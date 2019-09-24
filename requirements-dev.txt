@@ -1,0 +1,5 @@
+flake8
+jupyter
+pylint
+pytest
+pytest-cov

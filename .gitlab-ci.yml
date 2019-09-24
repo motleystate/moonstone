@@ -1,0 +1,26 @@
+stages:
+  - test
+
+# This folder is cached between builds
+# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
+cache:
+  paths:
+  - ~/.cache/pip/
+
+test-p37:
+  image: python:3.7
+  stage: test
+  script:
+    - pip install .
+    - pip install -r requirement-dev.txt
+    - flake8 --max-line-length 120
+    - pytest --cov .
+
+test-p36:
+  image: python:3.6
+  stage: test
+  script:
+    - pip install .
+    - pip install -r requirement-dev.txt
+    - flake8 --max-line-length 120
+    - pytest --cov .

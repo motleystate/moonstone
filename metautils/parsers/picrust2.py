@@ -22,4 +22,3 @@ class Picrust2PathwaysParser(object):
 
     def to_dataframe(self):
         self._dataframe = pd.read_csv(self.file_path, sep='\t', index_col=0)
-        
