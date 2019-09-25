@@ -8,7 +8,7 @@ class BaseParser(object):
 
     @property
     def dataframe(self):
-        if not getattr(self, '_dataframe', None):
+        if getattr(self, '_dataframe', None) is None:
             self.to_dataframe()
         return self._dataframe
 
