@@ -1,12 +1,6 @@
 stages:
   - test
 
-# This folder is cached between builds
-# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
-cache:
-  paths:
-  - ~/.cache/pip/
-
 test-p37:
   image: python:3.7
   stage: test
