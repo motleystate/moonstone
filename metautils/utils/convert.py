@@ -13,5 +13,5 @@ def pandas_to_python_type(pandas_dtype):
     elif pandas_dtype == 'float64':
         python_type = 'float'
     if python_type:
-        return f"{python_type} ({pandas_dtype})"
+        return python_type
     return pandas_dtype
