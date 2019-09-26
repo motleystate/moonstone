@@ -1,6 +1,6 @@
 import pandas as pd
 
-from metautils.utils.convert import pandas_to_python_type
+from metautils.utils.pandas.series import SeriesStatsBuilder
 
 from .base import BaseParser
 
@@ -22,48 +22,13 @@ class MetadataParser(BaseParser):
     def to_dataframe(self):
         self._dataframe = pd.read_csv(self.file_path, sep='\t')
 
-    def _build_base_stats(self, series):
-        return {
-            'col_name': series.name,
-            'col_type': str(series.dtype),
-            'python_col_type': pandas_to_python_type(series.dtype),
-            'n_values': series.size,
-            'n_uniq_values': len(series.value_counts())
-        }
-
-    def _build_object_stats(self, series):
-        stats_dict = self._build_base_stats(series)
-        repartition = series.value_counts()
-        stats_dict['values_repartition'] = {i: repartition[i] for i in repartition.index}
-        return stats_dict
-
-    def _build_number_stats(self, series):
-        stats_dict = self._build_base_stats(series)
-        stats_dict['mean'] = round(series.mean(), 2)
-        return stats_dict
-
-    def _build_int64_stats(self, series):
-        return self._build_number_stats(series)
-
-    def _build_float64_stats(self, series):
-        return self._build_number_stats(series)
-
-    def _build_stats(self, col_name):
-        """
-        Build statistics of a pandas Series from dataframe based on column name
-        :return: Dict of stats
-        :rtype: dict
-        """
-        series = self.dataframe[col_name]
-        return getattr(self, f"_build_{str(series.dtype)}_stats",
-                       self._build_base_stats)(series)
-
     def get_stats(self):
         """
         :return: list of dict containing statistics about each column
         :rtype: list(dict)
         """
         stats = []
-        for i in self.dataframe.columns:
-            stats.append(self._build_stats(i))
+        for col in self.dataframe.columns:
+            stats_builder = SeriesStatsBuilder(self.dataframe[col])
+            stats.append(stats_builder.build_stats())
         return stats
