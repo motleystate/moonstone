@@ -15,12 +15,15 @@ class MetadataParser(BaseParser):
     s3  19.1    M   F
     """
 
-    def __init__(self, file_path, sep='\t'):
+    def __init__(self, file_path, sep='\t', no_header=False):
         self.sep = sep
+        self.header = 'infer'
+        if no_header is True:
+            self.header = None
         super().__init__(file_path)
 
     def to_dataframe(self):
-        self._dataframe = pd.read_csv(self.file_path, sep='\t')
+        self._dataframe = pd.read_csv(self.file_path, sep='\t', header=self.header)
 
     def get_stats(self):
         """
