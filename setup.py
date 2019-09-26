@@ -9,6 +9,8 @@ setup(
     install_requires=[
         'numpy',
         'pandas',
+        'plotly',
+        'jupyter'
     ],
     packages=find_packages()
 )
