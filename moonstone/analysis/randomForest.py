@@ -1,14 +1,15 @@
-import classify
+from collections import Counter
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn import preprocessing
 from sklearn.model_selection import StratifiedKFold, train_test_split, cross_val_score
-import matplotlib.pyplot as plt
-from sklearn.feature_selection import RFECV
 from sklearn.metrics import accuracy_score
-from collections import Counter
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
+
+from moonstone.analysis import classify
 
 
 class RandomForest(object):

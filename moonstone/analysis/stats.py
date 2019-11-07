@@ -1,7 +1,6 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from scipy import stats
 import pandas as pd
+from scipy import stats
 
 
 def count_items(y):
@@ -52,6 +51,7 @@ class Descriptive(object):
         # df_means = pd.DataFrame(df_stats['mean'])
         # df_means.boxplot()
         # plt.show()
+
 
 """Count data from metagenomic experiments is usually space.
 Definitions can vary, but generally >50% zeros who indicate a sparse matrix.

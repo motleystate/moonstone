@@ -10,9 +10,9 @@ and to determine the type of variable in each column.
 A second part will be to match the type of statistical analysis that could be performed.
 """
 
-import  handleMetadata
+# import handleMetadata
 
-parser = argparse.ArgumentParser(description='MetaData Description Script')
-parser.add_argument("metadata", type=str, help="Clinical data input file")
+# parser = argparse.ArgumentParser(description='MetaData Description Script')
+# parser.add_argument("metadata", type=str, help="Clinical data input file")
 
-read_file = handleMetadata.Inputs
+# read_file = handleMetadata.Inputs

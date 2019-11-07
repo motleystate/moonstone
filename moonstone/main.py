@@ -1,17 +1,13 @@
 import argparse
-import handleCounts
-import handleMetadata
-import clustering
-import stats
-import filtering
-import classify
-from moonstone.analysis import randomForest
+
+from moonstone.parsers import (filtering, handleCounts, handleMetadata)
+from moonstone.analysis import (classify, clustering, randomForest, stats)
 
 """ Moonstone is designed as a means of enabling machine learning analysis of metagenomic sequencing data.
 The program englobes the following functionalities:
     > Import of count data (currently limited to SHAMAN-style counts output)
     > Import of clinical metadata (in development)
-    > A basic statistical analysis of the imported data 
+    > A basic statistical analysis of the imported data
     > Unsupervised clustering algorithms: PCA (other is development)
     > Supervised clustering (in development)
     > Classifier and biomarker discovery (in development)"""

@@ -1,3 +1,2 @@
-from sklearn import linear_model
-from sklearn.linear_model import LogisticRegressionCV
-
+from sklearn import linear_model  # noqa
+from sklearn.linear_model import LogisticRegressionCV  # noqa

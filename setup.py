@@ -10,7 +10,10 @@ setup(
         'numpy',
         'pandas',
         'plotly',
-        'jupyter'
+        'sklearn',
+        'matplotlib',
+        'plotly'
     ],
-    packages=find_packages()
+    packages=find_packages(),
+    entry_points={'console_scripts': ['moonstone=moonstone.main:run']},
 )

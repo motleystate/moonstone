@@ -37,4 +37,3 @@ class Inputs(object):
         df.rename_axis("sample", inplace=True)  # Gives the row axis the proper 'sample' name
         df = df.applymap(float)  # Converts all values to floats in preparation of analysis
         return df
-

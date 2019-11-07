@@ -6,7 +6,6 @@ At the least, samples names/references should match with the 'counts' file
 """
 
 import pandas as pd
-import matplotlib.pyplot as plt
 
 
 class Inputs(object):
@@ -17,4 +16,3 @@ class Inputs(object):
         df = pd.read_csv(self.metafile, sep=',', index_col='sample')
         # df.drop(['SUBJID'], axis=1, inplace=True)
         return df
-

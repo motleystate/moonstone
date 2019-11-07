@@ -1,12 +1,13 @@
-import stats
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import interp
 from sklearn import preprocessing, svm
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.metrics import roc_curve, auc
-import matplotlib.pyplot as plt
 from sklearn.feature_selection import RFECV
+
+from moonstone.analysis import stats
 
 
 class SVM(object):
@@ -22,10 +23,10 @@ class SVM(object):
         Merging appear to be the best option to preserve sample designations
         and combine count data with any metadata.
         Pandas data frames requires indexes to be of the same type in order to correctly merge.
-        
+
         For the moment is appear that metadata samples, if they are numbered, result in a int64 index type.
         Count data yields an 'object' type, even if samples are numbered.
-        
+
         Thus we will check for mismatched index type and try to correct"""
         if not isinstance(dc.index, type(dm.index)):
             dc.set_index(np.int64(np.array(dc.index)), inplace=True)

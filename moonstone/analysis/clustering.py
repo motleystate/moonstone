@@ -1,8 +1,10 @@
+from collections import Counter
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
-from collections import Counter
+
 
 class Unsupervised(object):
     def __init__(self, count_matrix, metadata):
@@ -85,8 +87,8 @@ class Unsupervised(object):
         d_final.to_csv(path_or_buf=file)
         print(d_final.head())
 
-        data_clusters = px.data.gapminder()
-        fig = px
+        data_clusters = px.data.gapminder()  # noqa
+        fig = px  # noqa
 
     def gmm(self):
         from sklearn.mixture import GaussianMixture
