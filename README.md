@@ -14,16 +14,15 @@ Set up a Python 3 virtual env, for instance:
 ```bash
 python3 -m virtualenv metautils
 source metautils/bin/activate
-(metautils) $
+(moonstone) $
 ```
 
 Then simply clone and install the library:
 
 ```bash
-(metautils) $ git clone https://gitlab.pasteur.fr/metagenomics/data-analysis.git
-(metautils) $ cd data-analysis
-(metautils) $ pip install .
+(moonstone) $ git clone https://gitlab.pasteur.fr/metagenomics/data-analysis.git
+(moonstone) $ cd data-analysis
+(moonstone) $ pip install .
 ```
 
 You can also install dependencies required for devlopment : `pip install -r requirements-dev.txt`.
-
