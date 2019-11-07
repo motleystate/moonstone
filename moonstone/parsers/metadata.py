@@ -1,6 +1,6 @@
 import pandas as pd
 
-from metautils.utils.pandas.series import SeriesStatsBuilder
+from moonstone.utils.pandas.series import SeriesStatsBuilder
 
 from .base import BaseParser
 

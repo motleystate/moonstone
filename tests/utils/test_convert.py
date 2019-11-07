@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from metautils.utils.convert import pandas_to_python_type
+from moonstone.utils.convert import pandas_to_python_type
 
 
 class TestPandasToPythonType(TestCase):

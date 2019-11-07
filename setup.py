@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="metautils",
+    name="moonstone",
     version="0.0.1",
-    description='Utilities for metagenomics data analysis.',
-    author='Kenzo-Hugo Hillion',
+    description='Utilities for metagenomics data analysis using machine learning.',
+    author='Kenzo-Hugo Hillion, Sean Kennedy',
     author_email='kehillio@pasteur.fr',
     install_requires=[
         'numpy',

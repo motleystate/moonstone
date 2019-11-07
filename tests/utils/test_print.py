@@ -2,7 +2,7 @@ import sys
 from io import StringIO
 from unittest import TestCase
 
-from metautils.utils.print import print_multi_col
+from moonstone.utils.print import print_multi_col
 
 
 class TestPrintMultiCol(TestCase):

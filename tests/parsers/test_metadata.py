@@ -4,7 +4,7 @@ from unittest import TestCase
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from metautils.parsers.metadata import MetadataParser
+from moonstone.parsers.metadata import MetadataParser
 
 
 class TestMetadataParser(TestCase):
