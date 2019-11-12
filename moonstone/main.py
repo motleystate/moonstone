@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from moonstone.parsers import (filtering, handleCounts, handleMetadata)
 from moonstone.analysis import (classify, clustering, randomForest, stats)
@@ -16,9 +17,12 @@ The program englobes the following functionalities:
 # Countfile and Metadata are required
 # Optional parameters include filtering, and the implemented analysis
 
-parser = argparse.ArgumentParser(description='Microbiota Analysis Scripts for Machine LEarning')
+parser = argparse.ArgumentParser(prog='moonstone', description='Microbiota Analysis Scripts for Machine LEarning',
+                                 usage='%(prog)s countfile, metadata file, output directory [options]')
 parser.add_argument("countfile", type=str, help="Normalized count file input")
 parser.add_argument("metadata", type=str, help="Clinical data input file")
+parser.add_argument("outdir", type=str, help="Output files directory")
+parser.add_argument("-os", help='Suppress output directory exists prompt.', action='store_true')
 parser.add_argument("-f", metavar='filtering', type=float, help="Minimum mean reads per variable: use a float >0")
 parser.add_argument('-p', help='Generates PCA plot of data', action='store_true')
 parser.add_argument('-k', metavar='clusters', help="Runs K-Means clustering. Provide number of clusters", type=int)
@@ -28,8 +32,31 @@ parser.add_argument('-sc', metavar='variable', type=str, help='SVM and output Cl
 parser.add_argument('-rf', metavar='variable', type=str, help="Random Forest Analysis, using supplied variable")
 args = parser.parse_args()
 
+# Check if the output directory exists.
+# Unless suppressed with -os argument, user will need to confirm overwriting to continue
+if os.path.isdir(args.outdir):
+    if args.os:
+        print('Output directory %s already exists, but away we go anyway!' % args.outdir)
+
+    answer = 'n'
+    if not args.os:
+        answer = input('Output directory %s already exists! Continue anyway [y/N]?' % args.outdir)
+        if 'Y' or 'y' or 'yes' == answer:
+            print('Okay. Files in %s will be overwritten.' % args.outdir)
+        else:
+            raise SystemExit("Not overwriting...aborting.")
+
+# Create directory and report success.
+if not os.path.isdir(args.outdir):
+    try:
+        os.mkdir(args.outdir)
+    except OSError:
+        print('There was a problem creating %s' % args.outdir)
+    else:
+        print('Output directory %s successfully created.' % args.outdir)
+
 # The following section concerns opening and reporting on the count file
-print("Opening {} which should contain normalized counts\n".format(args.countfile))
+print("\nOpening {} which should contain normalized counts\n".format(args.countfile))
 count_read = handleCounts.Inputs(args.countfile)
 df = count_read.opencounts()
 num_samples, num_otus = df.shape
