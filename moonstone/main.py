@@ -21,7 +21,7 @@ parser = argparse.ArgumentParser(prog='moonstone', description='Microbiota Analy
                                  usage='%(prog)s countfile, metadata file, output directory [options]')
 parser.add_argument("countfile", type=str, help="Normalized count file input")
 parser.add_argument("metadata", type=str, help="Clinical data input file")
-parser.add_argument("outdir", type=str, help="Output files directory")
+parser.add_argument("outdir", nargs='?', type=str, help="Output files directory", default='output')
 parser.add_argument("-os", help='Suppress output directory exists prompt.', action='store_true')
 parser.add_argument("-f", metavar='filtering', type=float, help="Minimum mean reads per variable: use a float >0")
 parser.add_argument('-p', help='Generates PCA plot of data', action='store_true')
@@ -38,10 +38,10 @@ if os.path.isdir(args.outdir):
     if args.os:
         print('Output directory %s already exists, but away we go anyway!' % args.outdir)
 
-    answer = 'n'
-    if not args.os:
-        answer = input('Output directory %s already exists! Continue anyway [y/N]?' % args.outdir)
-        if 'Y' or 'y' or 'yes' == answer:
+    else:
+        answer = input('Output directory %s already exists! Continue anyway [y/N]?' % args.outdir).upper()
+        yes_answers = ['Y', 'YES', 'MAKE IT SO', 'OUI']
+        if answer in yes_answers:
             print('Okay. Files in %s will be overwritten.' % args.outdir)
         else:
             raise SystemExit("Not overwriting...aborting.")
