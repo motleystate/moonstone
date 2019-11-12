@@ -136,37 +136,37 @@ def get_metadata_file(metadata_path, count_df):
 
 def run():
     args = parse_arguments()
-    outdir = handle_output_directory(args.outdir, args.os)
+    outdir = handle_output_directory(args.outdir, args.skip_prompt)
 
     # Parse input files
     count_df = get_count_file(args.countfile, outdir)  # df
-    if args.f:
-        count_df = filter_count_df(count_df, args.f, outdir)
-    metadata_df = get_metadata_file(args.metadata, outdir)  # dm
+    if args.filtering:
+        count_df = filter_count_df(count_df, args.filtering, outdir)
+    metadata_df = get_metadata_file(args.metadata, count_df)  # dm
 
     # Run different analysis
     if args.pca_plot:
-        pca = clustering.Unsupervised(count_df, metadata_df)
+        pca = clustering.Unsupervised(count_df, metadata_df, outdir)
         pca.pca()
 
     if args.k_means:
         kmeans = clustering.Unsupervised(count_df, metadata_df, outdir)
-        kmeans.kmeans('metaData_withKClusters.csv', n_clusters=args.k)
+        kmeans.kmeans('metaData_withKClusters.csv', n_clusters=args.k_means)
 
     if args.svm:
         svm = classify.SVM(count_df, metadata_df)
-        svm.analyze(variable=args.s)
+        svm.analyze(variable=args.svm)
 
     if args.svm_roc:
         roc = classify.SVM(count_df, metadata_df)
-        roc.roc_analysis(variable=args.sr)
+        roc.roc_analysis(variable=args.svm_roc)
 
     if args.svm_classifier:
         scomponents = classify.SVM(count_df, metadata_df)
-        scomponents.feature_analysis(variable=args.sc)
+        scomponents.feature_analysis(variable=args.svm_classifier)
 
     if args.random_forest:
-        forest = randomForest.RandomForest(count_df, metadata_df, outdir, variable=args.rf)
+        forest = randomForest.RandomForest(count_df, metadata_df, outdir, variable=args.random_forest)
         forest.forest('rf_Allfeatures.csv')
 
 
