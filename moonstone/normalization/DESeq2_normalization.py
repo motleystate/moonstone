@@ -38,14 +38,16 @@ class DESeq2_normalization:
             setattr(self, "_sample_log_median", Median_df)
         return self._sample_log_median
 
+    @property
     def scaling_factor(self):
         if getattr(self, "_scaling_factor", None) is None:
             Scaling_factors = np.exp(self._sample_log_median)
             setattr(self, "_scaling_factor", Scaling_factors)
         return self._scaling_factor
 
-    def scaled_df(self):
-        if getattr(self, "_scaled_df", None) is None:
+    @property
+    def normalized_df(self):
+        if getattr(self, "_normalized_df", None) is None:
             final_df = self.df.div(self._scaling_factor)
-            setattr(self, "_scaled_df", final_df)
-        return self._scaled_df
+            setattr(self, "_normalized_df", final_df)
+        return self._normalized_df
