@@ -22,10 +22,10 @@ Then simply clone and install the library:
 ```bash
 (moonstone) $ git clone https://gitlab.pasteur.fr/metagenomics/data-analysis.git
 (moonstone) $ cd data-analysis
-(moonstone) $ pip install .
+(moonstone) $ pip install .  # you can use -e option to make an editable install
 ```
 
-You can also install dependencies required for devlopment : `pip install -r requirements-dev.txt`.
+You can also install dependencies required for development : `pip install -r requirements-dev.txt`.
 
 ## Run moonstone
 
@@ -60,6 +60,6 @@ optional arguments:
 
 To work a a new feature, related or not to an issue, we open a new branch from the development (currently `master`) branch to work on it.
 
-> *If an issue is opened, we recommend to name your branch with the issue number at the begining, e.g. 5-my-new-feature
+> *If an issue is opened, we recommend to name your branch with the issue number at the begining, e.g. 5-my-new-feature*
 
 Once done, work is reviewed through a merge request to keep developers up to date on the development of moonstone.

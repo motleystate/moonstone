@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 from moonstone.parsers import (filtering, handleCounts, handleMetadata)
 from moonstone.analysis import (classify, clustering, randomForest, stats)
@@ -13,115 +14,161 @@ The program englobes the following functionalities:
     > Supervised clustering (in development)
     > Classifier and biomarker discovery (in development)"""
 
-# Parser for commandline arguments:
-# Countfile and Metadata are required
-# Optional parameters include filtering, and the implemented analysis
 
-parser = argparse.ArgumentParser(prog='moonstone', description='Microbiota Analysis Scripts for Machine LEarning',
-                                 usage='%(prog)s countfile, metadata file, output directory [options]')
-parser.add_argument("countfile", type=str, help="Normalized count file input")
-parser.add_argument("metadata", type=str, help="Clinical data input file")
-parser.add_argument("outdir", nargs='?', type=str, help="Output files directory", default='output')
-parser.add_argument("-os", help='Suppress output directory exists prompt.', action='store_true')
-parser.add_argument("-f", metavar='filtering', type=float, help="Minimum mean reads per variable: use a float >0")
-parser.add_argument('-p', help='Generates PCA plot of data', action='store_true')
-parser.add_argument('-k', metavar='clusters', help="Runs K-Means clustering. Provide number of clusters", type=int)
-parser.add_argument('-s', metavar='variable', type=str, help='Run SVMachine Classification')
-parser.add_argument('-sr', metavar='variable', type=str, help='SVM Classifier with ROC Analysis')
-parser.add_argument('-sc', metavar='variable', type=str, help='SVM and output Classifier Components')
-parser.add_argument('-rf', metavar='variable', type=str, help="Random Forest Analysis, using supplied variable")
-args = parser.parse_args()
-
-# Check if the output directory exists.
-# Unless suppressed with -os argument, user will need to confirm overwriting to continue
-if os.path.isdir(args.outdir):
-    if args.os:
-        print('Output directory %s already exists, but away we go anyway!' % args.outdir)
-
-    else:
-        answer = input('Output directory %s already exists! Continue anyway [y/N]?' % args.outdir).upper()
-        yes_answers = ['Y', 'YES', 'MAKE IT SO', 'OUI']
-        if answer in yes_answers:
-            print('Okay. Files in %s will be overwritten.' % args.outdir)
-        else:
-            raise SystemExit("Not overwriting...aborting.")
-
-# Create directory and report success.
-if not os.path.isdir(args.outdir):
+def parse_arguments():
+    """
+    Parser for commandline arguments:
+    * Countfile and Metadata are required
+    * Optional parameters include filtering, and the implemented analysis
+    """
+    parser = argparse.ArgumentParser(prog='moonstone', description='Microbiota Analysis Scripts for Machine LEarning',
+                                     usage='%(prog)s countfile, metadata file, output directory [options]')
+    parser.add_argument('countfile', type=str, help="Normalized count file input")
+    parser.add_argument('metadata', type=str, help="Clinical data input file")
+    parser.add_argument('outdir', nargs='?', type=str, help="Output files directory", default='output')
+    parser.add_argument('-os', '--skip_prompt', help='Suppress output directory exists prompt.', action='store_true')
+    parser.add_argument('-f', '--filtering', metavar='min_mean_read', type=float,
+                        help="Minimum mean reads per variable: use a float >0")
+    parser.add_argument('-p', '--pca_plot', help='Generates PCA plot of data', action='store_true')
+    parser.add_argument('-k', '--k_means', metavar='nb_clusters', type=int,
+                        help="Runs K-Means clustering. Provide number of clusters")
+    parser.add_argument('-s', '--svm', metavar='variable', type=str, help='Run SVMachine Classification')
+    parser.add_argument('-sr', '--svm_roc', metavar='variable', type=str, help='SVM Classifier with ROC Analysis')
+    parser.add_argument('-sc', '--svm_classifier', metavar='variable', type=str,
+                        help='SVM and output Classifier Components')
+    parser.add_argument('-rf', '--random_forest', metavar='variable', type=str,
+                        help="Random Forest Analysis, using supplied variable")
     try:
-        os.mkdir(args.outdir)
-    except OSError:
-        print('There was a problem creating %s' % args.outdir)
+        return parser.parse_args()
+    except SystemExit:
+        sys.exit(1)
+
+
+def handle_output_directory(outdir_path, suppress_outdir_prompt):
+    """
+    Check if the output directory exists.
+    Unless suppressed with -os argument, user will need to confirm overwriting to continue
+    :return: path to output directory
+    """
+    yes_answers = ['Y', 'YES', 'MAKE IT SO', 'OUI']
+    if os.path.isdir(outdir_path):
+        if suppress_outdir_prompt:
+            print('Output directory %s already exists, but away we go anyway!' % outdir_path)
+        else:
+            answer = input('Output directory %s already exists! Continue anyway [y/N]?' % outdir_path).upper()
+            if answer in yes_answers:
+                print('Okay. Files in %s will be overwritten.' % outdir_path)
+            else:
+                raise SystemExit("Not overwriting...aborting.")
+
+    # Create directory and report success.
+    if not os.path.isdir(outdir_path):
+        try:
+            os.mkdir(outdir_path)
+        except OSError:
+            print('There was a problem creating %s' % outdir_path)
+        else:
+            print('Output directory %s successfully created.' % outdir_path)
+    return outdir_path
+
+
+def get_count_file(countfile_path, outdir_path):
+    """
+    The following section concerns opening and reporting on the count file.
+    :return: dataframe of counts
+    """
+    print("\nOpening {} which should contain normalized counts\n".format(countfile_path))
+    count_read = handleCounts.Inputs(countfile_path)
+    count_df = count_read.opencounts()
+    num_samples, num_otus = count_df.shape
+    print(f'Found {num_samples} samples and {num_otus} OTUs\n')
+
+    run_statistics = stats.Descriptive(count_df, outdir_path)
+    run_statistics.matrix_stats('starting_variables.csv')
+    check_sparse = stats.Density(count_df)
+    if check_sparse.is_sparse():
+        print("Count Table is sparse with %2.3f%s non-zero values." % (check_sparse.percent_non_zeros(), "%"))
     else:
-        print('Output directory %s successfully created.' % args.outdir)
+        print("Count Table has %2.3f%s non-zero values." % (check_sparse.percent_non_zeros(), "%"))
+    return count_df
 
-# The following section concerns opening and reporting on the count file
-print("\nOpening {} which should contain normalized counts\n".format(args.countfile))
-count_read = handleCounts.Inputs(args.countfile)
-df = count_read.opencounts()
-num_samples, num_otus = df.shape
-print(f'Found {num_samples} samples and {num_otus} OTUs\n')
 
-run_statistics = stats.Descriptive(df, args.outdir)
-run_statistics.matrix_stats('starting_variables.csv')
-check_sparse = stats.Density(df)
-if check_sparse.is_sparse():
-    print("Count Table is sparse with %2.3f%s non-zero values." % (check_sparse.percent_non_zeros(), "%"))
-else:
-    print("Count Table has %2.3f%s non-zero values." % (check_sparse.percent_non_zeros(), "%"))
-
-# The second step is to read in the variables file.
-# This could be rendered optional depending the the analyses selected
-metadata_read = handleMetadata.Inputs(args.metadata)
-dm = metadata_read.openmeta()
-
-# The following section concerns opening and reporting on the metadata file
-print("\nOpening {} which is expected to contain clinical metadata.".format(args.metadata))
-meta_read = handleMetadata.Inputs(args.metadata)
-dfc = meta_read.openmeta()
-if df.shape[0] != dfc.shape[0]:
-    print('Count samples: {} does not equal sample number in metadata file {}'.format(df.shape[0], dfc.shape[0]))
-    raise SystemExit("Count and Metadata sample numbers don't match...disaster!")
-else:
-    print(f'Nice! {df.shape[0]} samples in count AND metadata files.\n')
-
-if args.f:
-    filtered = filtering.Filtering(df, args.f)
-    df = filtered.by_mean()
-    filtered_stats = stats.Descriptive(df, args.outdir)
+def filter_count_df(count_df, min_read_mean, outdir_path):
+    """
+    :return: filtered count dataframe
+    """
+    check_sparse = stats.Density(count_df)
+    filtered = filtering.Filtering(count_df, min_read_mean)
+    count_df = filtered.by_mean()
+    filtered_stats = stats.Descriptive(count_df, outdir_path)
     filtered_stats.matrix_stats('filtered_variables.csv')
-    df.to_csv(path_or_buf=args.outdir+'/'+'filteredCountFile.csv')
-    check_f_sparse = stats.Density(df)
+    count_df.to_csv(path_or_buf=outdir_path+'/'+'filteredCountFile.csv')
+    check_f_sparse = stats.Density(count_df)
     if check_f_sparse.is_sparse():
         print("Filtered Count Table is sparse with %2.3f%s non-zero values.\n" %
               (check_f_sparse.percent_non_zeros(), "%"))
     elif check_sparse.is_sparse():
-        print("Filtered Count Table is no longer sparse: %2.3f%s non-zero values.\n"
-              % (check_f_sparse.percent_non_zeros(), "%"))
+        print("Filtered Count Table is no longer sparse: %2.3f%s non-zero values.\n" %
+              (check_f_sparse.percent_non_zeros(), "%"))
     else:
         print("Filtered Count Table now has %2.3f%s non-zero reads.\n" % (check_f_sparse.percent_non_zeros(), "%"))
+    return count_df
 
 
-if args.p:
-    pca = clustering.Unsupervised(df, dm)
-    pca.pca()
+def get_metadata_file(metadata_path, count_df):
+    """
+    This step is to read in the variables file.
+    This could be rendered optional depending the the analyses selected
+    It also deal with reporting on the metadata file
+    :return: dataframe of metadata
+    """
+    print("\nOpening {} which is expected to contain clinical metadata.".format(metadata_path))
+    metadata_read = handleMetadata.Inputs(metadata_path)
+    metadata_df = metadata_read.openmeta()
+    if count_df.shape[0] != metadata_df.shape[0]:
+        print('Count samples: {} does not equal sample number in metadata file {}'.format(count_df.shape[0],
+                                                                                          metadata_df.shape[0]))
+        raise SystemExit("Count and Metadata sample numbers don't match...disaster!")
+    else:
+        print(f'Nice! {count_df.shape[0]} samples in count AND metadata files.\n')
+    return metadata_df
 
-if args.k:
-    kmeans = clustering.Unsupervised(df, dm, args.outdir)
-    kmeans.kmeans('metaData_withKClusters.csv', n_clusters=args.k)
 
-if args.s:
-    svm = classify.SVM(df, dm)
-    svm.analyze(variable=args.s)
+def run():
+    args = parse_arguments()
+    outdir = handle_output_directory(args.outdir, args.skip_prompt)
 
-if args.sr:
-    roc = classify.SVM(df, dm)
-    roc.roc_analysis(variable=args.sr)
+    # Parse input files
+    count_df = get_count_file(args.countfile, outdir)  # df
+    if args.filtering:
+        count_df = filter_count_df(count_df, args.filtering, outdir)
+    metadata_df = get_metadata_file(args.metadata, count_df)  # dm
 
-if args.sc:
-    scomponents = classify.SVM(df, dm)
-    scomponents.feature_analysis(variable=args.sc)
+    # Run different analysis
+    if args.pca_plot:
+        pca = clustering.Unsupervised(count_df, metadata_df, outdir)
+        pca.pca()
 
-if args.rf:
-    forest = randomForest.RandomForest(df, dm, args.outdir, variable=args.rf)
-    forest.forest('rf_Allfeatures.csv')
+    if args.k_means:
+        kmeans = clustering.Unsupervised(count_df, metadata_df, outdir)
+        kmeans.kmeans('metaData_withKClusters.csv', n_clusters=args.k_means)
+
+    if args.svm:
+        svm = classify.SVM(count_df, metadata_df)
+        svm.analyze(variable=args.svm)
+
+    if args.svm_roc:
+        roc = classify.SVM(count_df, metadata_df)
+        roc.roc_analysis(variable=args.svm_roc)
+
+    if args.svm_classifier:
+        scomponents = classify.SVM(count_df, metadata_df)
+        scomponents.feature_analysis(variable=args.svm_classifier)
+
+    if args.random_forest:
+        forest = randomForest.RandomForest(count_df, metadata_df, outdir, variable=args.random_forest)
+        forest.forest('rf_Allfeatures.csv')
+
+
+if __name__ == "__main__":
+    run()

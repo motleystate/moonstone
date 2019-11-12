@@ -7,3 +7,9 @@ __pycache__/
 .vscode
 
 .coverage
+
+# Default output directory from moonstone
+output
+
+# Mac files
+.DS_Store
