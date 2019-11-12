@@ -13,10 +13,11 @@ from moonstone.analysis import classify
 
 
 class RandomForest(object):
-    def __init__(self, countfile, metadata, variable=""):
+    def __init__(self, countfile, metadata, outdir, variable=""):
         self.countfile = countfile
         self.metadata = metadata
         self.variable = variable
+        self.outdir = outdir
 
     # Can use the merging function in 'classify'
     def get_matrix(self):
@@ -24,7 +25,7 @@ class RandomForest(object):
         df = merged_df.merge(self.variable)
         return df
 
-    def forest(self):
+    def forest(self, filename):
         df = RandomForest.get_matrix(self)
 
         x = np.array(df.drop([self.variable], axis=1))
@@ -118,7 +119,8 @@ class RandomForest(object):
 
         df_complete_list = pd.DataFrame(zip(features, importance[indices], standard_deviations[indices]),
                                         columns=('features', 'importance', 'std'))
-        df_complete_list.to_csv(path_or_buf="rf_AllFeatures.csv", sep=',')
+        output_file = self.outdir+'/'+filename
+        df_complete_list.to_csv(path_or_buf=output_file, sep=',')
 
         if np.count_nonzero(importance) > 100:
             features_to_print = 100

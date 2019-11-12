@@ -61,8 +61,9 @@ count_read = handleCounts.Inputs(args.countfile)
 df = count_read.opencounts()
 num_samples, num_otus = df.shape
 print(f'Found {num_samples} samples and {num_otus} OTUs\n')
-run_statistics = stats.Descriptive(df, 'starting_variables.csv')
-run_statistics.matrix_stats()
+
+run_statistics = stats.Descriptive(df, args.outdir)
+run_statistics.matrix_stats('starting_variables.csv')
 check_sparse = stats.Density(df)
 if check_sparse.is_sparse():
     print("Count Table is sparse with %2.3f%s non-zero values." % (check_sparse.percent_non_zeros(), "%"))
@@ -87,9 +88,9 @@ else:
 if args.f:
     filtered = filtering.Filtering(df, args.f)
     df = filtered.by_mean()
-    filtered_stats = stats.Descriptive(df, 'filtered_variables.csv')
-    filtered_stats.matrix_stats()
-    df.to_csv(path_or_buf='filteredCountFile.csv')
+    filtered_stats = stats.Descriptive(df, args.outdir)
+    filtered_stats.matrix_stats('filtered_variables.csv')
+    df.to_csv(path_or_buf=args.outdir+'/'+'filteredCountFile.csv')
     check_f_sparse = stats.Density(df)
     if check_f_sparse.is_sparse():
         print("Filtered Count Table is sparse with %2.3f%s non-zero values.\n" %
@@ -106,8 +107,8 @@ if args.p:
     pca.pca()
 
 if args.k:
-    kmeans = clustering.Unsupervised(df, dm)
-    kmeans.kmeans(n_clusters=args.k)
+    kmeans = clustering.Unsupervised(df, dm, args.outdir)
+    kmeans.kmeans('metaData_withKClusters.csv', n_clusters=args.k)
 
 if args.s:
     svm = classify.SVM(df, dm)
@@ -122,5 +123,5 @@ if args.sc:
     scomponents.feature_analysis(variable=args.sc)
 
 if args.rf:
-    forest = randomForest.RandomForest(df, dm, variable=args.rf)
-    forest.forest()
+    forest = randomForest.RandomForest(df, dm, args.outdir, variable=args.rf)
+    forest.forest('rf_Allfeatures.csv')

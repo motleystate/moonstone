@@ -7,9 +7,10 @@ import plotly.express as px
 
 
 class Unsupervised(object):
-    def __init__(self, count_matrix, metadata):
+    def __init__(self, count_matrix, metadata, outdir):
         self.count_matrix = count_matrix
         self.metadata = metadata
+        self.outdir = outdir
 
     def pca(self):
         from sklearn.decomposition import PCA
@@ -35,7 +36,7 @@ class Unsupervised(object):
         ax.scatter3D(principal_df.loc[:, 'pc1'], principal_df.loc[:, 'pc2'], principal_df.loc[:, 'pc3'])
         plt.show()
 
-    def kmeans(self, n_clusters=2):
+    def kmeans(self, filename, n_clusters=2):
         from sklearn.cluster import KMeans
         from sklearn import preprocessing
 
@@ -82,9 +83,9 @@ class Unsupervised(object):
             # Append the cluster information for each sample to the clinical parameters
             d_final = pd.merge(d_final, dc[name], left_index=True, right_index=True)
             d_final.index.name = 'sample'
-        file = "metaData_withKClusters.csv"
-        print("\n\tAppending KMeans clustering information to original Metadata file. Saving as %s" % file)
-        d_final.to_csv(path_or_buf=file)
+        output_file = self.outdir+'/'+filename
+        print("\n\tAppending KMeans clustering information to original Metadata file. Saving as %s" % output_file)
+        d_final.to_csv(path_or_buf=output_file)
         print(d_final.head())
 
         data_clusters = px.data.gapminder()  # noqa

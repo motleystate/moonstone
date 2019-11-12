@@ -29,16 +29,17 @@ def normalized_stats(x):
 
 
 class Descriptive(object):
-    def __init__(self, df, save_filename):
+    def __init__(self, df, outdir):
         self.df = df
-        self.save_filename = save_filename
+        self.outdir = outdir
 
-    def matrix_stats(self):
+    def matrix_stats(self, filename):
+        output_file = self.outdir+'/'+filename
         df_stats = self.df.describe().transpose()  # Descriptive stats of variables
-        df_stats.to_csv(path_or_buf=self.save_filename)  # The above saved to a file (before filtering)
+        df_stats.to_csv(path_or_buf=output_file)  # The above saved to a file (before filtering)
         means = np.array(df_stats['mean'])
 
-        print(f"Saving variables to {self.save_filename} and running descriptive statistics on means:")
+        print(f"Saving variables to {output_file} and running descriptive statistics on means:")
 
         properties = ['Number of Variable', 'Min / Max', 'Mean', 'Variance', 'Skewness', 'Kurtosis / Fisher']
         for i in range(len(stats.describe(means))):
