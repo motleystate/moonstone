@@ -6,34 +6,38 @@ class DESeq2_normalization:
     def __init__(self, df):
         self.df = df
 
-    def non_zero_df(self):
+    def non_zero_df(self, df):
         """
         This function removes lines with 0 reads
         """
-        return self.df.copy().replace(0, np.nan).dropna().astype(int)
+        return df.replace(0, np.nan).dropna().astype(int)
 
-    def log_df(self):
-        return np.log(self.non_zero_df())
+    # change the log_nb
+    def log_df(self, df, log_nb=None):
+        return np.log(df)
 
-    def mean_gen_values(self):
-        return self.log_df().mean(axis=1)
+    def remove_zero_and_log(self, df):
+        return self.log_df(self.non_zero_df(df))
 
-    def subs_log_values(self):
+
+    def calculating_and_substracting_mean_row(self, df):
         """
-        Substracting the Log_mean to log original values
+        Substracting the mean row to original values
         """
-        return self.log_df().sub(self.mean_gen_values(), axis='rows')
+        return df.sub(df.mean(axis=1), axis='rows')
 
-    def sample_log_median(self):
+    def column_median(self, df):
         """
         Calculating the median per sample
         """
-        return self.subs_log_values().median()
+        return df.median()
 
     @property
     def scaling_factor(self):
         if getattr(self, "_scaling_factor", None) is None:
-            Scaling_factors = np.exp(self.sample_log_median())
+            non_zero_log_df = self.remove_zero_and_log(self.df)
+            substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
+            Scaling_factors = np.exp(substracted_mean_df.median())
             setattr(self, "_scaling_factor", Scaling_factors)
         return self._scaling_factor
 
