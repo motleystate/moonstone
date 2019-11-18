@@ -1,10 +1,12 @@
 import numpy as np
+import math
 
 
 class DESeq2_normalization:
 
-    def __init__(self, df):
+    def __init__(self, df, log_number=np.e):
         self.df = df
+        self.log = log_number
 
     def non_zero_df(self, df):
         """
@@ -12,11 +14,8 @@ class DESeq2_normalization:
         """
         return df.replace(0, np.nan).dropna().astype(int)
 
-    def log_df(self, df, log_nb=None):
-        if log_nb is None:
-            return np.log(df)
-        else:
-            return np.log(df) / np.log(log_nb)
+    def log_df(self, df):
+        return df.applymap(lambda x: math.log(x, self.log))
 
     def remove_zero_and_log(self, df):
         return self.log_df(self.non_zero_df(df))
@@ -27,13 +26,12 @@ class DESeq2_normalization:
         """
         return df.sub(df.mean(axis=1), axis='rows')
 
-    # Only missing how to change the base_exponent
     @property
     def compute_scaling_factor(self):
         if getattr(self, "_compute_scaling_factor", None) is None:
             non_zero_log_df = self.remove_zero_and_log(self.df)
             substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
-            Scaling_factors = np.exp(substracted_mean_df.median())
+            Scaling_factors = substracted_mean_df.applymap(lambda x: math.pow(self.log, x)).median()
             setattr(self, "_compute_scaling_factor", Scaling_factors)
         return self._compute_scaling_factor
 

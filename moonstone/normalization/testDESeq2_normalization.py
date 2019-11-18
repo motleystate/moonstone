@@ -67,7 +67,7 @@ class TestSequence(TestCase):
         input_column_names = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
         input_ind = ["Gen_1", "Gen_3", 'Gen_4']
         input_df = pd.DataFrame(input_data, columns=input_column_names, index=input_ind)
-        tested_object = DESeq2_normalization(self.dummy_df)
+        tested_object = DESeq2_normalization(self.dummy_df, log_number=10)
 
         data = [
             [2.406540, 1.414973, 1.681241, 1.875061],
@@ -78,7 +78,7 @@ class TestSequence(TestCase):
         ind = ["Gen_1", "Gen_3", 'Gen_4']
         expected_result = pd.DataFrame(data, columns=column_names, index=ind)
 
-        pd.testing.assert_frame_equal(tested_object.log_df(input_df, 10),
+        pd.testing.assert_frame_equal(tested_object.log_df(input_df),
                                       expected_result)
 
     def test_calculating_and_substracting_mean_row(self):
