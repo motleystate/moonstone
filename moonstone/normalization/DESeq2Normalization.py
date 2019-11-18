@@ -2,7 +2,7 @@ import numpy as np
 import math
 
 
-class DESeq2_normalization:
+class DESeq2Normalization:
 
     def __init__(self, df, log_number=np.e):
         self.df = df
@@ -31,8 +31,8 @@ class DESeq2_normalization:
         if getattr(self, "_scaling_factors", None) is None:
             non_zero_log_df = self.remove_zero_and_log(self.df)
             substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
-            Scaling_factors = substracted_mean_df.applymap(lambda x: math.pow(self.log, x)).median()
-            setattr(self, "_scaling_factors", Scaling_factors)
+            scaling_factors = substracted_mean_df.applymap(lambda x: math.pow(self.log, x)).median()
+            setattr(self, "_scaling_factors", scaling_factors)
         return self._scaling_factors
 
     @property
