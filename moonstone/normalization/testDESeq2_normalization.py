@@ -108,7 +108,7 @@ class TestSequence(TestCase):
         data = [3.648263, 0.805390, 0.686732, 0.432524]
         ind = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
         expected_result = pd.Series(data, index=ind)
-        pd.testing.assert_series_equal(tested_object.compute_scaling_factor, expected_result)
+        pd.testing.assert_series_equal(tested_object.scaling_factors, expected_result)
 
     def test_normalized_df(self):
         tested_object = DESeq2_normalization(self.dummy_df)

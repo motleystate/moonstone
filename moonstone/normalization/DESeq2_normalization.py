@@ -27,17 +27,17 @@ class DESeq2_normalization:
         return df.sub(df.mean(axis=1), axis='rows')
 
     @property
-    def compute_scaling_factor(self):
-        if getattr(self, "_compute_scaling_factor", None) is None:
+    def scaling_factors(self):
+        if getattr(self, "_scaling_factors", None) is None:
             non_zero_log_df = self.remove_zero_and_log(self.df)
             substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
             Scaling_factors = substracted_mean_df.applymap(lambda x: math.pow(self.log, x)).median()
-            setattr(self, "_compute_scaling_factor", Scaling_factors)
-        return self._compute_scaling_factor
+            setattr(self, "_scaling_factors", Scaling_factors)
+        return self._scaling_factors
 
     @property
     def normalized_df(self):
         if getattr(self, "_normalized_df", None) is None:
-            final_df = self.df.div(self.compute_scaling_factor)
+            final_df = self.df.div(self.scaling_factors)
             setattr(self, "_normalized_df", final_df)
         return self._normalized_df
