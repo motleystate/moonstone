@@ -26,7 +26,7 @@ class TestDESeq2Normalization(TestCase):
         pd.testing.assert_frame_equal(tested_object.df, self.dummy_df)
 
     def test_non_zero_df(self):
-        tested_object = DESeq2Normalization(self.dummy_df, zero_threshold = 80)
+        tested_object = DESeq2Normalization(self.dummy_df, zero_threshold=80)
         data = [
             [255, 26, 48, 75],
             [366, 46, 78, np.nan],
@@ -114,7 +114,23 @@ class TestDESeq2Normalization(TestCase):
 
     def test_scaling_factor_zero_thresh_80(self):
         tested_object = DESeq2Normalization(self.dummy_df, zero_threshold=80)
-        data = [3.648263, 0.805390, 0.686732, 0.432524]
+        data = [3.495248, 0.612726, 0.699505, 0.421084]
+        ind = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
+        expected_result = pd.Series(data, index=ind)
+        pd.testing.assert_series_equal(tested_object.scaling_factors, expected_result)
+
+    def test_scaling_factor_zero_thresh_80_more_zeros(self):
+        data = [
+            [255, 26, 48, 75],
+            [366, 0, 78, 0],
+            [955, 0, 46, 65],
+            [89, 54, 145, 29]
+        ]
+        column_names = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
+        ind = ["Gen_1", 'Gen_2', "Gen_3", 'Gen_4']
+        more_zero_example = pd.DataFrame(data, columns=column_names, index=ind)
+        tested_object = DESeq2Normalization(more_zero_example, zero_threshold=80)
+        data = [3.648263, 0.371980, 0.686732, 0.458165]
         ind = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
         expected_result = pd.Series(data, index=ind)
         pd.testing.assert_series_equal(tested_object.scaling_factors, expected_result)
