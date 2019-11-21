@@ -29,6 +29,18 @@ class TestDESeq2Normalization(TestCase):
         tested_object = DESeq2Normalization(self.dummy_df, zero_threshold=80)
         data = [
             [255, 26, 48, 75],
+            [955, 222, 46, 65],
+            [89, 54, 145, 29]
+        ]
+        column_names = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
+        ind = ["Gen_1", "Gen_3", 'Gen_4']
+        expected_result = pd.DataFrame(data, columns=column_names, index=ind).astype('float')
+        pd.testing.assert_frame_equal(tested_object.non_zero_df(self.dummy_df), expected_result)
+
+    def test_non_zero_df_threshold70(self):
+        tested_object = DESeq2Normalization(self.dummy_df, zero_threshold=70)
+        data = [
+            [255, 26, 48, 75],
             [366, 46, 78, np.nan],
             [955, 222, 46, 65],
             [89, 54, 145, 29]
