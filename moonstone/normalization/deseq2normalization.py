@@ -15,7 +15,7 @@ class DESeq2Normalization:
         """
         This function removes rows with 0 reads
         """
-        threshold = int(df.shape[1] * self.zero_threshold/100)
+        threshold = int(math.ceil(df.shape[1] * self.zero_threshold/100))
         non_zero_dataf = df.replace(0, np.nan).dropna(thresh=threshold).astype('float')
         total_len = len(df)
         non_zero_df_len = len(non_zero_dataf)
