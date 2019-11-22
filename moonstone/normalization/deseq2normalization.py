@@ -15,7 +15,7 @@ class DESeq2Normalization:
         """
         This function removes rows with 0 reads
         """
-        threshold = int(math.ceil(df.shape[1] * self.zero_threshold/100))
+        threshold = math.ceil(df.shape[1] * self.zero_threshold/100)
         non_zero_dataf = df.replace(0, np.nan).dropna(thresh=threshold).astype('float')
         total_len = len(df)
         non_zero_df_len = len(non_zero_dataf)
@@ -27,7 +27,7 @@ class DESeq2Normalization:
     def log_df(self, df):
         return df.applymap(lambda x: math.log(x, self.log))
 
-    def retrieving_zero_df(self, df):
+    def zero_df(self, df):
         """
         Retreiving the dataframe for all rows that contain a zero value
         """
