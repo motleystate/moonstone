@@ -91,5 +91,5 @@ class Df_Standardisation:
             df_samples = df.drop('#OTU ID', axis=1)
             taxa_columns_and_df_samples = pd.concat([complete_taxa_df, df_samples], axis=1, sort=False)
             standard_taxa_df = taxa_columns_and_df_samples.set_index(list(taxa_column_with_names))
-            setattr(self, "_standard_taxa_df", standard_taxa_df)
+            setattr(self, "_standard_taxa_df", standard_taxa_df.astype(int))
         return self._standard_taxa_df
