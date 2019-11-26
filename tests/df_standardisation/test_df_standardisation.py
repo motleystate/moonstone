@@ -33,7 +33,7 @@ class TestDf_Standardisation(TestCase):
         expected_object = None
         self.assertEqual(tested_object.delete_lowercase(test_string), expected_object)
 
-    def test_spliting_taxa_columns(self):
+    def test_spliting_into_taxa_columns(self):
         filepath = '/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/test_1_import_data.csv'
         tdfp = pd.read_csv(filepath)
         tested_object = Df_Standardisation(tdfp)
@@ -58,7 +58,7 @@ class TestDf_Standardisation(TestCase):
         ]
         expected_object = pd.DataFrame(exdfp, columns=[0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 3,
                                                        0, 1, 2, 3, 0, 1, 2, 3], dtype=str)
-        pd.testing.assert_frame_equal(tested_object.spliting_taxa_columns(tdfp), expected_object)
+        pd.testing.assert_frame_equal(tested_object.spliting_into_taxa_columns(tdfp), expected_object)
 
     def test_naming_taxa_columns(self):
         tdfp = [
