@@ -6,11 +6,11 @@ class Df_Standardisation:
     taxonomical_names = {'0': "kingdom", '1': "phylum", '2': "class",
                          '3': "order", '4': "family", '5': "genus", '6': "species"}
 
-    def __init__(self, df):
-        self.df = df
+    def __init__(self, filepath):
+        self.filepath = filepath
 
     def import_df(self, filepath):
-        df = pd.read_csv(filepath)
+        df = pd.read_csv(self.filepath)
         return df.rename(columns=df.loc[0]).drop(df.index[0])
 
     def delete_lowercase(self, string):
@@ -28,15 +28,10 @@ class Df_Standardisation:
         taxa_df = taxa_df.replace("Unknown Family", "nothing")
         return taxa_df.applymap(self.delete_lowercase)
 
-    def get_taxa_column_name(self, df):
-        if getattr(self, "_get_taxa_column_name", None) is None:
-            column_names = [taxonomical_names[x] for x in self.taxonomical_names if x in df.loc[:, 1].values]
-            setattr(self, "_tax_get_taxa_column_name", column_names)
-        return self._tax_get_taxa_column_name
-
     def naming_taxa_columns(self, df):
+        column_names = [self.taxonomical_names[x] for x in self.taxonomical_names if x in df.loc[:, 1].values]
         taxa_df = df[3]
-        taxa_df.columns = self.getting_taxa_column_name
+        taxa_df.columns = column_names
         return taxa_df
 
     def filling_missing_taxa_values(self, df):
@@ -46,14 +41,14 @@ class Df_Standardisation:
         return combining_df_and_taxa_status_in_nan
 
     @property
-    def standard_taxa_df(self, filepath):
+    def standard_taxa_df(self):
         if getattr(self, "_standard_taxa_df", None) is None:
-            df = self.import_df(filepath)
+            df = self.import_df(self.filepath)
             taxa_column = self.spliting_taxa_columns(df)
             taxa_column_with_names = self.naming_taxa_columns(taxa_column)
             taxa_df = self.filling_missing_taxa_values(taxa_column_with_names)
             df_samples = df.drop('#OTU ID', axis=1)
             taxa_columns_and_df_samples = pd.concat([taxa_df, df_samples], axis=1, sort=False)
-            standard_taxa_df = taxa_columns_and_df_samples.set_index(self.get_taxa_column_name)
+            standard_taxa_df = taxa_columns_and_df_samples.set_index(list(taxa_column_with_names))
             setattr(self, "_standard_taxa_df", standard_taxa_df)
         return self._standard_taxa_df
