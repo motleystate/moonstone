@@ -14,9 +14,9 @@ class TestDf_Standardisation(TestCase):
     """
 
     def test_import_df(self):
-        tdfp = '/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/raw_data.csv'
+        tdfp = 'tests/df_standardisation/raw_data.csv'
         tested_object = Df_Standardisation(tdfp)
-        exdfp = '/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/test_1_import_data.csv'
+        exdfp = 'tests/df_standardisation/test_1_import_data.csv'
         expected_object = pd.read_csv(exdfp, dtype=str)
         expected_object.index += 1
         pd.testing.assert_frame_equal(tested_object.import_df(tdfp), expected_object)
@@ -34,10 +34,10 @@ class TestDf_Standardisation(TestCase):
         self.assertEqual(tested_object.delete_lowercase(test_string), expected_object)
 
     def test_spliting_into_taxa_columns(self):
-        filepath = '/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/test_1_import_data.csv'
+        filepath = 'tests/df_standardisation/test_1_import_data.csv'
         tdfp = pd.read_csv(filepath)
         tested_object = Df_Standardisation(tdfp)
-        exdfp = '/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/test_2_spliting_taxa_columns.csv'
+        exdfp = 'tests/df_standardisation/test_2_spliting_taxa_columns.csv'
         exdfp = [
             ['D', 0, "", 'Bacteria', 'D', 1, "", 'Bacteroidetes',	None, 'D', 2, "", 'Bacteroidia',
              "D", 3, "", 'Bacteroidales', 'D', 4, "", 'Tannerellaceae', 'D', 5, "", 'Macellibacteroides'],
@@ -82,23 +82,23 @@ class TestDf_Standardisation(TestCase):
         tdfp = pd.DataFrame(tdfp, columns=[0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 3,
                                            0, 1, 2, 3, 0, 1, 2, 3], dtype=str)
         tested_object = Df_Standardisation(tdfp)
-        exdfp = "/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/test_3_taxa_data.csv"
+        exdfp = "tests/df_standardisation/test_3_taxa_data.csv"
         expected_object = pd.read_csv(exdfp, dtype=str)
         pd.testing.assert_frame_equal(tested_object.naming_taxa_columns(tdfp), expected_object)
 
     def test_filling_missing_taxa_values(self):
-        filepath = "/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/test_3_taxa_data.csv"
+        filepath = "tests/df_standardisation/test_3_taxa_data.csv"
         tdfp = pd.read_csv(filepath, dtype=str)
         tested_object = Df_Standardisation(filepath)
-        exdfp = "/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/test_4_taxa_df_completed.csv"
+        exdfp = "tests/df_standardisation/test_4_taxa_df_completed.csv"
         expected_object = pd.read_csv(exdfp, dtype=str)
         pd.testing.assert_frame_equal(tested_object.filling_missing_taxa_values(tdfp), expected_object)
 
     def test_standard_taxa_df(self):
-        tdfp = '/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/raw_data.csv'
+        tdfp = 'tests/df_standardisation/raw_data.csv'
         tested_object = Df_Standardisation(tdfp)
         print(tested_object.standard_taxa_df)
-        exdfp = '/home/mariela/Pasteur/Gitlab/data-analysis/tests/df_standardisation/test_5_final_df_with_taxa.csv'
+        exdfp = 'tests/df_standardisation/test_5_final_df_with_taxa.csv'
         expected_object = pd.read_csv(exdfp, index_col=['kingdom', 'phylum', 'class', 'order', 'family', 'genus'],
                                       dtype=str)
         pd.testing.assert_frame_equal(tested_object.standard_taxa_df, expected_object)
