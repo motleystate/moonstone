@@ -95,7 +95,22 @@ class TestDESeq2Normalization(TestCase):
         pd.testing.assert_frame_equal(tested_object.log_df(input_df),
                                       expected_result)
 
-    def test_zero_df(self):
+    def test_removed_zero_df_None(self):
+        data = [
+            [255, 26, 48, 75],
+            [366, 0, 78, 0],
+            [955, 0, 46, 65],
+            [89, 54, 145, 29]
+        ]
+        column_names = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
+        ind = ["Gen_1", 'Gen_2', "Gen_3", 'Gen_4']
+        dummy_df = pd.DataFrame(data, columns=column_names, index=ind)
+        tested_object = DESeq2Normalization(dummy_df)
+        expected_result = None
+        self.assertEqual(tested_object.removed_zero_df, expected_result)
+
+
+    def test_removed_zero_df(self):
         data = [
             [255, 26, 48, 75],
             [366, 0, 78, 0],
@@ -113,7 +128,9 @@ class TestDESeq2Normalization(TestCase):
         column_names = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
         ind = ['Gen_2', "Gen_3"]
         expected_result = pd.DataFrame(data, columns=column_names, index=ind)
-        pd.testing.assert_frame_equal(tested_object.zero_df(dummy_df),
+        scaling_factors = tested_object.scaling_factors  # noqa
+        print(tested_object.removed_zero_df)
+        pd.testing.assert_frame_equal(tested_object.removed_zero_df,
                                       expected_result)
 
     def test_calculating_and_substracting_mean_row(self):
@@ -203,3 +220,4 @@ class TestDESeq2Normalization(TestCase):
         ind = ["Gen_1", "Gen_2", "Gen_3", 'Gen_4']
         expected_result = pd.DataFrame(data, columns=column_names, index=ind)
         pd.testing.assert_frame_equal(tested_object.normalized_df, expected_result)
+

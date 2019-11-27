@@ -20,18 +20,25 @@ class DESeq2Normalization:
         total_len = len(df)
         non_zero_df_len = len(non_zero_dataf)
         if non_zero_df_len / total_len * 100 <= 50:
-            logging.warning("{} rows were drop, which represents {} % of the sample".format(
-                            total_len - non_zero_df_len, non_zero_df_len / total_len*100))
+            logging.warning("{} rows were dropped, which represents {} % of the sample".format(
+                            total_len - non_zero_df_len, (total_len - non_zero_df_len) / total_len*100))
+        self._removed_zero_df = df[~df.index.isin(non_zero_dataf.index)]
         return non_zero_dataf
 
     def log_df(self, df):
         return df.applymap(lambda x: math.log(x, self.log))
 
-    def zero_df(self, df):
+    @property
+    def removed_zero_df(self):
         """
-        Retreiving the dataframe for all rows that contain a zero value
+        gives the data frame with the rows that were removed for having too many zeros.
+        this attribute is computed during the non_zero_df function
         """
-        return df[pd.isnull(df.replace(0, np.nan)).any(axis=1)]
+        if getattr(self, "_removed_zero_df", None) is None:
+            logging.warning("Computing the scaling factors beforehand is required")
+            return None
+        else:
+            return self._removed_zero_df
 
     def remove_zero_and_log(self, df):
         return self.log_df(self.non_zero_df(df))
