@@ -109,7 +109,6 @@ class TestDESeq2Normalization(TestCase):
         expected_result = None
         self.assertEqual(tested_object.removed_zero_df, expected_result)
 
-
     def test_removed_zero_df(self):
         data = [
             [255, 26, 48, 75],

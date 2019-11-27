@@ -1,7 +1,6 @@
 import numpy as np
 import math
 import logging
-import pandas as pd
 
 
 class DESeq2Normalization:
