@@ -120,7 +120,7 @@ class TestDESeq2Normalization(TestCase):
         column_names = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
         ind = ["Gen_1", 'Gen_2', "Gen_3", 'Gen_4']
         dummy_df = pd.DataFrame(data, columns=column_names, index=ind)
-        tested_object = DESeq2Normalization(self.dummy_df)
+        tested_object = DESeq2Normalization(dummy_df)
         data = [
             [366, 0, 78, 0],
             [955, 0, 46, 65],
