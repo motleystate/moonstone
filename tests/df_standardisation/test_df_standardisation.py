@@ -97,7 +97,6 @@ class TestDf_Standardisation(TestCase):
     def test_standard_taxa_df(self):
         tdfp = 'tests/df_standardisation/raw_data.csv'
         tested_object = Df_Standardisation(tdfp)
-        print(tested_object.standard_taxa_df)
         exdfp = 'tests/df_standardisation/test_5_final_df_with_taxa.csv'
         expected_object = pd.read_csv(exdfp, index_col=['kingdom', 'phylum', 'class', 'order', 'family', 'genus'])
         pd.testing.assert_frame_equal(tested_object.standard_taxa_df, expected_object)
