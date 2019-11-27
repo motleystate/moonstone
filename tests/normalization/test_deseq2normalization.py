@@ -219,4 +219,3 @@ class TestDESeq2Normalization(TestCase):
         ind = ["Gen_1", "Gen_2", "Gen_3", 'Gen_4']
         expected_result = pd.DataFrame(data, columns=column_names, index=ind)
         pd.testing.assert_frame_equal(tested_object.normalized_df, expected_result)
-
