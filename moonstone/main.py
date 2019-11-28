@@ -142,6 +142,8 @@ def run():
     logging.basicConfig(level=logging.DEBUG, filename=outdir+'moonstone.log', filemode='w',
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger('moonstone_app')
+    mpl_logger = logging.getLogger('matplotlib')
+    mpl_logger.setLevel(logging.WARNING)
     error_log = logging.StreamHandler()
     error_log.setLevel(logging.ERROR)
     logger.addHandler(error_log)
