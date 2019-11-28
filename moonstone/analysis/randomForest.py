@@ -1,3 +1,4 @@
+import logging
 from collections import Counter
 
 import matplotlib.pyplot as plt
@@ -11,9 +12,14 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, Gradien
 
 from moonstone.analysis import classify
 
+module_logger = logging.getLogger(__name__)
+module_logger.info('Using randomForest module.')
+
 
 class RandomForest(object):
     def __init__(self, countfile, metadata, outdir, variable=""):
+        self.logger = module_logger
+        self.logger.info('Starting instance of RandomForest.')
         self.countfile = countfile
         self.metadata = metadata
         self.variable = variable

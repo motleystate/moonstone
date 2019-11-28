@@ -1,5 +1,6 @@
 import logging
 module_logger = logging.getLogger(__name__)
+module_logger.info('Using filtering module.')
 
 
 class Filtering(object):
