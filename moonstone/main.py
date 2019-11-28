@@ -139,16 +139,17 @@ def run():
     args = parse_arguments()
     outdir = handle_output_directory(args.outdir, args.skip_prompt)
 
-    logging.basicConfig(level=logging.DEBUG, filename=outdir+'moonstone.log', filemode='w',
+    logging.basicConfig(level=logging.DEBUG, filename=outdir+'/moonstone.log', filemode='w',
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    logger = logging.getLogger('moonstone_app')
+    logger = logging.getLogger('moonstone_main')
     mpl_logger = logging.getLogger('matplotlib')
     mpl_logger.setLevel(logging.WARNING)
     error_log = logging.StreamHandler()
-    error_log.setLevel(logging.ERROR)
+    error_log.setLevel(logging.WARNING)
     logger.addHandler(error_log)
 
     # Parse input files
+    logger.info('Starting handleCounts module, get_count_file function to import count data.')
     count_df = get_count_file(args.countfile, outdir)  # df
     if args.filtering:
         count_df = filter_count_df(count_df, args.filtering, outdir)
