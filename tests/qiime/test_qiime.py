@@ -36,7 +36,6 @@ class TestQiime2Parser(TestCase):
         filepath = 'tests/qiime/qiime_files/test_1_import_data.csv'
         tdfp = pd.read_csv(filepath)
         tested_object = Qiime2Parser(filepath)
-        exdfp = 'tests/qiime/qiime_files/test_2_spliting_taxa_columns.csv'
         exdfp = [
             ['D', 0, "", 'Bacteria', 'D', 1, "", 'Bacteroidetes',	None, 'D', 2, "", 'Bacteroidia',
              "D", 3, "", 'Bacteroidales', 'D', 4, "", 'Tannerellaceae', 'D', 5, "", 'Macellibacteroides'],

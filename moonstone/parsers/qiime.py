@@ -47,7 +47,8 @@ class Qiime2Parser:
         it serves to clean the data a little bit since it sets to none all ambiguities
         (like 'uncultured') we might have in the data.
         """
-        taxa_column = df['#OTU ID'].str.split(";", expand=True)
+        #df = df.replace("#", " ") Remove # from OTU ID
+        taxa_column = df['OTU ID'].str.split(";", expand=True)
         taxa_column = taxa_column.replace("Ambiguous_taxa", "nothing")
         taxa_in_lists = [taxa_column[i].str.split("_", expand=True) for i in range(taxa_column.shape[1])]
         taxa_df = pd.concat(taxa_in_lists, axis=1)
@@ -92,7 +93,7 @@ class Qiime2Parser:
             taxa_columns = self.spliting_into_taxa_columns(self.dataframe_qiime)
             taxa_column_with_names = self.naming_taxa_columns(taxa_columns)
             complete_taxa_df = self.filling_missing_taxa_values(taxa_column_with_names)
-            df_samples = self._dataframe_qiime.drop('#OTU ID', axis=1)
+            df_samples = self._dataframe_qiime.drop('OTU ID', axis=1)
             taxa_columns_and_df_samples = pd.concat([complete_taxa_df, df_samples], axis=1, sort=False)
             standard_taxa_df = taxa_columns_and_df_samples.set_index(list(taxa_column_with_names))
             setattr(self, "_standard_taxa_df", standard_taxa_df.astype(int))
