@@ -27,13 +27,17 @@ class RandomForest(object):
 
     # Can use the merging function in 'classify'
     def get_matrix(self):
+        self.logger.info('Building the merged data-frame from count data and selected variable')
         merged_df = classify.SVM(self.countfile, self.metadata)
         df = merged_df.merge(self.variable)
+        self.logger.info('Done. Returning merged dataframe.')
         return df
 
     def forest(self, filename):
+        self.logger.info('Starting random forest analysis.')
         df = RandomForest.get_matrix(self)
 
+        self.logger.info('Setting up variables.')
         x = np.array(df.drop([self.variable], axis=1))
         x = preprocessing.maxabs_scale(x)
         y = np.array(df[self.variable])
@@ -49,7 +53,7 @@ class RandomForest(object):
             print(" %s samples labeled at %s, or %2.1f%s of the total"
                   % (value, category, value/sample_count*100, "%"))
 
-        # Setup the different classifiers. Decision tree and a 'forect of tress are obvious choices.
+        # Setup the different classifiers. Decision tree and a 'forest' of tress are obvious choices.
         # Also included are two type of boosting.
         dt = DecisionTreeClassifier()
         rf = RandomForestClassifier(n_estimators=100, max_features="auto", random_state=33)
@@ -61,11 +65,12 @@ class RandomForest(object):
         tts = train_test_split(x, y, test_size=.25, shuffle=True)
 
         # Decision Trees, TTS and then combined results of samples folds
-        print("Running Analysis...\nDecision Tree:")
+        self.logger.info("Running Decision Tree Analysis.")
         x_train, x_test, y_train, y_test = tts
         dt.fit(x_train, y_train)
         y_predict_tts = dt.predict(x_test)
-        print("\tTrain/Test Split Accuracy: %2.1f%s" % (accuracy_score(y_test, y_predict_tts) * 100, "%"))
+        print("Decision Tree:\n\tTrain/Test Split Accuracy: %2.1f%s"
+              % (accuracy_score(y_test, y_predict_tts) * 100, "%"))
 
         i = 0
         score = 0
@@ -76,21 +81,22 @@ class RandomForest(object):
             i += 1
         print("\tSample Folds Accuracy: %2.1f%s" % (score / i * 100, "%"))
 
-        print("Random Forest:")
+        self.logger.info("Running Random Forest Analysis")
         # Random Forest, TTS and then combined results of samples folds
         # We don't need to generate the train/test data again.
         rf.fit(x_train, y_train)
         y_predict_tts = rf.predict(x_test)
-        print("\tTrain/Test Split Accuracy: %2.1f%s" % (accuracy_score(y_test, y_predict_tts) * 100, "%"))
+        print("Random Forest:\n\tTrain/Test Split Accuracy: %2.1f%s"
+              % (accuracy_score(y_test, y_predict_tts) * 100, "%"))
 
         scores = cross_val_score(rf, x, y, cv=10)
         print("\t10X (Stratified)KFold Accuracy: %0.2f%s (+/- %0.2f)" % (scores.mean() * 100, "%", scores.std() * 200))
 
         # AdaBoost, TTS and then combined results of samples folds
-        print("AdaBoost:")
+        self.logger.info("Running AdaBoost Analysis")
         ab.fit(x_train, y_train)
         y_predict_tts = ab.predict(x_test)
-        print("\tTrain/Test Split Accuracy: %2.1f%s" % (accuracy_score(y_test, y_predict_tts) * 100, "%"))
+        print("AdaBoost:\n\tTrain/Test Split Accuracy: %2.1f%s" % (accuracy_score(y_test, y_predict_tts) * 100, "%"))
 
         i = 0
         score = 0
@@ -102,10 +108,11 @@ class RandomForest(object):
         print("\tSample Folds Accuracy: %2.1f%s" % (score / i * 100, "%"))
 
         # Gradient Boost, TTS and then combined results of samples folds
-        print("Gradient Boost:")
+        self.logger.info("Running Gradient Boost Analysis")
         ab.fit(x_train, y_train)
         y_predict_tts = ab.predict(x_test)
-        print("\tTrain/Test Split Accuracy: %2.1f%s" % (accuracy_score(y_test, y_predict_tts) * 100, "%"))
+        print("Gradient Boost:\n\tTrain/Test Split Accuracy: %2.1f%s"
+              % (accuracy_score(y_test, y_predict_tts) * 100, "%"))
         i = 0
         score = 0
         for train, test in sf.split(x, y):
