@@ -2,42 +2,41 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.dataframe_standardisation.df_standardisation import (
-    Df_Standardisation
+from moonstone.parsers.qiime import (
+    Qiime2Parser
 )
 
 
-class TestDf_Standardisation(TestCase):
+class TestQiime2Parser(TestCase):
     """
     expected data filepath = exdfp
     tested data filepath = tdfp
     """
 
     def test_import_df(self):
-        tdfp = 'tests/df_standardisation/raw_data.csv'
-        tested_object = Df_Standardisation(tdfp)
-        exdfp = 'tests/df_standardisation/test_1_import_data.csv'
-        expected_object = pd.read_csv(exdfp, dtype=str)
-        expected_object.index += 1
-        pd.testing.assert_frame_equal(tested_object.import_df(tdfp), expected_object)
+        tdfp = 'tests/qiime/qiime_files/raw_data.csv'
+        tested_object = Qiime2Parser(tdfp)
+        exdfp = 'tests/qiime/qiime_files/test_1_import_data.csv'
+        expected_object = pd.read_csv(exdfp)
+        pd.testing.assert_frame_equal(tested_object.dataframe_qiime, expected_object)
 
     def test_delete_lowercase_uppercase(self):
         test_string = "Salamandra"
-        tested_object = Df_Standardisation(test_string)
+        tested_object = Qiime2Parser(test_string)
         expected_object = 'Salamandra'
         self.assertEqual(tested_object.delete_lowercase(test_string), expected_object)
 
     def test_delete_lowercase_lowercase(self):
         test_string = "salamandra"
-        tested_object = Df_Standardisation(test_string)
+        tested_object = Qiime2Parser(test_string)
         expected_object = None
         self.assertEqual(tested_object.delete_lowercase(test_string), expected_object)
 
     def test_spliting_into_taxa_columns(self):
-        filepath = 'tests/df_standardisation/test_1_import_data.csv'
+        filepath = 'tests/qiime/qiime_files/test_1_import_data.csv'
         tdfp = pd.read_csv(filepath)
-        tested_object = Df_Standardisation(tdfp)
-        exdfp = 'tests/df_standardisation/test_2_spliting_taxa_columns.csv'
+        tested_object = Qiime2Parser(filepath)
+        exdfp = 'tests/qiime/qiime_files/test_2_spliting_taxa_columns.csv'
         exdfp = [
             ['D', 0, "", 'Bacteria', 'D', 1, "", 'Bacteroidetes',	None, 'D', 2, "", 'Bacteroidia',
              "D", 3, "", 'Bacteroidales', 'D', 4, "", 'Tannerellaceae', 'D', 5, "", 'Macellibacteroides'],
@@ -81,22 +80,22 @@ class TestDf_Standardisation(TestCase):
         ]
         tdfp = pd.DataFrame(tdfp, columns=[0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 3,
                                            0, 1, 2, 3, 0, 1, 2, 3], dtype=str)
-        tested_object = Df_Standardisation(tdfp)
-        exdfp = "tests/df_standardisation/test_3_taxa_data.csv"
+        tested_object = Qiime2Parser(tdfp)
+        exdfp = "tests/qiime/qiime_files/test_3_taxa_data.csv"
         expected_object = pd.read_csv(exdfp, dtype=str)
         pd.testing.assert_frame_equal(tested_object.naming_taxa_columns(tdfp), expected_object)
 
     def test_filling_missing_taxa_values(self):
-        filepath = "tests/df_standardisation/test_3_taxa_data.csv"
+        filepath = "tests/qiime/qiime_files/test_3_taxa_data.csv"
         tdfp = pd.read_csv(filepath, dtype=str)
-        tested_object = Df_Standardisation(filepath)
-        exdfp = "tests/df_standardisation/test_4_taxa_df_completed.csv"
+        tested_object = Qiime2Parser(filepath)
+        exdfp = "tests/qiime/qiime_files/test_4_taxa_df_completed.csv"
         expected_object = pd.read_csv(exdfp, dtype=str)
         pd.testing.assert_frame_equal(tested_object.filling_missing_taxa_values(tdfp), expected_object)
 
     def test_standard_taxa_df(self):
-        tdfp = 'tests/df_standardisation/raw_data.csv'
-        tested_object = Df_Standardisation(tdfp)
-        exdfp = 'tests/df_standardisation/test_5_final_df_with_taxa.csv'
+        tdfp = 'tests/qiime/qiime_files/raw_data.csv'
+        tested_object = Qiime2Parser(tdfp)
+        exdfp = 'tests/qiime/qiime_files/test_5_final_df_with_taxa.csv'
         expected_object = pd.read_csv(exdfp, index_col=['kingdom', 'phylum', 'class', 'order', 'family', 'genus'])
         pd.testing.assert_frame_equal(tested_object.standard_taxa_df, expected_object)
