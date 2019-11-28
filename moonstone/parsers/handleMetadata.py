@@ -13,6 +13,6 @@ class Inputs(object):
         self.metafile = metafile
 
     def openmeta(self):
-        df = pd.read_csv(self.metafile, sep=',', index_col='sample')
+        df = pd.read_csv(self.metafile, sep=',', index_col=1)
         # df.drop(['SUBJID'], axis=1, inplace=True)
         return df
