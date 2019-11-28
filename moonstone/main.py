@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import logging
 
 from moonstone.parsers import (filtering, handleCounts, handleMetadata)
 from moonstone.analysis import (classify, clustering, randomForest, stats)
@@ -137,6 +138,13 @@ def get_metadata_file(metadata_path, count_df, outdir):
 def run():
     args = parse_arguments()
     outdir = handle_output_directory(args.outdir, args.skip_prompt)
+
+    logging.basicConfig(level=logging.DEBUG, filename=outdir+'moonstone.log', filemode='w',
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger('moonstone_app')
+    error_log = logging.StreamHandler()
+    error_log.setLevel(logging.ERROR)
+    logger.addHandler(error_log)
 
     # Parse input files
     count_df = get_count_file(args.countfile, outdir)  # df
