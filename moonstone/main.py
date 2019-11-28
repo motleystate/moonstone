@@ -115,7 +115,7 @@ def filter_count_df(count_df, min_read_mean, outdir_path):
     return count_df
 
 
-def get_metadata_file(metadata_path, count_df):
+def get_metadata_file(metadata_path, count_df, outdir):
     """
     This step is to read in the variables file.
     This could be rendered optional depending the the analyses selected
@@ -124,7 +124,7 @@ def get_metadata_file(metadata_path, count_df):
     """
     print("\nOpening {} which is expected to contain clinical metadata.".format(metadata_path))
     metadata_read = handleMetadata.Inputs(metadata_path)
-    metadata_df = metadata_read.openmeta()
+    metadata_df = metadata_read.openmeta(outdir)
     if count_df.shape[0] != metadata_df.shape[0]:
         print('Count samples: {} does not equal sample number in metadata file {}'.format(count_df.shape[0],
                                                                                           metadata_df.shape[0]))
@@ -142,7 +142,7 @@ def run():
     count_df = get_count_file(args.countfile, outdir)  # df
     if args.filtering:
         count_df = filter_count_df(count_df, args.filtering, outdir)
-    metadata_df = get_metadata_file(args.metadata, count_df)  # dm
+    metadata_df = get_metadata_file(args.metadata, count_df, args.outdir)  # dm
 
     # Run different analysis
     if args.pca_plot:

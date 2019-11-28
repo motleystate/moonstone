@@ -12,7 +12,8 @@ class Inputs(object):
     def __init__(self, metafile):
         self.metafile = metafile
 
-    def openmeta(self):
-        df = pd.read_csv(self.metafile, sep=',', index_col=1)
-        # df.drop(['SUBJID'], axis=1, inplace=True)
+    def openmeta(self, outdir_path):
+        df = pd.read_csv(self.metafile, sep=',', index_col=0)
+        df.rename_axis("sample", inplace=True)
+        df.to_csv(path_or_buf=outdir_path + '/' + 'importedMetaData.csv')
         return df
