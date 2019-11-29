@@ -18,8 +18,8 @@ class TestQiime2Parser(TestCase):
         tested_object = Qiime2Parser(tdfp)
         expected_object = pd.DataFrame(
             {
-                '#OTU ID': ["D_0__Bacteria;D_1__Bacteroidetes;D_2__Bacteroidia;D_3__Bacteroidales;D_4__Tannerellaceae;D_5__Macellibacteroides",
-                            "D_0__Bacteria;D_1__Proteobacteria;D_2__Gammaproteobacteria;D_3__Betaproteobacteriales;D_4__Chitinibacteraceae;D_5__Deefgea"],
+                '#OTU ID': ["D_0__Bacteria;D_1__Bacteroidetes;D_2__Bacteroidia;D_3__Bacteroidales",
+                            "D_0__Bacteria;D_1__Proteobacteria;D_2__Gammaproteobacteria;D_3__Betaproteobacteriales"],
                 'Sample 1': [0, 0],
                 'Sample 2': [0, 0],
                 'Sample 3': [0, 0],
