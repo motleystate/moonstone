@@ -147,12 +147,19 @@ class SVM(object):
         y = np.array(df_final[variable])
 
         clf = svm.SVC(kernel='linear', probability=True, tol=0.00001)
-        rfecv = RFECV(estimator=clf, step=1, cv=StratifiedKFold(2), scoring='accuracy', verbose=0)
+        rfecv = RFECV(estimator=clf, step=1, cv=StratifiedKFold(10), scoring='accuracy', verbose=0)
         rfecv.fit(x, y)
-        print("Optimal number of features : %d" % rfecv.n_features_)
+        self.logger.info("Optimal number of features : %d" % rfecv.n_features_)
+
         df_rank = pd.DataFrame(rfecv.ranking_.transpose(),
                                index=df_final.drop([variable], axis=1).columns, columns=['Coef'])
-        print(df_rank.sort_values(by=['Coef']))
+
+        self.logger.info('Full component list for %s being written to %s'
+                         % (variable, self.outdir+'/'+variable+'_SVM_components.csv' ))
+
+        df_rank.sort_values(by=['Coef'], ascending=[bool])\
+            .to_csv(path_or_buf=self.outdir+'/'+variable+'_SVM_components.csv', sep=',')
+
         # df_rank.sort_values(by=['Coef']).plot.barh()
         # plt.show()
 

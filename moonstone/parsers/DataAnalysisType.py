@@ -12,6 +12,17 @@ and to determine the type of variable in each column.
 A second part will be to match the type of statistical analysis that could be performed.
 """
 
+
+class Variables(object):
+    def __init__(self):
+        self.logger = module_logger
+        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
+
+    def inspect(self, metadata_df):
+        self.logger.info('Looking closer at the metadata structure.')
+        column_dict = {c[0]: c[1] for c in enumerate(metadata_df.columns)}
+        return column_dict
+
 # import handleMetadata
 
 # parser = argparse.ArgumentParser(description='MetaData Description Script')

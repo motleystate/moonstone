@@ -5,6 +5,7 @@ This file is likely to be highly variable depending on the project
 At the least, samples names/references should match with the 'counts' file
 """
 
+from moonstone.parsers import DataAnalysisType
 import pandas as pd
 import logging
 module_logger = logging.getLogger(__name__)
@@ -22,4 +23,5 @@ class Inputs(object):
         df.rename_axis("sample", inplace=True)
         df.to_csv(path_or_buf=outdir_path + '/' + 'importedMetaData.csv')
         self.logger.info('Success!')
+        # variables_dict = DataAnalysisType.Variables.inspect(df, df)
         return df
