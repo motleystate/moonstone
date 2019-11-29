@@ -1,7 +1,8 @@
 import pandas as pd
+from .base import BaseParser
 
 
-class Qiime2Parser:
+class Qiime2Parser(BaseParser):
     """
     This class serves for transforming the data obtained by Qiime2 (https://qiime2.org/)
     into a dataframe that has the taxa information ordered in a multilevel index and the
@@ -19,24 +20,16 @@ class Qiime2Parser:
     taxonomical_names = {'0': "kingdom", '1': "phylum", '2': "class",
                          '3': "order", '4': "family", '5': "genus", '6': "species"}
     symbol_to_remove = '#'
+    terms_to_remove = ["Ambiguous_taxa", "Unknown Family"]
 
-    def __init__(self, filepath):
-        self.filepath = filepath
-
-    def import_df(self):
+    def to_dataframe(self):
         """
         Importing the csv and placing the samples and block of taxa as headers of the different columns
         """
-        df = pd.read_csv(self.filepath, skiprows=1)
+        df = pd.read_csv(self.file_path, skiprows=1)
         new_column_names = [column_name.replace(self.symbol_to_remove, "") for column_name in list(df)]
         df.columns = new_column_names
-        self._dataframe_qiime = df
-
-    @property
-    def dataframe_qiime(self):
-        if getattr(self, '_dataframe_qiime', None) is None:
-            self.import_df()
-        return self._dataframe_qiime
+        self._dataframe = df
 
     def spliting_into_taxa_columns(self, serie):
         """
@@ -45,10 +38,9 @@ class Qiime2Parser:
         (like 'uncultured') we might have in the data.
         """
         taxa_column = serie.str.split(";", expand=True)
-        taxa_column = taxa_column.replace("Ambiguous_taxa", "nothing")
+        taxa_column = taxa_column.replace(self.terms_to_remove, None)
         taxa_in_lists = [taxa_column[i].str.split("_", expand=True) for i in range(taxa_column.shape[1])]
         taxa_df = pd.concat(taxa_in_lists, axis=1)
-        taxa_df = taxa_df.replace("Unknown Family", "nothing")
         return taxa_df.applymap(lambda x: x if not isinstance(x, str) else None if x.islower() else x)
 
     def naming_taxa_columns(self, df):
@@ -86,10 +78,10 @@ class Qiime2Parser:
         This property can be used to obtain the formated data frame directly, without any intermidiate steps.
         """
         if getattr(self, "_standard_taxa_df", None) is None:
-            taxa_columns = self.spliting_into_taxa_columns(self.dataframe_qiime['OTU ID'])
+            taxa_columns = self.spliting_into_taxa_columns(self.dataframe['OTU ID'])
             taxa_column_with_names = self.naming_taxa_columns(taxa_columns)
             complete_taxa_df = self.filling_missing_taxa_values(taxa_column_with_names)
-            df_samples = self._dataframe_qiime.drop('OTU ID', axis=1)
+            df_samples = self._dataframe.drop('OTU ID', axis=1)
             taxa_columns_and_df_samples = pd.concat([complete_taxa_df, df_samples], axis=1, sort=False)
             standard_taxa_df = taxa_columns_and_df_samples.set_index(list(taxa_column_with_names))
             setattr(self, "_standard_taxa_df", standard_taxa_df.astype(int))

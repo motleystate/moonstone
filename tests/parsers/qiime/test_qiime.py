@@ -13,7 +13,7 @@ class TestQiime2Parser(TestCase):
     tested data filepath = tdfp
     """
 
-    def test_import_df(self):
+    def test_to_dataframe(self):
         tdfp = 'tests/parsers/qiime/qiime_files/raw_data_to_import.csv'
         tested_object = Qiime2Parser(tdfp)
         expected_object = pd.DataFrame(
@@ -23,7 +23,7 @@ class TestQiime2Parser(TestCase):
             ],
             columns=["OTU ID", "Sample 1", "Sample 2", 'Sample 3']
         )
-        pd.testing.assert_frame_equal(tested_object.dataframe_qiime, expected_object)
+        pd.testing.assert_frame_equal(tested_object.dataframe, expected_object)
 
     def test_spliting_into_taxa_columns(self):
         filepath = 'tests/parsers/qiime/qiime_files/test_1_import_data.csv'
