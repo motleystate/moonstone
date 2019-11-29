@@ -14,20 +14,20 @@ class TestQiime2Parser(TestCase):
     """
 
     def test_import_df(self):
-        tdfp = 'tests/qiime/qiime_files/raw_data_to_import.csv'
+        tdfp = 'tests/parsers/qiime/qiime_files/raw_data_to_import.csv'
         tested_object = Qiime2Parser(tdfp)
         expected_object = pd.DataFrame(
             [
                     ["D_0__Bacteria;D_1__Bacteroidetes;D_2__Bacteroidia;D_3__Bacteroidales", 0, 0, 0],
                     ["D_0__Bacteria;D_1__Proteobacteria;D_2__Gammaproteobacteria;D_3__Betaproteobacteriales", 0, 0, 0],
             ],
-            columns=["#OTU ID", "Sample 1", "Sample 2", 'Sample 3']
+            columns=["OTU ID", "Sample 1", "Sample 2", 'Sample 3']
         )
         pd.testing.assert_frame_equal(tested_object.dataframe_qiime, expected_object)
 
     def test_spliting_into_taxa_columns(self):
-        filepath = 'tests/qiime/qiime_files/test_1_import_data.csv'
-        tdfp = pd.read_csv(filepath)
+        filepath = 'tests/parsers/qiime/qiime_files/test_1_import_data.csv'
+        tdfp = pd.read_csv(filepath, squeeze=True)
         tested_object = Qiime2Parser(filepath)
         exdfp = [
             ['D', 0, "", 'Bacteria', 'D', 1, "", 'Bacteroidetes',	None, 'D', 2, "", 'Bacteroidia',
@@ -73,21 +73,21 @@ class TestQiime2Parser(TestCase):
         tdfp = pd.DataFrame(tdfp, columns=[0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 3,
                                            0, 1, 2, 3, 0, 1, 2, 3], dtype=str)
         tested_object = Qiime2Parser(tdfp)
-        exdfp = "tests/qiime/qiime_files/test_3_taxa_data.csv"
+        exdfp = "tests/parsers/qiime/qiime_files/test_3_taxa_data.csv"
         expected_object = pd.read_csv(exdfp, dtype=str)
         pd.testing.assert_frame_equal(tested_object.naming_taxa_columns(tdfp), expected_object)
 
     def test_filling_missing_taxa_values(self):
-        filepath = "tests/qiime/qiime_files/test_3_taxa_data.csv"
+        filepath = "tests/parsers/qiime/qiime_files/test_3_taxa_data.csv"
         tdfp = pd.read_csv(filepath, dtype=str)
         tested_object = Qiime2Parser(filepath)
-        exdfp = "tests/qiime/qiime_files/test_4_taxa_df_completed.csv"
+        exdfp = "tests/parsers/qiime/qiime_files/test_4_taxa_df_completed.csv"
         expected_object = pd.read_csv(exdfp, dtype=str)
         pd.testing.assert_frame_equal(tested_object.filling_missing_taxa_values(tdfp), expected_object)
 
     def test_standard_taxa_df(self):
-        tdfp = 'tests/qiime/qiime_files/raw_data.csv'
+        tdfp = 'tests/parsers/qiime/qiime_files/raw_data.csv'
         tested_object = Qiime2Parser(tdfp)
-        exdfp = 'tests/qiime/qiime_files/test_5_final_df_with_taxa.csv'
+        exdfp = 'tests/parsers/qiime/qiime_files/test_5_final_df_with_taxa.csv'
         expected_object = pd.read_csv(exdfp, index_col=['kingdom', 'phylum', 'class', 'order', 'family', 'genus'])
         pd.testing.assert_frame_equal(tested_object.standard_taxa_df, expected_object)

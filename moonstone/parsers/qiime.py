@@ -18,6 +18,7 @@ class Qiime2Parser:
 
     taxonomical_names = {'0': "kingdom", '1': "phylum", '2': "class",
                          '3': "order", '4': "family", '5': "genus", '6': "species"}
+    symbol_to_remove = '#'
 
     def __init__(self, filepath):
         self.filepath = filepath
@@ -26,7 +27,10 @@ class Qiime2Parser:
         """
         Importing the csv and placing the samples and block of taxa as headers of the different columns
         """
-        self._dataframe_qiime = pd.read_csv(self.filepath, skiprows=1)
+        df = pd.read_csv(self.filepath, skiprows=1)
+        new_column_names = [column_name.replace(self.symbol_to_remove, "") for column_name in list(df)]
+        df.columns = new_column_names
+        self._dataframe_qiime = df
 
     @property
     def dataframe_qiime(self):
@@ -34,15 +38,13 @@ class Qiime2Parser:
             self.import_df()
         return self._dataframe_qiime
 
-    def spliting_into_taxa_columns(self, df):
+    def spliting_into_taxa_columns(self, serie):
         """
         This function takes the block of taxa column and splits it into different ones. In addition,
         it serves to clean the data a little bit since it sets to none all ambiguities
         (like 'uncultured') we might have in the data.
         """
-        new_column_names = [column_name.replace("#", "") for column_name in list(df)]
-        df.columns = new_column_names
-        taxa_column = df['OTU ID'].str.split(";", expand=True)
+        taxa_column = serie.str.split(";", expand=True)
         taxa_column = taxa_column.replace("Ambiguous_taxa", "nothing")
         taxa_in_lists = [taxa_column[i].str.split("_", expand=True) for i in range(taxa_column.shape[1])]
         taxa_df = pd.concat(taxa_in_lists, axis=1)
@@ -84,7 +86,7 @@ class Qiime2Parser:
         This property can be used to obtain the formated data frame directly, without any intermidiate steps.
         """
         if getattr(self, "_standard_taxa_df", None) is None:
-            taxa_columns = self.spliting_into_taxa_columns(self.dataframe_qiime)
+            taxa_columns = self.spliting_into_taxa_columns(self.dataframe_qiime['OTU ID'])
             taxa_column_with_names = self.naming_taxa_columns(taxa_columns)
             complete_taxa_df = self.filling_missing_taxa_values(taxa_column_with_names)
             df_samples = self._dataframe_qiime.drop('OTU ID', axis=1)
