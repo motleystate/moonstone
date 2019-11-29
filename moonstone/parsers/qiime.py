@@ -34,26 +34,20 @@ class Qiime2Parser:
             self.import_df()
         return self._dataframe_qiime
 
-    def delete_lowercase(self, string):
-        if string is not None:
-            if string.islower():
-                return None
-            else:
-                return string
-
     def spliting_into_taxa_columns(self, df):
         """
         This function takes the block of taxa column and splits it into different ones. In addition,
         it serves to clean the data a little bit since it sets to none all ambiguities
         (like 'uncultured') we might have in the data.
         """
-        #df = df.replace("#", " ") Remove # from OTU ID
+        new_column_names = [column_name.replace("#", "") for column_name in list(df)]
+        df.columns = new_column_names
         taxa_column = df['OTU ID'].str.split(";", expand=True)
         taxa_column = taxa_column.replace("Ambiguous_taxa", "nothing")
         taxa_in_lists = [taxa_column[i].str.split("_", expand=True) for i in range(taxa_column.shape[1])]
         taxa_df = pd.concat(taxa_in_lists, axis=1)
         taxa_df = taxa_df.replace("Unknown Family", "nothing")
-        return taxa_df.applymap(self.delete_lowercase)
+        return taxa_df.applymap(lambda x: x if not isinstance(x, str) else None if x.islower() else x)
 
     def naming_taxa_columns(self, df):
         """

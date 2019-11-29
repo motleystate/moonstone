@@ -14,23 +14,27 @@ class TestQiime2Parser(TestCase):
     """
 
     def test_import_df(self):
-        tdfp = 'tests/qiime/qiime_files/raw_data.csv'
+        tdfp = 'tests/qiime/qiime_files/raw_data_to_import.csv'
         tested_object = Qiime2Parser(tdfp)
-        exdfp = 'tests/qiime/qiime_files/test_1_import_data.csv'
-        expected_object = pd.read_csv(exdfp)
+        expected_object = pd.DataFrame(
+            {
+                '#OTU ID': ["D_0__Bacteria;D_1__Bacteroidetes;D_2__Bacteroidia;D_3__Bacteroidales;D_4__Tannerellaceae;D_5__Macellibacteroides",
+                            "D_0__Bacteria;D_1__Proteobacteria;D_2__Gammaproteobacteria;D_3__Betaproteobacteriales;D_4__Chitinibacteraceae;D_5__Deefgea"],
+                'Sample 1': [0, 0],
+                'Sample 2': [0, 0],
+                'Sample 3': [0, 0],
+                'Sample 4': [0, 0],
+                'Sample 5': [0, 0],
+                'Sample 6': [0, 0],
+                'Sample 7': [0, 93],
+                'Sample 8': [0, 0],
+                'Sample 9': [25, 0],
+                'Sample 10': [37, 0],
+                'Sample 11': [19, 0],
+                'Sample 12': [361, 0],
+            }
+        )
         pd.testing.assert_frame_equal(tested_object.dataframe_qiime, expected_object)
-
-    def test_delete_lowercase_uppercase(self):
-        test_string = "Salamandra"
-        tested_object = Qiime2Parser(test_string)
-        expected_object = 'Salamandra'
-        self.assertEqual(tested_object.delete_lowercase(test_string), expected_object)
-
-    def test_delete_lowercase_lowercase(self):
-        test_string = "salamandra"
-        tested_object = Qiime2Parser(test_string)
-        expected_object = None
-        self.assertEqual(tested_object.delete_lowercase(test_string), expected_object)
 
     def test_spliting_into_taxa_columns(self):
         filepath = 'tests/qiime/qiime_files/test_1_import_data.csv'
