@@ -17,7 +17,7 @@ class Inputs(object):
         self.metafile = metafile
 
     def openmeta(self, outdir_path):
-        self.logger.info('Opening Metadata file: '+ self.metafile)
+        self.logger.info('Opening Metadata file: ' + self.metafile)
         df = pd.read_csv(self.metafile, sep=',', index_col=0)
         df.rename_axis("sample", inplace=True)
         df.to_csv(path_or_buf=outdir_path + '/' + 'importedMetaData.csv')
