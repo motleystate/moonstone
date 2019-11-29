@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import logging
 
 from moonstone.parsers import (filtering, handleCounts, handleMetadata)
 from moonstone.analysis import (classify, clustering, randomForest, stats)
@@ -115,7 +116,7 @@ def filter_count_df(count_df, min_read_mean, outdir_path):
     return count_df
 
 
-def get_metadata_file(metadata_path, count_df):
+def get_metadata_file(metadata_path, count_df, outdir):
     """
     This step is to read in the variables file.
     This could be rendered optional depending the the analyses selected
@@ -124,7 +125,7 @@ def get_metadata_file(metadata_path, count_df):
     """
     print("\nOpening {} which is expected to contain clinical metadata.".format(metadata_path))
     metadata_read = handleMetadata.Inputs(metadata_path)
-    metadata_df = metadata_read.openmeta()
+    metadata_df = metadata_read.openmeta(outdir)
     if count_df.shape[0] != metadata_df.shape[0]:
         print('Count samples: {} does not equal sample number in metadata file {}'.format(count_df.shape[0],
                                                                                           metadata_df.shape[0]))
@@ -138,11 +139,21 @@ def run():
     args = parse_arguments()
     outdir = handle_output_directory(args.outdir, args.skip_prompt)
 
+    logging.basicConfig(level=logging.DEBUG, filename=outdir+'/moonstone.log', filemode='w',
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logger = logging.getLogger('moonstone_main')
+    mpl_logger = logging.getLogger('matplotlib')
+    mpl_logger.setLevel(logging.WARNING)
+    error_log = logging.StreamHandler()
+    error_log.setLevel(logging.WARNING)
+    logger.addHandler(error_log)
+
     # Parse input files
+    logger.info('Starting handleCounts module, get_count_file function to import count data.')
     count_df = get_count_file(args.countfile, outdir)  # df
     if args.filtering:
         count_df = filter_count_df(count_df, args.filtering, outdir)
-    metadata_df = get_metadata_file(args.metadata, count_df)  # dm
+    metadata_df = get_metadata_file(args.metadata, count_df, args.outdir)  # dm
 
     # Run different analysis
     if args.pca_plot:
@@ -154,15 +165,15 @@ def run():
         kmeans.kmeans('metaData_withKClusters.csv', n_clusters=args.k_means)
 
     if args.svm:
-        svm = classify.SVM(count_df, metadata_df)
+        svm = classify.SVM(count_df, metadata_df, outdir)
         svm.analyze(variable=args.svm)
 
     if args.svm_roc:
-        roc = classify.SVM(count_df, metadata_df)
+        roc = classify.SVM(count_df, metadata_df, outdir)
         roc.roc_analysis(variable=args.svm_roc)
 
     if args.svm_classifier:
-        scomponents = classify.SVM(count_df, metadata_df)
+        scomponents = classify.SVM(count_df, metadata_df, outdir)
         scomponents.feature_analysis(variable=args.svm_classifier)
 
     if args.random_forest:

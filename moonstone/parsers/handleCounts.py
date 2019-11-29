@@ -2,14 +2,18 @@
  The file needs to be opened formatted and some basic statistics calculated"""
 
 import pandas as pd
+import logging
+module_logger = logging.getLogger(__name__)
 
 
 class Inputs(object):
     def __init__(self, countfile):
+        self.logger = module_logger
+        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.countfile = countfile
 
     def opencounts(self):
-        # Normalized Counts from SHAMAN
+        self.logger.info('Opening Count file: '+self.countfile)
         # This should have been processed with Deseq2
         df = pd.read_csv(self.countfile, sep=',')
         # df = df.rename(columns={"Unnamed: 0": "sample"})  # Samples are numbered but the column name is empty.
@@ -20,8 +24,7 @@ class Inputs(object):
         # The following statements looks for 'NaN' in row 1.
         # If 'NaN' is found, the whole column is removed.
         if df.iloc[0].isnull().any():  # NEED TO FILTER OUT NAN BEFORE PROCEEDING!
-            print(f'Removing {df.iloc[0].isnull().any().sum()} unnamed/unidentified variable!')
-            # print(df.columns[df.iloc[0].isnull()])
+            self.logger.warning(f'Removed {df.iloc[0].isnull().any().sum()} unnamed/unidentified variable(s)!')
             df.drop(df.columns[df.iloc[0].isnull()], axis=1, inplace=True)
 
         df.columns = df.iloc[0]
@@ -36,4 +39,5 @@ class Inputs(object):
         df.rename_axis("", axis="columns", inplace=True)  # Should remove extraneous column axis name
         df.rename_axis("sample", inplace=True)  # Gives the row axis the proper 'sample' name
         df = df.applymap(float)  # Converts all values to floats in preparation of analysis
+        self.logger.info('Success!')
         return df

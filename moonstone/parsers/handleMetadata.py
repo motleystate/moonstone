@@ -6,13 +6,20 @@ At the least, samples names/references should match with the 'counts' file
 """
 
 import pandas as pd
+import logging
+module_logger = logging.getLogger(__name__)
 
 
 class Inputs(object):
     def __init__(self, metafile):
+        self.logger = module_logger
+        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.metafile = metafile
 
-    def openmeta(self):
-        df = pd.read_csv(self.metafile, sep=',', index_col='sample')
-        # df.drop(['SUBJID'], axis=1, inplace=True)
+    def openmeta(self, outdir_path):
+        self.logger.info('Opening Metadata file: ' + self.metafile)
+        df = pd.read_csv(self.metafile, sep=',', index_col=0)
+        df.rename_axis("sample", inplace=True)
+        df.to_csv(path_or_buf=outdir_path + '/' + 'importedMetaData.csv')
+        self.logger.info('Success!')
         return df
