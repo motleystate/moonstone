@@ -146,9 +146,10 @@ class RandomForest(object):
                 f + 1, features[f], importance[indices[f]]))
 
         plt.figure()
-        plt.title(f"Random Forest Feature Importance: {self.variable}", fontsize=16)
+        plt.title(f"Random Forest Feature Importance: {self.variable}", fontsize=12)
         plt.bar(range(features_to_print), importance[indices][:features_to_print], color="r",
-                yerr=standard_deviations[indices][:features_to_print], bottom=.26)
-        plt.xticks(range(features_to_print), features, rotation=90)
+                yerr=standard_deviations[indices][:features_to_print])
+        plt.xticks(range(features_to_print), features, rotation=90, fontsize=2.5)
         plt.xlim([-1, features_to_print])
-        plt.show()
+        # plt.show()
+        plt.savefig(self.variable+'_rfFeatures.pdf', format='pdf', dpi=150)

@@ -1,3 +1,4 @@
+import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -9,13 +10,20 @@ from sklearn.feature_selection import RFECV
 
 from moonstone.analysis import stats
 
+module_logger = logging.getLogger(__name__)
+module_logger.info('Using classify module.')
+
 
 class SVM(object):
     def __init__(self, countfile, metadata):
+        self.logger = module_logger
+        self.logger.info('Starting instance of SVM.')
         self.countfile = countfile
         self.metadata = metadata
 
     def merge(self, variable):
+        self.logger.info('Merge function called to merge count data and metadata.')
+        self.logger.info(f'Variable {variable} from metadata file will be marged with counts.')
         dc = self.countfile
         dm = self.metadata
 
