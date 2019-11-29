@@ -1,6 +1,8 @@
 import pandas as pd
 
 from .base import BaseParser
+import logging
+module_logger = logging.getLogger(__name__)
 
 
 class Picrust2PathwaysParser(BaseParser):
@@ -14,4 +16,6 @@ class Picrust2PathwaysParser(BaseParser):
     """
 
     def to_dataframe(self):
+        self.logger = module_logger
+        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self._dataframe = pd.read_csv(self.file_path, sep='\t', index_col=0)

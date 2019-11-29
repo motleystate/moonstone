@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
+import logging
+module_logger = logging.getLogger(__name__)
 
 
 def count_items(y):
@@ -30,6 +32,8 @@ def normalized_stats(x):
 
 class Descriptive(object):
     def __init__(self, df, outdir):
+        self.logger = module_logger
+        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.df = df
         self.outdir = outdir
 

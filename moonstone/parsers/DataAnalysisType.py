@@ -1,3 +1,5 @@
+import logging
+module_logger = logging.getLogger(__name__)
 """The goal of this script is to look through the processed metadata file
 and to determine the type of variable in each column.
 
