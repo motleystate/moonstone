@@ -1,13 +1,12 @@
 import logging
 module_logger = logging.getLogger(__name__)
-module_logger.info('Using filtering module.')
 
 
 class Filtering(object):
     def __init__(self, df, mean_filter):
         # self.logger = logging.getLogger('moonstone.filtering.Filtering')
         self.logger = module_logger
-        self.logger.info('Creating an instance of Filtering.')
+        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.df = df
         self.mean_filter = mean_filter
 

@@ -13,13 +13,12 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, Gradien
 from moonstone.analysis import classify
 
 module_logger = logging.getLogger(__name__)
-module_logger.info('Using randomForest module.')
 
 
 class RandomForest(object):
     def __init__(self, countfile, metadata, outdir, variable=""):
         self.logger = module_logger
-        self.logger.info('Starting instance of RandomForest.')
+        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.countfile = countfile
         self.metadata = metadata
         self.variable = variable

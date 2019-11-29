@@ -11,13 +11,12 @@ from sklearn.feature_selection import RFECV
 from moonstone.analysis import stats
 
 module_logger = logging.getLogger(__name__)
-module_logger.info('Using classify module.')
 
 
 class SVM(object):
     def __init__(self, countfile, metadata, outdir):
         self.logger = module_logger
-        self.logger.info('Starting instance of SVM.')
+        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.countfile = countfile
         self.metadata = metadata
         self.outdir = outdir
