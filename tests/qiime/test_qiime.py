@@ -17,22 +17,11 @@ class TestQiime2Parser(TestCase):
         tdfp = 'tests/qiime/qiime_files/raw_data_to_import.csv'
         tested_object = Qiime2Parser(tdfp)
         expected_object = pd.DataFrame(
-            {
-                '#OTU ID': ["D_0__Bacteria;D_1__Bacteroidetes;D_2__Bacteroidia;D_3__Bacteroidales",
-                            "D_0__Bacteria;D_1__Proteobacteria;D_2__Gammaproteobacteria;D_3__Betaproteobacteriales"],
-                'Sample 1': [0, 0],
-                'Sample 2': [0, 0],
-                'Sample 3': [0, 0],
-                'Sample 4': [0, 0],
-                'Sample 5': [0, 0],
-                'Sample 6': [0, 0],
-                'Sample 7': [0, 93],
-                'Sample 8': [0, 0],
-                'Sample 9': [25, 0],
-                'Sample 10': [37, 0],
-                'Sample 11': [19, 0],
-                'Sample 12': [361, 0],
-            }
+            [
+                    ["D_0__Bacteria;D_1__Bacteroidetes;D_2__Bacteroidia;D_3__Bacteroidales", 0, 0, 0],
+                    ["D_0__Bacteria;D_1__Proteobacteria;D_2__Gammaproteobacteria;D_3__Betaproteobacteriales", 0, 0, 0],
+            ],
+            columns=["#OTU ID", "Sample 1", "Sample 2", 'Sample 3']
         )
         pd.testing.assert_frame_equal(tested_object.dataframe_qiime, expected_object)
 
