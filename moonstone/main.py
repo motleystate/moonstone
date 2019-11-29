@@ -165,15 +165,15 @@ def run():
         kmeans.kmeans('metaData_withKClusters.csv', n_clusters=args.k_means)
 
     if args.svm:
-        svm = classify.SVM(count_df, metadata_df)
+        svm = classify.SVM(count_df, metadata_df, outdir)
         svm.analyze(variable=args.svm)
 
     if args.svm_roc:
-        roc = classify.SVM(count_df, metadata_df)
+        roc = classify.SVM(count_df, metadata_df, outdir)
         roc.roc_analysis(variable=args.svm_roc)
 
     if args.svm_classifier:
-        scomponents = classify.SVM(count_df, metadata_df)
+        scomponents = classify.SVM(count_df, metadata_df, outdir)
         scomponents.feature_analysis(variable=args.svm_classifier)
 
     if args.random_forest:

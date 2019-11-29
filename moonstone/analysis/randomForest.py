@@ -28,7 +28,7 @@ class RandomForest(object):
     # Can use the merging function in 'classify'
     def get_matrix(self):
         self.logger.info('Building the merged data-frame from count data and selected variable')
-        merged_df = classify.SVM(self.countfile, self.metadata)
+        merged_df = classify.SVM(self.countfile, self.metadata, self.outdir)
         df = merged_df.merge(self.variable)
         self.logger.info('Done. Returning merged dataframe.')
         return df
@@ -149,7 +149,7 @@ class RandomForest(object):
         plt.title(f"Random Forest Feature Importance: {self.variable}", fontsize=12)
         plt.bar(range(features_to_print), importance[indices][:features_to_print], color="r",
                 yerr=standard_deviations[indices][:features_to_print])
-        plt.xticks(range(features_to_print), features, rotation=90, fontsize=2.5)
+        plt.xticks(range(features_to_print), features, rotation=90, fontsize=3)
         plt.xlim([-1, features_to_print])
         # plt.show()
-        plt.savefig(self.variable+'_rfFeatures.pdf', format='pdf', dpi=150)
+        plt.savefig(self.outdir+"/"+self.variable+'_rfFeatures.pdf', format='pdf', dpi=150)

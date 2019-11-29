@@ -15,11 +15,12 @@ module_logger.info('Using classify module.')
 
 
 class SVM(object):
-    def __init__(self, countfile, metadata):
+    def __init__(self, countfile, metadata, outdir):
         self.logger = module_logger
         self.logger.info('Starting instance of SVM.')
         self.countfile = countfile
         self.metadata = metadata
+        self.outdir = outdir
 
     def merge(self, variable):
         self.logger.info('Merge function called to merge count data and metadata.')
@@ -37,14 +38,16 @@ class SVM(object):
 
         Thus we will check for mismatched index type and try to correct"""
         if not isinstance(dc.index, type(dm.index)):
+            self.logger.warning(f'Index types do not match: {type(dc.index)} and {type(dm.index)}.')
             dc.set_index(np.int64(np.array(dc.index)), inplace=True)
 
         df = pd.merge(dm[variable], dc, left_index=True, right_index=True)
         return df  # returned to analyze function as 'df_final'
 
     def analyze(self, variable=""):
+        self.logger.info(f'Starting SVM analysis with variable: {variable}')
         if variable == 'all':
-            pass  # Later to include an iterator over al clinical variables.
+            pass  # Later to include an iterator over all clinical variables.
 
         df_final = SVM.merge(self, variable)
 
@@ -53,7 +56,7 @@ class SVM(object):
         # RBF kernel assumes features centered around zero, with equal variance.
         # Metagenomic data is sparse. maxabs_scale() handles both of these conditions.
         x_maxabs_scaled = preprocessing.maxabs_scale(x)
-        print("Counts standardized by Maximum Absolute Value. Check Mean & Variance near Zero:")
+        self.logger.info("Counts standardized by Maximum Absolute Value. Check Mean & Variance near Zero:")
         stats.normalized_stats(x_maxabs_scaled)
         y = np.array(df_final[variable])
 
@@ -61,7 +64,7 @@ class SVM(object):
         stats.count_items(y)
 
         # Support Vector Machine
-        print('\nRunning Support Vector Machine classifier. This will take a few moments...')
+        print('\nRunning Support Vector Machine classifier. This could take a few moments...')
         for kernel in ["linear", "poly", "rbf", "sigmoid"]:
             clf = svm.SVC(kernel=kernel, tol=0.00001, gamma='scale')
             # Get accuracy
@@ -70,6 +73,7 @@ class SVM(object):
                   (kernel, score.mean()*100, "%", score.std()*200, "%"))
 
     def roc_analysis(self, variable=""):
+        self.logger.info(f'Starting ROC analysis with variable: {variable}')
         df_final = SVM.merge(self, variable)
 
         x = np.array(df_final.drop([variable], axis=1).astype(float))
@@ -78,6 +82,7 @@ class SVM(object):
 
         # Here we make sure 2, and only 2 categories are present.
         if len(set(y)) != 2:
+            self.logger.fatal('ROC analysis attempted with more than 2 variable states!')
             raise SystemExit("ROC Analysis is only valid for binary [2] variables")
         # My variable counter
         stats.count_items(y)
@@ -131,9 +136,11 @@ class SVM(object):
         plt.ylabel('True Positive Rate')
         plt.title('%s\nROC Analysis' % variable, fontsize=20)
         plt.legend(loc="lower right")
-        plt.show()
+        # plt.show()
+        plt.savefig(self.outdir+"/"+variable+'_ROC.pdf', format='pdf', dpi=150)
 
     def feature_analysis(self, variable=""):
+        self.logger.info(f'Running SVM feature importance analysis with variable: {variable}')
         df_final = SVM.merge(self, variable)
 
         x = np.array(df_final.drop([variable], axis=1).astype(float))
