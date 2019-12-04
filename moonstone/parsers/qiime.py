@@ -67,7 +67,7 @@ class Qiime2Parser(BaseParser):
         column names     kingdom  phylum            family         genus
         value            Bacteria Bacteroidetes ... Tannerellaceae Tannerellaceae (family)
         """
-        values_with_taxa_status = df.apply(lambda x: x + " (" + x.name + ")")
+        values_with_taxa_status = df.apply(lambda x: x + " ({})".format(x.name))
         filling_missing_values = values_with_taxa_status.fillna(method='ffill', axis=1)
         combining_df_and_taxa_status_in_nan = df.combine_first(filling_missing_values)
         return combining_df_and_taxa_status_in_nan
