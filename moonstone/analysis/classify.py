@@ -155,7 +155,7 @@ class SVM(object):
                                index=df_final.drop([variable], axis=1).columns, columns=['Coef'])
 
         self.logger.info('Full component list for %s being written to %s'
-                         % (variable, self.outdir+'/'+variable+'_SVM_components.csv' ))
+                         % (variable, self.outdir+'/'+variable+'_SVM_components.csv'))
 
         df_rank.sort_values(by=['Coef'], ascending=[bool])\
             .to_csv(path_or_buf=self.outdir+'/'+variable+'_SVM_components.csv', sep=',')
