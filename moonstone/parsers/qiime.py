@@ -22,11 +22,15 @@ class Qiime2Parser(BaseParser):
     symbol_to_remove = '#'
     terms_to_remove = ["Ambiguous_taxa", "Unknown Family"]
 
+    def __init__(self, file_path, skip_row_number=1):
+        super().__init__(file_path)
+        self.skip_row_number = skip_row_number
+
     def to_dataframe(self):
         """
         Importing the csv and placing the samples and block of taxa as headers of the different columns
         """
-        df = pd.read_csv(self.file_path, skiprows=1)
+        df = pd.read_csv(self.file_path, skiprows=self.skip_row_number)
         new_column_names = [column_name.replace(self.symbol_to_remove, "") for column_name in list(df)]
         df.columns = new_column_names
         self._dataframe = df
