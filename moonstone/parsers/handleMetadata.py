@@ -4,8 +4,6 @@ This file is likely to be highly variable depending on the project
     and will likely need several versions of the import code.
 At the least, samples names/references should match with the 'counts' file
 """
-
-from moonstone.parsers import DataAnalysisType
 import pandas as pd
 import logging
 module_logger = logging.getLogger(__name__)
