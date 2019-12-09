@@ -2,6 +2,15 @@ import pandas as pd
 
 
 class ConcatMetaAndReads:
+    """
+    Both, on the metadata_df and the reads_df assumes that the different samples
+    are displayed horizontally and the features(or taxa) vertically:
+
+    samples  1  2  3
+    feature1 x  t  c
+    feature2 y  g  a
+    feature3 v  b  n
+    """
 
     def __init__(self, metadata_df, reads_df):
         self.metadata = metadata_df
