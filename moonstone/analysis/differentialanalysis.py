@@ -8,7 +8,7 @@ from moonstone.parsers.Filtering.concat_meta_and_reads import ConcatMetaAndReads
 
 class DifferentialAnalysis:
 
-    def __init__(self, reads_dataframe, metadata_dataframe):
+    def __init__(self, metadata_dataframe, reads_dataframe):
         self.reads = reads_dataframe
         self.metadata = metadata_dataframe
 
@@ -42,12 +42,12 @@ class DifferentialAnalysis:
                     features.append(feature)
                     taxons.append(self.full_table.columns[family])
                     static_value.append(t_test[0])
-                    pvalue.append(t_test[1])
+                    pvalue.append(round(t_test[1],6))
                     variance_group1.append(cat1[self.full_table.columns[family]].var())
                     variance_group2.append(cat2[self.full_table.columns[family]].var())
         significant_differences_t_test = pd.DataFrame(list(zip(features, taxons, static_value, pvalue, variance_group1,
-                                                      variance_group2), columns=['features', 'taxons', 'static_value',
-                                                      'p-value', 'variance_group1', 'variance_group2']))
+                                                      variance_group2)), columns=['features', 'taxons', 'static_value',
+                                                      'p-value', 'variance_group1', 'variance_group2'])
         return significant_differences_t_test
 
     def wilcoxon_rank_test(self, dichotomic_features, significance_level):
@@ -68,13 +68,13 @@ class DifferentialAnalysis:
                     features.append(feature)
                     taxons.append(self.full_table.columns[family])
                     static_value.append(ranksums_test[0])
-                    pvalue.append(ranksums_test[1])
+                    pvalue.append(round(ranksums_test[1], 6))
                     variance_group1.append(cat1[self.full_table.columns[family]].var())
                     variance_group2.append(cat2[self.full_table.columns[family]].var())
         significant_differences_ranksums = pd.DataFrame(list(zip(features, taxons, static_value, pvalue,
-                                                        variance_group1, variance_group2), columns=['features',
+                                                        variance_group1, variance_group2)), columns=['features',
                                                         'taxons', 'static_value', 'p-value', 'variance_group1',
-                                                                                                    'variance_group2']))
+                                                                                                    'variance_group2'])
         return significant_differences_ranksums
 
     def one_way_anova(self, multiple_option_features, significance_level):
@@ -96,10 +96,10 @@ class DifferentialAnalysis:
                     features.append(characteristic)
                     taxons.append(self.full_table.columns[family])
                     static_values.append(oneway_anova[0])
-                    pvalues.append(oneway_anova[1])
+                    pvalues.append(round(oneway_anova[1],6))
 
         signigicant_differences_oneway_anova = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
-                                                            columns=['features', 'taxons', 'static_values', 'p-values'])
+                                                            columns=['features', 'taxons', 'static_value', 'p-value'])
         return signigicant_differences_oneway_anova
 
     def kruskal_test(self, multiple_option_features, significance_level):
@@ -124,5 +124,5 @@ class DifferentialAnalysis:
                     pvalues.append(oneway_anova[1])
 
         signigicant_differences_kruskal = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
-                                                       columns=['features', 'taxons', 'static_values', 'p-values'])
+                                                       columns=['features', 'taxons', 'static_value', 'p-value'])
         return signigicant_differences_kruskal

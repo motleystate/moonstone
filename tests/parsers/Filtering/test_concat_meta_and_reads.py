@@ -100,7 +100,5 @@ class TestFilteringOptions(TestCase):
             },
             orient='index', columns=['Sex', 'AGE', 'specie_1', 'specie_2'], dtype=str)
         expected_object.index.name = 'sample'
-        print(tested_object.full_dataframe_with_features_in_columns)
-        print(expected_object)
         pd.testing.assert_frame_equal(tested_object.full_dataframe_with_features_in_columns.astype(str),
                                       expected_object)
