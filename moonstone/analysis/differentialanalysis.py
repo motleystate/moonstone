@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import scipy.stats as st
 
-from moonstone.parsers.Filtering.concat_meta_and_readcounts import ConcatMetaAndReadCounts
+from moonstone.filtering.merging_meta_and_readcounts import MergingMetaAndReadCounts
 
 
 class DifferentialAnalysis:
@@ -14,7 +14,7 @@ class DifferentialAnalysis:
     @property
     def full_table(self):
         if getattr(self, "_full_table", None) is None:
-            instance = ConcatMetaAndReadCounts(self.metadata_df, self.read_count_df)
+            instance = MergingMetaAndReadCounts(self.metadata_df, self.read_count_df)
             setattr(self, "_full_table", instance.full_dataframe_with_features_in_columns)
         return self._full_table
 

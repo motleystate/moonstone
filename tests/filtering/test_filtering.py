@@ -8,7 +8,7 @@ from moonstone.filtering.filtering import (
 )
 
 
-class TestFilteringOptions(TestCase):
+class TestFiltering(TestCase):
 
     def test_remove_data_without_metadata(self):
         tested_object = pd.DataFrame.from_dict(
