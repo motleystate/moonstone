@@ -61,9 +61,9 @@ class TestDifferentialAnalysis(TestCase):
             {
                 0: ['SEX', 'specie_1', 2.580936, 0.032569, 64219.3, 925.7],
             },
-            orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1', 
+            orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1',
                                      'variance_group2'])
-        pd.testing.assert_frame_equal(test_object.t_test(self.dicotomic_features, self.significance_level), 
+        pd.testing.assert_frame_equal(test_object.t_test(self.dicotomic_features, self.significance_level),
                                       expected_object)
 
     def test_wilcoxon_rank_test(self):
@@ -74,7 +74,7 @@ class TestDifferentialAnalysis(TestCase):
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1',
                                      'variance_group2'])
-        pd.testing.assert_frame_equal(test_object.wilcoxon_rank_test(self.dicotomic_features, self.significance_level), 
+        pd.testing.assert_frame_equal(test_object.wilcoxon_rank_test(self.dicotomic_features, self.significance_level),
                                       expected_object)
 
     def test_one_way_anova(self):
