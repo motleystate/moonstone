@@ -3,7 +3,7 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from moonstone.parsers.Filtering.filtering_options import (
+from moonstone.parsers.filtering.filtering_options import (
     FilteringOptions
 )
 
@@ -55,7 +55,7 @@ class TestFilteringOptions(TestCase):
             },
             orient='index')
         expected_object.columns.name = 'sample'
-        pd.testing.assert_frame_equal(tested_object_instance.remove_rows_wihtout_relevant_info(row_to_remove,
+        pd.testing.assert_frame_equal(tested_object_instance.remove_rows_without_relevant_info(row_to_remove,
                                       level_to_consider), expected_object)
 
     def test_remove_rows_without_relevant_info_custom_value(self):
@@ -78,7 +78,7 @@ class TestFilteringOptions(TestCase):
             },
             orient='index')
         expected_object.columns.name = 'sample'
-        pd.testing.assert_frame_equal(tested_object_instance.remove_rows_wihtout_relevant_info(row_to_remove,
+        pd.testing.assert_frame_equal(tested_object_instance.remove_rows_without_relevant_info(row_to_remove,
                                       level_to_consider), expected_object)
         # Verify that we keep the 3rd row when filtering based on level 0
         level_to_consider = 0
@@ -91,7 +91,7 @@ class TestFilteringOptions(TestCase):
             },
             orient='index')
         expected_object.columns.name = 'sample'
-        pd.testing.assert_frame_equal(tested_object_instance.remove_rows_wihtout_relevant_info(row_to_remove,
+        pd.testing.assert_frame_equal(tested_object_instance.remove_rows_without_relevant_info(row_to_remove,
                                       level_to_consider), expected_object)
 
     def test_selecting_certain_rows(self):
@@ -117,5 +117,5 @@ class TestFilteringOptions(TestCase):
             orient='index')
         expected_object.index.set_names(['genus', 'specie'], inplace=True)
         expected_object.columns.name = 'sample'
-        pd.testing.assert_frame_equal(tested_object_instance.selecting_certain_rows(desired_row_series,
+        pd.testing.assert_frame_equal(tested_object_instance.selecting_rows(desired_row_series,
                                       level_to_consider), expected_object)
