@@ -47,7 +47,7 @@ class TestFiltering(TestCase):
         tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
         with pytest.raises(Exception):
             assert tested_object.full_dataframe
-            
+
     def test_full_dataframe(self):
         tested_object_reads = pd.DataFrame.from_dict(
             {
