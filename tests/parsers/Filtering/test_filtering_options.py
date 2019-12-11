@@ -58,6 +58,42 @@ class TestFilteringOptions(TestCase):
         pd.testing.assert_frame_equal(tested_object_instance.remove_rows_wihtout_relevant_info(row_to_remove,
                                       level_to_consider), expected_object)
 
+    def test_remove_rows_without_relevant_info_custom_value(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                ('genus1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9},
+                ('genus_2', 'custom_value'): {'1': 4, '2': 8, '3': 9, '4': 0}
+            },
+            orient='index')
+        tested_object.columns.name = 'sample'
+        row_to_remove = ['custom_value']
+        # Test to filter out when we see custom_value in level 1
+        level_to_consider = 1
+        tested_object_instance = FilteringOptions(tested_object)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                ('genus1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9}
+            },
+            orient='index')
+        expected_object.columns.name = 'sample'
+        pd.testing.assert_frame_equal(tested_object_instance.remove_rows_wihtout_relevant_info(row_to_remove,
+                                      level_to_consider), expected_object)
+        # Verify that we keep the 3rd row when filtering based on level 0
+        level_to_consider = 0
+        tested_object_instance = FilteringOptions(tested_object)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                ('genus1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9},
+                ('genus_2', 'custom_value'): {'1': 4, '2': 8, '3': 9, '4': 0}
+            },
+            orient='index')
+        expected_object.columns.name = 'sample'
+        pd.testing.assert_frame_equal(tested_object_instance.remove_rows_wihtout_relevant_info(row_to_remove,
+                                      level_to_consider), expected_object)
+
     def test_selecting_certain_rows(self):
         tested_object = pd.DataFrame.from_dict(
             {
