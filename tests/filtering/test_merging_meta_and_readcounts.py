@@ -29,6 +29,25 @@ class TestFiltering(TestCase):
         tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
         self.assertTrue(tested_object.check_column_names())
 
+    def test_full_dataframe_with_different_sample_number(self):
+        tested_object_reads = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 2, 1, 0],
+                'specie_2': [25, 6, 3, 9]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        tested_object_reads.columns.name = 'sample'
+        tested_object_metadata = pd.DataFrame.from_dict(
+            {
+                'Sex': ['M', 'F', 'M'],
+                'AGE': [25, 65, 49]
+            },
+            orient='index', columns=[1, 2, 3])
+        tested_object_metadata.columns.name = 'sample'
+        tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
+        with pytest.raises(Exception):
+            assert tested_object.full_dataframe
+            
     def test_full_dataframe(self):
         tested_object_reads = pd.DataFrame.from_dict(
             {
