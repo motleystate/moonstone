@@ -5,8 +5,7 @@ class FilteringOptions:
      - Some rows contain non relevant information
 
     In additon, it can be used to only get the desired rows to study.
-    
-    This class assumes that the samples are placed on the different 
+    This class assumes that the samples are placed on the different
     columns and features (or taxa) are specified on the rows. Ex:
     samples  1  2  3  4
     feature1 x  y  t  g
