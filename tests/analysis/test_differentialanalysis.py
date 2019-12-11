@@ -71,7 +71,8 @@ class TestDifferentialAnalysis(TestCase):
                0: ['SEX', 'specie_1', 2.611165, 0.009023, 64219.3, 925.7],
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1', 'variance_group2'])
-        pd.testing.assert_frame_equal(test_object.wilcoxon_rank_test(self.dicotomic_features, self.significance_level), expected_object)
+        pd.testing.assert_frame_equal(test_object.wilcoxon_rank_test(self.dicotomic_features, self.significance_level), 
+                                      expected_object)
 
     def test_one_way_anova(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
@@ -80,7 +81,8 @@ class TestDifferentialAnalysis(TestCase):
                0: ['Season', 'specie_4', 15.370573, 0.002748],
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value'])
-        pd.testing.assert_frame_equal(test_object.one_way_anova(self.multiple_option_features, self.significance_level), expected_object)
+        pd.testing.assert_frame_equal(test_object.one_way_anova(self.multiple_option_features, self.significance_level),
+                                      expected_object)
 
     def test_kruskal_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
@@ -89,6 +91,5 @@ class TestDifferentialAnalysis(TestCase):
                0: ['Season', 'specie_4', 7.436364, 0.024278],
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value'])
-        pd.testing.assert_frame_equal(test_object.kruskal_test(self.multiple_option_features, self.significance_level), expected_object)
-
-    
+        pd.testing.assert_frame_equal(test_object.kruskal_test(self.multiple_option_features, self.significance_level),
+                                      expected_object)

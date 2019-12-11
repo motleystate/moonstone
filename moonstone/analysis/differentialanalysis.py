@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import scipy.stats as st
 
 from moonstone.parsers.Filtering.concat_meta_and_reads import ConcatMetaAndReads
@@ -42,7 +41,7 @@ class DifferentialAnalysis:
                     features.append(feature)
                     taxons.append(self.full_table.columns[family])
                     static_value.append(t_test[0])
-                    pvalue.append(round(t_test[1],6))
+                    pvalue.append(round(t_test[1], 6))
                     variance_group1.append(cat1[self.full_table.columns[family]].var())
                     variance_group2.append(cat2[self.full_table.columns[family]].var())
         significant_differences_t_test = pd.DataFrame(list(zip(features, taxons, static_value, pvalue, variance_group1,
@@ -74,7 +73,7 @@ class DifferentialAnalysis:
         significant_differences_ranksums = pd.DataFrame(list(zip(features, taxons, static_value, pvalue,
                                                         variance_group1, variance_group2)), columns=['features',
                                                         'taxons', 'static_value', 'p-value', 'variance_group1',
-                                                                                                    'variance_group2'])
+                                                        'variance_group2'])
         return significant_differences_ranksums
 
     def one_way_anova(self, multiple_option_features, significance_level):
@@ -96,7 +95,7 @@ class DifferentialAnalysis:
                     features.append(characteristic)
                     taxons.append(self.full_table.columns[family])
                     static_values.append(oneway_anova[0])
-                    pvalues.append(round(oneway_anova[1],6))
+                    pvalues.append(round(oneway_anova[1], 6))
 
         signigicant_differences_oneway_anova = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
                                                             columns=['features', 'taxons', 'static_value', 'p-value'])
