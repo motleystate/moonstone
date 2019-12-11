@@ -1,7 +1,6 @@
 from unittest import TestCase
 
 import pandas as pd
-import numpy as np
 
 from moonstone.analysis.differentialanalysis import (
     DifferentialAnalysis
@@ -35,7 +34,7 @@ class TestDifferentialAnalysis(TestCase):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
-               '1': ['M', 'Fall', 300.0, 3886.0, 0.0, 2362.0, 0.0],
+                '1': ['M', 'Fall', 300.0, 3886.0, 0.0, 2362.0, 0.0],
                 '2': ['M', 'Fall', 245.0, 1184.0, 0.0, 1858.0, 295.0],
                 '3': ['F', 'Spring', 11.0, 1250.0, 0.0, 23.0, 472.0],
                 '4': ['M', 'Summer', 154.0, 6347.0, 0.0, 1300.0, 0.0],
@@ -46,7 +45,8 @@ class TestDifferentialAnalysis(TestCase):
                 '9': ['F', 'Summer', 76.0, 2333.0, 0.0, 549.0, 1.0],
                 '10': ['F', 'Spring', 28.0, 2749.0, 0.0, 54.0, 0.0],
             },
-            orient='index', columns=['SEX', 'Season', 'specie_1', 'specie_2', 'specie_3', 'specie_4', 'specie_5'], dtype=str)
+            orient='index', columns=['SEX', 'Season', 'specie_1', 'specie_2', 'specie_3', 'specie_4', 'specie_5'],
+            dtype=str)
         expected_object.index.name = 'sample'
         pd.testing.assert_frame_equal(test_object.full_table.astype(str), expected_object)
 
@@ -61,8 +61,10 @@ class TestDifferentialAnalysis(TestCase):
             {
                 0: ['SEX', 'specie_1', 2.580936, 0.032569, 64219.3, 925.7],
             },
-            orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1', 'variance_group2'])
-        pd.testing.assert_frame_equal(test_object.t_test(self.dicotomic_features, self.significance_level), expected_object)
+            orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1', 
+                                     'variance_group2'])
+        pd.testing.assert_frame_equal(test_object.t_test(self.dicotomic_features, self.significance_level), 
+                                      expected_object)
 
     def test_wilcoxon_rank_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
@@ -70,7 +72,8 @@ class TestDifferentialAnalysis(TestCase):
             {
                0: ['SEX', 'specie_1', 2.611165, 0.009023, 64219.3, 925.7],
             },
-            orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1', 'variance_group2'])
+            orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1',
+                                     'variance_group2'])
         pd.testing.assert_frame_equal(test_object.wilcoxon_rank_test(self.dicotomic_features, self.significance_level), 
                                       expected_object)
 

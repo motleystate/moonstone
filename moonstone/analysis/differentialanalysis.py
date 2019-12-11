@@ -71,9 +71,9 @@ class DifferentialAnalysis:
                     variance_group1.append(cat1[self.full_table.columns[family]].var())
                     variance_group2.append(cat2[self.full_table.columns[family]].var())
         significant_differences_ranksums = pd.DataFrame(list(zip(features, taxons, static_value, pvalue,
-                                                        variance_group1, variance_group2)), columns=['features',
-                                                        'taxons', 'static_value', 'p-value', 'variance_group1',
-                                                        'variance_group2'])
+                                                        variance_group1, variance_group2)), 
+                                                        columns=['features', 'taxons', 'static_value', 'p-value', 
+                                                                 'variance_group1', 'variance_group2'])
         return significant_differences_ranksums
 
     def one_way_anova(self, multiple_option_features, significance_level):
