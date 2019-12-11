@@ -2,26 +2,26 @@ import pandas as pd
 import numpy as np
 import scipy.stats as st
 
-from moonstone.parsers.Filtering.concat_meta_and_reads import ConcatMetaAndReads
+from moonstone.parsers.Filtering.concat_meta_and_readcounts import ConcatMetaAndReadCounts
 
 
 class DifferentialAnalysis:
 
     def __init__(self, metadata_dataframe, reads_dataframe):
-        self.reads = reads_dataframe
-        self.metadata = metadata_dataframe
+        self.read_count_df = reads_dataframe
+        self.metadata_df = metadata_dataframe
 
     @property
     def full_table(self):
         if getattr(self, "_full_table", None) is None:
-            instance = ConcatMetaAndReads(self.metadata, self.reads)
+            instance = ConcatMetaAndReadCounts(self.metadata_df, self.read_count_df)
             setattr(self, "_full_table", instance.full_dataframe_with_features_in_columns)
         return self._full_table
 
     @property
     def number_columns_to_skip(self):
         if getattr(self, "_number_columns_to_skip", None) is None:
-            setattr(self, "_number_columns_to_skip", len(self.metadata))
+            setattr(self, "_number_columns_to_skip", len(self.metadata_df))
         return self._number_columns_to_skip
 
     def t_test(self, dichotomic_features, significance_level):

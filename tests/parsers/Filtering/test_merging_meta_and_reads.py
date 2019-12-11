@@ -2,8 +2,8 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.parsers.Filtering.concat_meta_and_reads import (
-    ConcatMetaAndReads
+from moonstone.parsers.Filtering.merging_meta_and_readcounts import (
+    MergingMetaAndReadCounts
 )
 
 
@@ -24,7 +24,7 @@ class TestFilteringOptions(TestCase):
             },
             orient='index', columns=[1, 2, 3, 4])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = ConcatMetaAndReads(tested_object_metadata, tested_object_reads)
+        tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
         expected_object = True
         self.assertEqual(tested_object.check_column_names(), expected_object)
 
@@ -43,7 +43,7 @@ class TestFilteringOptions(TestCase):
             },
             orient='index', columns=[1, 2, 3, 4])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = ConcatMetaAndReads(tested_object_metadata, tested_object_reads)
+        tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
                 'Sex': ['M', 'F', 'M', "F"],
@@ -70,7 +70,7 @@ class TestFilteringOptions(TestCase):
             },
             orient='index', columns=[1, 2, 3])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = ConcatMetaAndReads(tested_object_metadata, tested_object_reads)
+        tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
         expected_object = 'Cannot concat metadata dataframe and reads dataframe because\
                         column names or number of samples do not match.'
         self.assertEqual(tested_object.full_dataframe, expected_object)
@@ -90,7 +90,7 @@ class TestFilteringOptions(TestCase):
             },
             orient='index', columns=[1, 2, 3, 4])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = ConcatMetaAndReads(tested_object_metadata, tested_object_reads)
+        tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
                 '1': ['M', 25, 3, 25],
