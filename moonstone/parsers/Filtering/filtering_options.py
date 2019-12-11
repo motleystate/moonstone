@@ -11,6 +11,8 @@ class FilteringOptions:
     feature1 x  y  t  g
     feature2 f  h  j  k
     feature3 l  m  o  p
+    self.steps can be used to save the different argurments used to
+    select the desired data. 
     """
     def __init__(self, dataframe):
         self.counts_df = dataframe
@@ -29,5 +31,5 @@ class FilteringOptions:
 
     def selecting_rows(self, desired_row_series, level_to_check):
         self.counts_df = self.counts_df[self.counts_df.index.get_level_values(level_to_check).isin(desired_row_series)]
-        self.steps.append('selecting_certain_rows')
+        self.steps.append('selecting_rows')
         return self.counts_df
