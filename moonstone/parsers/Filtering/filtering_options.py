@@ -12,7 +12,7 @@ class FilteringOptions:
     feature2 f  h  j  k
     feature3 l  m  o  p
     self.steps can be used to save the different argurments used to
-    select the desired data. 
+    select the desired data.
     """
     def __init__(self, dataframe):
         self.counts_df = dataframe
