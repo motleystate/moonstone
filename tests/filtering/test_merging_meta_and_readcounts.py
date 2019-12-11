@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+import pytest
+
 import pandas as pd
 
 from moonstone.filtering.merging_meta_and_readcounts import (
@@ -70,9 +72,8 @@ class TestFiltering(TestCase):
             orient='index', columns=[1, 2, 3])
         tested_object_metadata.columns.name = 'sample'
         tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
-        expected_object = 'Cannot concat metadata dataframe and reads dataframe because\
-                        column names or number of samples do not match.'
-        self.assertEqual(tested_object.full_dataframe, expected_object)
+        with pytest.raises(Exception):
+            assert tested_object.full_dataframe
 
     def test_full_dataframe_with_features_in_columns(self):
         tested_object_reads = pd.DataFrame.from_dict(

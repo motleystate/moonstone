@@ -10,13 +10,8 @@ class DifferentialAnalysis:
     def __init__(self, metadata_dataframe, reads_dataframe):
         self.read_count_df = reads_dataframe
         self.metadata_df = metadata_dataframe
-
-    @property
-    def full_table(self):
-        if getattr(self, "_full_table", None) is None:
-            instance = MergingMetaAndReadCounts(self.metadata_df, self.read_count_df)
-            setattr(self, "_full_table", instance.full_dataframe_with_features_in_columns)
-        return self._full_table
+        instance = MergingMetaAndReadCounts(self.metadata_df, self.read_count_df)
+        self.full_table = instance.full_dataframe_with_features_in_columns
 
     @property
     def number_columns_to_skip(self):
@@ -97,9 +92,9 @@ class DifferentialAnalysis:
                     static_values.append(oneway_anova[0])
                     pvalues.append(round(oneway_anova[1], 6))
 
-        signigicant_differences_oneway_anova = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
+        significant_differences_oneway_anova = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
                                                             columns=['features', 'taxons', 'static_value', 'p-value'])
-        return signigicant_differences_oneway_anova
+        return significant_differences_oneway_anova
 
     def kruskal_test(self, multiple_option_features, significance_level):
         features = []
@@ -122,6 +117,6 @@ class DifferentialAnalysis:
                     static_values.append(oneway_anova[0])
                     pvalues.append(oneway_anova[1])
 
-        signigicant_differences_kruskal = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
+        significant_differences_kruskal = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
                                                        columns=['features', 'taxons', 'static_value', 'p-value'])
-        return signigicant_differences_kruskal
+        return significant_differences_kruskal
