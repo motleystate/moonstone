@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.parsers.Filtering.merging_meta_and_readcounts import (
+from moonstone.filtering.merging_meta_and_readcounts import (
     MergingMetaAndReadCounts
 )
 
