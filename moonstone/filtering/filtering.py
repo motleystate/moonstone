@@ -1,4 +1,4 @@
-class FilteringOptions:
+class Filtering:
     """
     This class can be used to filter out the data where:
      - Some samples are not included in the metadata.

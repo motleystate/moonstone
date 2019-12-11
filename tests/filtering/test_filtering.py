@@ -3,8 +3,8 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from moonstone.parsers.filtering.filtering_options import (
-    FilteringOptions
+from moonstone.filtering.filtering import (
+    Filtering
 )
 
 
@@ -25,7 +25,7 @@ class TestFilteringOptions(TestCase):
             },
             orient='index', columns=['1', '3', '4'])
         tested_object_metadata.columns.name = 'sample'
-        tested_object_instance = FilteringOptions(tested_object)
+        tested_object_instance = Filtering(tested_object)
         expected_object = pd.DataFrame.from_dict(
             {
                 'specie_1': [3, 1, 0],
@@ -47,7 +47,7 @@ class TestFilteringOptions(TestCase):
         tested_object.columns.name = 'sample'
         row_to_remove = [np.nan]
         level_to_consider = 0
-        tested_object_instance = FilteringOptions(tested_object)
+        tested_object_instance = Filtering(tested_object)
         expected_object = pd.DataFrame.from_dict(
             {
                 ('genus1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
@@ -70,7 +70,7 @@ class TestFilteringOptions(TestCase):
         row_to_remove = ['custom_value']
         # Test to filter out when we see custom_value in level 1
         level_to_consider = 1
-        tested_object_instance = FilteringOptions(tested_object)
+        tested_object_instance = Filtering(tested_object)
         expected_object = pd.DataFrame.from_dict(
             {
                 ('genus1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
@@ -82,7 +82,7 @@ class TestFilteringOptions(TestCase):
                                       level_to_consider), expected_object)
         # Verify that we keep the 3rd row when filtering based on level 0
         level_to_consider = 0
-        tested_object_instance = FilteringOptions(tested_object)
+        tested_object_instance = Filtering(tested_object)
         expected_object = pd.DataFrame.from_dict(
             {
                 ('genus1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
@@ -108,7 +108,7 @@ class TestFilteringOptions(TestCase):
         tested_object.index.set_names(['genus', 'specie'], inplace=True)
         desired_row_series = ['specie_1', 'specie_2']
         level_to_consider = 1
-        tested_object_instance = FilteringOptions(tested_object)
+        tested_object_instance = Filtering(tested_object)
         expected_object = pd.DataFrame.from_dict(
             {
                 ('genus_1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
