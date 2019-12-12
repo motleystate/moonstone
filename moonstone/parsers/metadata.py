@@ -1,6 +1,6 @@
 import pandas as pd
 
-from moonstone.utils.pandas.series import SeriesStatsBuilder
+from moonstone.analysis.columns_statistics import DataframeStatistics
 from .base import BaseParser
 
 
@@ -29,8 +29,4 @@ class MetadataParser(BaseParser):
         :return: list of dict containing statistics about each column
         :rtype: list(dict)
         """
-        stats = []
-        for col in self.dataframe.columns:
-            stats_builder = SeriesStatsBuilder(self.dataframe[col])
-            stats.append(stats_builder.build_stats())
-        return stats
+        return DataframeStatistics(self.dataframe).get_stats()
