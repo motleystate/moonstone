@@ -1,8 +1,7 @@
 import pandas as pd
+
 from moonstone.utils.pandas.series import SeriesStatsBuilder
 from .base import BaseParser
-import logging
-module_logger = logging.getLogger(__name__)
 
 
 class MetadataParser(BaseParser):
@@ -16,8 +15,6 @@ class MetadataParser(BaseParser):
     """
 
     def __init__(self, file_path, sep='\t', no_header=False):
-        self.logger = module_logger
-        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.sep = sep
         self.header = 'infer'
         if no_header is True:
@@ -25,7 +22,7 @@ class MetadataParser(BaseParser):
         super().__init__(file_path)
 
     def to_dataframe(self):
-        self._dataframe = pd.read_csv(self.file_path, sep='\t', header=self.header)
+        self._dataframe = pd.read_csv(self.file_path, sep=self.sep, header=self.header)
 
     def get_stats(self):
         """
