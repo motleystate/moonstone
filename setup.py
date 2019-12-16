@@ -12,7 +12,8 @@ setup(
         'plotly',
         'sklearn',
         'matplotlib',
-        'plotly'
+        'plotly',
+        'statsmodels'
     ],
     packages=find_packages(),
     entry_points={'console_scripts': ['moonstone=moonstone.main:run']},
