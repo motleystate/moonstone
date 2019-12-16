@@ -1,6 +1,8 @@
 from unittest import TestCase
+import pytest
 
 import pandas as pd
+import numpy as np
 
 from moonstone.analysis.differentialanalysis import (
     DifferentialAnalysis
@@ -37,7 +39,7 @@ class TestDifferentialAnalysis(TestCase):
         expected_object = 2
         self.assertEqual(tested_object.number_columns_to_skip, expected_object)
 
-    def test_t_test(self):
+    def test_test_t_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -52,7 +54,7 @@ class TestDifferentialAnalysis(TestCase):
         pd.testing.assert_frame_equal(test_object.test_t_test(self.dicotomic_feature),
                                       expected_object)
 
-    def test_wilcoxon_rank_test(self):
+    def test_test_wilcoxon_rank_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -67,7 +69,7 @@ class TestDifferentialAnalysis(TestCase):
         pd.testing.assert_frame_equal(test_object.test_wilcoxon_rank_test(self.dicotomic_feature),
                                       expected_object)
 
-    def test_one_way_anova(self):
+    def test_test_one_way_anova(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -82,7 +84,7 @@ class TestDifferentialAnalysis(TestCase):
         pd.testing.assert_frame_equal(test_object.test_one_way_anova(self.multiple_option_feature),
                                       expected_object)
 
-    def test_kruskal_test(self):
+    def test_test_kruskal_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -94,4 +96,40 @@ class TestDifferentialAnalysis(TestCase):
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value'])
         pd.testing.assert_frame_equal(test_object.test_kruskal_test(self.multiple_option_feature),
+                                      expected_object)
+
+    def test_test_default(self):
+        test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
+        with pytest.raises(Exception):
+            assert test_object.test_default()
+
+    def test_corrected_p_values(self):
+        test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
+        tested_object = pd.DataFrame.from_dict(
+            {
+               0: ['Season', 'specie_1', 0.890909, 0.640533],
+               1: ['Season', 'specie_2', 0.336364, 0.845200],
+               2: ['Season', 'specie_3', 1.518519, 0.468013],
+               3: ['Season', 'specie_4', 7.436364, 0.024278],
+               4: ['Season', 'specie_5', 2.142857, 0.342519],
+            },
+            orient='index', columns=['features', 'taxons', 'static_value', 'p-value'])
+        expected_object = np.array([0.8006663, 0.8452, 0.7800217, 0.12139, 0.7800217])
+        np.testing.assert_almost_equal(test_object.corrected_p_values(tested_object['p-value'], 'fdr_bh'),
+                                       expected_object)
+
+    def test_differential_analysis_by_feature(self):
+        test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
+        expected_object = pd.DataFrame.from_dict(
+            {
+               0: ['Season', 'specie_1', 0.890909, 0.640533, 0.800666],
+               1: ['Season', 'specie_2', 0.336364, 0.845200, 0.845200],
+               2: ['Season', 'specie_3', 1.518519, 0.468013, 0.780022],
+               3: ['Season', 'specie_4', 7.436364, 0.024278, 0.121390],
+               4: ['Season', 'specie_5', 2.142857, 0.342519, 0.780022],
+            },
+            orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'corrected_p-value'])
+        pd.testing.assert_frame_equal(test_object.differential_analysis_by_feature('kruskal_test',
+                                                                                   self.multiple_option_features,
+                                                                                   'fdr_bh'),
                                       expected_object)

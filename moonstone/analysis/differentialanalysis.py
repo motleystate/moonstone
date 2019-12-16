@@ -137,6 +137,6 @@ class DifferentialAnalysis:
         final_table = pd.DataFrame()
         for feature in features:
             test_result = getattr(self, f"test_{test}", self.test_default)(feature)
-            test_result['corrected_pvalue'] = self.corrected_p_values(test_result['p-value'], correction_method_used)
+            test_result['corrected_p-value'] = self.corrected_p_values(test_result['p-value'], correction_method_used)
             final_table = final_table.append(test_result)
         return final_table
