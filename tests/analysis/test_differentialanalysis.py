@@ -26,7 +26,9 @@ class TestDifferentialAnalysis(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])
         self.tested_object_metadata.columns.name = 'sample'
+        self.dicotomic_feature = 'SEX'
         self.dicotomic_features = ['SEX']
+        self.multiple_option_feature = 'Season'
         self.multiple_option_features = ['Season']
         self.significance_level = 0.05
 
@@ -35,44 +37,61 @@ class TestDifferentialAnalysis(TestCase):
         expected_object = 2
         self.assertEqual(tested_object.number_columns_to_skip, expected_object)
 
-    def test_t_test(self):
+    def test_test_t_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
                 0: ['SEX', 'specie_1', 2.580936, 0.032569, 64219.3, 925.7],
+                1: ['SEX', 'specie_2', 1.353146, 0.213002, 4611894.3, 432948.3],
+                2: ['SEX', 'specie_3', 0.984586, 0.353664, 769104.2, 180.0],
+                3: ['SEX', 'specie_4', 1.788817, 0.111441, 915345.3, 227463.2],
+                4: ['SEX', 'specie_5', 0.485682, 0.640215, 102820.3, 39705.3],
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1',
                                      'variance_group2'])
-        pd.testing.assert_frame_equal(test_object.t_test(self.dicotomic_features, self.significance_level),
+        pd.testing.assert_frame_equal(test_object.test_t_test(self.dicotomic_feature),
                                       expected_object)
 
-    def test_wilcoxon_rank_test(self):
+    def test_test_wilcoxon_rank_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
                0: ['SEX', 'specie_1', 2.611165, 0.009023, 64219.3, 925.7],
+               1: ['SEX', 'specie_2', 0.522233, 0.601508, 4611894.3, 432948.3],
+               2: ['SEX', 'specie_3', 0.104447, 0.916815, 769104.2, 180.0],
+               3: ['SEX', 'specie_4', 1.148913, 0.250592, 915345.3,	227463.2],
+               4: ['SEX', 'specie_5', -0.104447, 0.916815, 102820.3, 39705.3],
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1',
                                      'variance_group2'])
-        pd.testing.assert_frame_equal(test_object.wilcoxon_rank_test(self.dicotomic_features, self.significance_level),
+        pd.testing.assert_frame_equal(test_object.test_wilcoxon_rank_test(self.dicotomic_feature),
                                       expected_object)
 
-    def test_one_way_anova(self):
+    def test_test_one_way_anova(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
-               0: ['Season', 'specie_4', 15.370573, 0.002748],
+               0: ['Season', 'specie_1', 0.064622, 0.937974],
+               1: ['Season', 'specie_2', 0.401588, 0.683744],
+               2: ['Season', 'specie_3', 1.208941, 0.354003],
+               3: ['Season', 'specie_4', 15.370573, 0.002748],
+               4: ['Season', 'specie_5', 1.817575, 0.231335],
+
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value'])
-        pd.testing.assert_frame_equal(test_object.one_way_anova(self.multiple_option_features, self.significance_level),
+        pd.testing.assert_frame_equal(test_object.test_one_way_anova(self.multiple_option_feature),
                                       expected_object)
 
-    def test_kruskal_test(self):
+    def test_test_kruskal_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
-               0: ['Season', 'specie_4', 7.436364, 0.024278],
+               0: ['Season', 'specie_1', 0.890909, 0.640533],
+               1: ['Season', 'specie_2', 0.336364, 0.845200],
+               2: ['Season', 'specie_3', 1.518519, 0.468013],
+               3: ['Season', 'specie_4', 7.436364, 0.024278],
+               4: ['Season', 'specie_5', 2.142857, 0.342519],
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value'])
-        pd.testing.assert_frame_equal(test_object.kruskal_test(self.multiple_option_features, self.significance_level),
+        pd.testing.assert_frame_equal(test_object.test_kruskal_test(self.multiple_option_feature),
                                       expected_object)
