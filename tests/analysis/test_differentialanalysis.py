@@ -37,7 +37,7 @@ class TestDifferentialAnalysis(TestCase):
         expected_object = 2
         self.assertEqual(tested_object.number_columns_to_skip, expected_object)
 
-    def test_test_t_test(self):
+    def test_t_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -52,7 +52,7 @@ class TestDifferentialAnalysis(TestCase):
         pd.testing.assert_frame_equal(test_object.test_t_test(self.dicotomic_feature),
                                       expected_object)
 
-    def test_test_wilcoxon_rank_test(self):
+    def test_wilcoxon_rank_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -67,7 +67,7 @@ class TestDifferentialAnalysis(TestCase):
         pd.testing.assert_frame_equal(test_object.test_wilcoxon_rank_test(self.dicotomic_feature),
                                       expected_object)
 
-    def test_test_one_way_anova(self):
+    def test_one_way_anova(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -82,7 +82,7 @@ class TestDifferentialAnalysis(TestCase):
         pd.testing.assert_frame_equal(test_object.test_one_way_anova(self.multiple_option_feature),
                                       expected_object)
 
-    def test_test_kruskal_test(self):
+    def test_kruskal_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
