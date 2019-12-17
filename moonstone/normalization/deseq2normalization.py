@@ -3,6 +3,7 @@ import math
 import logging
 import pandas as pd
 
+
 class DESeq2Normalization:
 
     def __init__(self, df, log_number=np.e, zero_threshold=80, normalization_level=0):
