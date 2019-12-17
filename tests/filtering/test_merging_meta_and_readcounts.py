@@ -9,7 +9,7 @@ from moonstone.filtering.merging_meta_and_readcounts import (
 )
 
 
-class TestFiltering(TestCase):
+class TestMergingMetaAndReadCounts(TestCase):
 
     def test_check_column_names_True(self):
         tested_object_reads = pd.DataFrame.from_dict(
