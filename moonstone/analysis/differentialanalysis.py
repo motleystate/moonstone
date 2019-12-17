@@ -11,6 +11,8 @@ class DifferentialAnalysis:
     def __init__(self, metadata_dataframe, reads_dataframe):
         self.read_count_df = reads_dataframe
         self.metadata_df = metadata_dataframe
+        print('removing rows with only zeros')
+        self.read_count_df = self.read_count_df[self.read_count_df.sum(axis=1) != 0.0]
         instance = MergingMetaAndReadCounts(self.metadata_df, self.read_count_df)
         self.full_table = instance.full_dataframe_with_features_in_columns
         self.available_tests = {'dichotomic': ['t_test', 'wilcoxon_rank_test'],
