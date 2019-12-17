@@ -1,14 +1,19 @@
 import numpy as np
 import math
 import logging
-
+import pandas as pd
 
 class DESeq2Normalization:
 
-    def __init__(self, df, log_number=np.e, zero_threshold=80):
+    def __init__(self, df, log_number=np.e, zero_threshold=80, normalization_level=0):
         self.df = df
         self.log = log_number
         self.zero_threshold = zero_threshold
+        self.normalization_level = normalization_level
+        if isinstance(df.index, pd.core.index.MultiIndex):
+            self.grouped_df = df.groupby(level=self.normalization_level).sum()
+        else:
+            self.grouped_df = df
 
     def non_zero_df(self, df):
         """
@@ -51,7 +56,7 @@ class DESeq2Normalization:
     @property
     def scaling_factors(self):
         if getattr(self, "_scaling_factors", None) is None:
-            non_zero_log_df = self.remove_zero_and_log(self.df)
+            non_zero_log_df = self.remove_zero_and_log(self.grouped_df)
             substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
             scaling_factors = substracted_mean_df.rpow(self.log).replace(np.nan, 0).median()
             setattr(self, "_scaling_factors", scaling_factors)

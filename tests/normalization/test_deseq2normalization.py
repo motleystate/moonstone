@@ -38,7 +38,7 @@ class TestDESeq2Normalization(TestCase):
         pd.testing.assert_frame_equal(tested_object.non_zero_df(self.dummy_df), expected_result)
 
     def test_non_zero_df_threshold70(self):
-        tested_object = DESeq2Normalization(self.dummy_df, zero_threshold=70)
+        tested_object = DESeq2Normalization(self.dummy_df, zero_threshold=70, normalization_level=0)
         data = [
             [255, 26, 48, 75],
             [366, 46, 78, np.nan],
@@ -128,7 +128,6 @@ class TestDESeq2Normalization(TestCase):
         ind = ['Gen_2', "Gen_3"]
         expected_result = pd.DataFrame(data, columns=column_names, index=ind)
         scaling_factors = tested_object.scaling_factors  # noqa
-        print(tested_object.removed_zero_df)
         pd.testing.assert_frame_equal(tested_object.removed_zero_df,
                                       expected_result)
 
@@ -219,3 +218,59 @@ class TestDESeq2Normalization(TestCase):
         ind = ["Gen_1", "Gen_2", "Gen_3", 'Gen_4']
         expected_result = pd.DataFrame(data, columns=column_names, index=ind)
         pd.testing.assert_frame_equal(tested_object.normalized_df, expected_result)
+
+    def test_multiindex_normalization_first_element(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                ('genus_1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
+                ('genus_1', 'specie_3'): {'1': 5, '2': 8, '3': 4, '4': 7},
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9},
+                ('genus_2', 'specie_4'): {'1': 9, '2': 18, '3': 6, '4': 3},
+                ('genus_3', 'specie_5'): {'1': 5, '2': 0, '3': 3, '4': 2},
+                ('genus_3', 'specie_6'): {'1': 19, '2': 8, '3': 0, '4': 0},
+            },
+            orient='index')
+        tested_object.columns.name = 'sample'
+        tested_object.index.set_names(['genus', 'specie'], inplace=True)
+        normalized_tested_object = DESeq2Normalization(tested_object, normalization_level='genus')
+        expected_result = pd.DataFrame.from_dict(
+            {
+                ('genus_1', 'specie_1'): {'1': 1.520270, '2': 1.454854, '3': 1.914414, '4': 0.000000},
+                ('genus_1', 'specie_3'): {'1': 2.533784, '2': 5.819417, '3': 7.657658, '4': 10.050676},
+                ('genus_2', 'specie_2'): {'1': 12.668919, '2': 4.364563, '3': 5.743243, '4': 12.922298},
+                ('genus_2', 'specie_4'): {'1': 4.560811, '2': 13.093689, '3': 11.486487, '4': 4.307433},
+                ('genus_3', 'specie_5'): {'1': 2.533784, '2': 0.000000, '3': 5.7432433, '4': 2.871622},
+                ('genus_3', 'specie_6'): {'1': 9.628379, '2': 5.819417, '3': 0.000000, '4': 0.000000},
+            },
+            orient='index')
+        expected_result.columns.name = 'sample'
+        expected_result.index.set_names(['genus', 'specie'], inplace=True)
+        pd.testing.assert_frame_equal(normalized_tested_object.normalized_df, expected_result)
+
+    def test_multiindex_normalization_second_element(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                ('genus_1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
+                ('genus_1', 'specie_3'): {'1': 5, '2': 8, '3': 4, '4': 7},
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9},
+                ('genus_2', 'specie_4'): {'1': 9, '2': 18, '3': 6, '4': 3},
+                ('genus_3', 'specie_5'): {'1': 5, '2': 0, '3': 3, '4': 2},
+                ('genus_3', 'specie_6'): {'1': 19, '2': 8, '3': 0, '4': 0},
+            },
+            orient='index')
+        tested_object.columns.name = 'sample'
+        tested_object.index.set_names(['genus', 'specie'], inplace=True)
+        normalized_tested_object = DESeq2Normalization(tested_object, normalization_level=1)
+        expected_result = pd.DataFrame.from_dict(
+            {
+                ('genus_1', 'specie_1'): {'1': 2.449490, '2': 1.446254, '3': 1.446254, '4': 0.000000},
+                ('genus_1', 'specie_3'): {'1': 4.082483, '2': 5.785015, '3': 5.785015, '4': 6.204679},
+                ('genus_2', 'specie_2'): {'1': 20.412415, '2': 4.338761, '3': 4.338761, '4': 7.977444},
+                ('genus_2', 'specie_4'): {'1': 7.348469, '2': 13.016284, '3': 8.677523, '4': 2.659148},
+                ('genus_3', 'specie_5'): {'1': 4.082483, '2': 0.000000, '3': 4.338761, '4': 1.772765},
+                ('genus_3', 'specie_6'): {'1': 15.513435, '2': 5.785015, '3': 0.000000, '4': 0.000000},
+            },
+            orient='index')
+        expected_result.columns.name = 'sample'
+        expected_result.index.set_names(['genus', 'specie'], inplace=True)
+        pd.testing.assert_frame_equal(normalized_tested_object.normalized_df, expected_result)
