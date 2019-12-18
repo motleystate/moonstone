@@ -13,6 +13,18 @@ logger = logging.getLogger(__name__)
 
 class DifferentialAnalysis:
 
+    available_tests = {
+        'dichotomic': ['t_test', 'wilcoxon_rank_test'],
+        'multiple': ['one_way_anova', 'kruskal_test']
+    }
+    tests_functions_used = {
+        't_test': st.ttest_ind,
+        'wilcoxon_rank_test': st.ranksums,
+        'one_way_anova': st.f_oneway,
+        'kruskal_test': st.kruskal
+
+    }
+
     def __init__(self, metadata_dataframe, read_count_dataframe):
         self.read_count_df = read_count_dataframe
         self.metadata_df = metadata_dataframe
@@ -20,8 +32,6 @@ class DifferentialAnalysis:
         self.read_count_df = self.read_count_df[self.read_count_df.sum(axis=1) != 0.0]
         instance = MergingMetaAndReadCounts(self.metadata_df, self.read_count_df)
         self.full_table = instance.full_dataframe_with_features_in_columns
-        self.available_tests = {'dichotomic': ['t_test', 'wilcoxon_rank_test'],
-                                'multiple': ['one_way_anova', 'kruskal_test']}
 
     @property
     def number_columns_to_skip(self):
@@ -29,7 +39,7 @@ class DifferentialAnalysis:
             setattr(self, "_number_columns_to_skip", len(self.metadata_df))
         return self._number_columns_to_skip
 
-    def test_t_test(self, feature):
+    def test_dichotomic_features(self, feature, test_to_use):
         features = []
         taxons = []
         static_value = []
@@ -39,44 +49,21 @@ class DifferentialAnalysis:
         cat1 = self.full_table[self.full_table[feature] == self.full_table[feature][0]]
         cat2 = self.full_table[self.full_table[feature] != self.full_table[feature][0]]
         for family in range(self.number_columns_to_skip, self.full_table.shape[1]):
-            t_test = st.ttest_ind(cat1[self.full_table.columns[family]], cat2[self.full_table.columns[family]])
+            test = self.tests_functions_used[test_to_use](cat1[self.full_table.columns[family]],
+                                                          cat2[self.full_table.columns[family]])
             features.append(feature)
             taxons.append(self.full_table.columns[family])
-            static_value.append(round(t_test[0], 6))
-            pvalue.append(round(t_test[1], 6))
+            static_value.append(round(test[0], 6))
+            pvalue.append(round(test[1], 6))
             variance_group1.append(cat1[self.full_table.columns[family]].var())
             variance_group2.append(cat2[self.full_table.columns[family]].var())
-        t_test_results = pd.DataFrame(list(zip(features, taxons, static_value, pvalue, variance_group1,
-                                               variance_group2)), columns=['features', 'taxons', 'static_value',
-                                                                           'p-value', 'variance_group1',
-                                                                           'variance_group2'])
-        return t_test_results
+        test_results = pd.DataFrame(list(zip(features, taxons, static_value, pvalue, variance_group1,
+                                             variance_group2)), columns=['features', 'taxons', 'static_value',
+                                                                         'p-value', 'variance_group1',
+                                                                         'variance_group2'])
+        return test_results
 
-    def test_wilcoxon_rank_test(self, feature):
-        features = []
-        taxons = []
-        static_value = []
-        pvalue = []
-        variance_group1 = []
-        variance_group2 = []
-        cat1 = self.full_table[self.full_table[feature] == self.full_table[feature][0]]
-        cat2 = self.full_table[self.full_table[feature] != self.full_table[feature][0]]
-        for family in range(self.number_columns_to_skip, self.full_table.shape[1]):
-            ranksums_test = st.ranksums(cat1[self.full_table.columns[family]],
-                                        cat2[self.full_table.columns[family]])
-            features.append(feature)
-            taxons.append(self.full_table.columns[family])
-            static_value.append(round(ranksums_test[0], 6))
-            pvalue.append(round(ranksums_test[1], 6))
-            variance_group1.append(cat1[self.full_table.columns[family]].var())
-            variance_group2.append(cat2[self.full_table.columns[family]].var())
-            wilcoxon_ranksums_results = pd.DataFrame(list(zip(features, taxons, static_value, pvalue,
-                                                              variance_group1, variance_group2)),
-                                                     columns=['features', 'taxons', 'static_value', 'p-value',
-                                                              'variance_group1', 'variance_group2'])
-        return wilcoxon_ranksums_results
-
-    def test_one_way_anova(self, feature):
+    def test_multiple_features(self, feature, test_to_use):
         features = []
         taxons = []
         static_values = []
@@ -88,40 +75,18 @@ class DifferentialAnalysis:
             list_ofgroups = []
             for variable in variable_dic:
                 list_ofgroups.append(variable_dic[variable][self.full_table.columns[family]])
-            oneway_anova = st.f_oneway(*np.asarray(list_ofgroups))
+            test = self.tests_functions_used[test_to_use](*np.asarray(list_ofgroups))
             features.append(feature)
             taxons.append(self.full_table.columns[family])
-            static_values.append(round(oneway_anova[0], 6))
-            pvalues.append(round(oneway_anova[1], 6))
+            static_values.append(round(test[0], 6))
+            pvalues.append(round(test[1], 6))
 
-        oneway_anova_results = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
-                                            columns=['features', 'taxons', 'static_value', 'p-value'])
-        return oneway_anova_results
-
-    def test_kruskal_test(self, feature):
-        features = []
-        taxons = []
-        static_values = []
-        pvalues = []
-        variable_dic = {}
-        for variable in self.full_table[feature].unique():
-            variable_dic[variable] = self.full_table[self.full_table[feature] == variable]
-        for family in range(self.number_columns_to_skip, self.full_table.shape[1]):
-            list_ofgroups = []
-            for variable in variable_dic:
-                list_ofgroups.append(variable_dic[variable][self.full_table.columns[family]])
-            kruskal_test = st.kruskal(*np.asarray(list_ofgroups))
-            features.append(feature)
-            taxons.append(self.full_table.columns[family])
-            static_values.append(round(kruskal_test[0], 6))
-            pvalues.append(kruskal_test[1])
-
-        kruskal_test_results = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
-                                            columns=['features', 'taxons', 'static_value', 'p-value'])
-        return kruskal_test_results
+        test_results = pd.DataFrame(list(zip(features, taxons, static_values, pvalues)),
+                                    columns=['features', 'taxons', 'static_value', 'p-value'])
+        return test_results
 
     def test_default(self, *args, **kwargs):
-        raise Exception("For dichotomic features use {} and for multiple option features use {}."
+        raise Exception("For 'dichotomic_features' use {} and for 'multiple_features' use {}."
                         .format(', '.join(self.available_tests['dichotomic']),
                                 ', '.join(self.available_tests['multiple'])))
 
@@ -134,7 +99,7 @@ class DifferentialAnalysis:
         corrected_p_values = multipletests(p_value_serie, method=correction_method_used)
         return corrected_p_values[1]
 
-    def differential_analysis_by_feature(self, test, features, correction_method_used):
+    def differential_analysis_by_feature(self, features, type_of_features, test, correction_method_used):
         '''
         Features should be provided in a list splited by dichotomic or multiple option features.
         example:
@@ -143,7 +108,7 @@ class DifferentialAnalysis:
         '''
         final_table = pd.DataFrame()
         for feature in features:
-            test_result = getattr(self, f"test_{test}", self.test_default)(feature)
+            test_result = getattr(self, f"test_{type_of_features}", self.test_default)(feature, test)
             test_result['corrected_p-value'] = self.corrected_p_values(test_result['p-value'], correction_method_used)
             final_table = final_table.append(test_result)
         return final_table

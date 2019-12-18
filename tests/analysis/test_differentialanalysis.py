@@ -39,7 +39,7 @@ class TestDifferentialAnalysis(TestCase):
         expected_object = 2
         self.assertEqual(tested_object.number_columns_to_skip, expected_object)
 
-    def test_test_t_test(self):
+    def test_test_dichotomic_features_t_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -51,10 +51,10 @@ class TestDifferentialAnalysis(TestCase):
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1',
                                      'variance_group2'])
-        pd.testing.assert_frame_equal(test_object.test_t_test(self.dicotomic_feature),
+        pd.testing.assert_frame_equal(test_object.test_dichotomic_features(self.dicotomic_feature, 't_test'),
                                       expected_object)
 
-    def test_test_wilcoxon_rank_test(self):
+    def test_test_dichotomic_features_wilcoxon_rank_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -66,10 +66,10 @@ class TestDifferentialAnalysis(TestCase):
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1',
                                      'variance_group2'])
-        pd.testing.assert_frame_equal(test_object.test_wilcoxon_rank_test(self.dicotomic_feature),
-                                      expected_object)
+        pd.testing.assert_frame_equal(test_object.test_dichotomic_features(self.dicotomic_feature,
+                                                                           'wilcoxon_rank_test'), expected_object)
 
-    def test_test_one_way_anova(self):
+    def test_test_multiple_features_one_way_anova(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -81,10 +81,10 @@ class TestDifferentialAnalysis(TestCase):
 
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value'])
-        pd.testing.assert_frame_equal(test_object.test_one_way_anova(self.multiple_option_feature),
+        pd.testing.assert_frame_equal(test_object.test_multiple_features(self.multiple_option_feature, 'one_way_anova'),
                                       expected_object)
 
-    def test_test_kruskal_test(self):
+    def test_test_multiple_features_kruskal_test(self):
         test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
@@ -95,7 +95,7 @@ class TestDifferentialAnalysis(TestCase):
                4: ['Season', 'specie_5', 2.142857, 0.342519],
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value'])
-        pd.testing.assert_frame_equal(test_object.test_kruskal_test(self.multiple_option_feature),
+        pd.testing.assert_frame_equal(test_object.test_multiple_features(self.multiple_option_feature, 'kruskal_test'),
                                       expected_object)
 
     def test_test_default(self):
@@ -129,7 +129,8 @@ class TestDifferentialAnalysis(TestCase):
                4: ['Season', 'specie_5', 2.142857, 0.342519, 0.780022],
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'corrected_p-value'])
-        pd.testing.assert_frame_equal(test_object.differential_analysis_by_feature('kruskal_test',
-                                                                                   self.multiple_option_features,
+        pd.testing.assert_frame_equal(test_object.differential_analysis_by_feature(self.multiple_option_features,
+                                                                                   'multiple_features',
+                                                                                   'kruskal_test',
                                                                                    'fdr_bh'),
                                       expected_object)
