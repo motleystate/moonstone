@@ -100,7 +100,7 @@ class DifferentialAnalysis:
         corrected_p_values = multipletests(p_value_serie, method=correction_method_used)
         return corrected_p_values[1]
 
-    def differential_analysis_by_feature(self, features, type_of_features, test, correction_method_used):
+    def differential_analysis_by_feature(self, features, type_of_features, test_to_use, correction_method_used):
         '''
         Features should be provided in a list splited by dichotomic or multiple option features.
         example:
@@ -109,7 +109,7 @@ class DifferentialAnalysis:
         '''
         final_table = pd.DataFrame()
         for feature in features:
-            test_result = getattr(self, f"test_{type_of_features}", self.test_default)(feature, test)
+            test_result = getattr(self, f"test_{type_of_features}", self.test_default)(feature, test_to_use)
             test_result['corrected_p-value'] = self.corrected_p_values(test_result['p-value'], correction_method_used)
             final_table = final_table.append(test_result)
         return final_table
