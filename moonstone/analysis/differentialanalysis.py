@@ -6,7 +6,7 @@ import scipy.stats as st
 from statsmodels.stats.multitest import multipletests
 
 from moonstone.filtering.merging_meta_and_readcounts import MergingMetaAndReadCounts
-
+from moonstone.filtering.filtering import Filtering
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,8 @@ class DifferentialAnalysis:
         self.read_count_df = read_count_dataframe
         self.metadata_df = metadata_dataframe
         logger.info('removing rows with only zeros')
-        self.read_count_df = self.read_count_df[self.read_count_df.sum(axis=1) != 0.0]
+        read_counts_instance = Filtering(self.read_count_df)
+        self.read_count_df = read_counts_instance.deleting_only_zeros_rows(self.read_count_df)
         instance = MergingMetaAndReadCounts(self.metadata_df, self.read_count_df)
         self.full_table = instance.full_dataframe_with_features_in_columns
 

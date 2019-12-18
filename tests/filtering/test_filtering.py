@@ -119,3 +119,23 @@ class TestFiltering(TestCase):
         expected_object.columns.name = 'sample'
         pd.testing.assert_frame_equal(tested_object_instance.selecting_rows(desired_row_series,
                                       level_to_consider), expected_object)
+
+    def test_deleting_only_zeros_rows(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 2, 1, 0],
+                'specie_2': [25, 6, 3, 9],
+                'specie_3': [0, 0, 0, 0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        tested_object.columns.name = 'sample'
+        tested_object_instance = Filtering(tested_object)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 2, 1, 0],
+                'specie_2': [25, 6, 3, 9]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        expected_object.columns.name = 'sample'
+        pd.testing.assert_frame_equal(tested_object_instance.deleting_only_zeros_rows(tested_object),
+                                      expected_object)

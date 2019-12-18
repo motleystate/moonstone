@@ -33,3 +33,7 @@ class Filtering:
         self.counts_df = self.counts_df[self.counts_df.index.get_level_values(level_to_check).isin(desired_row_series)]
         self.steps.append('selecting_rows')
         return self.counts_df
+
+    def deleting_only_zeros_rows(self, df):
+        self.steps.append('deleting_only_zeros_rows')
+        return df[df.sum(axis=1) != 0.0]
