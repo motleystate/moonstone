@@ -8,8 +8,8 @@ from moonstone.filtering.merging_meta_and_readcounts import MergingMetaAndReadCo
 
 class DifferentialAnalysis:
 
-    def __init__(self, metadata_dataframe, reads_dataframe):
-        self.read_count_df = reads_dataframe
+    def __init__(self, metadata_dataframe, read_count_dataframe):
+        self.read_count_df = read_count_dataframe
         self.metadata_df = metadata_dataframe
         print('removing rows with only zeros')
         self.read_count_df = self.read_count_df[self.read_count_df.sum(axis=1) != 0.0]
