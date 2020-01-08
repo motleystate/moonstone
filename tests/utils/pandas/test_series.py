@@ -38,7 +38,12 @@ class TestSeriesStatsBuilder(TestCase):
             'python_col_type': 'int',
             'n_values': 3,
             'n_uniq_values': 3,
-            'mean': 22.67
+            'mean': 22.67,
+            'values_repartition': {
+                12: 1,
+                41: 1,
+                15: 1,
+            }
         }
         stats_builder = SeriesStatsBuilder(series)
         tested_dict = stats_builder.build_stats()
@@ -55,7 +60,12 @@ class TestSeriesStatsBuilder(TestCase):
             'python_col_type': 'float',
             'n_values': 3,
             'n_uniq_values': 3,
-            'mean': 15.9
+            'mean': 15.9,
+            'values_repartition': {
+                13.3: 1,
+                15.3: 1,
+                19.1: 1,
+            }
         }
         stats_builder = SeriesStatsBuilder(series)
         tested_dict = stats_builder.build_stats()

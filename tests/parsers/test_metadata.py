@@ -44,7 +44,12 @@ class TestMetadataParser(TestCase):
                 'python_col_type': 'float',
                 'n_values': 3,
                 'n_uniq_values': 3,
-                'mean': 15.9
+                'mean': 15.9,
+                'values_repartition': {
+                    13.3: 1,
+                    15.3: 1,
+                    19.1: 1
+                }
             },
             {
                 'col_name': 'col_3',
@@ -81,7 +86,12 @@ class TestMetadataParser(TestCase):
                 'python_col_type': 'float',
                 'n_values': 3,
                 'n_uniq_values': 3,
-                'mean': 15.9
+                'mean': 15.9,
+                'values_repartition': {
+                    13.3: 1,
+                    15.3: 1,
+                    19.1: 1
+                }
             },
             {
                 'col_name': 2,

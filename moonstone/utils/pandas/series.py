@@ -7,19 +7,18 @@ class SeriesStatsBuilder(object):
         self.series = series
 
     def _build_base_stats(self):
+        repartition = self.series.value_counts()
         return {
             'col_name': self.series.name,
             'col_type': str(self.series.dtype),
             'python_col_type': pandas_to_python_type(self.series.dtype),
             'n_values': self.series.size,
-            'n_uniq_values': len(self.series.value_counts())
+            'n_uniq_values': len(self.series.value_counts()),
+            'values_repartition': {i: repartition[i] for i in repartition.index},
         }
 
     def _build_object_stats(self):
-        stats_dict = self._build_base_stats()
-        repartition = self.series.value_counts()
-        stats_dict['values_repartition'] = {i: repartition[i] for i in repartition.index}
-        return stats_dict
+        return self._build_base_stats()
 
     def _build_number_stats(self):
         stats_dict = self._build_base_stats()
