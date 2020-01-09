@@ -23,7 +23,11 @@ class TestDataframeStatistics(TestCase):
                 'python_col_type': 'int',
                 'n_values': 3,
                 'n_uniq_values': 2,
-                'mean': 2.0
+                'mean': 2.0,
+                'values_repartition': {
+                    1: 2,
+                    4: 1
+                }
             },
             {
                 'col_name': 'choice',
@@ -42,7 +46,12 @@ class TestDataframeStatistics(TestCase):
                 'python_col_type': 'float',
                 'n_values': 3,
                 'n_uniq_values': 3,
-                'mean': 3.0
+                'mean': 3.0,
+                'values_repartition': {
+                    1.5: 1,
+                    4.5: 1,
+                    3.0: 1
+                }
             }
         ]
         df_stats = DataframeStatistics(self.dataframe)
