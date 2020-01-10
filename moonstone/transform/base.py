@@ -5,5 +5,7 @@ class TransformBase:
         self.df = df
         self.history = []
 
-    def historize(self, action, arguments):
+    def historize(self, action, arguments=None):
+        if arguments is None:
+            arguments = {}
         self.history.append([action, arguments])

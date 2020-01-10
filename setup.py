@@ -13,7 +13,8 @@ setup(
         'sklearn',
         'matplotlib',
         'plotly',
-        'statsmodels'
+        'statsmodels',
+        'python-slugify'
     ],
     packages=find_packages(),
     entry_points={'console_scripts': ['moonstone=moonstone.main:run']},
