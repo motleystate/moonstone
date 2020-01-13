@@ -107,3 +107,19 @@ class TestMetadataParser(TestCase):
         ]
         parser = MetadataParser(self.metadata_file_no_header, no_header=True)
         self.assertListEqual(parser.get_stats(), expected_list)
+
+    def test_parse_file_force_dtype(self):
+        expected_df = pd.DataFrame(
+            {
+                'col_1': ['s1', 's2', 's3'],
+                'col_2': ['13.3', '15.3', '19.1'],
+                'col_3': ['M', 'F', 'M']
+            }
+        )
+        parsing_options = {
+            'dtype': {
+                'col_2': 'object'
+            }
+        }
+        parser = MetadataParser(self.metadata_file, parsing_options=parsing_options)
+        assert_frame_equal(parser.dataframe, expected_df)

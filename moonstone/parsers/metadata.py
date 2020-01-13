@@ -1,5 +1,3 @@
-import pandas as pd
-
 from moonstone.analysis.columns_statistics import DataframeStatistics
 from .base import BaseParser
 
@@ -14,15 +12,9 @@ class MetadataParser(BaseParser):
     s3  19.1    M   F
     """
 
-    def __init__(self, file_path, sep='\t', no_header=False):
-        self.sep = sep
-        self.header = 'infer'
-        if no_header is True:
-            self.header = None
-        super().__init__(file_path)
-
     def to_dataframe(self):
-        self._dataframe = pd.read_csv(self.file_path, sep=self.sep, header=self.header)
+        dataframe = super().to_dataframe()
+        return dataframe
 
     def get_stats(self):
         """

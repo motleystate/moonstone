@@ -10,8 +10,8 @@ from moonstone.parsers.base import BaseParser
 class TestBaseParser(TestCase):
 
     def setUp(self):
-        self.test_file = os.path.join(os.path.dirname(__file__), "base.csv")
-        self.parser = BaseParser(self.test_file)
+        self.test_file = os.path.join(os.path.dirname(__file__), "data/metadata/base.csv")
+        self.parser = BaseParser(self.test_file, sep=',')
 
     def test_parse_file(self):
         expected_df = pd.DataFrame(
