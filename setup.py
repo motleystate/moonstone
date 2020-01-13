@@ -14,7 +14,8 @@ setup(
         'matplotlib',
         'plotly',
         'statsmodels',
-        'python-slugify'
+        'python-slugify',
+        'pyaml',
     ],
     packages=find_packages(),
     entry_points={'console_scripts': ['moonstone=moonstone.main:run']},

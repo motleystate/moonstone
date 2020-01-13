@@ -10,8 +10,8 @@ from moonstone.parsers.metadata import MetadataParser
 class TestMetadataParser(TestCase):
 
     def setUp(self):
-        self.metadata_file = os.path.join(os.path.dirname(__file__), "metadata.tsv")
-        self.metadata_file_no_header = os.path.join(os.path.dirname(__file__), "metadata_noheader.tsv")
+        self.metadata_file = os.path.join(os.path.dirname(__file__), "data/metadata/metadata.tsv")
+        self.metadata_file_no_header = os.path.join(os.path.dirname(__file__), "data/metadata/metadata_noheader.tsv")
 
     def test_parse_file(self):
         expected_df = pd.DataFrame(

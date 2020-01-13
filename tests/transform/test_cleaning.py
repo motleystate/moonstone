@@ -2,12 +2,12 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.transform.cleaning import StringCleaning
+from moonstone.transform.cleaning import StringCleaner
 
 
-class TestTransformBase(TestCase):
+class TestStringCleaner(TestCase):
 
-    def test_remove_trainling_space(self):
+    def test_remove_trailing_spaces(self):
         df = pd.DataFrame(
             [
                 [1, ' b'],
@@ -24,15 +24,15 @@ class TestTransformBase(TestCase):
         )
         method_name = "remove_trailing_spaces"
         expected_history = [
-            [method_name, {}]
+            [method_name, {'col_name': 'string'}]
         ]
-        transform_cleaning = StringCleaning(df)
+        transform_cleaning = StringCleaner(df)
         getattr(transform_cleaning, method_name)('string')
         self.assertTrue(transform_cleaning.history)
         self.assertListEqual(transform_cleaning.history, expected_history)
         pd.testing.assert_frame_equal(transform_cleaning.df, expected_df)
 
-    def test_slugify(self):
+    def test_to_slug(self):
         df = pd.DataFrame(
             [
                 [1, ' b test  '],
@@ -49,9 +49,9 @@ class TestTransformBase(TestCase):
         )
         method_name = "to_slug"
         expected_history = [
-            [method_name, {}]
+            [method_name, {'col_name': 'string'}]
         ]
-        transform_cleaning = StringCleaning(df)
+        transform_cleaning = StringCleaner(df)
         getattr(transform_cleaning, method_name)('string')
         self.assertTrue(transform_cleaning.history)
         self.assertListEqual(transform_cleaning.history, expected_history)
