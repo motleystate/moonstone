@@ -10,10 +10,14 @@ class TransformBase:
         self.df = df
         self.history = []
 
-    def historize(self, action, arguments=None):
+    def historize(self, action, col_name, arguments=None):
         if arguments is None:
             arguments = {}
-        self.history.append([action, arguments])
+        self.history.append([action, {'col_name': col_name, **arguments}])
+
+    def rename(self, col_name, new_name):
+        self.df.rename(columns={col_name: new_name}, inplace=True)
+        self.historize(self.rename.__name__, col_name, {'new_name': new_name})
 
     def run_transform(self, col_name, method_name, method_options):
         try:
