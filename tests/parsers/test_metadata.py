@@ -128,13 +128,14 @@ class TestMetadataParser(TestCase):
     def test_parse_dirty_metadata_and_clean(self):
         expected_df = pd.DataFrame(
             {
-                'samples': ['s1', 's2', 's3', 's4'],
+                'sample': ['s1', 's2', 's3', 's4'],
                 'age': [29, 48, 36, 25],
             }
         )
         cleaning_operations = {
             'samples': [
-                ('to_slug', {})
+                ('to_slug', {}),
+                ('rename', {'new_name': 'sample'})
             ]
         }
         parser = MetadataParser(self.metadata_file_dirty, sep=",", cleaning_operations=cleaning_operations)
