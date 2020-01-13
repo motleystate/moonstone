@@ -14,5 +14,5 @@ class StringCleaner(TransformBase):
         self.historize(self.to_slug.__name__, {'col_name': col_name})
 
 
-class DataframeCleaner(StringCleaner):
+class DataFrameCleaner(StringCleaner):
     pass

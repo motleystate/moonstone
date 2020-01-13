@@ -12,6 +12,7 @@ class TestMetadataParser(TestCase):
     def setUp(self):
         self.metadata_file = os.path.join(os.path.dirname(__file__), "data/metadata/metadata.tsv")
         self.metadata_file_no_header = os.path.join(os.path.dirname(__file__), "data/metadata/metadata_noheader.tsv")
+        self.metadata_file_dirty = os.path.join(os.path.dirname(__file__), "data/metadata/dirty_metadata.tsv")
 
     def test_parse_file(self):
         expected_df = pd.DataFrame(
@@ -122,4 +123,19 @@ class TestMetadataParser(TestCase):
             }
         }
         parser = MetadataParser(self.metadata_file, parsing_options=parsing_options)
+        assert_frame_equal(parser.dataframe, expected_df)
+
+    def test_parse_dirty_metadata_and_clean(self):
+        expected_df = pd.DataFrame(
+            {
+                'samples': ['s1', 's2', 's3', 's4'],
+                'age': [29, 48, 36, 25],
+            }
+        )
+        cleaning_operations = {
+            'samples': [
+                ('to_slug', {})
+            ]
+        }
+        parser = MetadataParser(self.metadata_file_dirty, sep=",", cleaning_operations=cleaning_operations)
         assert_frame_equal(parser.dataframe, expected_df)

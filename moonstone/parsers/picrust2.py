@@ -1,6 +1,4 @@
 from .base import BaseParser
-import logging
-module_logger = logging.getLogger(__name__)
 
 
 class Picrust2PathwaysParser(BaseParser):
