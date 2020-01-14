@@ -54,6 +54,14 @@ optional arguments:
   -rf variable  Random Forest Analysis, using supplied variable
 ```
 
+## Parsing and cleaning based on YAML config file
+
+It is now possible to perform parsing and cleaning of an input table thanks to a config YAML file.
+
+For the moment, only documentation available is the test available at : `tests/parsers/test_metadata:TestYAMLBasedMetadataParser.test_parse_end_to_end`.
+
+Documentation coming soon...
+
 --------
 
 ## Development guide
