@@ -54,6 +54,53 @@ optional arguments:
   -rf variable  Random Forest Analysis, using supplied variable
 ```
 
+## Parsing and cleaning based on YAML config file
+
+It is now possible to perform parsing and cleaning of an input table thanks to a config YAML file.
+
+For the moment, only documentation available is the test available at : `tests/parsers/test_metadata:TestYAMLBasedMetadataParser.test_parse_end_to_end`:
+
+### Input table
+
+```csv
+samples,age
+s1,29
+S2 ,48
+s3,36
+s4 ,25
+```
+
+### Config File
+
+```yaml
+parsing:
+  - col_name: samples
+    operations:
+    - name: to_slug
+    - name: rename
+      options:
+        new_name: 'sample'
+  - col_name: age
+    dtype: object
+```
+
+### Usage
+
+```python
+metadata_file_dirty = os.path.join(os.path.dirname(__file__), "data/metadata/dirty_metadata.tsv")
+config_file = os.path.join(os.path.dirname(__file__), "data/metadata/config.yaml")
+parser = YAMLBasedMetadataParser(metadata_file_dirty, config_file, sep=",")
+expected_df = pd.DataFrame(
+    {
+        'sample': ['s1', 's2', 's3', 's4'],
+        'age': ['29', '48', '36', '25'],
+    }
+)
+pd.testing.assert_frame_equal(parser.metadata_parser.dataframe, expected_df)
+```
+
+Better documentation coming soon...
+
 --------
 
 ## Development guide

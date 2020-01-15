@@ -1,0 +1,9 @@
+parsing:
+  - col_name: samples
+    operations:
+    - name: to_slug
+    - name: rename
+      options:
+        new_name: 'sample'
+  - col_name: age
+    dtype: object

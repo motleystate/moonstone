@@ -3,14 +3,21 @@ import pandas as pd
 
 class BaseParser(object):
 
-    def __init__(self, file_path):
+    def __init__(self, file_path, sep='\t', no_header=False, parsing_options=None):
         self.file_path = file_path
+        self.sep = sep
+        self.header = 'infer'
+        if no_header is True:
+            self.header = None
+        self.parsing_options = parsing_options
+        if self.parsing_options is None:
+            self.parsing_options = {}
 
     @property
     def dataframe(self):
         if getattr(self, '_dataframe', None) is None:
-            self.to_dataframe()
+            self._dataframe = self.to_dataframe()
         return self._dataframe
 
     def to_dataframe(self):
-        self._dataframe = pd.read_csv(self.file_path)
+        return pd.read_csv(self.file_path, sep=self.sep, header=self.header, **self.parsing_options)

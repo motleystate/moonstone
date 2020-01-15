@@ -33,7 +33,7 @@ class Qiime2Parser(BaseParser):
         df = pd.read_csv(self.file_path, skiprows=self.skip_row_number)
         new_column_names = [column_name.replace(self.symbol_to_remove, "") for column_name in list(df)]
         df.columns = new_column_names
-        self._dataframe = df
+        return df
 
     def spliting_into_taxa_columns(self, serie):
         """
