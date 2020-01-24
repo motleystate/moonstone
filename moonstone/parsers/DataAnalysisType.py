@@ -10,6 +10,9 @@ and to determine the type of variable in each column.
 - For different groups, determine if they are balanced.
 
 A second part will be to match the type of statistical analysis that could be performed.
+
+@TODO
+this needs to be moved to appropriate module of moonstone, to be defined
 """
 
 
