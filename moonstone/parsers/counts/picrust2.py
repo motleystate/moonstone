@@ -1,4 +1,4 @@
-from .base import BaseParser
+from moonstone.parsers.base import BaseParser
 
 
 class Picrust2PathwaysParser(BaseParser):

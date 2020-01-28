@@ -1,5 +1,5 @@
 import pandas as pd
-from .base import BaseParser
+from moonstone.parsers.base import BaseParser
 
 
 class Qiime2Parser(BaseParser):

@@ -4,13 +4,13 @@ from unittest import TestCase
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from moonstone.parsers.picrust2 import Picrust2PathwaysParser
+from moonstone.parsers.counts.picrust2 import Picrust2PathwaysParser
 
 
 class TestPicrust2PathwaysParser(TestCase):
 
     def setUp(self):
-        self.test_file = os.path.join(os.path.dirname(__file__), "data/picrust2.tsv")
+        self.test_file = os.path.join(os.path.dirname(__file__), "picrust2.tsv")
 
     def test_parse_file(self):
         expected_df = pd.DataFrame(
