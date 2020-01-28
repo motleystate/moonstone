@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.transform.cleaning import StringCleaner
+from moonstone.parsers.transform.cleaning import StringCleaner
 
 
 class TestStringCleaner(TestCase):

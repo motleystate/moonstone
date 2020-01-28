@@ -2,7 +2,7 @@ import yaml
 from collections import defaultdict
 
 from moonstone.analysis.columns_statistics import DataframeStatistics
-from moonstone.transform.cleaning import DataFrameCleaner
+from moonstone.parsers.transform.cleaning import DataFrameCleaner
 from .base import BaseParser
 
 
@@ -17,6 +17,8 @@ class MetadataParser(BaseParser):
             ('operation1', 'operation1_options'),
             ('operation2', 'operation2_options')
         ]}
+        :param cleaning_operations: cleaning operations to apply to the input table
+        :type cleaning_operations: DICT
         """
         self.cleaning_operations = cleaning_operations
         if self.cleaning_operations is None:
