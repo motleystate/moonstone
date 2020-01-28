@@ -3,7 +3,7 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from moonstone.normalization.deseq2normalization import (
+from moonstone.normalization.counts.deseq2normalization import (
     DESeq2Normalization
 )
 
