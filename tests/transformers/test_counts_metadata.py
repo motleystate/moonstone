@@ -4,12 +4,12 @@ import pytest
 
 import pandas as pd
 
-from moonstone.filtering.merging_meta_and_readcounts import (
-    MergingMetaAndReadCounts
+from moonstone.transformers.mergers import (
+    MergeCountsAndMetadata
 )
 
 
-class TestMergingMetaAndReadCounts(TestCase):
+class TestMergeCountsAndMetadata(TestCase):
 
     def test_check_column_names_True(self):
         tested_object_reads = pd.DataFrame.from_dict(
@@ -26,7 +26,7 @@ class TestMergingMetaAndReadCounts(TestCase):
             },
             orient='index', columns=[1, 2, 3, 4])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
+        tested_object = MergeCountsAndMetadata(tested_object_metadata, tested_object_reads)
         self.assertTrue(tested_object.check_column_names())
 
     def test_full_dataframe_with_different_sample_number(self):
@@ -44,7 +44,7 @@ class TestMergingMetaAndReadCounts(TestCase):
             },
             orient='index', columns=[1, 2, 3])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
+        tested_object = MergeCountsAndMetadata(tested_object_metadata, tested_object_reads)
         with pytest.raises(Exception):
             assert tested_object.full_dataframe
 
@@ -63,7 +63,7 @@ class TestMergingMetaAndReadCounts(TestCase):
             },
             orient='index', columns=[1, 2, 3, 4])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
+        tested_object = MergeCountsAndMetadata(tested_object_metadata, tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
                 'Sex': ['M', 'F', 'M', "F"],
@@ -90,7 +90,7 @@ class TestMergingMetaAndReadCounts(TestCase):
             },
             orient='index', columns=[1, 2, 3, 4])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = MergingMetaAndReadCounts(tested_object_metadata, tested_object_reads)
+        tested_object = MergeCountsAndMetadata(tested_object_metadata, tested_object_reads)
         expected_object = pd.DataFrame.from_dict(
             {
                 '1': ['M', 25, 3, 25],
