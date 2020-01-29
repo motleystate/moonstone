@@ -1,3 +1,8 @@
+"""
+@TODO
+This needs to be moved and adapted to the filtering module
+"""
+
 import logging
 module_logger = logging.getLogger(__name__)
 

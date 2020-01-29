@@ -4,6 +4,10 @@ import pandas as pd
 class BaseParser(object):
 
     def __init__(self, file_path, sep='\t', no_header=False, parsing_options=None):
+        """
+        :param parsing_options: Extra parsing options for `read_csv` method, see pandas documentation
+        :type parsing_options: DICT
+        """
         self.file_path = file_path
         self.sep = sep
         self.header = 'infer'

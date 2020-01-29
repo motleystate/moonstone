@@ -1,5 +1,5 @@
 import pandas as pd
-from .base import BaseParser
+from moonstone.parsers.base import BaseParser
 
 
 class Qiime2Parser(BaseParser):
@@ -26,7 +26,7 @@ class Qiime2Parser(BaseParser):
         super().__init__(file_path)
         self.skip_row_number = skip_row_number
 
-    def to_dataframe(self):
+    def _import_dataframe(self):
         """
         Importing the csv and placing the samples and block of taxa as headers of the different columns
         """
@@ -76,17 +76,17 @@ class Qiime2Parser(BaseParser):
         combining_df_and_taxa_status_in_nan = df.combine_first(filling_missing_values)
         return combining_df_and_taxa_status_in_nan
 
-    @property
-    def standard_taxa_df(self):
+    def to_dataframe(self):
         """
         This property can be used to obtain the formated data frame directly, without any intermidiate steps.
         """
-        if getattr(self, "_standard_taxa_df", None) is None:
-            taxa_columns = self.spliting_into_taxa_columns(self.dataframe['OTU ID'])
+        if getattr(self, "_dataframe", None) is None:
+            dataframe = self._import_dataframe()
+            taxa_columns = self.spliting_into_taxa_columns(dataframe['OTU ID'])
             taxa_column_with_names = self.naming_taxa_columns(taxa_columns)
             complete_taxa_df = self.filling_missing_taxa_values(taxa_column_with_names)
-            df_samples = self._dataframe.drop('OTU ID', axis=1)
+            df_samples = dataframe.drop('OTU ID', axis=1)
             taxa_columns_and_df_samples = pd.concat([complete_taxa_df, df_samples], axis=1, sort=False)
             standard_taxa_df = taxa_columns_and_df_samples.set_index(list(taxa_column_with_names))
-            setattr(self, "_standard_taxa_df", standard_taxa_df.astype(int))
-        return self._standard_taxa_df
+            setattr(self, "_dataframe", standard_taxa_df.astype(int))
+        return self._dataframe
