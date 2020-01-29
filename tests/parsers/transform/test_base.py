@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.transform.base import TransformBase
+from moonstone.parsers.transform.base import TransformBase
 
 
 class TestTransformBase(TestCase):

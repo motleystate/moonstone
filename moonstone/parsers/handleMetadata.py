@@ -3,6 +3,9 @@ Here is where the clinical data for the samples will be opened.
 This file is likely to be highly variable depending on the project
     and will likely need several versions of the import code.
 At the least, samples names/references should match with the 'counts' file
+
+@TODO
+It is likely that redundacy exists with the MetadataParser. We would need to fuse both part of code.
 """
 import pandas as pd
 import logging

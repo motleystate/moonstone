@@ -1,5 +1,10 @@
-"""Here is where the normalized count data will be opened.
- The file needs to be opened formatted and some basic statistics calculated"""
+"""
+Here is where the normalized count data will be opened.
+The file needs to be opened formatted and some basic statistics calculated
+
+@TODO
+This needs to be moved to appropriate module, maybe create a new dedicated one to load data for analysis
+"""
 
 import pandas as pd
 import logging
