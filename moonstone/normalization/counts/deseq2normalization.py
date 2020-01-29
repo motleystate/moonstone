@@ -80,4 +80,4 @@ class DESeq2Normalization(BaseNormalization):
         return self._scaling_factors
 
     def normalize(self):
-        return self.df.div(self.scaling_factors)
+        return self.raw_df.div(self.scaling_factors)
