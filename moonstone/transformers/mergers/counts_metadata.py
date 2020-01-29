@@ -1,9 +1,9 @@
 import pandas as pd
 
 
-class MergingMetaAndReadCounts:
+class MergeCountsAndMetadata:
     """
-    Both, on the metadata_df and the reads_df assumes that the different samples
+    On both the counts and metadata dataframes, we assume that the different samples
     are displayed horizontally and the features(or taxa) vertically:
 
     samples  1  2  3

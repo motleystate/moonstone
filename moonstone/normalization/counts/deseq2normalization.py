@@ -3,8 +3,10 @@ import math
 import logging
 import pandas as pd
 
+from moonstone.normalization.base import BaseNormalization
 
-class DESeq2Normalization:
+
+class DESeq2Normalization(BaseNormalization):
     """
     Brief explanation of how this normalization module works:
     "gen" "spec" 1  2  3                  "gen"  1    2     3                 "gen"    "spec"   1       2        3
@@ -18,7 +20,10 @@ class DESeq2Normalization:
 """
 
     def __init__(self, df, log_number=np.e, zero_threshold=80, normalization_level=0):
-        self.df = df
+        """
+        :param normalization_level: At which level of a multi-index you want the normalization to be perfomed
+        """
+        super().__init__(df)
         self.log = log_number
         self.zero_threshold = zero_threshold
         self.normalization_level = normalization_level
@@ -29,7 +34,7 @@ class DESeq2Normalization:
 
     def non_zero_df(self, df):
         """
-        This function removes rows with 0 reads
+        This method removes rows with 0 reads
         """
         threshold = math.ceil(df.shape[1] * self.zero_threshold/100)
         non_zero_dataf = df.replace(0, np.nan).dropna(thresh=threshold).astype('float')
@@ -47,11 +52,11 @@ class DESeq2Normalization:
     @property
     def removed_zero_df(self):
         """
-        gives the data frame with the rows that were removed for having too many zeros.
+        gives the dataframe with the rows that were removed for having too many zeros.
         this attribute is computed during the non_zero_df function
         """
         if getattr(self, "_removed_zero_df", None) is None:
-            logging.warning("Computing the scaling factors beforehand is required")
+            logging.warning("Computing the scaling factors beforehand is required to access this dataframe")
             return None
         else:
             return self._removed_zero_df
@@ -74,9 +79,5 @@ class DESeq2Normalization:
             setattr(self, "_scaling_factors", scaling_factors)
         return self._scaling_factors
 
-    @property
-    def normalized_df(self):
-        if getattr(self, "_normalized_df", None) is None:
-            final_df = self.df.div(self.scaling_factors)
-            setattr(self, "_normalized_df", final_df)
-        return self._normalized_df
+    def normalize(self):
+        return self.raw_df.div(self.scaling_factors)

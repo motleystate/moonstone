@@ -3,7 +3,7 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from moonstone.filtering.filtering import (
+from moonstone.filters.filtering import (
     Filtering
 )
 
