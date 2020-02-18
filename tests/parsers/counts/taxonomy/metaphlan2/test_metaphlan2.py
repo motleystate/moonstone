@@ -54,9 +54,9 @@ class TestMetaphlan2Parser(TestCase):
         """
         expected_df = pd.DataFrame(
             [
-                ['Bacteria', 'Actinobacteria', 'Actinobacteria', 'Actinomycetales', 'Actinomycetaceae', 'Actinomycetaceae (family)', 'Actinomycetaceae (family)', 5.5, 6.0],
-                ['Bacteria', 'Actinobacteria', 'Actinobacteria', 'Actinomycetales', 'Actinomycetaceae', 'Actinobaculum', 'Actinobaculum (genus)', 4.3, 2.1],
-                ['Bacteria', 'Actinobacteria', 'Actinobacteria', 'Actinomycetales', 'Actinomycetaceae', 'Actinobaculum', 'Actinobaculum_massiliense', 1.0, 2.0]
+                ['Bacteria', 'Actinobacteria', 'Actinobacteria', 'Actinomycetales', 'Actinomycetaceae', 'Actinomycetaceae (family)', 'Actinomycetaceae (family)', 5.5, 6.0],  # noqa
+                ['Bacteria', 'Actinobacteria', 'Actinobacteria', 'Actinomycetales', 'Actinomycetaceae', 'Actinobaculum', 'Actinobaculum (genus)', 4.3, 2.1],   # noqa
+                ['Bacteria', 'Actinobacteria', 'Actinobacteria', 'Actinomycetales', 'Actinomycetaceae', 'Actinobaculum', 'Actinobaculum_massiliense', 1.0, 2.0]   # noqa
             ],
             columns=['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species', 'SAMPLE_1', 'SAMPLE_2']
         )
