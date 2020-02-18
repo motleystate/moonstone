@@ -8,7 +8,7 @@ class Metaphlan2Parser(BaseParser):
     """
 
     taxonomical_names = [
-        "kingdom", "phylum", "class", "order", "family", "genus", "species"
+        "kingdom", "phylum", "class", "order", "family", "genus", "species", "sTrain"
     ]
     taxa_column = 'ID'
 
