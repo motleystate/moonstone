@@ -12,24 +12,6 @@ class TestMetaphlan2Parser(TestCase):
         input_path = os.path.join(os.path.dirname(__file__), 'input.tsv')
         self.meta2parser = Metaphlan2Parser(input_path)
 
-    def test_fill_none(self):
-        taxa_df = pd.DataFrame(
-            [
-                ['Bacteria', 'Bacteroidetes'],
-                ['Bacteria', None]
-            ],
-            columns=['kingdom', 'phylum']
-        )
-        expected_df = pd.DataFrame(
-            [
-                ['Bacteria', 'Bacteroidetes'],
-                ['Bacteria', 'Bacteria (kingdom)']
-            ],
-            columns=['kingdom', 'phylum']
-        )
-        tested_df = self.meta2parser._fill_none(taxa_df)
-        pd.testing.assert_frame_equal(tested_df, expected_df)
-
     def test_taxa_fill_none(self):
         df = pd.DataFrame(
             [

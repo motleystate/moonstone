@@ -1,8 +1,9 @@
 import pandas as pd
-from moonstone.parsers.base import BaseParser
+
+from moonstone.parsers.counts.taxonomy.base import TaxonomyCountsBaseParser
 
 
-class Metaphlan2Parser(BaseParser):
+class Metaphlan2Parser(TaxonomyCountsBaseParser):
     """
     Parse output from metaphlan2 merged table
     """
@@ -11,24 +12,6 @@ class Metaphlan2Parser(BaseParser):
         "kingdom", "phylum", "class", "order", "family", "genus", "species", "sTrain"
     ]
     taxa_column = 'ID'
-
-    def _fill_none(self, taxa_df):
-        """
-        This function serves to obtain a data frame that fills the None values with the last valid value and
-        the category where it belonged to. E.g:
-
-        Before:
-        column names     kingdom  phylum            family         genus
-        value            Bacteria Bacteroidetes ... Tannerellaceae None
-
-        After:
-        column names     kingdom  phylum            family         genus
-        value            Bacteria Bacteroidetes ... Tannerellaceae Tannerellaceae (family)
-        """
-        taxa_df_with_rank = taxa_df.apply(lambda x: x + " ({})".format(x.name))
-        taxa_df_with_rank_filled_none = taxa_df_with_rank.fillna(method='ffill', axis=1)
-        taxa_df_filled_none = taxa_df.combine_first(taxa_df_with_rank_filled_none)
-        return taxa_df_filled_none
 
     def split_taxa_fill_none(self, df):
         """
