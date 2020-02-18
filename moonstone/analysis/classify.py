@@ -23,7 +23,7 @@ class SVM(object):
 
     def merge(self, variable):
         self.logger.info('Merge function called to merge count data and metadata.')
-        self.logger.info(f'Variable {variable} from metadata file will be marged with counts.')
+        self.logger.info(f'Variable {variable} from metadata file will be merged with counts.')
         dc = self.countfile
         dm = self.metadata
 
@@ -39,8 +39,10 @@ class SVM(object):
         if not isinstance(dc.index, type(dm.index)):
             self.logger.warning(f'Index types do not match: {type(dc.index)} and {type(dm.index)}.')
             dc.set_index(np.int64(np.array(dc.index)), inplace=True)
+            self.logger.info(f' Indexes reset. Count Index={type(dc.index)}, Metadata Index={type(dm.index)}')
 
         df = pd.merge(dm[variable], dc, left_index=True, right_index=True)
+        self.logger.info('Merge function completed. Returning merged data frame.')
         return df  # returned to analyze function as 'df_final'
 
     def analyze(self, variable=""):
@@ -135,19 +137,34 @@ class SVM(object):
         plt.ylabel('True Positive Rate')
         plt.title('%s\nROC Analysis' % variable, fontsize=20)
         plt.legend(loc="lower right")
-        # plt.show()
+        # Save figure to PDF
         plt.savefig(self.outdir+"/"+variable+'_ROC.pdf', format='pdf', dpi=150)
 
     def feature_analysis(self, variable=""):
         self.logger.info(f'Running SVM feature importance analysis with variable: {variable}')
         df_final = SVM.merge(self, variable)
+        self.logger.info('Feature Analysis successfully collected merged database.')
 
+        # Setup the data
         x = np.array(df_final.drop([variable], axis=1).astype(float))
         x = preprocessing.maxabs_scale(x)
         y = np.array(df_final[variable])
 
+        # Calculate and plot the contributions of all variables
+        self.logger.info('Running SVM with linear kernel and reporting coefficients')
         clf = svm.SVC(kernel='linear', probability=True, tol=0.00001)
+
+        clf.fit(x, y)
+        df_coef = pd.DataFrame(clf.coef_.transpose(),
+                               index=df_final.drop([variable], 1).columns,
+                               columns=['Coef'])
+        df_coef.sort_values(by=['Coef']).plot.barh()
+        plt.savefig(self.outdir + '/' + variable + '_variable_coefs.pdf', format='pdf', dpi=150)
+        self.logger.info('Coefficients Figure for SVM Linear kernel saved to ' + variable + '_variable_coefs.pdf')
+
+        # Run and plot Recursive Factor Elimination with Cross Validation
         rfecv = RFECV(estimator=clf, step=1, cv=StratifiedKFold(10), scoring='accuracy', verbose=0)
+
         rfecv.fit(x, y)
         self.logger.info("Optimal number of features : %d" % rfecv.n_features_)
 
@@ -160,19 +177,10 @@ class SVM(object):
         df_rank.sort_values(by=['Coef'], ascending=[bool])\
             .to_csv(path_or_buf=self.outdir+'/'+variable+'_SVM_components.csv', sep=',')
 
-        # df_rank.sort_values(by=['Coef']).plot.barh()
-        # plt.show()
-
-        clf.fit(x, y)
-        df_coef = pd.DataFrame(clf.coef_.transpose(),
-                               index=df_final.drop([variable], 1).columns,
-                               columns=['Coef'])
-        df_coef.sort_values(by=['Coef']).plot.barh()
-        plt.show()
-
-        # Plot number of features VS. cross-validation scores
-        # plt.figure()
-        # plt.xlabel("Number of features selected")
-        # plt.ylabel("Cross validation score (nb of correct classifications)")
-        # plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
-        # plt.show()
+        plt.figure()
+        plt.xlabel("Number of features selected")
+        plt.ylabel("Cross validation score (nb of correct classifications)")
+        plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
+        plt.savefig(self.outdir + '/' + variable + '_rfecv.pdf', format='pdf', dpi=150)
+        self.logger.info('RFECV Figure for SVM Linear kernel saved to ' + variable + '_rfecv.pdf')
+        self.logger.info('SVM feature importance analysis for %s completed' % variable)
