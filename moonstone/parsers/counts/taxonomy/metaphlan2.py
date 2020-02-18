@@ -7,32 +7,12 @@ class Metaphlan2Parser(BaseParser):
     Parse output from metaphlan2 merged table
     """
 
-    taxonomical_names = {'0': "kingdom", '1': "phylum", '2': "class",
-                         '3': "order", '4': "family", '5': "genus", '6': "species"}
+    taxonomical_names = [
+        "kingdom", "phylum", "class", "order", "family", "genus", "species"
+    ]
     taxa_column = 'ID'
 
-    def split_taxa_columns_and_fill_none(self, df):
-        """
-        This function takes the block of taxa column and splits it into different ones.
-        It also fill in None with latest found annotation
-        """
-        taxa_column = df[self.taxa_column].str.split("|", expand=True)
-        taxa_in_lists = [taxa_column[i].str.split("_", expand=True) for i in range(taxa_column.shape[1])]
-        taxa_df = pd.concat(taxa_in_lists, axis=1)
-        return taxa_df.applymap(lambda x: x if not isinstance(x, str) else None if x.islower() else x)
-
-    def naming_taxa_columns(self, df):
-        """
-        This function puts the name of the different column taxa according to the number that is stated in the
-        taxa blobk by Qiime2. For example, it recognises the 0 as kingdom and add it to the column where the
-        kingdoms are displayed.
-        """
-        column_names = [self.taxonomical_names[x] for x in self.taxonomical_names if x in df.loc[:, 1].values]
-        taxa_df = df[3]
-        taxa_df.columns = column_names
-        return taxa_df
-
-    def filling_missing_taxa_values(self, df):
+    def _fill_none(self, taxa_df):
         """
         This function serves to obtain a data frame that fills the None values with the last valid value and
         the category where it belonged to. E.g:
@@ -45,13 +25,42 @@ class Metaphlan2Parser(BaseParser):
         column names     kingdom  phylum            family         genus
         value            Bacteria Bacteroidetes ... Tannerellaceae Tannerellaceae (family)
         """
-        values_with_taxa_status = df.apply(lambda x: x + " ({})".format(x.name))
-        filling_missing_values = values_with_taxa_status.fillna(method='ffill', axis=1)
-        combining_df_and_taxa_status_in_nan = df.combine_first(filling_missing_values)
-        return combining_df_and_taxa_status_in_nan
+        taxa_df_with_rank = taxa_df.apply(lambda x: x + " ({})".format(x.name))
+        taxa_df_with_rank_filled_none = taxa_df_with_rank.fillna(method='ffill', axis=1)
+        taxa_df_filled_none = taxa_df.combine_first(taxa_df_with_rank_filled_none)
+        return taxa_df_filled_none
+
+    def split_taxa_fill_none(self, df):
+        """
+        This function split taxa column into different ones.
+        It also fill in None with latest found annotation
+        """
+        def remove_taxo_prefix(string):
+            if string is None:
+                return None
+            else:
+                return string.split('__')[-1]
+
+        taxa_columns = df[self.taxa_column].str.split("|", expand=True)
+        taxa_columns.columns = self.taxonomical_names[:len(taxa_columns.columns)]
+        taxa_columns = taxa_columns.applymap(lambda x: remove_taxo_prefix(x))
+        taxa_columns = self._fill_none(taxa_columns)
+        return pd.concat([self._fill_none(taxa_columns), df.drop(self.taxa_column, axis=1)], axis=1)
+
+    def naming_taxa_columns(self, df):
+        """
+        This function puts the name of the different column taxa according to the number that is stated in the
+        taxa blobk by Qiime2. For example, it recognises the 0 as kingdom and add it to the column where the
+        kingdoms are displayed.
+        """
+        column_names = [self.taxonomical_names[x] for x in self.taxonomical_names if x in df.loc[:, 1].values]
+        taxa_df = df[3]
+        taxa_df.columns = column_names
+        return taxa_df
 
     def to_dataframe(self):
         df = super().to_dataframe()
+        df = self.split_taxa_fill_none(df)
         return df
     #         taxa_columns = self.spliting_into_taxa_columns(dataframe['OTU ID'])
     #         taxa_column_with_names = self.naming_taxa_columns(taxa_columns)
