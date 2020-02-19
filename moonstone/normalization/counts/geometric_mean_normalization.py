@@ -5,6 +5,8 @@ import pandas as pd
 
 from moonstone.normalization.base import BaseNormalization
 
+logger = logging.getLogger(__name__)
+
 
 class GeometricMeanNormalization(BaseNormalization):
     """
@@ -13,7 +15,7 @@ class GeometricMeanNormalization(BaseNormalization):
     info: https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html
     """
 
-    def __init__(self, df, log_number=np.e, zero_threshold=80, normalization_level=0):
+    def __init__(self, df, log_number=np.e, zero_threshold=80, normalization_level=None):
         """
         :param normalization_level: At which level of a multi-index you want the normalization to be perfomed
         """
@@ -21,10 +23,11 @@ class GeometricMeanNormalization(BaseNormalization):
         self.log = log_number
         self.zero_threshold = zero_threshold
         self.normalization_level = normalization_level
-        if isinstance(df.index, pd.core.index.MultiIndex):
+        if normalization_level is not None and isinstance(df.index, pd.core.index.MultiIndex):
             self.grouped_df = df.groupby(level=self.normalization_level).sum()
         else:
             self.grouped_df = df
+
 
     def non_zero_df(self, df):
         """
@@ -35,7 +38,7 @@ class GeometricMeanNormalization(BaseNormalization):
         total_len = len(df)
         non_zero_df_len = len(non_zero_dataf)
         if non_zero_df_len / total_len * 100 <= 50:
-            logging.warning("{} rows were dropped, which represents {} % of the sample".format(
+            logger.warning("{} rows were dropped, which represents {} % of the sample".format(
                             total_len - non_zero_df_len, (total_len - non_zero_df_len) / total_len*100))
         self._removed_zero_df = df[~df.index.isin(non_zero_dataf.index)]
         return non_zero_dataf
@@ -50,7 +53,7 @@ class GeometricMeanNormalization(BaseNormalization):
         this attribute is computed during the non_zero_df function
         """
         if getattr(self, "_removed_zero_df", None) is None:
-            logging.warning("Computing the scaling factors beforehand is required to access this dataframe")
+            logger.warning("Computing the scaling factors beforehand is required to access this dataframe")
             return None
         else:
             return self._removed_zero_df
