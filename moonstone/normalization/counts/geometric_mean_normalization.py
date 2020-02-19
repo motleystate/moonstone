@@ -1,6 +1,7 @@
-import numpy as np
-import math
 import logging
+import math
+
+import numpy as np
 import pandas as pd
 
 from moonstone.normalization.base import BaseNormalization
@@ -27,7 +28,6 @@ class GeometricMeanNormalization(BaseNormalization):
             self.grouped_df = df.groupby(level=self.normalization_level).sum()
         else:
             self.grouped_df = df
-
 
     def non_zero_df(self, df):
         """
