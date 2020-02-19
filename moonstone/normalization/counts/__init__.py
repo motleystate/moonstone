@@ -1,1 +1,1 @@
-from .deseq2normalization import DESeq2Normalization  # noqa
+from .geometric_mean_normalization import GeometricMeanNormalization  # noqa
