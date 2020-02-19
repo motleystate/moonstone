@@ -21,30 +21,33 @@ class GeometricMeanNormalization(BaseNormalization):
         :param normalization_level: At which level of a multi-index you want the normalization to be perfomed
         """
         super().__init__(df)
-        self.log = log_number
+        self.log_number = log_number
         self.zero_threshold = zero_threshold
         self.normalization_level = normalization_level
         if normalization_level is not None and isinstance(df.index, pd.core.index.MultiIndex):
             self.grouped_df = df.groupby(level=self.normalization_level).sum()
+            logger.info("Normalization on %s level (n=%s)", self.normalization_level, self.grouped_df.shape[0])
         else:
             self.grouped_df = df
+            logger.info("Normalization on all rows (n=%s)", self.grouped_df.shape[0])
 
     def non_zero_df(self, df):
         """
         This method removes rows with 0 reads
         """
         threshold = math.ceil(df.shape[1] * self.zero_threshold/100)
+        total_nb_rows = df.shape[0]
         non_zero_dataf = df.replace(0, np.nan).dropna(thresh=threshold).astype('float')
-        total_len = len(df)
-        non_zero_df_len = len(non_zero_dataf)
-        if non_zero_df_len / total_len * 100 <= 50:
-            logger.warning("{} rows were dropped, which represents {} % of the sample".format(
-                            total_len - non_zero_df_len, (total_len - non_zero_df_len) / total_len*100))
+        removed_nb_rows = non_zero_dataf.shape[0]
+        logger.info("%s/%s rows dropped", total_nb_rows - removed_nb_rows, total_nb_rows)
+        if removed_nb_rows / total_nb_rows <= 0.5:
+            logger.warning("It represents %s %% of the rows",
+                           (total_nb_rows - removed_nb_rows) / total_nb_rows*100)
         self._removed_zero_df = df[~df.index.isin(non_zero_dataf.index)]
         return non_zero_dataf
 
     def log_df(self, df):
-        return df.applymap(lambda x: math.log(x, self.log))
+        return df.applymap(lambda x: math.log(x, self.log_number))
 
     @property
     def removed_zero_df(self):
@@ -58,7 +61,7 @@ class GeometricMeanNormalization(BaseNormalization):
         else:
             return self._removed_zero_df
 
-    def remove_zero_and_log(self, df):
+    def remove_zero_and_apply_log(self, df):
         return self.log_df(self.non_zero_df(df))
 
     def calculating_and_substracting_mean_row(self, df):
@@ -70,9 +73,9 @@ class GeometricMeanNormalization(BaseNormalization):
     @property
     def scaling_factors(self):
         if getattr(self, "_scaling_factors", None) is None:
-            non_zero_log_df = self.remove_zero_and_log(self.grouped_df)
+            non_zero_log_df = self.remove_zero_and_apply_log(self.grouped_df)
             substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
-            scaling_factors = substracted_mean_df.rpow(self.log).replace(np.nan, 0).median()
+            scaling_factors = substracted_mean_df.rpow(self.log_number).replace(np.nan, 0).median()
             setattr(self, "_scaling_factors", scaling_factors)
         return self._scaling_factors
 
