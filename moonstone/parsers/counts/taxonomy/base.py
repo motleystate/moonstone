@@ -36,6 +36,8 @@ class TaxonomyCountsBaseParser(BaseParser):
             """
             if genus_and_species[1] is None:
                 return None
+            elif genus_and_species[0] is None:
+                return genus_and_species[1]
             else:
                 return '_'.join(genus_and_species)
 

@@ -32,14 +32,18 @@ class TestTaxonomyCountsBaseParser(TestCase):
         taxa_df = pd.DataFrame(
             [
                 ['Lactobacillus', 'jensenii'],
-                ['Lactobacillus', None]
+                ['Lactobacillus', None],
+                [None, 'jensenii'],
+                [None, None],
             ],
             columns=['genus', 'species']
         )
         expected_df = pd.DataFrame(
             [
                 ['Lactobacillus', 'Lactobacillus_jensenii'],
-                ['Lactobacillus', None]
+                ['Lactobacillus', None],
+                [None, 'jensenii'],
+                [None, None],
             ],
             columns=['genus', 'species']
         )
