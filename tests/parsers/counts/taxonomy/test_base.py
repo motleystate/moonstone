@@ -28,6 +28,24 @@ class TestTaxonomyCountsBaseParser(TestCase):
         tested_df = self.parser._fill_none(taxa_df)
         pd.testing.assert_frame_equal(tested_df, expected_df)
 
+    def test_merge_genus_species(self):
+        taxa_df = pd.DataFrame(
+            [
+                ['Lactobacillus', 'jensenii'],
+                ['Lactobacillus', None]
+            ],
+            columns=['genus', 'species']
+        )
+        expected_df = pd.DataFrame(
+            [
+                ['Lactobacillus', 'Lactobacillus_jensenii'],
+                ['Lactobacillus', None]
+            ],
+            columns=['genus', 'species']
+        )
+        tested_df = self.parser._merge_genus_species(taxa_df)
+        pd.testing.assert_frame_equal(tested_df, expected_df)
+
     def test_taxa_fill_none(self):
         df = pd.DataFrame(
             [
