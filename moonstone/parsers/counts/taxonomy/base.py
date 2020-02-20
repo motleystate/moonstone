@@ -28,13 +28,27 @@ class TaxonomyCountsBaseParser(BaseParser):
         taxa_df_filled_none = taxa_df.combine_first(taxa_df_with_rank_filled_none)
         return taxa_df_filled_none
 
-    def split_taxa_fill_none(self, df, sep=";"):
+    def _merge_genus_species(self, taxa_df):
+
+        def join_genus_species(genus_and_species):
+            """
+            :param genus_and_species: list of 2 items
+            """
+            if genus_and_species[1] is None:
+                return None
+            else:
+                return '_'.join(genus_and_species)
+
+        taxa_df['species'] = taxa_df[['genus', 'species']].apply(lambda x: join_genus_species(x), axis=1)
+        return taxa_df
+
+    def split_taxa_fill_none(self, df, sep=";",  taxo_prefix="__", merge_genus_species=False):
 
         def remove_taxo_prefix(string):
             if string is None:
                 return None
             else:
-                term = string.split('__')[-1]
+                term = string.split(taxo_prefix)[-1]
             if term:
                 return term
             else:
@@ -44,5 +58,7 @@ class TaxonomyCountsBaseParser(BaseParser):
         self._rank_level = len(taxa_columns.columns)
         taxa_columns.columns = self.taxonomical_names[:self._rank_level]
         taxa_columns = taxa_columns.applymap(lambda x: remove_taxo_prefix(x))
+        if merge_genus_species:
+            taxa_columns = self._merge_genus_species(taxa_columns)
         taxa_columns = self._fill_none(taxa_columns)
         return pd.concat([self._fill_none(taxa_columns), df.drop(self.taxa_column, axis=1)], axis=1)
