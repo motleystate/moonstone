@@ -93,7 +93,7 @@ class TestFiltering(TestCase):
         expected_object.columns.name = 'sample'
         with self.assertRaises(KeyError):
             pd.testing.assert_frame_equal(tested_object_instance.remove_rows_without_relevant_info(row_to_remove,
-                                        level_to_consider), expected_object)
+                                          level_to_consider), expected_object)
 
     def test_selecting_certain_rows(self):
         tested_object = pd.DataFrame.from_dict(
