@@ -26,7 +26,7 @@ class Filtering:
 
     def remove_rows_without_relevant_info(self, name_of_rows, level_name_provided):
         self.counts_df = self.counts_df.drop(index=name_of_rows, level=level_name_provided)
-        self.steps.append('remove_rows_wihtout_relevant_info')
+        self.steps.append('remove_rows_without_relevant_info')
         return self.counts_df
 
     def selecting_rows(self, desired_row_series, level_to_check):
