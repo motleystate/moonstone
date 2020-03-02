@@ -24,7 +24,7 @@ class GeometricMeanNormalization(BaseNormalization):
         self.log_number = log_number
         self.zero_threshold = zero_threshold
         self.normalization_level = normalization_level
-        if normalization_level is not None and isinstance(df.index, pd.core.index.MultiIndex):
+        if normalization_level is not None and isinstance(df.index, pd.MultiIndex):
             self.grouped_df = df.groupby(level=self.normalization_level).sum()
             logger.info("Normalization on %s level (n=%s)", self.normalization_level, self.grouped_df.shape[0])
         else:
