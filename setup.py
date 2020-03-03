@@ -14,6 +14,7 @@ setup(
         'statsmodels',
         'python-slugify',
         'pyaml',
+        'numpy==1.18.1'
     ],
     packages=find_packages(),
     entry_points={'console_scripts': ['moonstone=moonstone.main:run']},
