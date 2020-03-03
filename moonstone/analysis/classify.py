@@ -10,20 +10,19 @@ from sklearn.feature_selection import RFECV
 
 from moonstone.analysis import stats
 
-module_logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
-class SVM(object):
+class ML(object):
     def __init__(self, countfile, metadata, outdir):
-        self.logger = module_logger
-        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
+        logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.countfile = countfile
         self.metadata = metadata
         self.outdir = outdir
 
     def merge(self, variable):
-        self.logger.info('Merge function called to merge count data and metadata.')
-        self.logger.info(f'Variable {variable} from metadata file will be merged with counts.')
+        logger.info('Merge function called to merge count data and metadata.')
+        logger.info(f'Variable {variable} from metadata file will be merged with counts.')
         dc = self.countfile
         dm = self.metadata
 
@@ -37,27 +36,28 @@ class SVM(object):
 
         Thus we will check for mismatched index type and try to correct"""
         if not isinstance(dc.index, type(dm.index)):
-            self.logger.warning(f'Index types do not match: {type(dc.index)} and {type(dm.index)}.')
+            logger.warning(f'Index types do not match: {type(dc.index)} and {type(dm.index)}.')
             dc.set_index(np.int64(np.array(dc.index)), inplace=True)
-            self.logger.info(f' Indexes reset. Count Index={type(dc.index)}, Metadata Index={type(dm.index)}')
+            logger.info(f' Indexes reset. Count Index={type(dc.index)}, Metadata Index={type(dm.index)}')
 
         df = pd.merge(dm[variable], dc, left_index=True, right_index=True)
-        self.logger.info('Merge function completed. Returning merged data frame.')
+        logger.info('Merge function completed. Returning merged data frame.')
         return df  # returned to analyze function as 'df_final'
 
-    def analyze(self, variable=""):
-        self.logger.info(f'Starting SVM analysis with variable: {variable}')
+    def svm(self, variable=""):
+        logger.info(f'Starting SVM analysis with variable: {variable}')
         if variable == 'all':
             pass  # Later to include an iterator over all clinical variables.
 
-        df_final = SVM.merge(self, variable)
+        df_final = ML.merge(self, variable)
 
         # Setup the features and labels
         x = np.array(df_final.drop([variable], axis=1).astype(float))
         # RBF kernel assumes features centered around zero, with equal variance.
         # Metagenomic data is sparse. maxabs_scale() handles both of these conditions.
         x_maxabs_scaled = preprocessing.maxabs_scale(x)
-        self.logger.info("Counts standardized by Maximum Absolute Value. Check Mean & Variance near Zero:")
+        logger.info("Counts standardized by Maximum Absolute Value. Check Mean & Variance near Zero:")
+
         stats.normalized_stats(x_maxabs_scaled)
         y = np.array(df_final[variable])
 
@@ -74,7 +74,7 @@ class SVM(object):
                   (kernel, score.mean()*100, "%", score.std()*200, "%"))
 
     def roc_analysis(self, variable=""):
-        self.logger.info(f'Starting ROC analysis with variable: {variable}')
+        logger.info(f'Starting ROC analysis with variable: {variable}')
         df_final = SVM.merge(self, variable)
 
         x = np.array(df_final.drop([variable], axis=1).astype(float))
@@ -83,7 +83,7 @@ class SVM(object):
 
         # Here we make sure 2, and only 2 categories are present.
         if len(set(y)) != 2:
-            self.logger.fatal('ROC analysis attempted with more than 2 variable states!')
+            logger.fatal('ROC analysis attempted with more than 2 variable states!')
             raise SystemExit("ROC Analysis is only valid for binary [2] variables")
         # My variable counter
         stats.count_items(y)
@@ -141,9 +141,9 @@ class SVM(object):
         plt.savefig(self.outdir+"/"+variable+'_ROC.pdf', format='pdf', dpi=150)
 
     def feature_analysis(self, variable=""):
-        self.logger.info(f'Running SVM feature importance analysis with variable: {variable}')
+        logger.info(f'Running SVM feature importance analysis with variable: {variable}')
         df_final = SVM.merge(self, variable)
-        self.logger.info('Feature Analysis successfully collected merged database.')
+        logger.info('Feature Analysis successfully collected merged database.')
 
         # Setup the data
         x = np.array(df_final.drop([variable], axis=1).astype(float))
@@ -151,7 +151,7 @@ class SVM(object):
         y = np.array(df_final[variable])
 
         # Calculate and plot the contributions of all variables
-        self.logger.info('Running SVM with linear kernel and reporting coefficients')
+        logger.info('Running SVM with linear kernel and reporting coefficients')
         clf = svm.SVC(kernel='linear', probability=True, tol=0.00001)
 
         clf.fit(x, y)
@@ -160,18 +160,18 @@ class SVM(object):
                                columns=['Coef'])
         df_coef.sort_values(by=['Coef']).plot.barh()
         plt.savefig(self.outdir + '/' + variable + '_variable_coefs.pdf', format='pdf', dpi=150)
-        self.logger.info('Coefficients Figure for SVM Linear kernel saved to ' + variable + '_variable_coefs.pdf')
+        logger.info('Coefficients Figure for SVM Linear kernel saved to ' + variable + '_variable_coefs.pdf')
 
         # Run and plot Recursive Factor Elimination with Cross Validation
         rfecv = RFECV(estimator=clf, step=1, cv=StratifiedKFold(10), scoring='accuracy', verbose=0)
 
         rfecv.fit(x, y)
-        self.logger.info("Optimal number of features : %d" % rfecv.n_features_)
+        logger.info("Optimal number of features : %d" % rfecv.n_features_)
 
         df_rank = pd.DataFrame(rfecv.ranking_.transpose(),
                                index=df_final.drop([variable], axis=1).columns, columns=['Coef'])
 
-        self.logger.info('Full component list for %s being written to %s'
+        logger.info('Full component list for %s being written to %s'
                          % (variable, self.outdir+'/'+variable+'_SVM_components.csv'))
 
         df_rank.sort_values(by=['Coef'], ascending=[bool])\
@@ -182,5 +182,5 @@ class SVM(object):
         plt.ylabel("Cross validation score (nb of correct classifications)")
         plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
         plt.savefig(self.outdir + '/' + variable + '_rfecv.pdf', format='pdf', dpi=150)
-        self.logger.info('RFECV Figure for SVM Linear kernel saved to ' + variable + '_rfecv.pdf')
-        self.logger.info('SVM feature importance analysis for %s completed' % variable)
+        logger.info('RFECV Figure for SVM Linear kernel saved to ' + variable + '_rfecv.pdf')
+        logger.info('SVM feature importance analysis for %s completed' % variable)
