@@ -16,19 +16,21 @@ class GeometricMeanNormalization(BaseNormalization):
     info: https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html
     """
 
-    def __init__(self, df, log_number=np.e, zero_threshold=80, normalization_level=None):
+    def __init__(self, df, log_number=np.e, zero_threshold=80, normalization_level=None, replace_0_to_1=False):
         """
         :param normalization_level: At which level of a multi-index you want the normalization to be perfomed
         """
         super().__init__(df)
+        if replace_0_to_1 is True:
+            self.df = self.df.replace(0, 1)
         self.log_number = log_number
         self.zero_threshold = zero_threshold
         self.normalization_level = normalization_level
-        if normalization_level is not None and isinstance(df.index, pd.MultiIndex):
-            self.grouped_df = df.groupby(level=self.normalization_level).sum()
+        if normalization_level is not None and isinstance(self.df.index, pd.MultiIndex):
+            self.grouped_df = self.df.groupby(level=self.normalization_level).sum()
             logger.info("Normalization on %s level (n=%s)", self.normalization_level, self.grouped_df.shape[0])
         else:
-            self.grouped_df = df
+            self.grouped_df = self.df
             logger.info("Normalization on all rows (n=%s)", self.grouped_df.shape[0])
 
     def non_zero_df(self, df):

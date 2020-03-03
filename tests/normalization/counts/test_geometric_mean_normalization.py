@@ -219,6 +219,19 @@ class TestGeometricMeanNormalization(TestCase):
         expected_result = pd.DataFrame(data, columns=column_names, index=ind)
         pd.testing.assert_frame_equal(tested_object.normalized_df, expected_result)
 
+    def test_normalized_df_replace_0_to_1(self):
+        tested_object = GeometricMeanNormalization(self.dummy_df, zero_threshold=100, replace_0_to_1=True)
+        data = [
+            [52.757471,	24.026807, 33.691852, 178.111683],
+            [75.722488, 42.508965, 54.749259, 0.000000],
+            [197.581903, 205.151963, 32.288025, 154.363458],
+            [18.413392, 49.901829, 101.777469, 68.869851]
+        ]
+        column_names = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
+        ind = ["Gen_1", "Gen_2", "Gen_3", 'Gen_4']
+        expected_result = pd.DataFrame(data, columns=column_names, index=ind)
+        pd.testing.assert_frame_equal(tested_object.normalized_df, expected_result)
+
     def test_multiindex_normalization_first_element(self):
         tested_object = pd.DataFrame.from_dict(
             {
