@@ -3,7 +3,7 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from moonstone.normalization.counts.geometric_mean_normalization import (
+from moonstone.normalization.counts.geometric_mean import (
     GeometricMeanNormalization
 )
 
