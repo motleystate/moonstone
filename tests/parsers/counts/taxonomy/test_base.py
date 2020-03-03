@@ -79,8 +79,8 @@ class TestTaxonomyCountsBaseParser(TestCase):
         terms_to_remove = ['term_to_remove', 'uncultured']
         expected_df = pd.DataFrame(
             [
-                ['Bacteria', 'Actinobacteria', 'Actinobacteria', 'Actinomycetales', 'Actinomycetales (order)', 5.5, 6.5],
-                ['Bacteria', 'Proteobacteria', 'Alphaproteobacteria', 'Caulobacterales', 'Caulobacterales (order)', 9.5, 7.3]
+                ['Bacteria', 'Actinobacteria', 'Actinobacteria', 'Actinomycetales', 'Actinomycetales (order)', 5.5, 6.5],  # noqa
+                ['Bacteria', 'Proteobacteria', 'Alphaproteobacteria', 'Caulobacterales', 'Caulobacterales (order)', 9.5, 7.3]  # noqa
             ],
             columns=['kingdom', 'phylum', 'class', 'order', 'family', 'sample_1', 'sample_2']
         )
