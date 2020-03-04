@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from moonstone.parsers.base import BaseParser
@@ -44,7 +45,12 @@ class TaxonomyCountsBaseParser(BaseParser):
         taxa_df['species'] = taxa_df[['genus', 'species']].apply(lambda x: join_genus_species(x), axis=1)
         return taxa_df
 
-    def split_taxa_fill_none(self, df, sep=";",  taxo_prefix="__", merge_genus_species=False):
+    def split_taxa_fill_none(self, df, sep=";",  taxo_prefix="__", merge_genus_species=False,
+                             terms_to_remove=None):
+        """
+        :param terms_to_remove: if specified, list of term to remove from taxa names (e.g. uncultured)
+        :type terms_to_remove: LIST
+        """
 
         def remove_taxo_prefix(string):
             if string is None:
@@ -60,6 +66,8 @@ class TaxonomyCountsBaseParser(BaseParser):
         self._rank_level = len(taxa_columns.columns)
         taxa_columns.columns = self.taxonomical_names[:self._rank_level]
         taxa_columns = taxa_columns.applymap(lambda x: remove_taxo_prefix(x))
+        if terms_to_remove is not None:
+            taxa_columns = taxa_columns.replace(terms_to_remove, np.nan)
         if merge_genus_species:
             taxa_columns = self._merge_genus_species(taxa_columns)
         taxa_columns = self._fill_none(taxa_columns)
