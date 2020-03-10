@@ -5,7 +5,7 @@ class BaseScaling:
         self.x = raw_x
         self._scaled_x = None
 
-    def scale(self):
+    def scaler(self):
         """Overridden in child classes to perform a specific scaling."""
 
         return self.x
@@ -13,6 +13,6 @@ class BaseScaling:
     @property
     def scale_x(self):
         if getattr(self, "_scaled_df", None) is None:
-            self._scaled_x = self.scale()
+            self._scaled_x = self.scaler()
             self.x = self._scaled_x
         return self._scaled_x

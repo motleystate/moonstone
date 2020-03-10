@@ -9,7 +9,7 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.feature_selection import RFECV
 
 from moonstone.analysis import stats
-from moonstone.normalization.processed import ScalingNormalization
+from moonstone.normalization.processed.scaling_normalization import StandardScaler
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +52,9 @@ class ML(object):
 
         # Setup the features and labels
         x = np.array(df_final.drop([variable], axis=1).astype(float))
-        x_scaled = ScalingNormalization(x)
+
+        x_scaled = StandardScaler(x).scaler()
+
         y = np.array(df_final[variable])
 
         # My variable counter
@@ -63,7 +65,7 @@ class ML(object):
         for kernel in ["linear", "poly", "rbf", "sigmoid"]:
             clf = svm.SVC(kernel=kernel, tol=0.00001, gamma='scale')
             # Get accuracy
-            score = cross_val_score(clf, x_maxabs_scaled, y, cv=10)
+            score = cross_val_score(clf, x_scaled, y, cv=10)
             print("\tAccuracy for %s kernel: %.2f%s (+/- %.2f%s)" %
                   (kernel, score.mean()*100, "%", score.std()*200, "%"))
 
