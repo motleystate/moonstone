@@ -1,0 +1,1460 @@
+sample,SUBJID,VisitId,SEX,AGE,CMV_Serology,TABAC,PROBIO,CRP,GRIPPE,IgG,IgA,IgM,IgE,Visit_day,Visit_month,Visit_year,Season,Smoking,Age_Group,Probiotics,Grippe
+1,707,1,1,51,CMV_Negative,1,0,5.3,0,10.53,2.39,0.63,13.28,2,10,2012,Fall,Ex smoker,50-59yr,No intake,Negative
+2,102,1,1,24,CMV_Positive,2,0,0.6,0,9.79,1.55,1.72,32.4,9,10,2012,Fall,Smoker,20-29yr,No intake,Negative
+3,211,2,2,37,CMV_Negative,0,2,0.5,1,10.45,1.82,1.12,43.76,4,10,2012,Fall,Non smoker,30-39yr,Low intake,Positive
+4,703,1,1,58,CMV_Negative,2,0,2.5,1,9.58,3.09,1.3,34.49,1,10,2012,Fall,Smoker,50-59yr,No intake,Positive
+5,309,2,1,30,CMV_Positive,2,0,2.7,1,8.87,3.14,0.41,4.62,4,10,2012,Fall,Smoker,30-39yr,No intake,Positive
+6,307,2,1,32,CMV_Negative,0,0,0.5,1,11.96,2.4,1.01,239.59,4,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+7,604,1,2,58,CMV_Negative,0,0,11.7,1,12.74,1.96,1.3,73.24,2,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+8,203,2,2,39,CMV_Negative,2,0,0.3,1,9.82,1.57,0.66,30.75,4,10,2012,Fall,Smoker,30-39yr,No intake,Positive
+9,611,1,2,56,CMV_Negative,0,0,0.9,1,10.39,2.02,1.07,192.76,3,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+10,5,1,2,21,CMV_Negative,0,0,1,1,11.31,1.57,1.2,56.45,10,10,2012,Fall,Non smoker,20-29yr,No intake,Positive
+11,601,1,2,57,CMV_Positive,2,0,0.9,0,6.84,1.47,2.25,44.78,2,10,2012,Fall,Smoker,50-59yr,No intake,Negative
+12,1,1,2,27,CMV_Positive,2,0,7,1,8.04,0.98,0.85,8.49,9,10,2012,Fall,Smoker,20-29yr,No intake,Positive
+13,209,2,2,33,CMV_Positive,2,0,0.4,1,7.16,2.26,1.52,58.94,4,10,2012,Fall,Smoker,30-39yr,No intake,Positive
+14,210,2,2,38,CMV_Negative,0,0,2,1,11.76,1.72,0.74,31.9,4,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+15,3,1,2,28,CMV_Positive,2,0,5.9,0,7.62,1.97,1.03,669.07,10,10,2012,Fall,Smoker,20-29yr,No intake,Negative
+16,607,1,2,51,CMV_Negative,0,0,1,1,9.38,1.13,1.27,5.44,3,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+17,310,2,1,32,CMV_Positive,0,0,0.2,1,8.38,1.77,0.49,12.45,4,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+18,603,1,2,55,CMV_Negative,1,0,1.5,1,13.78,2.84,1.4,23.54,2,10,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+19,705,1,1,52,CMV_Positive,0,0,0.3,1,8.27,2.57,1.02,31.89,2,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+20,804,1,2,68,CMV_Positive,0,0,4.8,0,8.73,1.86,1.17,5.24,17,10,2012,Fall,Non smoker,60-69yr,No intake,Negative
+21,605,1,2,57,CMV_Positive,0,0,1.1,1,10.84,2.63,1.27,23.17,3,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+22,610,1,2,50,CMV_Positive,1,0,0.7,1,10.85,2.55,0.94,5.44,3,10,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+23,305,2,1,36,CMV_Negative,2,0,0.4,1,9.47,1.79,0.62,8.98,4,10,2012,Fall,Smoker,30-39yr,No intake,Positive
+24,706,1,1,50,CMV_Positive,0,0,0.4,0,10.36,1.59,1.64,9.12,2,10,2012,Fall,Non smoker,50-59yr,No intake,Negative
+25,608,1,2,58,CMV_Positive,1,0,3,0,9.96,1.77,0.76,165.95,3,10,2012,Fall,Ex smoker,50-59yr,No intake,Negative
+26,2,1,2,22,CMV_Negative,0,2,0.7,1,11.44,1.99,1.05,476.93,10,10,2012,Fall,Non smoker,20-29yr,Low intake,Positive
+27,101,1,1,24,CMV_Negative,2,0,2.2,1,10.87,2.16,1.49,69.4,9,10,2012,Fall,Smoker,20-29yr,No intake,Positive
+28,212,2,2,30,CMV_Negative,0,0,4.1,1,10.11,0.72,0.77,30.21,4,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+29,612,1,2,55,CMV_Negative,2,0,2,0,8.87,4.92,3.22,54.01,3,10,2012,Fall,Smoker,50-59yr,No intake,Negative
+30,704,1,1,57,CMV_Negative,0,0,3.4,1,11.99,1.75,0.96,19.5,1,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+31,602,1,2,56,CMV_Negative,1,0,2,0,9.34,2.42,2.25,1274.57,2,10,2012,Fall,Ex smoker,50-59yr,No intake,Negative
+32,606,1,2,58,CMV_Negative,0,0,1.8,0,10.38,1.74,0.7,16.34,3,10,2012,Fall,Non smoker,50-59yr,No intake,Negative
+33,7,1,2,24,CMV_Positive,0,0,0.4,1,9.23,0.73,1.43,23.65,10,10,2012,Fall,Non smoker,20-29yr,No intake,Positive
+34,6,1,2,22,CMV_Negative,2,0,11.6,0,6.86,1.98,1.67,185.9,10,10,2012,Fall,Smoker,20-29yr,No intake,Negative
+35,609,1,2,56,CMV_Positive,0,0,0.2,0,7.63,1.85,1.08,16.61,3,10,2012,Fall,Non smoker,50-59yr,No intake,Negative
+36,306,2,1,34,CMV_Positive,0,0,0.3,1,10.85,2.25,1.11,7.96,4,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+37,204,2,2,37,CMV_Positive,2,0,0.6,0,10.75,1.7,2.47,88.45,4,10,2012,Fall,Smoker,30-39yr,No intake,Negative
+38,702,1,1,52,CMV_Negative,0,0,0.4,1,9.79,1.08,0.96,15.02,1,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+39,304,2,1,39,CMV_Negative,0,0,1.3,1,11.21,1.51,1.38,37.82,4,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+40,103,1,1,27,CMV_Negative,2,0,0.7,1,9.67,1.35,0.82,42.11,9,10,2012,Fall,Smoker,20-29yr,No intake,Positive
+41,4,1,2,23,CMV_Negative,2,0,9.8,1,9.46,1.51,1.01,12.67,10,10,2012,Fall,Smoker,20-29yr,No intake,Positive
+42,715,1,1,53,CMV_Negative,0,0,0.5,1,8.04,1.37,0.81,23.17,6,11,2012,Fall,Non smoker,50-59yr,No intake,Positive
+43,617,1,2,53,CMV_Positive,2,0,11.4,0,9.53,1.87,0.75,33.12,7,11,2012,Fall,Smoker,50-59yr,No intake,Negative
+44,621,1,2,53,CMV_Negative,0,0,3.7,1,13.57,2.61,0.99,4.34,7,11,2012,Fall,Non smoker,50-59yr,No intake,Positive
+45,802,2,2,66,CMV_Positive,0,0,4.2,1,11.01,1.88,0.52,167.59,8,11,2012,Fall,Non smoker,60-69yr,No intake,Positive
+46,619,1,2,54,CMV_Positive,0,0,0.8,0,8.4,1.46,2.66,11.44,7,11,2012,Fall,Non smoker,50-59yr,No intake,Negative
+47,714,1,1,53,CMV_Negative,0,0,0.7,0,8.28,2.71,1.5,2.92,5,11,2012,Fall,Non smoker,50-59yr,No intake,Negative
+48,904,2,1,63,CMV_Positive,2,0,1.2,1,9.64,1.83,0.61,3.46,8,11,2012,Fall,Smoker,60-69yr,No intake,Positive
+49,321,2,1,34,CMV_Negative,1,0,5.2,1,11.27,1.33,1.71,20.53,7,11,2012,Fall,Ex smoker,30-39yr,No intake,Positive
+50,903,2,1,66,CMV_Negative,0,0,1.5,1,8.63,2.38,0.82,70.01,8,11,2012,Fall,Non smoker,60-69yr,No intake,Positive
+51,5,2,2,21,CMV_Negative,0,0,1,1,11.31,1.57,1.2,56.45,25,10,2012,Fall,Non smoker,20-29yr,No intake,Positive
+52,902,2,1,68,CMV_Negative,0,0,1.1,0,10.43,1.71,1.24,12.1,8,11,2012,Fall,Non smoker,60-69yr,No intake,Negative
+53,710,1,1,54,CMV_Negative,0,0,1,0,8.7,3.01,0.57,20.8,5,11,2012,Fall,Non smoker,50-59yr,No intake,Negative
+54,509,2,1,46,CMV_Negative,2,0,3.5,1,8.39,2.94,0.61,290.76,25,10,2012,Fall,Smoker,40-49yr,No intake,Positive
+55,901,2,1,62,CMV_Negative,1,0,1,0,13.98,3.61,1.69,49.86,8,11,2012,Fall,Ex smoker,60-69yr,No intake,Negative
+56,614,1,2,54,CMV_Negative,1,0,0.6,0,11.53,2.96,1.18,65.16,6,11,2012,Fall,Ex smoker,50-59yr,No intake,Negative
+57,711,1,1,53,CMV_Positive,1,0,0.8,1,12.27,4.92,2.42,3000,5,11,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+58,616,1,2,58,CMV_Negative,0,0,2.3,1,15.11,3.13,1.62,33.28,7,11,2012,Fall,Non smoker,50-59yr,No intake,Positive
+59,4,2,2,23,CMV_Negative,2,0,9.8,1,9.46,1.51,1.01,12.67,25,10,2012,Fall,Smoker,20-29yr,No intake,Positive
+60,1,2,2,27,CMV_Positive,2,0,7,1,8.04,0.98,0.85,8.49,25,10,2012,Fall,Smoker,20-29yr,No intake,Positive
+61,615,1,2,52,CMV_Positive,2,2,2.3,1,5.94,1.11,0.9,90.03,6,11,2012,Fall,Smoker,50-59yr,Low intake,Positive
+62,622,1,2,58,CMV_Negative,1,2,0.4,1,7.32,1.74,0.85,14.76,7,11,2012,Fall,Ex smoker,50-59yr,Low intake,Positive
+63,881,1,2,64,CMV_Positive,1,0,1.2,1,13.37,2.36,1.72,14.81,17,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+64,953,1,1,64,CMV_Positive,1,0,18.6,1,13.19,4.01,1.06,183.15,16,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+65,79,2,2,27,CMV_Negative,0,0,0.4,1,12.26,2.95,1.31,57.44,18,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+66,879,1,2,64,CMV_Positive,1,0,6.9,1,11.69,2.74,0.73,298.75,17,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+67,950,2,1,60,CMV_Negative,1,0,1.2,1,12.39,2.38,2.57,64.31,22,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+68,478,1,2,47,CMV_Negative,2,2,0.5,1,7.66,2.02,1.4,258,16,4,2013,Spring,Smoker,40-49yr,Low intake,Positive
+69,479,1,2,42,CMV_Negative,0,0,2,1,12.62,2.87,2.13,31.61,17,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+70,5219,1,2,38,CMV_Negative,1,0,0.2,1,11.65,2.14,2.02,32.81,17,4,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+71,371,1,1,35,CMV_Positive,0,0,0.8,1,12.9,3.04,0.83,44.29,16,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+72,565,2,1,40,CMV_Negative,0,0,3.4,1,11.25,1.48,1.34,111.36,18,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+73,159,1,1,26,CMV_Positive,0,0,2.4,1,10.67,1.8,0.43,7.1,16,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+74,955,1,1,63,CMV_Negative,1,0,0.6,1,8.82,1.43,0.64,124,17,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+75,563,2,1,41,CMV_Negative,1,0,0.8,1,12.06,2.96,0.58,6.18,18,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+76,880,1,2,69,CMV_Negative,0,0,2.9,1,10.89,2.65,0.74,37.33,17,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+77,755,2,1,50,CMV_Positive,0,0,3.5,1,13.19,3.66,0.94,33.07,22,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+78,359,2,1,39,CMV_Negative,0,0,0.7,1,10.36,3,1.04,80.55,22,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+79,78,2,2,28,CMV_Negative,0,0,0.3,1,11.04,1.68,3.66,1.79,18,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+80,575,1,1,49,CMV_Negative,2,0,0.9,1,9.96,3.17,0.98,92.54,17,4,2013,Spring,Smoker,40-49yr,No intake,Positive
+81,876,2,2,60,CMV_Negative,0,0,7.6,1,7.92,2.46,0.53,17.69,18,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+82,360,2,1,31,CMV_Negative,2,0,1.4,1,7.86,1.65,0.92,37.04,22,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+83,878,1,2,61,CMV_Negative,0,0,0.8,1,12.1,3.29,1.35,27.83,16,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+84,735,1,1,54,CMV_Positive,1,0,3.8,0,9.44,3.1,0.8,376.27,4,3,2013,Spring,Ex smoker,50-59yr,No intake,Negative
+85,468,1,2,47,CMV_Positive,2,0,0.4,1,10.18,2.84,1.69,203.53,6,3,2013,Spring,Smoker,40-49yr,No intake,Positive
+86,840,1,2,68,CMV_Positive,0,0,1.5,1,10.31,1.96,1.84,10.74,5,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+87,737,1,1,53,CMV_Positive,0,30,1,1,11.29,3.14,0.77,13.3,5,3,2013,Spring,Non smoker,50-59yr,High intake,Positive
+88,263,1,2,34,CMV_Negative,0,0,0.3,1,12.4,2.37,1.08,63.48,6,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+89,841,1,2,62,CMV_Positive,1,0,0.9,1,11.74,2.58,0.79,5.3,5,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+90,346,2,1,37,CMV_Negative,1,0,3.2,1,9.88,3.92,0.59,156.75,7,3,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+91,332,2,1,37,CMV_Positive,2,0,2.4,1,15.9,1.75,1.97,23.78,6,3,2013,Spring,Smoker,30-39yr,No intake,Positive
+92,144,1,1,26,CMV_Positive,0,0,0.3,1,10.35,1.58,1.73,21.75,5,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+93,261,1,2,33,CMV_Positive,0,0,3,1,13.14,2.72,1.21,47.18,4,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+94,69,2,2,21,CMV_Negative,0,0,0.2,1,12.53,0.55,2.17,12.32,6,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+95,837,1,2,67,CMV_Negative,0,0,1.1,0,9.33,0.81,1.13,120.44,4,3,2013,Spring,Non smoker,60-69yr,No intake,Negative
+1486,928,1,1,64,CMV_Negative,0,0,1.2,1,13.67,2.78,1.4,975.57,5,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+96,843,1,2,63,CMV_Negative,1,0,0.6,1,10.35,1.17,1.3,8.43,5,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+97,262,1,2,30,CMV_Negative,0,0,0.2,1,10.12,1.61,1.36,16.6,5,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+98,537,2,1,41,CMV_Negative,1,0,2.3,1,11.4,3.35,1.21,114.17,6,3,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+99,75,1,2,25,CMV_Negative,2,0,0.4,1,9.43,2.47,0.87,12.81,5,3,2013,Spring,Smoker,20-29yr,No intake,Positive
+100,556,1,1,48,CMV_Positive,0,0,2,1,13.23,1.73,0.68,4.58,6,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+101,729,2,1,60,CMV_Negative,0,0,0.5,1,9.86,3.29,0.82,34.54,7,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+102,216,1,2,37,CMV_Positive,0,0,0.2,1,14.65,2.61,0.87,17.26,23,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+103,420,1,2,46,CMV_Positive,0,0,1.1,0,8.4,2.73,1.14,228.54,14,11,2012,Fall,Non smoker,40-49yr,No intake,Negative
+104,195,2,1,26,CMV_Negative,2,0,1.4,1,8.31,1.7,1.34,51.23,25,7,2013,Summer,Smoker,20-29yr,No intake,Positive
+105,517,1,1,43,CMV_Positive,0,0,1.2,1,11.96,2.29,0.99,195.17,12,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+106,5096,1,2,20,CMV_Negative,2,2,2.2,1,10.29,1.16,0.87,10.46,1,8,2013,Summer,Smoker,20-29yr,Low intake,Positive
+107,522,1,1,46,CMV_Negative,2,0,6,0,10.71,2.44,1.13,23.73,12,11,2012,Fall,Smoker,40-49yr,No intake,Negative
+108,524,1,1,45,CMV_Negative,2,0,3.7,1,9.67,2.56,1.76,79.1,13,11,2012,Fall,Smoker,40-49yr,No intake,Positive
+109,699,2,2,54,CMV_Negative,0,0,2.4,1,10.65,1.39,1.05,11.49,25,7,2013,Summer,Non smoker,50-59yr,No intake,Positive
+110,624,1,2,52,CMV_Negative,1,0,1.7,0,8.97,2.21,1.28,57.8,14,11,2012,Fall,Ex smoker,50-59yr,No intake,Negative
+111,198,2,1,28,CMV_Positive,1,0,0.3,1,8.89,1.81,1.42,438.83,24,7,2013,Summer,Ex smoker,20-29yr,No intake,Positive
+112,418,1,2,44,CMV_Positive,1,0,6.9,0,12.51,1.81,1.33,20.83,14,11,2012,Fall,Ex smoker,40-49yr,No intake,Negative
+113,526,1,1,40,CMV_Positive,1,0,1.5,1,12.13,4.39,0.56,49.3,13,11,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+114,521,1,1,46,CMV_Negative,0,0,1.1,1,14.84,2.35,1.06,76.7,12,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+115,998,2,1,65,CMV_Negative,1,0,1,0,11.95,2.56,1.64,74.84,1,8,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+116,992,2,1,64,CMV_Negative,0,0,2,0,6.93,1.61,0.32,17.16,18,7,2013,Summer,Non smoker,60-69yr,No intake,Negative
+117,5096,2,2,20,CMV_Negative,2,2,2.2,1,10.29,1.16,0.87,10.46,8,8,2013,Summer,Smoker,20-29yr,Low intake,Positive
+118,518,1,1,45,CMV_Negative,0,0,1.9,1,10.16,2.04,1,324.5,12,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+119,996,2,1,60,CMV_Negative,0,0,0.7,1,9.69,2.32,0.75,153.54,25,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+120,525,1,1,49,CMV_Positive,2,0,3.2,0,11.06,4.94,1.55,160.59,13,11,2012,Fall,Smoker,40-49yr,No intake,Negative
+121,520,1,1,45,CMV_Positive,2,0,2,1,8.54,1.75,2.07,13.42,12,11,2012,Fall,Smoker,40-49yr,No intake,Positive
+122,898,2,2,66,CMV_Positive,2,0,1.7,1,7.76,3.25,1.78,486.32,24,7,2013,Summer,Smoker,60-69yr,No intake,Positive
+123,500,2,2,48,CMV_Positive,1,0,0.7,0,7.98,1.4,0.74,2.66,1,8,2013,Summer,Ex smoker,40-49yr,No intake,Negative
+124,160,1,1,24,CMV_Negative,0,0,0.3,1,14.22,3,1.61,6.62,16,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+125,161,1,1,27,CMV_Negative,2,0,0.4,1,6.15,1.59,0.72,9.21,17,4,2013,Spring,Smoker,20-29yr,No intake,Positive
+126,369,1,1,36,CMV_Positive,0,0,0.5,1,12.8,2.73,1.32,151.58,16,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+127,5534,1,1,46,CMV_Positive,2,0,0.8,1,9.57,1.54,1.17,3000,16,4,2013,Spring,Smoker,40-49yr,No intake,Positive
+128,82,1,2,29,CMV_Positive,0,0,0.9,1,11.41,5.07,1.12,28.34,17,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+129,564,2,1,47,CMV_Negative,0,0,0.5,1,11.93,1.65,0.79,54.41,18,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+130,358,2,1,33,CMV_Positive,0,0,1,1,12.4,2.06,1.14,23.59,18,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+131,754,2,1,51,CMV_Positive,1,0,0.7,1,10.02,3.51,1.11,10.3,18,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+132,477,1,2,43,CMV_Positive,0,0,0.9,1,9.9,1.54,1.02,12.72,16,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+133,874,2,2,64,CMV_Negative,0,0,3.4,1,8.76,1.09,1.13,37.58,18,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+134,873,2,2,62,CMV_Positive,1,0,7.5,1,11.95,2.09,0.79,79.59,18,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+135,661,1,2,50,CMV_Positive,2,2,0.2,1,10.32,1.07,0.78,184.42,17,4,2013,Spring,Smoker,50-59yr,Low intake,Positive
+136,662,1,2,50,CMV_Positive,1,0,2,1,10.02,3.13,0.79,8.73,17,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+137,574,1,1,41,CMV_Positive,1,0,0.3,1,12.72,2.24,1.1,17.77,17,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+138,370,1,1,39,CMV_Negative,1,2,0.9,1,7.65,1.09,1.62,39.04,16,4,2013,Spring,Ex smoker,30-39yr,Low intake,Positive
+139,756,2,1,52,CMV_Negative,2,0,1.5,1,9.91,3.03,2.51,8,22,4,2013,Spring,Smoker,50-59yr,No intake,Positive
+140,954,1,1,65,CMV_Negative,0,0,0.9,1,8.79,1.13,1.77,13.35,16,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+141,357,2,1,38,CMV_Negative,0,0,1.2,1,11.88,3.57,0.38,253.54,18,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+142,153,2,1,24,CMV_Positive,0,0,1.3,1,13.23,1.85,1.79,1.7,18,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+143,573,1,1,42,CMV_Negative,0,0,0.4,1,10.11,1.76,2.74,70.68,16,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+144,719,1,1,50,CMV_Negative,1,0,1.2,1,11.09,1.79,1.43,67.04,17,12,2012,Winter,Ex smoker,50-59yr,No intake,Positive
+145,720,1,1,59,CMV_Negative,0,0,3.4,0,10.21,2.5,0.58,180.18,19,12,2012,Winter,Non smoker,50-59yr,No intake,Negative
+146,118,1,1,24,CMV_Negative,2,0,1.6,1,16.58,2.46,1.46,38.94,17,12,2012,Winter,Smoker,20-29yr,No intake,Positive
+147,225,1,2,31,CMV_Negative,1,0,8.4,1,11.33,2.21,1.24,18.3,18,12,2012,Winter,Ex smoker,30-39yr,No intake,Positive
+148,15,1,2,27,CMV_Negative,0,0,4.7,1,12.31,2.7,1.41,201.2,17,12,2012,Winter,Non smoker,20-29yr,No intake,Positive
+149,530,1,1,44,CMV_Negative,2,0,4.6,0,12.77,2.74,0.43,21.12,19,12,2012,Winter,Smoker,40-49yr,No intake,Negative
+150,528,1,1,44,CMV_Negative,0,0,0.9,1,11.95,1.41,0.83,2.46,17,12,2012,Winter,Non smoker,40-49yr,No intake,Positive
+151,17,1,2,21,CMV_Negative,0,0,1.2,1,12.59,1.56,1.32,19.86,18,12,2012,Winter,Non smoker,20-29yr,No intake,Positive
+152,818,1,2,69,CMV_Positive,0,0,0.8,0,7.71,1.61,0.72,19.21,12,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+153,824,1,2,64,CMV_Negative,1,0,0.7,0,8.45,1.46,1.19,16.59,18,12,2012,Winter,Ex smoker,60-69yr,No intake,Negative
+154,424,1,2,48,CMV_Negative,1,0,0.3,0,10.82,2.46,0.8,5.69,19,12,2012,Winter,Ex smoker,40-49yr,No intake,Negative
+155,326,1,1,35,CMV_Negative,0,0,0.3,1,10.55,1.98,0.78,1.16,18,12,2012,Winter,Non smoker,30-39yr,No intake,Positive
+156,325,1,1,30,CMV_Positive,2,0,0.2,0,8.52,1.6,0.59,110.85,18,12,2012,Winter,Smoker,30-39yr,No intake,Negative
+157,816,1,2,66,CMV_Positive,0,0,0.6,1,14.71,2.82,0.51,100.67,12,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+158,119,1,1,23,CMV_Negative,0,0,0.2,1,7.7,1.21,1.33,5.39,18,12,2012,Winter,Non smoker,20-29yr,No intake,Positive
+160,822,1,2,61,CMV_Negative,0,0,2.3,1,9.88,0.85,1.04,29.55,17,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+161,223,1,2,32,CMV_Negative,0,0,0.5,1,10.55,1.65,0.87,13.09,18,12,2012,Winter,Non smoker,30-39yr,No intake,Positive
+162,817,1,2,66,CMV_Positive,2,0,0.8,0,12.06,2.59,0.99,21.13,12,12,2012,Winter,Smoker,60-69yr,No intake,Negative
+163,19,1,2,23,CMV_Negative,0,0,0.2,0,11.1,1.31,1.77,50.58,19,12,2012,Winter,Non smoker,20-29yr,No intake,Negative
+164,423,1,2,42,CMV_Positive,2,0,1.1,1,10.64,2.7,0.38,10.07,18,12,2012,Winter,Smoker,40-49yr,No intake,Positive
+165,625,1,2,57,CMV_Negative,0,0,1.4,1,12.64,1.36,1.7,26.34,17,12,2012,Winter,Non smoker,50-59yr,No intake,Positive
+166,628,1,2,55,CMV_Negative,1,0,0.4,1,10.22,1.58,0.78,196.23,18,12,2012,Winter,Ex smoker,50-59yr,No intake,Positive
+167,16,1,2,26,CMV_Negative,0,0,0.7,1,9.23,2.49,1.2,101.5,18,12,2012,Winter,Non smoker,20-29yr,No intake,Positive
+168,327,1,1,31,CMV_Negative,1,0,0.2,1,11.26,1.83,1.42,27.7,18,12,2012,Winter,Ex smoker,30-39yr,No intake,Positive
+169,918,1,1,63,CMV_Negative,1,0,0.4,1,12.3,6.59,7.35,22.15,19,12,2012,Winter,Ex smoker,60-69yr,No intake,Positive
+170,815,1,2,67,CMV_Negative,0,0,3.1,0,8.62,1.08,0.81,233.87,12,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+171,826,1,2,64,CMV_Positive,0,0,2.8,1,11.98,3.25,0.68,15.98,19,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+172,626,1,2,59,CMV_Positive,1,2,0.5,0,9.46,2.31,0.75,21.86,17,12,2012,Winter,Ex smoker,50-59yr,Low intake,Negative
+173,721,1,1,60,CMV_Positive,0,0,1,0,12.01,2.89,1.68,15.91,19,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+174,224,1,2,32,CMV_Negative,0,0,3.2,0,13.65,1.47,1.65,20.06,18,12,2012,Winter,Non smoker,30-39yr,No intake,Negative
+175,324,1,1,35,CMV_Negative,0,0,0.8,1,11.25,3.03,0.87,24.55,17,12,2012,Winter,Non smoker,30-39yr,No intake,Positive
+176,819,1,2,64,CMV_Negative,0,0,2.7,1,12.34,1.69,0.62,34.03,12,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+177,529,1,1,40,CMV_Negative,0,0,0.2,0,11.96,1.57,1.74,3000,19,12,2012,Winter,Non smoker,40-49yr,No intake,Negative
+178,823,1,2,63,CMV_Positive,0,0,0.6,1,8.07,1.9,0.95,15.11,17,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+179,825,1,2,62,CMV_Negative,0,0,0.2,1,9.14,1.14,1.9,21.31,19,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+180,18,1,2,21,CMV_Positive,0,4,4.4,0,10.79,2.43,2.37,6.88,19,12,2012,Winter,Non smoker,20-29yr,Low intake,Negative
+181,120,1,1,25,CMV_Negative,0,12,0.5,0,11.94,2.89,1.11,1082.11,19,12,2012,Winter,Non smoker,20-29yr,High intake,Negative
+182,821,1,2,60,CMV_Negative,0,0,1,0,7.9,1.9,0.91,9.12,12,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+183,627,1,2,55,CMV_Negative,0,0,1.3,0,12.92,2.12,1.57,15.3,17,12,2012,Winter,Non smoker,50-59yr,No intake,Negative
+184,422,1,2,46,CMV_Negative,1,0,0.3,0,14.56,3.01,1.34,39.15,17,12,2012,Winter,Ex smoker,40-49yr,No intake,Negative
+185,803,2,2,66,CMV_Positive,0,0,1,0,9.55,2.41,1.81,13.25,8,11,2012,Fall,Non smoker,60-69yr,No intake,Negative
+186,806,2,2,67,CMV_Positive,0,0,2.2,0,7.52,1.53,3.16,2.99,8,11,2012,Fall,Non smoker,60-69yr,No intake,Negative
+187,808,2,2,65,CMV_Positive,0,0,4.3,0,11.4,3.17,0.96,30.01,8,11,2012,Fall,Non smoker,60-69yr,No intake,Negative
+188,618,1,2,51,CMV_Negative,1,0,1.9,0,9.42,2.86,0.61,56.01,7,11,2012,Fall,Ex smoker,50-59yr,No intake,Negative
+189,905,2,1,66,CMV_Negative,1,0,0.9,1,8.55,2.16,0.34,44.16,8,11,2012,Fall,Ex smoker,60-69yr,No intake,Positive
+190,709,1,1,55,CMV_Positive,1,0,0.9,1,10.23,2.11,1.54,55.24,5,11,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+1487,716,1,1,56,CMV_Positive,1,0,0.6,1,9.51,1.47,0.39,32.55,6,11,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+191,613,1,2,53,CMV_Negative,1,0,5.1,1,7.66,2.55,0.89,20.27,6,11,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+192,101,2,1,24,CMV_Negative,2,0,2.2,1,10.87,2.16,1.49,69.4,25,10,2012,Fall,Smoker,20-29yr,No intake,Positive
+193,7,2,2,24,CMV_Positive,0,0,0.4,1,9.23,0.73,1.43,23.65,25,10,2012,Fall,Non smoker,20-29yr,No intake,Positive
+194,514,1,1,48,CMV_Negative,2,0,0.8,1,9.14,2.24,0.99,119.08,6,11,2012,Fall,Smoker,40-49yr,No intake,Positive
+195,103,2,1,27,CMV_Negative,2,0,0.7,1,9.67,1.35,0.82,42.11,6,11,2012,Fall,Smoker,20-29yr,No intake,Positive
+196,6,2,2,22,CMV_Negative,2,0,11.6,0,6.86,1.98,1.67,185.9,25,10,2012,Fall,Smoker,20-29yr,No intake,Negative
+197,620,1,2,51,CMV_Negative,1,0,0.4,1,12.99,1.45,1.04,14.92,7,11,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+198,713,1,1,58,CMV_Negative,0,0,4,1,8.77,3.4,0.46,7.79,5,11,2012,Fall,Non smoker,50-59yr,No intake,Positive
+200,717,1,1,51,CMV_Negative,0,0,4.3,1,10.58,2.9,1.82,176,6,11,2012,Fall,Non smoker,50-59yr,No intake,Positive
+202,708,1,1,53,CMV_Negative,2,0,2.8,1,9.56,3.31,1.43,55.5,5,11,2012,Fall,Smoker,50-59yr,No intake,Positive
+203,102,2,1,24,CMV_Positive,2,0,0.6,0,9.79,1.55,1.72,32.4,25,10,2012,Fall,Smoker,20-29yr,No intake,Negative
+204,341,1,1,32,CMV_Positive,1,0,2.1,1,8.56,1.89,0.6,51.67,12,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+205,125,2,1,21,CMV_Negative,2,0,0.2,1,9.43,1.25,1.06,123.43,7,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+206,245,1,2,34,CMV_Positive,2,0,1.6,1,8.82,1.5,0.89,16.35,12,2,2013,Winter,Smoker,30-39yr,No intake,Positive
+207,538,2,1,47,CMV_Negative,1,0,4.5,1,12.19,2.68,1.01,52.62,7,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+208,53,1,2,22,CMV_Negative,0,0,0.8,1,12.29,2.36,2.18,26.21,11,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+209,138,1,1,21,CMV_Negative,0,0,1.2,0,11.63,5.36,0.91,13.6,12,2,2013,Winter,Non smoker,20-29yr,No intake,Negative
+210,34,2,2,24,CMV_Negative,0,0,4.3,1,10.77,2.53,1.35,107.73,7,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+211,440,2,2,46,CMV_Positive,2,0,0.6,0,12.09,0.84,1.15,65.79,7,2,2013,Winter,Smoker,40-49yr,No intake,Negative
+212,458,1,2,40,CMV_Negative,0,0,1.4,0,10.84,1.15,1.03,12.79,11,2,2013,Winter,Non smoker,40-49yr,No intake,Negative
+213,545,1,1,42,CMV_Negative,1,0,0.6,0,10.21,2,1,29.11,11,2,2013,Winter,Ex smoker,40-49yr,No intake,Negative
+214,55,1,2,22,CMV_Negative,2,0,10.2,1,13.48,2.23,0.92,7.69,11,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+215,61,1,2,22,CMV_Negative,1,0,15.4,1,12.39,3.72,0.82,21.26,12,2,2013,Winter,Ex smoker,20-29yr,No intake,Positive
+216,246,1,2,35,CMV_Positive,0,0,3.6,1,10.7,2.15,1.08,733.95,12,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+217,342,1,1,33,CMV_Negative,1,0,0.3,1,9.53,1.89,1.15,92.05,12,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+218,456,1,2,40,CMV_Negative,1,0,0.3,0,12.18,1.55,2.74,29.11,6,2,2013,Winter,Ex smoker,40-49yr,No intake,Negative
+219,59,1,2,26,CMV_Positive,2,0,1.7,0,9.61,1.97,0.72,88.47,12,2,2013,Winter,Smoker,20-29yr,No intake,Negative
+220,340,1,1,35,CMV_Negative,0,0,0.8,0,7.51,2.73,0.68,16.93,11,2,2013,Winter,Non smoker,30-39yr,No intake,Negative
+221,642,2,2,59,CMV_Positive,0,0,0.4,0,9.53,1.36,1.23,19.08,7,2,2013,Winter,Non smoker,50-59yr,No intake,Negative
+222,442,2,2,48,CMV_Negative,0,4,0.2,1,11.41,1.68,0.73,4.31,7,2,2013,Winter,Non smoker,40-49yr,Low intake,Positive
+223,704,2,1,57,CMV_Negative,0,0,3.4,1,11.99,1.75,0.96,19.5,18,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+224,418,2,2,44,CMV_Positive,1,0,6.9,0,12.51,1.81,1.33,20.83,29,11,2012,Fall,Ex smoker,40-49yr,No intake,Negative
+225,521,2,1,46,CMV_Negative,0,0,1.1,1,14.84,2.35,1.06,76.7,29,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+226,323,2,1,37,CMV_Negative,0,0,1.1,0,8.8,2.44,0.68,4.04,29,11,2012,Fall,Non smoker,30-39yr,No intake,Negative
+227,912,1,1,67,CMV_Negative,1,0,0.4,0,12.09,2.37,0.55,37.4,10,12,2012,Winter,Ex smoker,60-69yr,No intake,Negative
+228,915,1,1,68,CMV_Negative,0,0,0.7,0,9.92,4.03,0.87,47.15,10,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+229,812,1,2,68,CMV_Positive,0,0,0.5,0,10.68,1.83,0.81,31.12,11,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+230,913,1,1,65,CMV_Negative,0,0,0.3,0,11.79,5.19,0.65,230.2,10,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+231,911,1,1,61,CMV_Negative,1,0,1.3,1,8.18,0.65,0.7,41.62,10,12,2012,Winter,Ex smoker,60-69yr,No intake,Positive
+232,813,1,2,66,CMV_Negative,0,0,1.2,0,13.28,4.26,0.85,7.61,11,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+233,14,2,2,25,CMV_Negative,2,0,11.4,1,9.16,2.56,0.65,6.98,6,12,2012,Winter,Smoker,20-29yr,No intake,Positive
+234,908,1,1,62,CMV_Negative,0,2,3.2,0,11.3,1.6,0.98,17.78,10,12,2012,Winter,Non smoker,60-69yr,Low intake,Negative
+235,112,2,1,23,CMV_Negative,0,0,0.3,0,11.62,2.36,1.24,172.83,6,12,2012,Winter,Non smoker,20-29yr,No intake,Negative
+236,810,1,2,60,CMV_Negative,0,0,0.6,0,7.64,1.28,0.5,2.17,11,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+237,916,1,1,66,CMV_Positive,0,0,2.3,0,12.69,3.08,0.61,47.81,11,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+238,917,1,1,68,CMV_Positive,0,0,0.9,1,9.72,3.96,0.54,61.64,11,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+239,527,2,1,44,CMV_Negative,0,0,1.7,1,11.41,2.9,1.83,44.31,29,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+240,421,2,2,47,CMV_Negative,0,0,0.6,1,10.12,1.15,1.47,12.06,6,12,2012,Winter,Non smoker,40-49yr,No intake,Positive
+241,526,2,1,40,CMV_Positive,1,0,1.5,1,12.13,4.39,0.56,49.3,29,11,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+242,113,2,1,20,CMV_Negative,0,0,2.4,0,9.69,3.3,0.92,189.52,6,12,2012,Winter,Non smoker,20-29yr,No intake,Negative
+243,907,1,1,67,CMV_Negative,0,0,0.6,1,8.48,2.04,0.61,32.5,10,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+244,190,1,1,20,CMV_Positive,0,0,1.5,1,9.96,0.97,0.78,95.59,19,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+245,677,2,2,57,CMV_Negative,1,0,1.1,1,10.42,1.34,0.76,5.43,20,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+246,888,2,2,61,CMV_Positive,1,0,2.2,1,10.7,2.25,1.75,25.07,19,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+247,185,2,1,26,CMV_Negative,0,0,2.8,1,11.01,3.39,0.53,155.4,20,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+248,691,1,2,58,CMV_Negative,0,0,2.3,0,10.55,2.33,1.51,0.93,17,6,2013,Summer,Non smoker,50-59yr,No intake,Negative
+249,970,2,1,69,CMV_Negative,0,0,1.4,1,9.86,2.38,0.76,27.32,20,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+250,692,1,2,53,CMV_Negative,0,0,3,1,11.06,3.1,1.77,82.81,18,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+251,485,1,2,48,CMV_Negative,1,0,0.3,0,8.19,0.78,3.18,2.68,17,6,2013,Summer,Ex smoker,40-49yr,No intake,Negative
+252,890,1,2,60,CMV_Negative,2,0,2.7,0,10.86,2.06,1.24,19.46,19,6,2013,Summer,Smoker,60-69yr,No intake,Negative
+253,690,1,2,58,CMV_Negative,0,0,3.8,0,20.44,4.49,1.03,416.68,17,6,2013,Summer,Non smoker,50-59yr,No intake,Negative
+254,486,1,2,47,CMV_Negative,1,0,1.1,0,10.76,1.2,1.12,16.42,18,6,2013,Summer,Ex smoker,40-49yr,No intake,Negative
+255,187,1,1,27,CMV_Negative,0,0,2.2,1,9.72,2.74,1.21,6.88,18,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+256,889,1,2,65,CMV_Positive,1,0,1.6,1,11.18,2.18,1.59,40.76,19,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+257,971,2,1,61,CMV_Positive,1,0,2.3,1,13.31,3.39,0.42,15.37,20,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+258,488,1,2,42,CMV_Negative,1,0,0.4,0,9.02,1.93,4.03,8.4,19,6,2013,Summer,Ex smoker,40-49yr,No intake,Negative
+259,975,2,1,62,CMV_Negative,1,0,0.5,1,9.67,3.18,0.81,56.42,20,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+260,295,1,2,39,CMV_Negative,0,0,0.4,0,9.78,1.34,1.96,26.4,18,6,2013,Summer,Non smoker,30-39yr,No intake,Negative
+261,86,2,2,27,CMV_Positive,2,0,2.8,1,8.22,0.92,0.52,21.88,20,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+262,786,1,1,56,CMV_Negative,1,0,0.8,1,12.07,3.83,0.8,12.12,18,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+263,186,1,1,29,CMV_Negative,2,0,12.9,1,9.98,1.54,1.16,78.97,18,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+264,92,1,2,23,CMV_Positive,0,0,15,1,8.79,1.24,1.81,84.33,18,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+265,395,1,1,30,CMV_Negative,2,0,0.4,1,9.11,1.5,0.95,0.68,9,7,2013,Summer,Smoker,30-39yr,No intake,Positive
+266,997,1,1,63,CMV_Negative,0,0,0.6,0,8.99,2.51,0.72,14.18,9,7,2013,Summer,Non smoker,60-69yr,No intake,Negative
+267,492,2,2,43,CMV_Negative,0,0,0.3,1,13.78,3.37,1.83,12.2,11,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+268,197,1,1,23,CMV_Negative,2,0,2.7,1,11.36,1.15,0.69,69.57,10,7,2013,Summer,Smoker,20-29yr,No intake,Positive
+269,187,2,1,27,CMV_Negative,0,0,2.2,1,9.72,2.74,1.21,6.88,4,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+270,90,2,2,24,CMV_Positive,0,0,2.7,0,8.13,1.52,1.75,6.95,10,7,2013,Summer,Non smoker,20-29yr,No intake,Negative
+271,89,2,2,24,CMV_Negative,0,0,0.9,1,9.03,2.84,1.78,47.2,4,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+272,691,2,2,58,CMV_Negative,0,0,2.3,0,10.55,2.33,1.51,0.93,4,7,2013,Summer,Non smoker,50-59yr,No intake,Negative
+273,487,2,2,47,CMV_Negative,2,0,0.2,1,9.57,1.59,0.63,30.13,8,7,2013,Summer,Smoker,40-49yr,No intake,Positive
+274,996,1,1,60,CMV_Negative,0,0,0.7,1,9.69,2.32,0.75,153.54,8,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+275,92,2,2,23,CMV_Positive,0,0,15,1,8.79,1.24,1.81,84.33,4,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+276,795,1,1,59,CMV_Negative,2,0,7.7,1,11.57,3.09,2.41,7.03,8,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+277,699,1,2,54,CMV_Negative,0,0,2.4,1,10.65,1.39,1.05,11.49,9,7,2013,Summer,Non smoker,50-59yr,No intake,Positive
+278,789,2,1,58,CMV_Negative,0,0,6.1,1,7.26,2.05,0.58,125.75,10,7,2013,Summer,Non smoker,50-59yr,No intake,Positive
+279,796,1,1,51,CMV_Negative,2,0,1.1,1,6.91,1,0.63,69.36,8,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+280,196,1,1,20,CMV_Negative,0,0,2.6,1,11.85,3.05,1,382.87,9,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+281,486,2,2,47,CMV_Negative,1,0,1.1,0,10.76,1.2,1.12,16.42,4,7,2013,Summer,Ex smoker,40-49yr,No intake,Negative
+282,100,1,2,23,CMV_Positive,2,0,5.4,0,6.82,1.52,0.63,2.32,10,7,2013,Summer,Smoker,20-29yr,No intake,Negative
+283,995,1,1,61,CMV_Positive,1,0,1.5,1,9.53,1.74,1.05,90.8,8,7,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+284,893,2,2,65,CMV_Positive,0,0,2.4,1,11.61,2.41,0.7,26.9,10,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+285,994,1,1,66,CMV_Negative,1,0,2.9,1,10.06,1.43,1.47,7.03,8,7,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+286,194,2,1,21,CMV_Negative,2,0,0.2,1,10.14,2.36,1.25,53.97,17,7,2013,Summer,Smoker,20-29yr,No intake,Positive
+287,300,1,2,32,CMV_Negative,1,2,2.4,1,9.51,1.37,1.48,96.17,15,7,2013,Summer,Ex smoker,30-39yr,Low intake,Positive
+288,698,2,2,50,CMV_Positive,1,2,1.2,1,10.91,2.52,1.64,28.75,17,7,2013,Summer,Ex smoker,50-59yr,Low intake,Positive
+289,791,2,1,55,CMV_Negative,2,0,0.3,1,13.9,1.73,0.74,113.12,18,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+290,1000,1,1,62,CMV_Positive,1,0,0.5,1,11.08,4.83,1.24,96.96,16,7,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+291,695,2,2,54,CMV_Negative,2,0,1.1,1,7.95,2.1,0.63,18.25,18,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+292,497,2,2,47,CMV_Negative,1,0,0.2,1,10.67,2,1.21,167.8,18,7,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+293,498,2,2,43,CMV_Negative,0,0,0.4,1,12.53,4.17,1.73,46.68,18,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+295,594,2,1,40,CMV_Negative,1,0,0.5,1,10.72,2.02,0.37,1092.9,11,7,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+296,398,1,1,33,CMV_Negative,1,2,0.6,0,8.79,2.08,0.97,21.76,15,7,2013,Summer,Ex smoker,30-39yr,Low intake,Negative
+298,400,1,1,36,CMV_Positive,0,0,1,1,11.84,2.94,0.73,124.9,16,7,2013,Summer,Non smoker,30-39yr,No intake,Positive
+299,793,2,1,50,CMV_Negative,2,0,5.4,0,9.09,2.4,0.58,130.15,17,7,2013,Summer,Smoker,50-59yr,No intake,Negative
+300,599,2,1,40,CMV_Negative,1,0,1.1,1,13.28,2.56,0.86,274.12,17,7,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+301,799,1,1,50,CMV_Negative,0,0,0.3,1,11.43,2.41,0.72,150.59,15,7,2013,Summer,Non smoker,50-59yr,No intake,Positive
+302,200,1,1,20,CMV_Negative,0,0,2.3,1,11.66,2.32,1.05,215.14,16,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+303,394,2,1,38,CMV_Positive,1,2,1.7,1,9.14,2.46,0.8,77.12,18,7,2013,Summer,Ex smoker,30-39yr,Low intake,Positive
+304,499,1,2,45,CMV_Negative,1,0,0.6,1,9.54,2.55,0.89,181.51,16,7,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+305,597,2,1,47,CMV_Negative,2,0,1.4,1,9.68,1.68,1.08,40.26,18,7,2013,Summer,Smoker,40-49yr,No intake,Positive
+306,891,2,2,68,CMV_Negative,0,0,3.2,1,7.87,1.67,1.38,8.76,11,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+307,593,2,1,46,CMV_Negative,0,0,0.5,1,6.73,0.86,1.01,34.35,11,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+308,700,1,2,55,CMV_Positive,2,0,1.5,1,10.28,2.63,1.86,108.45,15,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+309,393,2,1,36,CMV_Negative,0,0,0.3,1,11.82,1.76,1.13,190.58,18,7,2013,Summer,Non smoker,30-39yr,No intake,Positive
+310,199,1,1,22,CMV_Negative,1,0,0.5,1,11.04,1.42,0.81,465.86,15,7,2013,Summer,Ex smoker,20-29yr,No intake,Positive
+311,97,2,2,23,CMV_Negative,1,0,1.2,1,14.11,1.73,0.94,103.44,18,7,2013,Summer,Ex smoker,20-29yr,No intake,Positive
+312,93,2,2,21,CMV_Negative,2,0,1.4,1,11.61,1.43,0.87,32.72,16,7,2013,Summer,Smoker,20-29yr,No intake,Positive
+313,798,1,1,52,CMV_Positive,1,0,2.7,0,9.9,1.84,0.73,44.26,15,7,2013,Summer,Ex smoker,50-59yr,No intake,Negative
+314,493,2,2,44,CMV_Positive,1,0,1.1,1,8.7,1.97,1.69,327.32,11,7,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+315,496,2,2,44,CMV_Negative,0,0,0.2,1,8.55,1.6,1.2,18.27,18,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+316,94,2,2,26,CMV_Positive,0,0,0.5,1,12.75,1.35,2.55,73.99,11,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+317,999,1,1,68,CMV_Negative,0,0,0.5,1,11.31,2.72,0.55,93.87,16,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+318,299,1,2,39,CMV_Negative,0,0,0.3,0,6.98,1.6,1.37,19.78,15,7,2013,Summer,Non smoker,30-39yr,No intake,Negative
+319,392,2,1,33,CMV_Negative,2,0,12.4,1,8.79,1.73,2.15,8.36,18,7,2013,Summer,Smoker,30-39yr,No intake,Positive
+320,998,1,1,65,CMV_Negative,1,0,1,0,11.95,2.56,1.64,74.84,15,7,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+321,900,1,2,65,CMV_Negative,0,0,4.9,1,8.69,2.09,0.83,10,15,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+322,899,1,2,63,CMV_Negative,0,0,1.1,1,11.02,2.2,1.07,14.69,15,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+323,892,2,2,66,CMV_Positive,1,0,0.7,0,7.73,2.41,0.85,15.06,11,7,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+324,399,1,1,32,CMV_Negative,1,0,2.6,0,8.03,1.1,0.48,2.23,15,7,2013,Summer,Ex smoker,30-39yr,No intake,Negative
+325,591,2,1,46,CMV_Negative,2,0,1.8,1,9.07,2.19,2.45,16.35,11,7,2013,Summer,Smoker,40-49yr,No intake,Positive
+326,800,1,1,50,CMV_Positive,2,0,10.3,1,9.78,2.03,2.42,102.22,16,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+327,728,1,1,55,CMV_Negative,0,0,1.1,0,9.98,2.76,0.71,14.8,11,2,2013,Winter,Non smoker,50-59yr,No intake,Negative
+328,51,1,2,23,CMV_Negative,0,0,3.1,1,11.25,2.46,1.14,12.4,6,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+329,548,1,1,43,CMV_Negative,2,0,1.8,0,10.8,2.63,1.58,2064.72,12,2,2013,Winter,Smoker,40-49yr,No intake,Negative
+330,52,1,2,25,CMV_Negative,0,0,1.6,1,11.73,0.94,0.89,28.8,11,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+331,54,1,2,21,CMV_Negative,0,0,3.3,1,12.5,3.26,1.5,3.42,11,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+332,58,1,2,23,CMV_Positive,0,0,0.6,1,14.59,3.29,1.27,12.87,11,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+333,544,1,1,48,CMV_Positive,0,0,0.7,0,11.17,1.41,1.09,247.06,6,2,2013,Winter,Non smoker,40-49yr,No intake,Negative
+334,56,1,2,28,CMV_Negative,0,0,1.9,1,14.07,3.22,2.66,0.57,11,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+335,922,1,1,63,CMV_Negative,0,0,6.9,1,10.41,1.93,0.55,20.42,6,2,2013,Winter,Non smoker,60-69yr,No intake,Positive
+336,60,1,2,20,CMV_Negative,0,0,6.5,1,11.02,1.22,1.79,47.25,12,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+337,57,1,2,26,CMV_Negative,2,0,0.9,1,9.22,1.98,0.77,66.53,11,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+338,339,1,1,38,CMV_Negative,0,0,0.2,1,11.62,1.36,0.55,290.6,6,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+339,441,2,2,48,CMV_Negative,0,0,2.3,1,10.78,2.19,1.34,28.2,7,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+341,547,1,1,48,CMV_Negative,2,0,0.5,0,9.88,2.62,1.78,20.81,12,2,2013,Winter,Smoker,40-49yr,No intake,Negative
+342,30,2,2,20,CMV_Negative,2,0,4.9,1,9.18,1.3,1.15,16.06,7,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+343,244,1,2,31,CMV_Negative,2,0,0.8,1,10.43,2.68,1.51,9.06,6,2,2013,Winter,Smoker,30-39yr,No intake,Positive
+344,457,1,2,47,CMV_Negative,0,0,3.3,0,12.11,3.07,1.35,88.21,11,2,2013,Winter,Non smoker,40-49yr,No intake,Negative
+345,459,1,2,43,CMV_Positive,0,0,1.2,1,12.54,1.71,1.1,0.87,12,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+346,546,1,1,46,CMV_Negative,0,0,2.4,1,12.15,2.74,1.04,136.01,12,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+347,830,1,2,61,CMV_Positive,0,0,1.3,0,12.23,3.1,0.98,12.03,6,2,2013,Winter,Non smoker,60-69yr,No intake,Negative
+348,283,2,2,37,CMV_Positive,0,0,0.3,1,9.62,3.16,0.6,1.25,20,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+349,188,1,1,26,CMV_Negative,0,2,1.9,1,11.03,2.73,0.91,9.68,18,6,2013,Summer,Non smoker,20-29yr,Low intake,Positive
+350,984,1,1,60,CMV_Negative,0,0,1.8,1,7.76,1.34,0.65,10.8,17,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+351,386,1,1,30,CMV_Negative,0,0,1.5,1,11.89,1.15,1.23,16.04,18,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+352,972,2,1,65,CMV_Positive,1,0,0.5,1,7.42,2.08,0.76,48.72,20,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+353,487,1,2,47,CMV_Negative,2,0,0.2,1,9.57,1.59,0.63,30.13,18,6,2013,Summer,Smoker,40-49yr,No intake,Positive
+354,679,2,2,51,CMV_Positive,2,0,1,1,9.47,1.54,0.74,18.87,20,6,2013,Summer,Smoker,50-59yr,No intake,Positive
+355,189,1,1,24,CMV_Negative,0,0,1.1,1,10.83,2.86,1.16,149.37,19,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+356,590,1,1,46,CMV_Negative,1,0,1,1,8.09,1.99,0.86,40.86,19,6,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+357,976,2,1,61,CMV_Positive,1,0,2.7,1,11.19,2.22,0.71,32.4,19,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+358,683,2,2,55,CMV_Positive,0,0,0.9,1,9.81,3.16,0.52,188.22,19,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+360,693,1,2,55,CMV_Positive,2,0,2.2,1,11.03,1.75,1.25,24.14,19,6,2013,Summer,Smoker,50-59yr,No intake,Positive
+361,680,2,2,52,CMV_Negative,1,0,1.8,1,10.49,2.29,1.67,262.53,20,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+362,387,1,1,33,CMV_Positive,1,0,0.7,1,15.14,3.41,0.73,23.29,19,6,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+363,787,1,1,54,CMV_Positive,0,0,1.8,1,11.73,2.03,1.25,33.65,18,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+364,183,2,1,26,CMV_Positive,0,0,8.6,1,10.14,2.88,1.55,37.82,20,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+365,285,2,2,30,CMV_Negative,0,0,0.3,1,12.58,1.04,1.93,9.28,19,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+366,985,1,1,61,CMV_Negative,1,0,0.4,0,9.92,1.65,0.76,85.59,17,6,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+367,785,1,1,56,CMV_Positive,2,0,2.8,1,9.38,1.49,0.89,401.73,17,6,2013,Summer,Smoker,50-59yr,No intake,Positive
+368,797,1,1,57,CMV_Negative,0,0,4.1,1,10.17,1.66,0.42,39.07,10,7,2013,Summer,Non smoker,50-59yr,No intake,Positive
+369,794,1,1,52,CMV_Positive,0,0,0.5,0,10.2,1.08,1.54,6.74,8,7,2013,Summer,Non smoker,50-59yr,No intake,Negative
+370,897,1,2,65,CMV_Negative,0,2,1.4,0,10.89,1.97,0.84,7.18,9,7,2013,Summer,Non smoker,60-69yr,Low intake,Negative
+371,298,1,2,34,CMV_Negative,2,0,1.8,0,10.45,3.52,1.2,7.56,8,7,2013,Summer,Smoker,30-39yr,No intake,Negative
+372,195,1,1,26,CMV_Negative,2,0,1.4,1,8.31,1.7,1.34,51.23,8,7,2013,Summer,Smoker,20-29yr,No intake,Positive
+373,91,2,2,22,CMV_Positive,0,0,1.4,1,13.73,2.43,1.22,6.98,4,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+374,600,1,1,48,CMV_Positive,0,0,0.5,1,9.38,3.19,0.88,7.08,9,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+375,896,1,2,66,CMV_Positive,1,2,0.9,0,7.42,1.91,0.63,12.65,8,7,2013,Summer,Ex smoker,60-69yr,Low intake,Negative
+376,787,2,1,54,CMV_Positive,0,0,1.8,1,11.73,2.03,1.25,33.65,4,7,2013,Summer,Non smoker,50-59yr,No intake,Positive
+377,898,1,2,66,CMV_Positive,2,0,1.7,1,7.76,3.25,1.78,486.32,10,7,2013,Summer,Smoker,60-69yr,No intake,Positive
+378,491,2,2,42,CMV_Negative,0,0,0.4,1,9.73,3.12,1.36,24.09,11,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+379,485,2,2,48,CMV_Negative,1,0,0.3,0,8.19,0.78,3.18,2.68,4,7,2013,Summer,Ex smoker,40-49yr,No intake,Negative
+380,188,2,1,26,CMV_Negative,0,2,1.9,1,11.03,2.73,0.91,9.68,4,7,2013,Summer,Non smoker,20-29yr,Low intake,Positive
+381,385,2,1,39,CMV_Positive,2,0,1.1,0,7.33,1.44,0.92,7.04,4,7,2013,Summer,Smoker,30-39yr,No intake,Negative
+1488,490,2,2,42,CMV_Negative,0,0,0.4,1,9.9,1.33,1.28,127.64,11,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+382,198,1,1,28,CMV_Positive,1,0,0.3,1,8.89,1.81,1.42,438.83,10,7,2013,Summer,Ex smoker,20-29yr,No intake,Positive
+383,397,1,1,37,CMV_Positive,1,0,1.8,0,11.26,1.7,0.58,21.96,10,7,2013,Summer,Ex smoker,30-39yr,No intake,Negative
+384,99,1,2,26,CMV_Negative,0,0,0.4,1,10.72,1.24,0.83,25.7,9,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+385,98,1,2,22,CMV_Negative,0,0,8,0,10.46,2.1,1.21,13.52,9,7,2013,Summer,Non smoker,20-29yr,No intake,Negative
+386,396,1,1,35,CMV_Negative,1,0,12,1,11.49,2.06,1.49,14.59,9,7,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+387,909,1,1,62,CMV_Positive,2,0,2,1,10.31,2.01,0.91,934.33,10,12,2012,Winter,Smoker,60-69yr,No intake,Positive
+388,419,2,2,42,CMV_Positive,0,0,1.5,0,10.44,2.27,1.14,66.78,29,11,2012,Fall,Non smoker,40-49yr,No intake,Negative
+389,624,2,2,52,CMV_Negative,1,0,1.7,0,8.97,2.21,1.28,57.8,29,11,2012,Fall,Ex smoker,50-59yr,No intake,Negative
+390,13,2,2,21,CMV_Positive,2,0,0.8,0,8.38,1.19,1.66,20.42,6,12,2012,Winter,Smoker,20-29yr,No intake,Negative
+391,910,1,1,61,CMV_Positive,2,0,4.1,1,10.17,2.13,0.48,62.23,10,12,2012,Winter,Smoker,60-69yr,No intake,Positive
+392,420,2,2,46,CMV_Positive,0,0,1.1,0,8.4,2.73,1.14,228.54,29,11,2012,Fall,Non smoker,40-49yr,No intake,Negative
+393,520,2,1,45,CMV_Positive,2,0,2,1,8.54,1.75,2.07,13.42,29,11,2012,Fall,Smoker,40-49yr,No intake,Positive
+395,814,1,2,65,CMV_Negative,0,0,0.3,0,9.39,1.93,1.59,11.45,12,12,2012,Winter,Non smoker,60-69yr,No intake,Negative
+396,522,2,1,46,CMV_Negative,2,0,6,0,10.71,2.44,1.13,23.73,29,11,2012,Fall,Smoker,40-49yr,No intake,Negative
+397,116,2,1,28,CMV_Positive,2,0,1.6,0,11.33,2.37,1.53,308.73,6,12,2012,Winter,Smoker,20-29yr,No intake,Negative
+398,114,2,1,25,CMV_Negative,2,0,3.4,1,9.86,1.09,0.79,44.59,6,12,2012,Winter,Smoker,20-29yr,No intake,Positive
+399,524,2,1,45,CMV_Negative,2,0,3.7,1,9.67,2.56,1.76,79.1,29,11,2012,Fall,Smoker,40-49yr,No intake,Positive
+400,525,2,1,49,CMV_Positive,2,0,3.2,0,11.06,4.94,1.55,160.59,29,11,2012,Fall,Smoker,40-49yr,No intake,Negative
+401,115,2,1,21,CMV_Negative,1,0,0.3,1,10.92,1.14,1.04,39.17,6,12,2012,Winter,Ex smoker,20-29yr,No intake,Positive
+402,809,1,2,67,CMV_Positive,0,0,0.8,1,7.68,1.17,0.93,36.44,11,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+403,111,2,1,26,CMV_Negative,0,0,2.1,1,11.43,2.92,1.9,302.79,6,12,2012,Winter,Non smoker,20-29yr,No intake,Positive
+404,110,2,1,27,CMV_Negative,2,0,0.5,1,10.25,2.29,0.7,110.16,6,12,2012,Winter,Smoker,20-29yr,No intake,Positive
+405,914,1,1,67,CMV_Positive,1,0,1.4,1,13.84,3.24,1.24,16.35,10,12,2012,Winter,Ex smoker,60-69yr,No intake,Positive
+406,117,2,1,24,CMV_Positive,0,0,1.1,1,12.62,1.94,0.61,737.14,6,12,2012,Winter,Non smoker,20-29yr,No intake,Positive
+407,811,1,2,63,CMV_Positive,0,0,1,1,9.95,3.17,1.03,11.56,11,12,2012,Winter,Non smoker,60-69yr,No intake,Positive
+408,572,1,1,49,CMV_Negative,1,0,1.2,1,8.22,3.09,1.35,103.86,15,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+409,472,2,2,41,CMV_Positive,0,0,1.4,1,13.28,1.57,1.74,12.24,11,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+411,156,1,1,23,CMV_Negative,2,0,0.2,1,12.23,2.86,1.1,22.7,9,4,2013,Spring,Smoker,20-29yr,No intake,Positive
+412,569,1,1,49,CMV_Negative,0,0,2.3,1,14.89,1.31,1.43,7.62,15,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+413,157,1,1,21,CMV_Negative,0,0,1.3,1,9.42,2.07,1.17,1683.89,10,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+414,150,2,1,22,CMV_Negative,0,0,0.2,1,8.37,1.3,0.51,244.54,11,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+415,5122,1,1,25,CMV_Negative,0,0,0.7,1,12.64,3.21,1.07,15.97,15,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+416,762,1,1,53,CMV_Positive,1,0,1.2,1,11.43,2.15,1.18,55.38,15,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+417,77,2,2,23,CMV_Positive,0,0,1.4,1,11.63,2.79,0.42,49.27,11,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+418,364,1,1,37,CMV_Positive,2,0,2.2,1,8.9,2.38,0.56,15.29,10,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+419,656,2,2,52,CMV_Positive,0,0,3.5,1,11.12,3.59,1.1,62.18,11,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+420,567,1,1,49,CMV_Negative,2,0,1.2,1,10.24,1.34,0.64,45.23,10,4,2013,Spring,Smoker,40-49yr,No intake,Positive
+421,761,1,1,59,CMV_Negative,1,0,1,1,11.54,2.42,1.21,23.13,15,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+422,471,2,2,45,CMV_Negative,0,0,1.9,1,12.7,2.04,1.55,22.94,11,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+423,657,2,2,57,CMV_Negative,0,0,2,1,10.99,1.99,1.71,18.08,11,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+424,80,1,2,24,CMV_Negative,2,0,0.2,1,10.58,1.76,2.27,95.5,9,4,2013,Spring,Smoker,20-29yr,No intake,Positive
+425,760,1,1,52,CMV_Positive,0,0,0.2,1,9.66,2,1.15,160.26,10,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+426,81,1,2,25,CMV_Negative,0,0,0.3,0,9.68,1.53,0.85,38.81,15,4,2013,Spring,Non smoker,20-29yr,No intake,Negative
+427,320,2,1,34,CMV_Negative,0,0,0.4,1,11.57,1.97,1.04,66.23,15,11,2012,Fall,Non smoker,30-39yr,No intake,Positive
+428,891,1,2,68,CMV_Negative,0,0,3.2,1,7.87,1.67,1.38,8.76,24,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+429,979,2,1,64,CMV_Negative,0,0,4.4,1,9.97,4.64,0.84,12.45,27,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+430,789,1,1,58,CMV_Negative,0,0,6.1,1,7.26,2.05,0.58,125.75,26,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+431,893,1,2,65,CMV_Positive,0,0,2.4,1,11.61,2.41,0.7,26.9,26,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+432,986,1,1,65,CMV_Negative,0,0,2.3,1,10.99,3.76,0.93,180.01,26,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+433,286,2,2,30,CMV_Negative,0,0,5.7,1,9.12,1.97,0.7,279.68,27,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+434,192,1,1,26,CMV_Negative,2,0,0.7,1,8.9,1.49,0.44,3.32,25,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+435,592,1,1,41,CMV_Negative,1,0,1.4,1,9.65,1.08,0.82,49.3,25,6,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+436,491,1,2,42,CMV_Negative,0,0,0.4,1,9.73,3.12,1.36,24.09,24,6,2013,Summer,Non smoker,40-49yr,No intake,Positive
+437,685,2,2,54,CMV_Positive,0,0,1.9,1,9,1.51,2.14,7.59,27,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+438,593,1,1,46,CMV_Negative,0,0,0.5,1,6.73,0.86,1.01,34.35,25,6,2013,Summer,Non smoker,40-49yr,No intake,Positive
+439,292,2,2,32,CMV_Negative,2,0,3.6,0,7.66,1.81,0.44,41.59,26,6,2013,Summer,Smoker,30-39yr,No intake,Negative
+440,490,1,2,42,CMV_Negative,0,0,0.4,1,9.9,1.33,1.28,127.64,24,6,2013,Summer,Non smoker,40-49yr,No intake,Positive
+441,95,1,2,20,CMV_Positive,2,0,1.9,1,10.28,1.2,1.19,55.86,26,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+442,93,1,2,21,CMV_Negative,2,0,1.4,1,11.61,1.43,0.87,32.72,24,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+443,88,2,2,26,CMV_Positive,2,0,0.9,1,10.2,1.86,1.05,9.23,26,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+444,694,1,2,56,CMV_Negative,1,0,1.4,1,9.33,0.97,0.71,10.48,24,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+445,193,1,1,21,CMV_Negative,0,0,0.3,0,8.22,2.35,1.85,1.61,25,6,2013,Summer,Non smoker,20-29yr,No intake,Negative
+446,293,2,2,37,CMV_Negative,1,0,0.4,1,9.77,2,2.58,560.09,26,6,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+447,390,1,1,30,CMV_Negative,2,0,0.4,1,12.23,2.18,1,176.38,25,6,2013,Summer,Smoker,30-39yr,No intake,Positive
+448,297,1,2,37,CMV_Negative,1,0,1.1,1,9.43,2.25,2.18,14.81,26,6,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+449,107,1,1,23,CMV_Negative,1,0,0.2,1,10.43,2.09,1.16,46.3,19,11,2012,Fall,Ex smoker,20-29yr,No intake,Positive
+450,221,2,2,35,CMV_Positive,0,0,0.3,0,14.78,4.29,1.79,10.76,15,11,2012,Fall,Non smoker,30-39yr,No intake,Negative
+451,115,1,1,21,CMV_Negative,1,0,0.3,1,10.92,1.14,1.04,39.17,20,11,2012,Fall,Ex smoker,20-29yr,No intake,Positive
+452,319,2,1,38,CMV_Negative,0,0,0.8,1,15.51,2.03,0.58,1272.81,21,11,2012,Fall,Non smoker,30-39yr,No intake,Positive
+453,318,2,1,35,CMV_Negative,0,0,2.5,1,11.11,3.08,0.76,213.12,15,11,2012,Fall,Non smoker,30-39yr,No intake,Positive
+454,222,2,2,33,CMV_Positive,2,0,7.2,0,9.8,1.5,1.41,148.01,15,11,2012,Fall,Smoker,30-39yr,No intake,Negative
+455,620,2,2,51,CMV_Negative,1,0,0.4,1,12.99,1.45,1.04,14.92,22,11,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+456,110,1,1,27,CMV_Negative,2,0,0.5,1,10.25,2.29,0.7,110.16,19,11,2012,Fall,Smoker,20-29yr,No intake,Positive
+457,216,2,2,37,CMV_Positive,0,0,0.2,1,14.65,2.61,0.87,17.26,15,11,2012,Fall,Non smoker,30-39yr,No intake,Positive
+458,114,1,1,25,CMV_Negative,2,0,3.4,1,9.86,1.09,0.79,44.59,20,11,2012,Fall,Smoker,20-29yr,No intake,Positive
+459,713,2,1,58,CMV_Negative,0,0,4,1,8.77,3.4,0.46,7.79,22,11,2012,Fall,Non smoker,50-59yr,No intake,Positive
+460,106,1,1,20,CMV_Negative,0,0,0.5,1,9.46,1.73,1.34,9.85,19,11,2012,Fall,Non smoker,20-29yr,No intake,Positive
+461,8,1,2,26,CMV_Negative,0,2,6.2,0,9.87,2.93,1.17,18.66,20,11,2012,Fall,Non smoker,20-29yr,Low intake,Negative
+462,712,2,1,54,CMV_Positive,2,0,1.9,1,11.74,1.43,0.38,308.83,22,11,2012,Fall,Smoker,50-59yr,No intake,Positive
+463,12,1,2,23,CMV_Negative,2,0,3.3,0,9.32,2.77,1.39,282.45,21,11,2012,Fall,Smoker,20-29yr,No intake,Negative
+464,316,2,1,36,CMV_Negative,1,0,0.6,1,10.32,3.4,0.9,33.79,15,11,2012,Fall,Ex smoker,30-39yr,No intake,Positive
+465,622,2,2,58,CMV_Negative,1,2,0.4,1,7.32,1.74,0.85,14.76,22,11,2012,Fall,Ex smoker,50-59yr,Low intake,Positive
+466,117,1,1,24,CMV_Positive,0,0,1.1,1,12.62,1.94,0.61,737.14,20,11,2012,Fall,Non smoker,20-29yr,No intake,Positive
+467,111,1,1,26,CMV_Negative,0,0,2.1,1,11.43,2.92,1.9,302.79,19,11,2012,Fall,Non smoker,20-29yr,No intake,Positive
+468,113,1,1,20,CMV_Negative,0,0,2.4,0,9.69,3.3,0.92,189.52,19,11,2012,Fall,Non smoker,20-29yr,No intake,Negative
+469,711,2,1,53,CMV_Positive,1,0,0.8,1,12.27,4.92,2.42,3000,22,11,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+470,13,1,2,21,CMV_Positive,2,0,0.8,0,8.38,1.19,1.66,20.42,21,11,2012,Fall,Smoker,20-29yr,No intake,Negative
+471,621,2,2,53,CMV_Negative,0,0,3.7,1,13.57,2.61,0.99,4.34,22,11,2012,Fall,Non smoker,50-59yr,No intake,Positive
+472,11,1,2,26,CMV_Negative,2,0,0.7,1,7.53,1.59,1.16,5.94,21,11,2012,Fall,Smoker,20-29yr,No intake,Positive
+473,315,2,1,31,CMV_Negative,2,0,1.8,0,8.74,1.54,1.56,24.91,19,11,2012,Fall,Smoker,30-39yr,No intake,Negative
+474,10,1,2,20,CMV_Negative,0,0,5.3,1,14.5,2.95,0.81,405.89,21,11,2012,Fall,Non smoker,20-29yr,No intake,Positive
+475,317,2,1,35,CMV_Negative,1,0,1.6,1,12.36,3.52,0.51,109.65,15,11,2012,Fall,Ex smoker,30-39yr,No intake,Positive
+476,613,2,2,53,CMV_Negative,1,0,5.1,1,7.66,2.55,0.89,20.27,22,11,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+1489,615,2,2,52,CMV_Positive,2,2,2.3,1,5.94,1.11,0.9,90.03,22,11,2012,Fall,Smoker,50-59yr,Low intake,Positive
+477,116,1,1,28,CMV_Positive,2,0,1.6,0,11.33,2.37,1.53,308.73,20,11,2012,Fall,Smoker,20-29yr,No intake,Negative
+478,717,2,1,51,CMV_Negative,0,0,4.3,1,10.58,2.9,1.82,176,22,11,2012,Fall,Non smoker,50-59yr,No intake,Positive
+479,109,1,1,23,CMV_Negative,2,0,0.9,0,9.18,0.36,0.83,46.84,19,11,2012,Fall,Smoker,20-29yr,No intake,Negative
+480,421,1,2,47,CMV_Negative,0,0,0.6,1,10.12,1.15,1.47,12.06,21,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+481,619,2,2,54,CMV_Positive,0,0,0.8,0,8.4,1.46,2.66,11.44,22,11,2012,Fall,Non smoker,50-59yr,No intake,Negative
+482,220,2,2,32,CMV_Negative,2,0,0.4,1,8.14,1.91,1.09,278.32,15,11,2012,Fall,Smoker,30-39yr,No intake,Positive
+483,9,1,2,23,CMV_Negative,0,0,0.4,1,12.17,2.77,1.33,18.3,20,11,2012,Fall,Non smoker,20-29yr,No intake,Positive
+484,714,2,1,53,CMV_Negative,0,0,0.7,0,8.28,2.71,1.5,2.92,22,11,2012,Fall,Non smoker,50-59yr,No intake,Negative
+485,112,1,1,23,CMV_Negative,0,0,0.3,0,11.62,2.36,1.24,172.83,19,11,2012,Fall,Non smoker,20-29yr,No intake,Negative
+486,108,1,1,26,CMV_Negative,2,0,0.5,1,11.21,1.83,0.85,818.85,19,11,2012,Fall,Smoker,20-29yr,No intake,Positive
+487,105,1,1,21,CMV_Negative,0,0,0.8,1,8.34,1.39,0.81,27.13,19,11,2012,Fall,Non smoker,20-29yr,No intake,Positive
+488,14,1,2,25,CMV_Negative,2,0,11.4,1,9.16,2.56,0.65,6.98,21,11,2012,Fall,Smoker,20-29yr,No intake,Positive
+489,758,1,1,55,CMV_Positive,0,0,0.9,1,10.66,1.77,0.44,25.62,9,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+490,757,1,1,57,CMV_Positive,1,0,2.6,1,9.54,2.91,0.88,143.08,9,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+491,861,2,2,60,CMV_Negative,0,0,1.6,1,10.78,2.99,1.11,16.72,4,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+492,566,1,1,41,CMV_Negative,2,0,1,1,7.96,1.57,0.55,34.25,8,4,2013,Spring,Smoker,40-49yr,No intake,Positive
+493,154,1,1,27,CMV_Negative,2,0,2.3,1,11.42,1.72,0.8,71.87,8,4,2013,Spring,Smoker,20-29yr,No intake,Positive
+494,354,2,1,38,CMV_Positive,1,0,0.9,1,11.36,2.34,1.44,195.05,3,4,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+495,475,1,2,40,CMV_Positive,0,0,0.5,1,12.76,1.85,0.93,264.67,9,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+496,863,2,2,64,CMV_Negative,1,0,3.6,1,9.39,1.76,0.95,54.46,4,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+497,659,1,2,59,CMV_Positive,0,0,0.5,1,10.37,2.12,0.52,54.61,8,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+498,145,2,1,26,CMV_Negative,0,0,1.7,1,10.57,2.87,0.79,2556.07,4,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+499,759,1,1,59,CMV_Positive,1,0,0.4,1,11.33,1.82,1.06,10.59,9,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+500,877,1,2,61,CMV_Positive,1,0,1.7,1,10.77,2.59,1.04,43.66,8,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+501,950,1,1,60,CMV_Negative,1,0,1.2,1,12.39,2.38,2.57,64.31,8,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+502,474,1,2,40,CMV_Negative,2,0,0.5,1,10.51,1.63,2.01,23.51,8,4,2013,Spring,Smoker,40-49yr,No intake,Positive
+503,363,1,1,30,CMV_Negative,0,0,0.5,1,10.75,1.42,0.67,47.89,9,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+504,361,1,1,38,CMV_Negative,2,0,1.9,1,10.07,1.13,0.99,45.86,9,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+505,755,1,1,50,CMV_Positive,0,0,3.5,1,13.19,3.66,0.94,33.07,8,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+506,756,1,1,52,CMV_Negative,2,0,1.5,1,9.91,3.03,2.51,8,8,4,2013,Spring,Smoker,50-59yr,No intake,Positive
+507,76,2,2,22,CMV_Negative,0,0,6.8,1,13.3,4.07,1.39,45.62,4,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+508,564,1,1,47,CMV_Negative,0,0,0.5,1,11.93,1.65,0.79,54.41,3,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+509,658,1,2,52,CMV_Negative,0,0,2.7,1,10.41,2.23,0.98,43.95,8,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+510,655,2,2,53,CMV_Negative,0,0,0.8,1,13.2,2.58,1.15,25.21,4,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+511,565,1,1,40,CMV_Negative,0,0,3.4,1,11.25,1.48,1.34,111.36,3,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+512,754,1,1,51,CMV_Positive,1,0,0.7,1,10.02,3.51,1.11,10.3,3,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+513,862,2,2,62,CMV_Negative,0,2,0.4,1,9.14,2.38,1.24,13.66,4,4,2013,Spring,Non smoker,60-69yr,Low intake,Positive
+514,741,2,1,51,CMV_Negative,1,0,0.5,1,9.93,2.42,0.63,45.56,4,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+515,753,1,1,59,CMV_Positive,2,0,1.5,1,10.81,2.98,0.88,7.32,3,4,2013,Spring,Smoker,50-59yr,No intake,Positive
+516,362,1,1,35,CMV_Negative,2,0,0.7,1,9.78,1.48,0.48,9.24,9,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+517,867,2,2,68,CMV_Negative,2,0,2.5,1,25.77,1.31,0.57,77.03,4,4,2013,Spring,Smoker,60-69yr,No intake,Positive
+518,876,1,2,60,CMV_Negative,0,0,7.6,1,7.92,2.46,0.53,17.69,3,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+519,360,1,1,31,CMV_Negative,2,0,1.4,1,7.86,1.65,0.92,37.04,8,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+520,267,2,2,38,CMV_Negative,0,0,1.2,1,11.83,1.9,0.41,112.27,4,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+521,951,1,1,64,CMV_Positive,1,0,1.4,1,7.2,1.71,1.29,21.84,8,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+522,265,2,2,34,CMV_Negative,0,0,1.5,1,11.31,2.57,2.37,31.71,4,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+523,875,1,2,66,CMV_Positive,1,0,0.3,1,9.66,2.25,0.39,10.14,3,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+525,563,1,1,41,CMV_Negative,1,0,0.8,1,12.06,2.96,0.58,6.18,3,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+526,359,1,1,39,CMV_Negative,0,0,0.7,1,10.36,3,1.04,80.55,8,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+527,358,1,1,33,CMV_Positive,0,0,1,1,12.4,2.06,1.14,23.59,3,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+528,860,2,2,66,CMV_Negative,0,0,0.5,1,10.57,2.99,0.84,14.98,4,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+529,146,2,1,25,CMV_Negative,0,0,0.4,1,10.46,2.17,1.07,171.67,4,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+530,152,2,1,29,CMV_Negative,0,0,0.4,1,10.62,1.89,0.86,11.2,11,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+531,367,1,1,35,CMV_Positive,2,0,0.7,1,13.75,2.4,1.89,18.79,10,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+532,155,1,1,22,CMV_Negative,0,0,3.8,1,9.86,1.63,0.86,58.87,9,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+533,570,1,1,43,CMV_Negative,0,0,1.8,1,7.24,2.47,1.06,103.32,15,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+534,366,1,1,38,CMV_Positive,1,0,0.3,1,10.59,3.3,1.7,32.31,10,4,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+535,748,2,1,55,CMV_Negative,0,2,0.4,1,11.89,2.01,1.87,41.6,11,4,2013,Spring,Non smoker,50-59yr,Low intake,Positive
+536,568,1,1,43,CMV_Negative,1,0,2.3,1,8.7,2.01,0.93,21.02,10,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+537,660,1,2,56,CMV_Positive,2,0,1.2,1,11.06,1.28,0.73,228.03,9,4,2013,Spring,Smoker,50-59yr,No intake,Positive
+538,355,2,1,37,CMV_Negative,1,0,0.8,1,10.22,2.68,0.84,535.75,10,4,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+539,368,1,1,32,CMV_Negative,0,0,0.5,1,13.29,1.17,0.49,31.06,15,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+540,151,2,1,23,CMV_Negative,1,0,2.9,1,12.23,1.6,0.93,470.19,11,4,2013,Spring,Ex smoker,20-29yr,No intake,Positive
+541,470,2,2,46,CMV_Negative,1,0,1,1,12.23,1.92,0.71,10.62,11,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+542,473,2,2,48,CMV_Positive,0,0,1,1,9.8,0.85,1.43,45.12,10,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+543,270,2,2,36,CMV_Negative,1,0,2.3,1,14.14,2.58,2.33,145.82,11,4,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+544,571,1,1,48,CMV_Negative,1,0,2.6,1,11.25,3.35,0.71,596.53,15,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+545,952,1,1,63,CMV_Negative,0,0,0.8,1,9.97,3.77,0.92,7.17,15,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+546,870,2,2,63,CMV_Positive,1,0,2.2,1,10.9,1.72,2.28,3.94,10,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+547,747,2,1,51,CMV_Negative,0,0,1.2,1,11.22,3.4,0.52,23.12,11,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+548,871,2,2,62,CMV_Negative,0,0,0.8,1,8.66,4.02,0.57,8.41,10,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+549,158,1,1,23,CMV_Positive,2,0,1.1,0,8.86,2.19,1.5,42.31,15,4,2013,Spring,Smoker,20-29yr,No intake,Negative
+550,365,1,1,34,CMV_Negative,0,0,1,1,11.7,2.2,0.97,99.93,10,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+551,934,1,1,62,CMV_Negative,1,0,2.3,1,8.88,1.97,1.52,108.84,12,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+552,557,1,1,41,CMV_Negative,0,0,0.6,1,9.72,4.07,1.56,161.94,11,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+553,139,2,1,24,CMV_Negative,0,0,2.9,1,11.95,2.54,0.95,110.11,7,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+554,933,1,1,66,CMV_Negative,2,0,1.4,1,8.39,1.36,0.81,85.94,12,3,2013,Spring,Smoker,60-69yr,No intake,Positive
+555,138,2,1,21,CMV_Negative,0,0,1.2,0,11.63,5.36,0.91,13.6,12,3,2013,Spring,Non smoker,20-29yr,No intake,Negative
+556,853,1,2,69,CMV_Negative,0,0,2.5,0,10.84,3.14,0.92,22.77,12,3,2013,Spring,Non smoker,60-69yr,No intake,Negative
+557,140,2,1,26,CMV_Negative,0,0,17.1,1,10.02,1.78,0.86,12.12,7,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+558,938,1,1,64,CMV_Positive,2,2,10,1,8.42,1.81,1.33,25.77,13,3,2013,Spring,Smoker,60-69yr,Low intake,Positive
+559,849,1,2,63,CMV_Positive,1,2,1.5,1,10.17,1.27,0.91,37.65,11,3,2013,Spring,Ex smoker,60-69yr,Low intake,Positive
+560,923,2,1,61,CMV_Positive,0,0,0.4,1,12.84,2.3,1.19,103.26,7,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+561,936,1,1,65,CMV_Negative,1,0,0.5,0,8.37,2.33,0.58,135.79,12,3,2013,Spring,Ex smoker,60-69yr,No intake,Negative
+562,740,1,1,57,CMV_Negative,0,0,1,1,9.2,3.68,0.9,44.02,13,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+563,738,1,1,52,CMV_Negative,0,0,0.8,1,11.18,1.27,0.65,73.2,11,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+564,264,1,2,35,CMV_Negative,0,0,1.6,1,10.95,2.67,1.53,844.02,13,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+565,848,1,2,68,CMV_Positive,1,0,0.7,1,11.8,3.03,1.18,5.78,11,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+566,855,1,2,61,CMV_Negative,0,0,0.8,1,11.66,1.82,1.08,174.43,13,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+567,550,2,1,49,CMV_Negative,1,0,5.6,1,13.02,3.25,0.97,217.54,7,3,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+568,846,1,2,63,CMV_Positive,0,0,0.3,1,9.82,2.67,1.03,27.74,11,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+569,926,2,1,64,CMV_Positive,1,0,1.9,1,10.91,1.68,1.28,71.12,13,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+570,845,1,2,65,CMV_Negative,0,0,2.4,1,11.26,1.94,1.02,8.41,11,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+571,191,1,1,22,CMV_Positive,2,0,0.3,1,8.07,0.96,0.99,26.19,24,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+1490,594,1,1,40,CMV_Negative,1,0,0.5,1,10.72,2.02,0.37,1092.9,25,6,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+572,388,1,1,32,CMV_Negative,0,0,1,1,8.26,1.74,0.47,12.34,24,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+573,493,1,2,44,CMV_Positive,1,0,1.1,1,8.7,1.97,1.69,327.32,25,6,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+574,595,1,1,41,CMV_Positive,0,0,0.3,1,11.58,1.45,0.82,74.95,26,6,2013,Summer,Non smoker,40-49yr,No intake,Positive
+575,788,1,1,58,CMV_Negative,1,0,0.5,0,8.97,1.75,1.81,7.58,24,6,2013,Summer,Ex smoker,50-59yr,No intake,Negative
+576,94,1,2,26,CMV_Positive,0,0,0.5,1,12.75,1.35,2.55,73.99,25,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+577,389,1,1,33,CMV_Negative,2,0,3.9,1,9.25,1.65,0.64,19.55,24,6,2013,Summer,Smoker,30-39yr,No intake,Positive
+578,591,1,1,46,CMV_Negative,2,0,1.8,1,9.07,2.19,2.45,16.35,24,6,2013,Summer,Smoker,40-49yr,No intake,Positive
+579,987,1,1,60,CMV_Negative,0,2,0.4,1,9.92,1.22,1,39.8,26,6,2013,Summer,Non smoker,60-69yr,Low intake,Positive
+580,391,1,1,38,CMV_Negative,2,0,1.8,1,8.55,1.35,0.84,13.46,25,6,2013,Summer,Smoker,30-39yr,No intake,Positive
+581,87,2,2,22,CMV_Negative,0,0,4.8,0,10.33,1.73,1.18,140.12,27,6,2013,Summer,Non smoker,20-29yr,No intake,Negative
+582,978,2,1,64,CMV_Negative,1,0,4.1,1,10.94,3.22,0.7,6.39,27,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+583,892,1,2,66,CMV_Positive,1,0,0.7,0,7.73,2.41,0.85,15.06,25,6,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+584,983,2,1,63,CMV_Positive,1,0,2.5,0,9.06,1.51,0.68,48.43,26,6,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+585,296,1,2,31,CMV_Positive,2,0,0.5,1,9.58,0.68,1.1,48.76,25,6,2013,Summer,Smoker,30-39yr,No intake,Positive
+586,492,1,2,43,CMV_Negative,0,0,0.3,1,13.78,3.37,1.83,12.2,24,6,2013,Summer,Non smoker,40-49yr,No intake,Positive
+587,287,2,2,32,CMV_Positive,0,0,0.3,1,11.48,2.35,1,38.74,27,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+588,489,1,2,40,CMV_Negative,0,2,1.8,1,11.39,2.54,0.92,66.16,24,6,2013,Summer,Non smoker,40-49yr,Low intake,Positive
+589,322,1,1,37,CMV_Negative,0,0,0.9,0,11.54,1.28,0.81,90.57,24,10,2012,Fall,Non smoker,30-39yr,No intake,Negative
+590,851,1,2,60,CMV_Positive,0,0,1.6,1,8.41,1.58,1.43,9.59,12,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+591,649,2,2,52,CMV_Positive,0,0,0.6,1,13.54,2.99,1.6,10.97,7,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+592,654,1,2,53,CMV_Positive,0,2,0.7,1,9.86,1.81,1.14,71.84,11,3,2013,Spring,Non smoker,50-59yr,Low intake,Positive
+593,352,1,1,38,CMV_Negative,1,0,1.4,1,12.6,3.63,0.6,157.56,11,3,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+594,935,1,1,60,CMV_Negative,1,0,8.5,1,9.65,1.32,0.5,41.12,12,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+595,653,1,2,55,CMV_Negative,1,0,0.8,0,10.7,1.41,0.87,2.7,11,3,2013,Spring,Ex smoker,50-59yr,No intake,Negative
+596,924,2,1,64,CMV_Positive,1,0,1.7,1,12.33,4.51,1.01,107.78,13,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+597,932,1,1,62,CMV_Negative,2,0,0.4,1,10.52,2.53,1.93,133,11,3,2013,Spring,Smoker,60-69yr,No intake,Positive
+598,850,1,2,63,CMV_Positive,0,0,0.9,1,10.56,2,1.4,9.8,12,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+599,353,1,1,39,CMV_Negative,0,0,2.5,1,10.86,1.73,1.37,21.41,12,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+600,852,1,2,63,CMV_Positive,1,0,0.5,1,8.47,1.32,1.04,4.31,12,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+601,931,1,1,64,CMV_Negative,1,0,0.6,1,11.37,0.88,0.62,16.71,11,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+602,925,2,1,66,CMV_Negative,0,0,0.4,1,9.74,1.76,1.72,25.84,13,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+603,739,1,1,56,CMV_Negative,0,0,0.6,1,9,1.77,1.07,114.24,12,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+604,834,2,2,64,CMV_Positive,0,0,5.3,0,15.41,1.21,1.58,49.53,7,3,2013,Spring,Non smoker,60-69yr,No intake,Negative
+605,939,1,1,63,CMV_Negative,1,2,3.3,1,9.83,1.82,2.28,39.71,13,3,2013,Spring,Ex smoker,60-69yr,Low intake,Positive
+606,847,1,2,62,CMV_Positive,0,2,3,1,10.53,3.04,0.84,24.27,11,3,2013,Spring,Non smoker,60-69yr,Low intake,Positive
+607,854,1,2,60,CMV_Negative,0,0,1.8,1,12.14,1.36,3,3.23,13,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+608,734,2,1,50,CMV_Positive,2,0,0.4,1,8.61,2.2,0.8,754.59,13,3,2013,Spring,Smoker,50-59yr,No intake,Positive
+609,469,1,2,44,CMV_Negative,2,0,1.2,1,10.63,1.03,1.58,166.13,12,3,2013,Spring,Smoker,40-49yr,No intake,Positive
+610,937,1,1,68,CMV_Positive,0,0,2.2,1,8.64,2.06,1.44,30.81,13,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+611,91,1,2,22,CMV_Positive,0,0,1.4,1,13.73,2.43,1.22,6.98,17,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+612,290,1,2,39,CMV_Negative,0,0,3.6,0,12.11,1.48,0.53,73.09,11,6,2013,Summer,Non smoker,30-39yr,No intake,Negative
+613,982,1,1,63,CMV_Positive,1,0,0.7,1,9.36,1.31,0.71,565.28,11,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+614,288,1,2,36,CMV_Negative,1,0,6.9,1,8.83,0.89,1.21,41.22,11,6,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+615,969,2,1,61,CMV_Negative,0,0,1.5,1,13.94,1.94,0.48,178.94,12,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+616,980,1,1,60,CMV_Negative,1,0,1,0,9.44,2.09,0.56,183.27,11,6,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+617,88,1,2,26,CMV_Positive,2,0,0.9,1,10.2,1.86,1.05,9.23,12,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+618,689,1,2,57,CMV_Positive,1,0,1.2,0,7.74,1.94,1.02,12.55,12,6,2013,Summer,Ex smoker,50-59yr,No intake,Negative
+619,968,2,1,61,CMV_Positive,0,0,2.1,1,10.57,1.64,0.9,13.46,13,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+620,293,1,2,37,CMV_Negative,1,0,0.4,1,9.77,2,2.58,560.09,12,6,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+621,675,2,2,57,CMV_Negative,1,0,1,1,10.14,1.45,0.44,7.35,13,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+622,181,2,1,28,CMV_Positive,2,0,0.5,1,10.46,2.59,0.52,41.85,12,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+623,176,2,1,20,CMV_Negative,2,0,6.5,1,7.62,3.73,0.66,57.76,13,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+624,291,1,2,30,CMV_Negative,0,0,1.7,1,9.58,1.38,0.62,9.2,12,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+625,281,2,2,37,CMV_Positive,2,0,1.8,1,12,2.82,0.7,30.26,13,6,2013,Summer,Smoker,30-39yr,No intake,Positive
+626,90,1,2,24,CMV_Positive,0,0,2.7,0,8.13,1.52,1.75,6.95,17,6,2013,Summer,Non smoker,20-29yr,No intake,Negative
+627,589,1,1,42,CMV_Positive,0,0,0.3,1,13.1,1.89,0.7,13.96,11,6,2013,Summer,Non smoker,40-49yr,No intake,Positive
+628,289,1,2,37,CMV_Negative,2,0,2.1,1,9.57,1.51,0.86,16.88,11,6,2013,Summer,Smoker,30-39yr,No intake,Positive
+629,967,2,1,60,CMV_Negative,1,0,3.4,1,10.02,3.12,0.43,539.66,13,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+630,687,1,2,58,CMV_Positive,0,0,0.3,1,8.18,3.35,0.76,12.85,11,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+631,280,2,2,40,CMV_Positive,0,0,0.9,1,11.09,3.98,1.75,75.09,13,6,2013,Summer,Non smoker,40-49yr,No intake,Positive
+632,463,1,2,40,CMV_Positive,1,0,1.2,1,10.31,1.97,2.09,45.5,18,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+633,648,2,2,58,CMV_Negative,0,0,0.5,0,13.43,1.56,2.32,48.89,13,2,2013,Winter,Non smoker,50-59yr,No intake,Negative
+634,833,1,2,62,CMV_Positive,0,0,1.2,1,9.19,1.96,1.1,41.83,18,2,2013,Winter,Non smoker,60-69yr,No intake,Positive
+635,65,1,2,20,CMV_Negative,2,0,0.8,1,8.62,1.04,2.13,14.81,19,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+636,40,2,2,23,CMV_Negative,2,4,1.5,1,12.04,2.35,1.69,24.29,13,2,2013,Winter,Smoker,20-29yr,Low intake,Positive
+637,729,1,1,60,CMV_Negative,0,0,0.5,1,9.86,3.29,0.82,34.54,18,2,2013,Winter,Non smoker,60-69yr,No intake,Positive
+638,41,2,2,20,CMV_Negative,0,0,7.2,0,13.52,2.18,0.98,314.45,13,2,2013,Winter,Non smoker,20-29yr,No intake,Negative
+639,448,2,2,44,CMV_Negative,0,0,0.8,1,13.79,1.09,1.26,53.25,14,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+640,252,1,2,38,CMV_Negative,2,0,0.3,1,9.39,2.23,1.38,194.81,19,2,2013,Winter,Smoker,30-39yr,No intake,Positive
+641,344,1,1,30,CMV_Negative,1,0,0.8,1,11.86,1.82,2.8,965.74,13,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+642,462,1,2,48,CMV_Negative,0,0,1.7,0,8.62,2.77,0.84,9.34,18,2,2013,Winter,Non smoker,40-49yr,No intake,Negative
+643,241,2,2,31,CMV_Negative,1,0,1.4,0,10.99,1.92,4.08,35.55,13,2,2013,Winter,Ex smoker,30-39yr,No intake,Negative
+644,461,1,2,47,CMV_Positive,1,0,0.8,1,13.77,3.15,2,87.94,13,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+645,345,1,1,36,CMV_Negative,2,0,0.9,0,10.74,1.71,1.93,13.58,18,2,2013,Winter,Smoker,30-39yr,No intake,Negative
+646,248,1,2,34,CMV_Negative,2,0,0.3,0,9.33,2.49,0.59,24.06,13,2,2013,Winter,Smoker,30-39yr,No intake,Negative
+647,62,1,2,24,CMV_Negative,0,0,1.4,1,11.79,2.5,1.15,50.1,13,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+648,129,2,1,27,CMV_Negative,2,0,0.3,0,9.75,1.67,1.89,29.24,14,2,2013,Winter,Smoker,20-29yr,No intake,Negative
+649,460,1,2,49,CMV_Positive,1,0,3.6,1,10.45,2.44,0.7,15.45,13,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+650,249,1,2,33,CMV_Negative,0,0,0.6,1,12.48,3.65,1.23,0.81,18,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+651,347,1,1,38,CMV_Negative,0,30,2.1,1,12.29,1.05,0.64,80.44,25,2,2013,Winter,Non smoker,30-39yr,High intake,Positive
+652,452,2,2,42,CMV_Negative,0,0,0.6,1,12.01,1.66,2.64,243.19,21,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+653,348,1,1,38,CMV_Negative,1,2,0.6,1,13.61,2.97,1.39,28.07,25,2,2013,Winter,Ex smoker,30-39yr,Low intake,Positive
+654,552,1,1,43,CMV_Positive,0,0,10.2,1,11.44,4.12,0.37,397.38,20,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+655,46,2,2,25,CMV_Negative,0,0,0.8,1,12.57,1.16,1.29,12.11,21,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+656,143,1,1,20,CMV_Positive,2,0,0.2,1,8.76,1.17,0.65,9.92,20,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+657,828,2,2,60,CMV_Positive,1,0,1.3,1,15.48,3.11,1.14,159.9,21,2,2013,Winter,Ex smoker,60-69yr,No intake,Positive
+658,142,1,1,20,CMV_Negative,0,0,0.4,1,11.11,1.76,0.65,178.14,20,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+659,454,2,2,41,CMV_Negative,2,0,2.8,0,9.34,2.22,1.39,21.22,21,2,2013,Winter,Smoker,40-49yr,No intake,Negative
+660,649,1,2,52,CMV_Positive,0,0,0.6,1,13.54,2.99,1.6,10.97,19,2,2013,Winter,Non smoker,50-59yr,No intake,Positive
+661,69,1,2,21,CMV_Negative,0,0,0.2,1,12.53,0.55,2.17,12.32,20,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+662,68,1,2,23,CMV_Negative,0,0,0.3,1,11.99,1.73,0.91,6.41,20,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+663,45,2,2,21,CMV_Negative,0,0,2.4,1,10,2.11,0.99,12.25,21,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+664,550,1,1,49,CMV_Negative,1,0,5.6,1,13.02,3.25,0.97,217.54,19,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+665,450,2,2,46,CMV_Negative,1,0,2.8,1,7.75,1.57,1.09,49.66,21,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+666,140,1,1,26,CMV_Negative,0,0,17.1,1,10.02,1.78,0.86,12.12,19,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1491,464,1,2,47,CMV_Positive,1,0,1,1,9.99,2.65,1.09,64.4,25,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+667,830,2,2,61,CMV_Positive,0,0,1.3,0,12.23,3.1,0.98,12.03,20,2,2013,Winter,Non smoker,60-69yr,No intake,Negative
+668,453,2,2,49,CMV_Negative,1,0,0.4,0,12.8,2.37,3.17,5.43,21,2,2013,Winter,Ex smoker,40-49yr,No intake,Negative
+669,255,2,2,37,CMV_Negative,0,0,0.4,1,10.41,3.2,0.74,11.2,14,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+670,260,2,2,38,CMV_Negative,1,0,5.8,1,9.58,1.65,0.98,6.48,14,3,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+671,146,1,1,25,CMV_Negative,0,0,0.4,1,10.46,2.17,1.07,171.67,19,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+672,76,1,2,22,CMV_Negative,0,0,6.8,1,13.3,4.07,1.39,45.62,19,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+673,267,1,2,38,CMV_Negative,0,0,1.2,1,11.83,1.9,0.41,112.27,19,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+674,256,2,2,39,CMV_Negative,1,0,3.5,1,9.53,2.6,1.42,11.15,14,3,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+675,145,1,1,26,CMV_Negative,0,0,1.7,1,10.57,2.87,0.79,2556.07,18,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+676,561,1,1,49,CMV_Negative,1,0,1,1,11.76,2.09,0.8,21.26,26,3,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+677,650,2,2,55,CMV_Positive,0,0,0.3,1,13.76,3.03,2.81,33.21,14,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+678,857,1,2,66,CMV_Positive,1,0,0.4,1,9.08,2.68,0.58,100.21,18,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+679,746,1,1,54,CMV_Negative,2,0,2.1,1,9.34,2.38,1.16,124.11,26,3,2013,Spring,Smoker,50-59yr,No intake,Positive
+680,651,2,2,53,CMV_Negative,0,0,13.4,1,9.71,1.95,1.3,20.45,14,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+681,266,1,2,35,CMV_Negative,2,0,4.4,1,13.41,4.2,1.88,446.04,19,3,2013,Spring,Smoker,30-39yr,No intake,Positive
+682,859,1,2,66,CMV_Negative,0,0,3.3,0,8.66,2.07,1.34,383.69,18,3,2013,Spring,Non smoker,60-69yr,No intake,Negative
+683,856,1,2,62,CMV_Positive,0,30,0.5,1,10.82,2.65,1.04,6.25,18,3,2013,Spring,Non smoker,60-69yr,High intake,Positive
+684,741,1,1,51,CMV_Negative,1,0,0.5,1,9.93,2.42,0.63,45.56,19,3,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+685,942,1,1,63,CMV_Positive,1,0,0.7,1,14.88,2.08,1.8,60.89,19,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+686,861,1,2,60,CMV_Negative,0,0,1.6,1,10.78,2.99,1.11,16.72,18,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+687,265,1,2,34,CMV_Negative,0,0,1.5,1,11.31,2.57,2.37,31.71,18,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+688,835,2,2,64,CMV_Positive,1,0,0.5,1,10.11,1.76,0.46,4.92,14,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+689,863,1,2,64,CMV_Negative,1,0,3.6,1,9.39,1.76,0.95,54.46,18,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+690,66,1,2,21,CMV_Negative,0,0,1.3,1,10.95,1.39,1.23,12.08,19,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+691,445,2,2,45,CMV_Negative,0,0,0.8,0,14.15,2.6,1,48.89,14,2,2013,Winter,Non smoker,40-49yr,No intake,Negative
+692,446,2,2,44,CMV_Negative,0,0,1,1,13.1,3.31,0.98,235.68,14,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+693,64,1,2,20,CMV_Negative,0,0,0.4,0,10.23,3.39,0.85,63.53,18,2,2013,Winter,Non smoker,20-29yr,No intake,Negative
+694,250,1,2,39,CMV_Negative,0,2,3.2,1,12.57,3.02,1.29,6.17,18,2,2013,Winter,Non smoker,30-39yr,Low intake,Positive
+695,247,1,2,32,CMV_Positive,0,0,0.5,1,10.13,2,1.29,67.15,13,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+696,334,2,1,31,CMV_Positive,0,0,1.1,1,11.05,1.27,1.02,10.5,14,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+697,251,1,2,32,CMV_Negative,2,0,0.3,1,7.05,1.5,0.85,3.87,19,2,2013,Winter,Smoker,30-39yr,No intake,Positive
+698,240,2,2,32,CMV_Positive,0,0,1.6,1,10.21,2.87,1.41,22.44,14,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+699,63,1,2,20,CMV_Positive,2,0,0.4,1,11.98,1.61,1.16,14.47,13,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+700,832,1,2,61,CMV_Negative,0,0,1.5,1,12.16,4.95,0.74,2399.01,18,2,2013,Winter,Non smoker,60-69yr,No intake,Positive
+701,67,1,2,20,CMV_Positive,2,0,0.7,1,10.63,2.07,1.3,6.28,19,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+702,343,1,1,33,CMV_Negative,2,0,0.3,1,11.07,1.95,0.9,27.04,13,2,2013,Winter,Smoker,30-39yr,No intake,Positive
+703,540,2,1,47,CMV_Negative,1,0,0.4,0,10.76,1.54,0.59,68.6,14,2,2013,Winter,Ex smoker,40-49yr,No intake,Negative
+704,333,2,1,39,CMV_Negative,0,0,0.6,1,12.13,2.42,1.27,510.42,14,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+705,38,2,2,22,CMV_Positive,0,2,2,1,12.35,1.31,1.97,89.75,14,2,2013,Winter,Non smoker,20-29yr,Low intake,Positive
+706,239,2,2,33,CMV_Negative,2,0,1,0,9.03,0.75,0.78,20.63,14,2,2013,Winter,Smoker,30-39yr,No intake,Negative
+707,33,2,2,21,CMV_Negative,0,0,3.8,1,11.99,3.08,1.1,20.66,18,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+708,346,1,1,37,CMV_Negative,1,0,3.2,1,9.88,3.92,0.59,156.75,18,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+709,236,2,2,36,CMV_Positive,0,0,0.4,1,12.78,2.09,0.6,56.06,14,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+710,831,1,2,62,CMV_Negative,0,0,0.8,0,11.99,2.7,1.86,4.78,18,2,2013,Winter,Non smoker,60-69yr,No intake,Negative
+711,34,1,2,24,CMV_Negative,0,0,4.3,1,10.77,2.53,1.35,107.73,23,1,2013,Winter,Non smoker,20-29yr,No intake,Positive
+712,642,1,2,59,CMV_Positive,0,0,0.4,0,9.53,1.36,1.23,19.08,22,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+713,442,1,2,48,CMV_Negative,0,4,0.2,1,11.41,1.68,0.73,4.31,23,1,2013,Winter,Non smoker,40-49yr,Low intake,Positive
+714,726,1,1,51,CMV_Negative,1,0,0.6,1,9.47,2.21,1.56,15.97,23,1,2013,Winter,Ex smoker,50-59yr,No intake,Positive
+715,233,1,2,36,CMV_Negative,0,2,1.2,0,12.85,2.38,0.79,22.87,21,1,2013,Winter,Non smoker,30-39yr,Low intake,Negative
+716,440,1,2,46,CMV_Positive,2,0,0.6,0,12.09,0.84,1.15,65.79,22,1,2013,Winter,Smoker,40-49yr,No intake,Negative
+717,32,1,2,24,CMV_Negative,0,0,1.7,1,11.71,3.47,1.36,7.33,23,1,2013,Winter,Non smoker,20-29yr,No intake,Positive
+718,640,1,2,56,CMV_Positive,0,0,0.6,0,11.03,2.17,1.58,47.3,21,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+719,645,1,2,56,CMV_Negative,0,0,5.6,0,11.14,3.21,0.72,44.45,28,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+720,234,1,2,38,CMV_Positive,0,0,10.3,0,13.14,1.88,1.1,158.12,23,1,2013,Winter,Non smoker,30-39yr,No intake,Negative
+721,919,1,1,65,CMV_Negative,1,0,3.4,0,10.8,3.31,0.43,13.28,21,1,2013,Winter,Ex smoker,60-69yr,No intake,Negative
+722,235,1,2,39,CMV_Positive,0,0,3.5,1,10.46,2.53,1.23,2.13,23,1,2013,Winter,Non smoker,30-39yr,No intake,Positive
+723,536,1,1,41,CMV_Negative,2,0,3.8,0,13.07,3.44,1.36,65.12,21,1,2013,Winter,Smoker,40-49yr,No intake,Negative
+724,35,1,2,24,CMV_Negative,2,0,1.3,1,11.29,3.82,1.87,10.01,28,1,2013,Winter,Smoker,20-29yr,No intake,Positive
+725,441,1,2,48,CMV_Negative,0,0,2.3,1,10.78,2.19,1.34,28.2,22,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+726,538,1,1,47,CMV_Negative,1,0,4.5,1,12.19,2.68,1.01,52.62,21,1,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+727,646,1,2,55,CMV_Positive,0,0,1.8,0,12.05,2.37,1.17,20.42,28,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+728,33,1,2,21,CMV_Negative,0,0,3.8,1,11.99,3.08,1.1,20.66,23,1,2013,Winter,Non smoker,20-29yr,No intake,Positive
+729,920,1,1,65,CMV_Negative,0,0,0.9,1,10.07,4.08,0.59,29.86,22,1,2013,Winter,Non smoker,60-69yr,No intake,Positive
+730,725,1,1,59,CMV_Negative,0,0,0.3,0,13.42,1.99,0.98,22.15,23,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+731,641,1,2,58,CMV_Negative,1,0,7.1,1,12.05,2.41,1.27,267.3,22,1,2013,Winter,Ex smoker,50-59yr,No intake,Positive
+732,731,2,1,50,CMV_Negative,1,0,2.2,1,10.74,1.93,0.64,10.98,14,3,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+733,465,2,2,48,CMV_Negative,2,0,2.6,1,11.96,1.64,1.11,236.52,14,3,2013,Spring,Smoker,40-49yr,No intake,Positive
+734,865,1,2,69,CMV_Positive,0,2,0.6,1,9.66,1.03,0.93,2.17,19,3,2013,Spring,Non smoker,60-69yr,Low intake,Positive
+735,254,2,2,30,CMV_Positive,0,0,2.2,1,13.12,1.09,1.61,74.28,14,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+736,867,1,2,68,CMV_Negative,2,0,2.5,1,25.77,1.31,0.57,77.03,19,3,2013,Spring,Smoker,60-69yr,No intake,Positive
+737,732,2,1,59,CMV_Negative,0,0,0.6,1,11.01,3.27,0.5,39.8,14,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+738,562,1,1,46,CMV_Negative,0,0,0.3,1,10.01,2.53,1.16,24.81,26,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+739,858,1,2,60,CMV_Negative,0,0,1.7,1,12.62,1.6,1.69,22.62,18,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+740,940,1,1,65,CMV_Negative,0,0,1.2,1,10.96,1.81,1.32,45.12,18,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+741,733,2,1,58,CMV_Negative,0,0,1,1,10.54,1.41,0.44,43.75,14,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+742,269,1,2,30,CMV_Positive,0,0,4.8,1,9.71,1.37,0.78,45.99,26,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+743,943,1,1,67,CMV_Negative,2,0,4.9,1,9.39,4.26,1.15,60.25,19,3,2013,Spring,Smoker,60-69yr,No intake,Positive
+744,864,1,2,61,CMV_Positive,0,0,2.3,1,13.87,2.86,1.08,7.34,19,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+745,655,1,2,53,CMV_Negative,0,0,0.8,1,13.2,2.58,1.15,25.21,19,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+746,866,1,2,60,CMV_Positive,0,0,4.9,1,11.76,1.65,1.01,3.29,19,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+747,259,2,2,38,CMV_Positive,0,0,1.6,1,12.36,1.82,0.72,34.15,14,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+748,941,1,1,62,CMV_Negative,0,0,0.5,1,12.02,2.14,0.56,125.64,18,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+749,862,1,2,62,CMV_Negative,0,2,0.4,1,9.14,2.38,1.24,13.66,18,3,2013,Spring,Non smoker,60-69yr,Low intake,Positive
+750,860,1,2,66,CMV_Negative,0,0,0.5,1,10.57,2.99,0.84,14.98,18,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+751,83,1,2,24,CMV_Positive,0,0,3.4,0,12.69,2.17,1.25,28.64,21,5,2013,Spring,Non smoker,20-29yr,No intake,Negative
+752,162,2,1,28,CMV_Positive,0,0,0.4,1,13.98,3.3,0.73,29.43,16,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+753,579,2,1,40,CMV_Negative,0,0,1.2,1,10.56,3.82,0.4,17.75,16,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+754,958,1,1,69,CMV_Negative,1,0,2.4,1,13.42,1.17,1.63,39.73,15,5,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+755,275,1,2,31,CMV_Negative,1,0,0.8,1,9.31,1.78,1.29,9.25,21,5,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1492,5701,2,1,59,CMV_Positive,0,0,2.2,1,10.87,1.7,1.11,242.64,16,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1493,664,2,2,55,CMV_Positive,1,2,1,0,9.31,2.74,1.08,85.22,16,5,2013,Spring,Ex smoker,50-59yr,Low intake,Negative
+1494,577,2,1,41,CMV_Negative,1,0,1.6,1,11.3,2.93,0.69,28.37,16,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+1495,374,1,1,35,CMV_Negative,0,0,0.8,1,11.6,2.1,0.97,57.34,15,5,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1496,962,1,1,67,CMV_Positive,1,0,1.2,0,5.75,2.93,0.36,70.08,15,5,2013,Spring,Ex smoker,60-69yr,No intake,Negative
+1497,169,1,1,26,CMV_Negative,0,0,0.6,1,11.31,2.96,1.14,11.57,22,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1498,580,2,1,43,CMV_Positive,1,0,0.3,1,11.22,2.04,0.78,5.83,16,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+756,965,1,1,65,CMV_Positive,0,0,2.8,1,9.6,1.83,0.89,43.77,21,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+757,961,1,1,62,CMV_Negative,0,0,0.6,1,10.83,2,0.92,6,15,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+758,277,1,2,31,CMV_Negative,0,0,0.9,1,10.89,2.55,0.57,4.33,21,5,2013,Spring,Non smoker,30-39yr,No intake,Positive
+759,667,1,2,51,CMV_Positive,0,0,0.5,1,12.46,2.05,0.77,11.97,14,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+760,170,1,1,20,CMV_Negative,2,0,1.9,0,9.73,1.42,1.5,16.65,22,5,2013,Spring,Smoker,20-29yr,No intake,Negative
+761,586,1,1,40,CMV_Positive,2,0,1.6,1,11.36,3.64,0.66,158.17,22,5,2013,Spring,Smoker,40-49yr,No intake,Positive
+762,168,1,1,29,CMV_Negative,1,0,0.9,1,10.29,3.01,0.77,90.36,21,5,2013,Spring,Ex smoker,20-29yr,No intake,Positive
+763,775,1,1,52,CMV_Positive,2,0,2.4,1,10.46,1.31,1.09,67.38,22,5,2013,Spring,Smoker,50-59yr,No intake,Positive
+764,294,1,2,30,CMV_Positive,0,0,1.2,1,11.98,2.03,1.38,45.35,17,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+765,384,1,1,36,CMV_Negative,0,0,1.8,1,13.19,3.38,0.98,9.54,12,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+766,686,1,2,55,CMV_Negative,1,0,0.3,0,8.7,2.07,0.78,0.99,11,6,2013,Summer,Ex smoker,50-59yr,No intake,Negative
+767,382,1,1,38,CMV_Negative,1,0,0.6,1,7.23,2.16,0.41,22.13,11,6,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+768,292,1,2,32,CMV_Negative,2,0,3.6,0,7.66,1.81,0.44,41.59,12,6,2013,Summer,Smoker,30-39yr,No intake,Negative
+769,85,2,2,23,CMV_Negative,0,0,3.1,1,11.23,1.8,2.11,251.07,13,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+770,180,2,1,26,CMV_Negative,0,0,1,1,12.07,2.01,1.58,11.13,12,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+771,887,2,2,64,CMV_Positive,1,0,1.3,1,10.66,2.65,1.28,16.76,13,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+772,674,2,2,54,CMV_Positive,0,0,1,0,11.5,0.77,1.16,109.42,13,6,2013,Summer,Non smoker,50-59yr,No intake,Negative
+773,688,1,2,52,CMV_Positive,1,0,0.6,0,11,1.88,1.66,80.89,11,6,2013,Summer,Ex smoker,50-59yr,No intake,Negative
+774,983,1,1,63,CMV_Positive,1,0,2.5,0,9.06,1.51,0.68,48.43,12,6,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+775,89,1,2,24,CMV_Negative,0,0,0.9,1,9.03,2.84,1.78,47.2,17,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+776,981,1,1,64,CMV_Positive,0,0,1.6,1,10.04,1.4,0.81,18.04,11,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+777,676,2,2,52,CMV_Positive,0,0,0.5,1,15.68,0.1,3.94,0.25,13,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+778,784,1,1,51,CMV_Negative,0,0,2.4,1,10.96,1.15,0.43,109.08,12,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+779,282,2,2,39,CMV_Positive,2,0,1.4,1,9.8,1.36,1.62,12.69,12,6,2013,Summer,Smoker,30-39yr,No intake,Positive
+780,886,2,2,61,CMV_Negative,0,0,0.8,1,12.17,3.34,1.04,37.3,13,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+781,174,2,1,23,CMV_Negative,2,0,2.2,1,7.91,0.96,0.94,364.91,13,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+782,383,1,1,31,CMV_Negative,2,0,0.3,0,6.47,2.32,0.95,130.74,11,6,2013,Summer,Smoker,30-39yr,No intake,Negative
+783,385,1,1,39,CMV_Positive,2,0,1.1,0,7.33,1.44,0.92,7.04,17,6,2013,Summer,Smoker,30-39yr,No intake,Negative
+784,583,1,1,45,CMV_Positive,0,0,2.4,1,11.04,3.34,0.29,28.55,6,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+785,585,1,1,43,CMV_Negative,1,0,14.1,1,9.37,1.73,1.19,26.08,14,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+786,157,2,1,21,CMV_Negative,0,0,1.3,1,9.42,2.07,1.17,1683.89,6,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+787,766,1,1,54,CMV_Negative,0,0,0.5,1,9.95,1.79,1.01,62.5,6,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+788,772,1,1,52,CMV_Negative,2,0,6.2,0,6.61,0.95,4.81,58.39,14,5,2013,Spring,Smoker,50-59yr,No intake,Negative
+789,764,1,1,51,CMV_Negative,1,0,2.9,1,10.87,1.12,2.38,97.65,6,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+790,765,1,1,54,CMV_Positive,0,0,3.3,1,9.77,1.47,1.98,36.05,6,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+791,483,1,2,49,CMV_Positive,1,0,0.7,1,10.9,3.6,0.49,6.14,14,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+792,768,1,1,53,CMV_Negative,2,0,2.2,1,8.49,1.06,0.78,14.22,13,5,2013,Spring,Smoker,50-59yr,No intake,Positive
+793,82,2,2,29,CMV_Positive,0,0,0.9,1,11.41,5.07,1.12,28.34,2,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+794,581,1,1,42,CMV_Positive,1,0,0.8,1,9.26,1.75,1.09,49.07,6,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+795,956,1,1,65,CMV_Negative,0,0,8.2,1,11.49,1.16,0.83,18.96,14,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+796,584,1,1,46,CMV_Negative,0,0,2,1,11.12,1.96,0.61,75.37,13,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+797,373,1,1,34,CMV_Negative,2,0,0.4,1,14.15,2.31,1.02,364.98,13,5,2013,Spring,Smoker,30-39yr,No intake,Positive
+798,163,1,1,24,CMV_Negative,0,0,0.9,1,9.64,2.38,1.35,70.88,6,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+799,166,1,1,23,CMV_Negative,0,0,1.2,1,13.27,2.42,0.73,202.48,13,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+800,165,1,1,28,CMV_Negative,1,0,0.2,0,8.59,1.64,0.79,428.35,6,5,2013,Spring,Ex smoker,20-29yr,No intake,Negative
+801,5534,2,1,46,CMV_Positive,2,0,0.8,1,9.57,1.54,1.17,3000,2,5,2013,Spring,Smoker,40-49yr,No intake,Positive
+802,773,1,1,59,CMV_Negative,1,0,0.9,1,15.29,3.76,1.43,134.03,14,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+803,572,2,1,49,CMV_Negative,1,0,1.2,1,8.22,3.09,1.35,103.86,2,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+804,417,1,2,43,CMV_Negative,0,0,0.3,1,11.26,1.55,0.75,434.23,14,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+805,299,2,2,39,CMV_Negative,0,0,0.3,0,6.98,1.6,1.37,19.78,1,8,2013,Summer,Non smoker,30-39yr,No intake,Negative
+806,600,2,1,48,CMV_Positive,0,0,0.5,1,9.38,3.19,0.88,7.08,25,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+807,527,1,1,44,CMV_Negative,0,0,1.7,1,11.41,2.9,1.83,44.31,13,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+808,415,1,2,41,CMV_Positive,0,0,0.3,1,16.48,2.01,1.05,26.39,13,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+809,416,1,2,48,CMV_Negative,0,2,0.5,1,13.65,2.51,1.05,8.44,14,11,2012,Fall,Non smoker,40-49yr,Low intake,Positive
+810,412,1,2,44,CMV_Positive,1,0,0.5,0,8.97,1.89,1.62,396.73,13,11,2012,Fall,Ex smoker,40-49yr,No intake,Negative
+811,623,1,2,57,CMV_Negative,0,0,13.3,0,7.68,1.57,0.65,12.45,14,11,2012,Fall,Non smoker,50-59yr,No intake,Negative
+812,196,2,1,20,CMV_Negative,0,0,2.6,1,11.85,3.05,1,382.87,25,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+813,805,2,2,66,CMV_Negative,0,2,3.1,1,10.75,4.83,0.89,17.79,8,11,2012,Fall,Non smoker,60-69yr,Low intake,Positive
+814,411,1,2,49,CMV_Positive,0,0,0.2,1,11.18,2.56,1.71,204.39,13,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+815,611,2,2,56,CMV_Negative,0,0,0.9,1,10.39,2.02,1.07,192.76,18,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+816,808,1,2,65,CMV_Positive,0,0,4.3,0,11.4,3.17,0.96,30.01,17,10,2012,Fall,Non smoker,60-69yr,No intake,Negative
+817,318,1,1,35,CMV_Negative,0,0,2.5,1,11.11,3.08,0.76,213.12,22,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+818,41,1,2,20,CMV_Negative,0,0,7.2,0,13.52,2.18,0.98,314.45,30,1,2013,Winter,Non smoker,20-29yr,No intake,Negative
+819,448,1,2,44,CMV_Negative,0,0,0.8,1,13.79,1.09,1.26,53.25,29,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+820,39,1,2,25,CMV_Negative,0,0,2.5,1,13.19,2.3,1.53,31,30,1,2013,Winter,Non smoker,20-29yr,No intake,Positive
+821,130,1,1,22,CMV_Positive,2,0,7.6,1,10.57,1.29,1.18,48.4,29,1,2013,Winter,Smoker,20-29yr,No intake,Positive
+822,402,1,2,42,CMV_Positive,0,0,1,1,13.08,3.57,1.02,19.56,25,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+823,201,1,2,37,CMV_Negative,0,0,0.8,0,9.45,1.66,0.79,87.04,18,9,2012,Fall,Non smoker,30-39yr,No intake,Negative
+824,40,1,2,23,CMV_Negative,2,4,1.5,1,12.04,2.35,1.69,24.29,30,1,2013,Winter,Smoker,20-29yr,Low intake,Positive
+825,37,1,2,24,CMV_Negative,0,0,2.2,1,9.99,2.74,1.69,82.29,29,1,2013,Winter,Non smoker,20-29yr,No intake,Positive
+826,209,1,2,33,CMV_Positive,2,0,0.4,1,7.16,2.26,1.52,58.94,19,9,2012,Fall,Smoker,30-39yr,No intake,Positive
+827,407,1,2,40,CMV_Negative,1,2,0.6,1,11.82,2,1.13,26.25,26,9,2012,Fall,Ex smoker,40-49yr,Low intake,Positive
+828,647,1,2,54,CMV_Positive,0,0,2.5,0,11.89,3.25,0.58,266.68,29,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+829,240,1,2,32,CMV_Positive,0,0,1.6,1,10.21,2.87,1.41,22.44,29,1,2013,Winter,Non smoker,30-39yr,No intake,Positive
+830,541,1,1,44,CMV_Positive,2,0,0.6,0,12.42,2.45,0.89,76,30,1,2013,Winter,Smoker,40-49yr,No intake,Negative
+831,505,1,1,44,CMV_Positive,0,0,0.2,1,12.74,4.42,2.19,147.24,24,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+832,305,1,1,36,CMV_Negative,2,0,0.4,1,9.47,1.79,0.62,8.98,17,9,2012,Fall,Smoker,30-39yr,No intake,Positive
+833,506,1,1,43,CMV_Negative,1,0,0.2,1,9.34,2.77,0.77,21.16,24,9,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+834,132,1,1,22,CMV_Positive,0,0,6.1,1,10.75,1.77,1.32,126.46,30,1,2013,Winter,Non smoker,20-29yr,No intake,Positive
+835,241,1,2,31,CMV_Negative,1,0,1.4,0,10.99,1.92,4.08,35.55,30,1,2013,Winter,Ex smoker,30-39yr,No intake,Negative
+836,237,1,2,34,CMV_Positive,0,0,0.3,1,12.24,3.2,0.98,12.56,29,1,2013,Winter,Non smoker,30-39yr,No intake,Positive
+837,333,1,1,39,CMV_Negative,0,0,0.6,1,12.13,2.42,1.27,510.42,28,1,2013,Winter,Non smoker,30-39yr,No intake,Positive
+838,210,1,2,38,CMV_Negative,0,0,2,1,11.76,1.72,0.74,31.9,19,9,2012,Fall,Non smoker,30-39yr,No intake,Positive
+839,512,1,1,43,CMV_Negative,1,0,0.5,1,10.58,2.94,1.34,23.62,25,9,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+840,204,1,2,37,CMV_Positive,2,0,0.6,0,10.75,1.7,2.47,88.45,18,9,2012,Fall,Smoker,30-39yr,No intake,Negative
+841,239,1,2,33,CMV_Negative,2,0,1,0,9.03,0.75,0.78,20.63,29,1,2013,Winter,Smoker,30-39yr,No intake,Negative
+842,410,1,2,48,CMV_Positive,1,0,1.5,1,13.18,1.62,1.51,7.5,26,9,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+843,445,1,2,45,CMV_Negative,0,0,0.8,0,14.15,2.6,1,48.89,28,1,2013,Winter,Non smoker,40-49yr,No intake,Negative
+844,507,1,1,44,CMV_Positive,1,0,2.9,1,5.59,0.93,0.88,7.35,24,9,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+845,38,1,2,22,CMV_Positive,0,2,2,1,12.35,1.31,1.97,89.75,29,1,2013,Winter,Non smoker,20-29yr,Low intake,Positive
+846,304,1,1,39,CMV_Negative,0,0,1.3,1,11.21,1.51,1.38,37.82,17,9,2012,Fall,Non smoker,30-39yr,No intake,Positive
+847,336,1,1,30,CMV_Negative,2,0,0.7,0,10.07,4.09,1.06,19.45,30,1,2013,Winter,Smoker,30-39yr,No intake,Negative
+848,306,1,1,34,CMV_Positive,0,0,0.3,1,10.85,2.25,1.11,7.96,17,9,2012,Fall,Non smoker,30-39yr,No intake,Positive
+849,307,1,1,32,CMV_Negative,0,0,0.5,1,11.96,2.4,1.01,239.59,17,9,2012,Fall,Non smoker,30-39yr,No intake,Positive
+850,540,1,1,47,CMV_Negative,1,0,0.4,0,10.76,1.54,0.59,68.6,28,1,2013,Winter,Ex smoker,40-49yr,No intake,Negative
+1499,446,1,2,44,CMV_Negative,0,0,1,1,13.1,3.31,0.98,235.68,29,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+851,770,1,1,55,CMV_Negative,0,0,1.3,1,9.04,2.32,0.73,42.77,13,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+852,661,2,2,50,CMV_Positive,2,2,0.2,1,10.32,1.07,0.78,184.42,2,5,2013,Spring,Smoker,50-59yr,Low intake,Positive
+853,662,2,2,50,CMV_Positive,1,0,2,1,10.02,3.13,0.79,8.73,2,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+854,478,2,2,47,CMV_Negative,2,2,0.5,1,7.66,2.02,1.4,258,2,5,2013,Spring,Smoker,40-49yr,Low intake,Positive
+855,957,1,1,60,CMV_Positive,1,0,8.5,0,10.24,6.77,1.38,73.6,14,5,2013,Spring,Ex smoker,60-69yr,No intake,Negative
+856,582,1,1,49,CMV_Positive,1,0,0.2,1,11.76,3.01,0.56,1.82,6,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+857,774,1,1,51,CMV_Positive,1,0,4.8,1,14.81,4.61,1.45,227.57,14,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+858,666,1,2,58,CMV_Positive,0,0,1.9,0,10.9,4.01,0.94,4.59,14,5,2013,Spring,Non smoker,50-59yr,No intake,Negative
+859,882,1,2,61,CMV_Positive,0,0,0.8,1,10.85,3.57,1.85,34.2,6,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+860,477,2,2,43,CMV_Positive,0,0,0.9,1,9.9,1.54,1.02,12.72,2,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+861,272,1,2,39,CMV_Negative,2,2,8,1,11.64,2.87,0.9,138.46,14,5,2013,Spring,Smoker,30-39yr,Low intake,Positive
+862,665,1,2,51,CMV_Positive,2,0,1,1,9.83,1.93,0.7,6.17,14,5,2013,Spring,Smoker,50-59yr,No intake,Positive
+863,164,1,1,24,CMV_Negative,0,0,2.8,1,12.71,2.98,0.94,50.36,6,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+864,482,1,2,47,CMV_Positive,0,0,0.3,1,10.72,2.14,1.94,12.71,13,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+865,767,1,1,52,CMV_Positive,1,0,0.4,1,10.33,2.23,0.6,24.99,13,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+866,769,1,1,50,CMV_Positive,0,0,0.9,1,9.12,2.45,0.59,106,13,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+867,481,1,2,47,CMV_Negative,0,0,7.7,1,9.98,1.77,1.49,5.19,6,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+868,160,2,1,24,CMV_Negative,0,0,0.3,1,14.22,3,1.61,6.62,2,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+869,771,1,1,50,CMV_Negative,1,0,0.3,1,10.69,1.91,1.05,8.79,13,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+870,5219,2,2,38,CMV_Negative,1,0,0.2,1,11.65,2.14,2.02,32.81,2,5,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+871,883,1,2,67,CMV_Negative,1,0,1.5,0,9.2,6.03,0.42,0.11,13,5,2013,Spring,Ex smoker,60-69yr,No intake,Negative
+872,68,2,2,23,CMV_Negative,0,0,0.3,1,11.99,1.73,0.91,6.41,6,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+873,552,2,1,43,CMV_Positive,0,0,10.2,1,11.44,4.12,0.37,397.38,6,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+874,345,2,1,36,CMV_Negative,2,0,0.9,0,10.74,1.71,1.93,13.58,7,3,2013,Spring,Smoker,30-39yr,No intake,Negative
+875,929,1,1,60,CMV_Negative,1,0,1.5,1,11.53,3.43,1.73,4.5,5,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+876,555,1,1,42,CMV_Negative,0,0,1.1,1,10.95,3.4,0.86,33.83,6,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+877,839,1,2,63,CMV_Positive,0,0,3.4,0,11.05,3.98,1.77,49.61,4,3,2013,Spring,Non smoker,60-69yr,No intake,Negative
+878,250,2,2,39,CMV_Negative,0,2,3.2,1,12.57,3.02,1.29,6.17,7,3,2013,Spring,Non smoker,30-39yr,Low intake,Positive
+879,72,1,2,22,CMV_Positive,2,0,3.4,1,9.37,0.96,1.34,25.6,4,3,2013,Spring,Smoker,20-29yr,No intake,Positive
+880,838,1,2,66,CMV_Positive,0,0,1.4,0,7.76,2.96,0.67,17.8,4,3,2013,Spring,Non smoker,60-69yr,No intake,Negative
+881,736,1,1,59,CMV_Positive,1,0,2.2,1,11.38,2.22,1.78,6.82,4,3,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+882,836,1,2,62,CMV_Positive,0,0,0.5,1,9.09,3.23,4.9,38.42,4,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+883,842,1,2,64,CMV_Negative,1,0,0.5,1,10.25,1.6,1.13,26.34,5,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+884,844,1,2,63,CMV_Negative,0,0,1.6,1,9.66,2.17,1.24,19.33,6,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+885,832,2,2,61,CMV_Negative,0,0,1.5,1,12.16,4.95,0.74,2399.01,7,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+886,927,1,1,62,CMV_Positive,1,0,0.6,1,9.22,1.11,0.82,3.47,5,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+887,930,1,1,63,CMV_Positive,1,0,1.8,1,9.52,3.8,1.19,10.44,5,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+888,833,2,2,62,CMV_Positive,0,0,1.2,1,9.19,1.96,1.1,41.83,7,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+889,652,1,2,56,CMV_Negative,0,0,0.3,1,11.24,1.62,1.75,16.76,6,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+890,73,1,2,21,CMV_Negative,0,0,2.1,1,8.98,0.72,1.64,3.85,4,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+891,74,1,2,24,CMV_Negative,0,0,1.6,1,11.96,1.54,2.24,38.56,4,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+892,143,2,1,20,CMV_Positive,2,0,0.2,1,8.76,1.17,0.65,9.92,6,3,2013,Spring,Smoker,20-29yr,No intake,Positive
+893,98,2,2,22,CMV_Negative,0,0,8,0,10.46,2.1,1.21,13.52,25,7,2013,Summer,Non smoker,20-29yr,No intake,Negative
+894,99,2,2,26,CMV_Negative,0,0,0.4,1,10.72,1.24,0.83,25.7,25,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+895,899,2,2,63,CMV_Negative,0,0,1.1,1,11.02,2.2,1.07,14.69,1,8,2013,Summer,Non smoker,60-69yr,No intake,Positive
+896,906,2,1,68,CMV_Negative,0,0,0.6,1,9.37,1.57,1.31,2.81,8,11,2012,Fall,Non smoker,60-69yr,No intake,Positive
+897,298,2,2,34,CMV_Negative,2,0,1.8,0,10.45,3.52,1.2,7.56,25,7,2013,Summer,Smoker,30-39yr,No intake,Negative
+898,516,1,1,41,CMV_Positive,1,0,1.7,1,10.66,2.76,0.78,24.06,12,11,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+899,100,2,2,23,CMV_Positive,2,0,5.4,0,6.82,1.52,0.63,2.32,24,7,2013,Summer,Smoker,20-29yr,No intake,Negative
+900,896,2,2,66,CMV_Positive,1,2,0.9,0,7.42,1.91,0.63,12.65,25,7,2013,Summer,Ex smoker,60-69yr,Low intake,Negative
+901,396,2,1,35,CMV_Negative,1,0,12,1,11.49,2.06,1.49,14.59,1,8,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+902,519,1,1,48,CMV_Negative,0,0,0.7,0,16.02,1.8,0.93,120.13,12,11,2012,Fall,Non smoker,40-49yr,No intake,Negative
+903,323,1,1,37,CMV_Negative,0,0,1.1,0,8.8,2.44,0.68,4.04,12,11,2012,Fall,Non smoker,30-39yr,No intake,Negative
+904,795,2,1,59,CMV_Negative,2,0,7.7,1,11.57,3.09,2.41,7.03,25,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+905,523,1,1,48,CMV_Positive,0,0,0.9,1,10.94,1.79,0.97,21.16,13,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+906,807,2,2,68,CMV_Negative,0,0,1.5,1,12.29,2.31,2.31,45.07,8,11,2012,Fall,Non smoker,60-69yr,No intake,Positive
+907,397,2,1,37,CMV_Positive,1,0,1.8,0,11.26,1.7,0.58,21.96,24,7,2013,Summer,Ex smoker,30-39yr,No intake,Negative
+908,413,1,2,47,CMV_Negative,0,0,2.7,0,13.79,1.61,0.99,1.94,13,11,2012,Fall,Non smoker,40-49yr,No intake,Negative
+909,796,2,1,51,CMV_Negative,2,0,1.1,1,6.91,1,0.63,69.36,25,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+910,414,1,2,45,CMV_Negative,0,0,1.3,1,13.26,1.63,0.99,68.02,13,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+911,419,1,2,42,CMV_Positive,0,0,1.5,0,10.44,2.27,1.14,66.78,14,11,2012,Fall,Non smoker,40-49yr,No intake,Negative
+912,515,1,1,48,CMV_Negative,0,0,1.1,1,9.16,2.24,1.08,44.37,12,11,2012,Fall,Non smoker,40-49yr,No intake,Positive
+913,127,1,1,29,CMV_Negative,1,0,0.6,1,9.01,1.85,0.99,99.49,22,1,2013,Winter,Ex smoker,20-29yr,No intake,Positive
+914,724,1,1,58,CMV_Positive,2,2,2.3,0,12.92,2.91,1.43,13.23,22,1,2013,Winter,Smoker,50-59yr,Low intake,Negative
+915,331,1,1,31,CMV_Negative,2,0,1.7,1,6,1.3,0.6,11.79,22,1,2013,Winter,Smoker,30-39yr,No intake,Positive
+916,31,1,2,22,CMV_Negative,2,0,0.6,0,10.23,3.26,1.18,5.6,23,1,2013,Winter,Smoker,20-29yr,No intake,Negative
+917,722,2,1,57,CMV_Negative,0,0,0.3,1,12.08,9.4,0.9,22,24,1,2013,Winter,Non smoker,50-59yr,No intake,Positive
+918,636,2,2,51,CMV_Positive,0,0,0.9,1,11.33,3.93,1.39,4.49,24,1,2013,Winter,Non smoker,50-59yr,No intake,Positive
+919,36,1,2,29,CMV_Positive,1,0,1.4,0,9.26,1.58,1.31,125.4,28,1,2013,Winter,Ex smoker,20-29yr,No intake,Negative
+920,30,1,2,20,CMV_Negative,2,0,4.9,1,9.18,1.3,1.15,16.06,22,1,2013,Winter,Smoker,20-29yr,No intake,Positive
+921,537,1,1,41,CMV_Negative,1,0,2.3,1,11.4,3.35,1.21,114.17,21,1,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+922,644,1,2,57,CMV_Positive,0,0,7.6,0,13.04,2.92,2.43,34.93,23,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+923,128,1,1,23,CMV_Negative,0,0,2.7,1,11.24,1.32,0.67,35.1,23,1,2013,Winter,Non smoker,20-29yr,No intake,Positive
+924,125,1,1,21,CMV_Negative,2,0,0.2,1,9.43,1.25,1.06,123.43,21,1,2013,Winter,Smoker,20-29yr,No intake,Positive
+925,443,1,2,47,CMV_Positive,0,0,0.4,1,14.41,3,1.1,7.19,28,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+926,532,2,1,44,CMV_Negative,2,0,1.6,0,7.95,0.73,0.81,123.08,24,1,2013,Winter,Smoker,40-49yr,No intake,Negative
+927,330,1,1,38,CMV_Negative,0,0,1.4,0,12.05,1.78,1.54,6.3,21,1,2013,Winter,Non smoker,30-39yr,No intake,Negative
+928,126,1,1,29,CMV_Negative,1,0,1.5,1,9.97,3.74,1.5,99.89,22,1,2013,Winter,Ex smoker,20-29yr,No intake,Positive
+929,29,1,2,29,CMV_Negative,2,0,2,0,7.83,1.46,1.99,8.84,22,1,2013,Winter,Smoker,20-29yr,No intake,Negative
+930,643,1,2,59,CMV_Negative,0,0,0.2,0,9.72,2.19,0.66,11.67,23,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+931,28,1,2,24,CMV_Positive,2,0,4,1,9.93,1.19,1.18,10.94,21,1,2013,Winter,Smoker,20-29yr,No intake,Positive
+932,539,1,1,49,CMV_Negative,0,0,0.2,1,13.98,3.61,0.51,5.62,22,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+933,131,1,1,23,CMV_Negative,0,0,14,1,13.01,1.89,2.13,87.93,30,1,2013,Winter,Non smoker,20-29yr,No intake,Positive
+934,203,1,2,39,CMV_Negative,2,0,0.3,1,9.82,1.57,0.66,30.75,18,9,2012,Fall,Smoker,30-39yr,No intake,Positive
+935,207,1,2,30,CMV_Negative,0,0,1.8,1,15.67,1.64,0.79,49.88,19,9,2012,Fall,Non smoker,30-39yr,No intake,Positive
+936,206,1,2,39,CMV_Negative,1,0,0.8,1,12.36,3.52,2.18,176.62,19,9,2012,Fall,Ex smoker,30-39yr,No intake,Positive
+937,513,1,1,45,CMV_Positive,0,0,0.9,1,13.15,1.29,1.69,352.99,25,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+938,444,1,2,42,CMV_Positive,2,0,8.8,0,10.26,3.15,1.29,175.03,28,1,2013,Winter,Smoker,40-49yr,No intake,Negative
+939,334,1,1,31,CMV_Positive,0,0,1.1,1,11.05,1.27,1.02,10.5,28,1,2013,Winter,Non smoker,30-39yr,No intake,Positive
+940,504,1,1,45,CMV_Negative,0,0,3.3,1,10.06,1.85,1.02,30.09,24,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+941,510,1,1,44,CMV_Negative,0,0,2.7,1,9.96,2.94,0.83,54.35,24,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+942,727,1,1,52,CMV_Negative,0,0,0.5,0,9.38,1.58,0.99,40.45,30,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+943,302,1,1,37,CMV_Negative,2,0,0.2,1,12.12,1.85,0.71,777.51,17,9,2012,Fall,Smoker,30-39yr,No intake,Positive
+944,449,1,2,45,CMV_Negative,0,0,4.8,1,11.66,1.32,0.87,11.14,30,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+945,502,1,1,48,CMV_Negative,0,0,3.1,1,13.61,4.49,1.36,17.11,24,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+1500,409,1,2,42,CMV_Negative,2,0,0.9,1,9.27,2.68,0.43,82.84,26,9,2012,Fall,Smoker,40-49yr,No intake,Positive
+947,332,1,1,37,CMV_Positive,2,0,2.4,1,15.9,1.75,1.97,23.78,28,1,2013,Winter,Smoker,30-39yr,No intake,Positive
+948,508,1,1,45,CMV_Negative,1,0,0.5,1,8.42,2.66,1.01,344.52,24,9,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+949,403,1,2,49,CMV_Negative,1,0,2.6,1,8.45,1.91,2.44,20.14,26,9,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+950,212,1,2,30,CMV_Negative,0,0,4.1,1,10.11,0.72,0.77,30.21,19,9,2012,Fall,Non smoker,30-39yr,No intake,Positive
+951,408,1,2,48,CMV_Negative,0,0,0.3,1,11.34,2.09,0.9,34.21,26,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+952,205,1,2,30,CMV_Positive,2,0,0.4,1,9.89,2.82,1.71,18.75,19,9,2012,Fall,Smoker,30-39yr,No intake,Positive
+953,401,1,2,44,CMV_Positive,1,0,0.5,1,13.34,2.5,1.77,19,25,9,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+954,310,1,1,32,CMV_Positive,0,0,0.2,1,8.38,1.77,0.49,12.45,18,9,2012,Fall,Non smoker,30-39yr,No intake,Positive
+955,309,1,1,30,CMV_Positive,2,0,2.7,1,8.87,3.14,0.41,4.62,18,9,2012,Fall,Smoker,30-39yr,No intake,Positive
+956,236,1,2,36,CMV_Positive,0,0,0.4,1,12.78,2.09,0.6,56.06,28,1,2013,Winter,Non smoker,30-39yr,No intake,Positive
+957,335,1,1,35,CMV_Negative,2,0,0.4,1,7.13,1.12,0.71,19.9,30,1,2013,Winter,Smoker,30-39yr,No intake,Positive
+958,238,1,2,37,CMV_Negative,1,0,4.6,1,10.63,2.18,0.68,64.26,29,1,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+959,406,1,2,48,CMV_Negative,2,4,0.6,0,12.75,2.12,2.64,13.93,26,9,2012,Fall,Smoker,40-49yr,Low intake,Negative
+960,447,1,2,43,CMV_Negative,2,0,0.5,1,8.51,1.93,0.72,1054.41,29,1,2013,Winter,Smoker,40-49yr,No intake,Positive
+962,202,1,2,35,CMV_Negative,2,0,2.5,1,9.56,1.61,1.34,35.7,18,9,2012,Fall,Smoker,30-39yr,No intake,Positive
+963,301,1,1,36,CMV_Negative,1,0,0.4,1,9.43,3,0.63,3000,17,9,2012,Fall,Ex smoker,30-39yr,No intake,Positive
+965,405,1,2,43,CMV_Positive,0,0,0.6,1,7.29,0.9,1.22,19.18,26,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+966,501,1,1,46,CMV_Negative,0,0,1.6,1,10.24,1.75,0.98,429.41,24,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+967,404,1,2,40,CMV_Positive,1,0,5,1,10.32,1.24,1.15,27.92,26,9,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+968,509,1,1,46,CMV_Negative,2,0,3.5,1,8.39,2.94,0.61,290.76,24,9,2012,Fall,Smoker,40-49yr,No intake,Positive
+969,511,1,1,43,CMV_Negative,0,0,0.4,1,9.47,1.6,0.84,15.22,25,9,2012,Fall,Non smoker,40-49yr,No intake,Positive
+970,503,1,1,48,CMV_Negative,1,0,0.8,1,9.47,2.03,0.6,823.12,24,9,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+971,129,1,1,27,CMV_Negative,2,0,0.3,0,9.75,1.67,1.89,29.24,29,1,2013,Winter,Smoker,20-29yr,No intake,Negative
+972,967,1,1,60,CMV_Negative,1,0,3.4,1,10.02,3.12,0.43,539.66,27,5,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+973,885,1,2,65,CMV_Positive,2,0,0.7,1,9.99,3.2,0.63,8.49,28,5,2013,Spring,Smoker,60-69yr,No intake,Positive
+974,675,1,2,57,CMV_Negative,1,0,1,1,10.14,1.45,0.44,7.35,27,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+975,582,2,1,49,CMV_Positive,1,0,0.2,1,11.76,3.01,0.56,1.82,23,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+976,882,2,2,61,CMV_Positive,0,0,0.8,1,10.85,3.57,1.85,34.2,23,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+977,175,1,1,23,CMV_Negative,1,0,0.2,0,12.63,3.04,1.38,13.46,28,5,2013,Spring,Ex smoker,20-29yr,No intake,Negative
+978,777,1,1,52,CMV_Negative,2,0,8.5,1,10.55,1.87,1.78,20.58,28,5,2013,Spring,Smoker,50-59yr,No intake,Positive
+979,481,2,2,47,CMV_Negative,0,0,7.7,1,9.98,1.77,1.49,5.19,23,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+980,172,1,1,29,CMV_Positive,0,0,0.3,1,6.41,2.47,1.01,13.88,22,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+981,581,2,1,42,CMV_Positive,1,0,0.8,1,9.26,1.75,1.09,49.07,23,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+982,173,1,1,21,CMV_Negative,0,0,0.3,1,13.23,2.59,0.87,368.52,22,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+983,765,2,1,54,CMV_Positive,0,0,3.3,1,9.77,1.47,1.98,36.05,23,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+984,966,1,1,64,CMV_Positive,0,2,2,1,10.71,2.89,3.99,2.86,22,5,2013,Spring,Non smoker,60-69yr,Low intake,Positive
+985,171,1,1,24,CMV_Negative,0,0,1.1,1,10.93,1.1,0.93,6.1,22,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+986,278,1,2,33,CMV_Negative,2,0,1.3,1,10.45,3.22,1.32,23.7,27,5,2013,Spring,Smoker,30-39yr,No intake,Positive
+987,280,1,2,40,CMV_Positive,0,0,0.9,1,11.09,3.98,1.75,75.09,27,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+988,673,1,2,51,CMV_Negative,0,0,0.4,1,8.88,2.41,0.92,85.29,22,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+989,164,2,1,24,CMV_Negative,0,0,2.8,1,12.71,2.98,0.94,50.36,23,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+990,676,1,2,52,CMV_Positive,0,0,0.5,1,15.68,0.1,3.94,0.25,28,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+991,174,1,1,23,CMV_Negative,2,0,2.2,1,7.91,0.96,0.94,364.91,28,5,2013,Spring,Smoker,20-29yr,No intake,Positive
+992,672,1,2,51,CMV_Positive,0,0,7.7,0,9.98,1.88,1.44,118.09,22,5,2013,Spring,Non smoker,50-59yr,No intake,Negative
+993,764,2,1,51,CMV_Negative,1,0,2.9,1,10.87,1.12,2.38,97.65,23,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+994,163,2,1,24,CMV_Negative,0,0,0.9,1,9.64,2.38,1.35,70.88,23,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+995,176,1,1,20,CMV_Negative,2,0,6.5,1,7.62,3.73,0.66,57.76,28,5,2013,Spring,Smoker,20-29yr,No intake,Positive
+996,968,1,1,61,CMV_Positive,0,0,2.1,1,10.57,1.64,0.9,13.46,27,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+997,376,1,1,36,CMV_Negative,1,0,0.4,1,11.64,3.29,0.68,41.81,22,5,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+999,84,1,2,28,CMV_Positive,1,0,1.8,1,9.33,1.3,0.69,6.6,22,5,2013,Spring,Ex smoker,20-29yr,No intake,Positive
+1000,378,1,1,30,CMV_Negative,2,0,1.1,1,10.38,4.8,1.19,57.6,27,5,2013,Spring,Smoker,30-39yr,No intake,Positive
+1001,766,2,1,54,CMV_Negative,0,0,0.5,1,9.95,1.79,1.01,62.5,23,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1002,377,1,1,37,CMV_Positive,0,0,1.1,1,10.64,2.7,1.18,26.29,27,5,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1003,177,1,1,25,CMV_Negative,1,0,0.4,0,8.26,1.25,1.16,8.78,28,5,2013,Spring,Ex smoker,20-29yr,No intake,Negative
+1004,776,1,1,56,CMV_Positive,0,0,1.5,1,10.27,1.34,0.74,28.19,27,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1005,674,1,2,54,CMV_Positive,0,0,1,0,11.5,0.77,1.16,109.42,27,5,2013,Spring,Non smoker,50-59yr,No intake,Negative
+1006,281,1,2,37,CMV_Positive,2,0,1.8,1,12,2.82,0.7,30.26,28,5,2013,Spring,Smoker,30-39yr,No intake,Positive
+1007,583,2,1,45,CMV_Positive,0,0,2.4,1,11.04,3.34,0.29,28.55,23,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1008,5167,1,1,21,CMV_Negative,0,0,0.5,1,9.28,2.16,1.32,1336.72,28,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1009,165,2,1,28,CMV_Negative,1,0,0.2,0,8.59,1.64,0.79,428.35,23,5,2013,Spring,Ex smoker,20-29yr,No intake,Negative
+1010,85,1,2,23,CMV_Negative,0,0,3.1,1,11.23,1.8,2.11,251.07,27,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1011,362,2,1,35,CMV_Negative,2,0,0.7,1,9.78,1.48,0.48,9.24,23,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+1013,372,1,1,33,CMV_Negative,0,0,0.5,1,9.67,2.52,0.45,411.48,29,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1015,363,2,1,30,CMV_Negative,0,0,0.5,1,10.75,1.42,0.67,47.89,23,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1016,757,2,1,57,CMV_Positive,1,0,2.6,1,9.54,2.91,0.88,143.08,23,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+1017,81,2,2,25,CMV_Negative,0,0,0.3,0,9.68,1.53,0.85,38.81,2,5,2013,Spring,Non smoker,20-29yr,No intake,Negative
+1018,480,1,2,41,CMV_Negative,0,0,4.4,1,10.27,1.43,1.47,41,29,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1019,155,2,1,22,CMV_Negative,0,0,3.8,1,9.86,1.63,0.86,58.87,23,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1020,760,2,1,52,CMV_Positive,0,0,0.2,1,9.66,2,1.15,160.26,24,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1021,361,2,1,38,CMV_Negative,2,0,1.9,1,10.07,1.13,0.99,45.86,23,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+1022,577,1,1,41,CMV_Negative,1,0,1.6,1,11.3,2.93,0.69,28.37,29,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+1023,474,2,2,40,CMV_Negative,2,0,0.5,1,10.51,1.63,2.01,23.51,22,4,2013,Spring,Smoker,40-49yr,No intake,Positive
+1025,576,1,1,41,CMV_Positive,1,0,0.6,1,11.04,3.22,0.44,15.23,29,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+1026,763,1,1,50,CMV_Positive,2,0,1.1,1,8.8,1.41,1.43,29.72,29,4,2013,Spring,Smoker,50-59yr,No intake,Positive
+1029,80,2,2,24,CMV_Negative,2,0,0.2,1,10.58,1.76,2.27,95.5,23,4,2013,Spring,Smoker,20-29yr,No intake,Positive
+1030,566,2,1,41,CMV_Negative,2,0,1,1,7.96,1.57,0.55,34.25,22,4,2013,Spring,Smoker,40-49yr,No intake,Positive
+1031,568,2,1,43,CMV_Negative,1,0,2.3,1,8.7,2.01,0.93,21.02,24,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+1032,139,1,1,24,CMV_Negative,0,0,2.9,1,11.95,2.54,0.95,110.11,19,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1034,551,1,1,44,CMV_Negative,1,0,0.6,1,12.71,3.18,0.72,13.99,20,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+1035,730,1,1,56,CMV_Negative,0,0,0.7,1,11.07,1.85,0.64,26.53,20,2,2013,Winter,Non smoker,50-59yr,No intake,Positive
+1036,254,1,2,30,CMV_Positive,0,0,2.2,1,13.12,1.09,1.61,74.28,25,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1037,339,2,1,38,CMV_Negative,0,0,0.2,1,11.62,1.36,0.55,290.6,20,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1038,465,1,2,48,CMV_Negative,2,0,2.6,1,11.96,1.64,1.11,236.52,25,2,2013,Winter,Smoker,40-49yr,No intake,Positive
+1039,549,1,1,42,CMV_Negative,0,0,1,1,10.83,2.95,0.9,69.99,19,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1501,43,2,2,23,CMV_Negative,0,0,2.3,1,10.28,1.79,1.78,6.89,21,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1041,829,2,2,66,CMV_Negative,0,0,2,0,7.96,2.33,1.15,74.46,21,2,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1045,922,2,1,63,CMV_Negative,0,0,6.9,1,10.41,1.93,0.55,20.42,20,2,2013,Winter,Non smoker,60-69yr,No intake,Positive
+1047,42,2,2,21,CMV_Negative,0,0,6.3,0,15.44,1.49,1.83,75.86,21,2,2013,Winter,Non smoker,20-29yr,No intake,Negative
+1048,243,2,2,30,CMV_Negative,0,0,3.1,1,15.71,1.84,1.05,13.45,21,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1051,923,1,1,61,CMV_Positive,0,0,0.4,1,12.84,2.3,1.19,103.26,19,2,2013,Winter,Non smoker,60-69yr,No intake,Positive
+1052,677,1,2,57,CMV_Negative,1,0,1.1,1,10.42,1.34,0.76,5.43,3,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+1053,778,1,1,53,CMV_Positive,1,0,0.4,1,8.57,1.3,0.95,16.31,29,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+1054,380,1,1,30,CMV_Positive,0,0,1.7,1,11.68,3.55,0.94,31.01,3,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+1056,274,2,2,33,CMV_Positive,1,0,0.8,1,7.55,1.45,1.16,178.71,29,5,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1057,886,1,2,61,CMV_Negative,0,0,0.8,1,12.17,3.34,1.04,37.3,28,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1058,5104,1,1,29,CMV_Negative,2,0,0.2,1,9.58,1.71,0.98,12.76,29,5,2013,Spring,Smoker,20-29yr,No intake,Positive
+1059,5303,1,1,39,CMV_Positive,0,0,1.6,1,9.53,3.26,0.97,79.42,4,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+1060,961,2,1,62,CMV_Negative,0,0,0.6,1,10.83,2,0.92,6,29,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1061,956,2,1,65,CMV_Negative,0,0,8.2,1,11.49,1.16,0.83,18.96,30,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1063,379,1,1,30,CMV_Negative,2,0,0.5,1,6.87,1.48,0.8,93.96,29,5,2013,Spring,Smoker,30-39yr,No intake,Positive
+1064,381,1,1,36,CMV_Positive,1,2,1.8,1,11.28,1.51,0.58,87.93,4,6,2013,Summer,Ex smoker,30-39yr,Low intake,Positive
+1065,973,1,1,60,CMV_Negative,1,0,0.5,1,9.48,1.71,1.21,1.52,4,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+1066,184,1,1,29,CMV_Positive,2,0,2,1,9.6,2.16,0.45,348.81,3,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+1067,5268,1,2,30,CMV_Positive,0,0,0.5,1,10.62,1.14,0.77,5.24,4,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+1068,678,1,2,57,CMV_Negative,1,0,4,1,12.55,1.82,0.93,28.6,4,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+1069,166,2,1,23,CMV_Negative,0,0,1.2,1,13.27,2.42,0.73,202.48,30,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1070,666,2,2,58,CMV_Positive,0,0,1.9,0,10.9,4.01,0.94,4.59,30,5,2013,Spring,Non smoker,50-59yr,No intake,Negative
+1071,86,1,2,27,CMV_Positive,2,0,2.8,1,8.22,0.92,0.52,21.88,3,6,2013,Summer,Smoker,20-29yr,No intake,Positive
+1072,273,2,2,31,CMV_Negative,0,0,2,1,13.56,1.53,1.58,89.59,29,5,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1073,215,1,2,37,CMV_Negative,1,0,0.7,0,10.32,2.86,0.7,18.74,23,10,2012,Fall,Ex smoker,30-39yr,No intake,Negative
+1074,217,1,2,38,CMV_Negative,0,0,0.9,1,11.57,2.05,0.77,124.3,24,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+1075,321,1,1,34,CMV_Negative,1,0,5.2,1,11.27,1.33,1.71,20.53,23,10,2012,Fall,Ex smoker,30-39yr,No intake,Positive
+1076,702,2,1,52,CMV_Negative,0,0,0.4,1,9.79,1.08,0.96,15.02,18,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+1078,802,1,2,66,CMV_Positive,0,0,4.2,1,11.01,1.88,0.52,167.59,16,10,2012,Fall,Non smoker,60-69yr,No intake,Positive
+1079,511,2,1,43,CMV_Negative,0,0,0.4,1,9.47,1.6,0.84,15.22,11,10,2012,Fall,Non smoker,40-49yr,No intake,Positive
+1080,220,1,2,32,CMV_Negative,2,0,0.4,1,8.14,1.91,1.09,278.32,24,10,2012,Fall,Smoker,30-39yr,No intake,Positive
+1081,218,1,2,38,CMV_Negative,0,0,1.2,1,10.81,1.22,0.88,4.31,24,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+1082,507,2,1,44,CMV_Positive,1,0,2.9,1,5.59,0.93,0.88,7.35,11,10,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+1083,805,1,2,66,CMV_Negative,0,2,3.1,1,10.75,4.83,0.89,17.79,17,10,2012,Fall,Non smoker,60-69yr,Low intake,Positive
+1084,905,1,1,66,CMV_Negative,1,0,0.9,1,8.55,2.16,0.34,44.16,16,10,2012,Fall,Ex smoker,60-69yr,No intake,Positive
+1085,807,1,2,68,CMV_Negative,0,0,1.5,1,12.29,2.31,2.31,45.07,17,10,2012,Fall,Non smoker,60-69yr,No intake,Positive
+1086,408,2,2,48,CMV_Negative,0,0,0.3,1,11.34,2.09,0.9,34.21,11,10,2012,Fall,Non smoker,40-49yr,No intake,Positive
+1088,314,1,1,30,CMV_Negative,1,0,0.3,1,7.82,2.05,0.81,379.84,22,10,2012,Fall,Ex smoker,30-39yr,No intake,Positive
+1091,410,2,2,48,CMV_Positive,1,0,1.5,1,13.18,1.62,1.51,7.5,11,10,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+1092,320,1,1,34,CMV_Negative,0,0,0.4,1,11.57,1.97,1.04,66.23,23,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+1093,508,2,1,45,CMV_Negative,1,0,0.5,1,8.42,2.66,1.01,344.52,11,10,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+1095,630,1,2,54,CMV_Positive,1,0,1.1,0,8.88,1.88,0.83,68.37,20,12,2012,Winter,Ex smoker,50-59yr,No intake,Negative
+1096,631,1,2,53,CMV_Negative,0,0,2.3,0,11.86,2.39,1.02,17.55,20,12,2012,Winter,Non smoker,50-59yr,No intake,Negative
+1097,426,1,2,41,CMV_Negative,0,0,1.3,1,17.12,4.71,2.03,70.36,9,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1098,635,1,2,53,CMV_Negative,0,0,6.9,1,9.76,2.81,0.38,39.94,9,1,2013,Winter,Non smoker,50-59yr,No intake,Positive
+1099,818,2,2,69,CMV_Positive,0,0,0.8,0,7.71,1.61,0.72,19.21,3,1,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1100,812,2,2,68,CMV_Positive,0,0,0.5,0,10.68,1.83,0.81,31.12,3,1,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1101,121,1,1,25,CMV_Negative,1,0,9.3,1,13.21,1.61,1.03,35.55,20,12,2012,Winter,Ex smoker,20-29yr,No intake,Positive
+1103,632,1,2,50,CMV_Positive,0,0,1.5,1,10.96,2.87,0.9,50.07,20,12,2012,Winter,Non smoker,50-59yr,No intake,Positive
+1104,430,1,2,44,CMV_Negative,0,0,3,1,10.49,2.76,1.29,43.11,14,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1105,810,2,2,60,CMV_Negative,0,0,0.6,0,7.64,1.28,0.5,2.17,3,1,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1106,629,1,2,59,CMV_Positive,0,0,1.6,0,10.97,2.81,0.7,13.43,19,12,2012,Winter,Non smoker,50-59yr,No intake,Negative
+1107,531,1,1,45,CMV_Positive,1,0,17.4,1,11.26,3.65,1.4,2.29,20,12,2012,Winter,Ex smoker,40-49yr,No intake,Positive
+1108,915,2,1,68,CMV_Negative,0,0,0.7,0,9.92,4.03,0.87,47.15,3,1,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1109,813,2,2,66,CMV_Negative,0,0,1.2,0,13.28,4.26,0.85,7.61,3,1,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1110,427,1,2,46,CMV_Negative,1,0,0.8,1,11.07,1.69,1.1,9.45,9,1,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+1111,827,1,2,61,CMV_Positive,0,2,2,1,10.3,1.8,1.6,19.83,14,1,2013,Winter,Non smoker,60-69yr,Low intake,Positive
+1112,820,2,2,65,CMV_Negative,1,0,0.8,0,10.69,2.52,0.86,15.42,3,1,2013,Winter,Ex smoker,60-69yr,No intake,Negative
+1113,821,2,2,60,CMV_Negative,0,0,1,0,7.9,1.9,0.91,9.12,3,1,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1114,229,1,2,31,CMV_Negative,1,0,2.4,1,11.38,2.21,0.88,19.86,9,1,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+1115,637,1,2,55,CMV_Positive,0,0,1.4,0,9.75,2.14,0.75,8.43,15,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+1118,435,1,2,40,CMV_Negative,0,0,1,1,12.73,2.59,1.66,34.59,15,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1119,124,1,1,25,CMV_Negative,2,0,0.3,1,9.41,3.63,0.75,61.69,16,1,2013,Winter,Smoker,20-29yr,No intake,Positive
+1120,535,1,1,40,CMV_Negative,0,0,0.6,1,11.6,0.44,0.74,0.42,16,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1121,26,1,2,25,CMV_Negative,0,0,2.4,0,11.38,1.46,1.05,164.06,16,1,2013,Winter,Non smoker,20-29yr,No intake,Negative
+1123,432,1,2,46,CMV_Negative,0,0,7.5,0,10.78,2.09,1.69,38.18,14,1,2013,Winter,Non smoker,40-49yr,No intake,Negative
+1124,439,1,2,43,CMV_Positive,0,0,0.8,1,12.02,2.2,0.6,10.05,16,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1125,231,1,2,30,CMV_Negative,0,2,1.3,1,11.09,1.39,1.22,18.55,16,1,2013,Winter,Non smoker,30-39yr,Low intake,Positive
+1126,436,1,2,48,CMV_Positive,0,0,0.7,0,12.86,1.86,1.33,4.5,16,1,2013,Winter,Non smoker,40-49yr,No intake,Negative
+1127,329,1,1,38,CMV_Negative,0,0,1,1,11.13,2.03,0.97,43.78,15,1,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1128,437,1,2,41,CMV_Positive,0,2,6.6,1,7.56,1.2,0.55,35.79,16,1,2013,Winter,Non smoker,40-49yr,Low intake,Positive
+1129,23,1,2,22,CMV_Negative,0,0,0.4,0,11.68,1.54,1.13,33.35,14,1,2013,Winter,Non smoker,20-29yr,No intake,Negative
+1130,533,1,1,48,CMV_Negative,0,0,0.6,1,10.2,1.29,1.3,82.4,14,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1131,638,1,2,52,CMV_Positive,1,0,1.9,1,9.51,2.77,0.76,11.57,15,1,2013,Winter,Ex smoker,50-59yr,No intake,Positive
+1133,965,2,1,65,CMV_Positive,0,0,2.8,1,9.6,1.83,0.89,43.77,6,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+1134,979,1,1,64,CMV_Negative,0,0,4.4,1,9.97,4.64,0.84,12.45,10,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+1502,588,1,1,49,CMV_Negative,1,0,0.3,1,9.08,2.42,1.75,6.26,5,6,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+1136,673,2,2,51,CMV_Negative,0,0,0.4,1,8.88,2.41,0.92,85.29,6,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1137,680,1,2,52,CMV_Negative,1,0,1.8,1,10.49,2.29,1.67,262.53,4,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+1138,5178,1,1,22,CMV_Negative,0,2,1.3,1,10.37,2.21,0.82,54.48,5,6,2013,Summer,Non smoker,20-29yr,Low intake,Positive
+1139,974,1,1,62,CMV_Positive,0,0,0.7,1,8.88,2.66,0.89,6.84,4,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+1140,173,2,1,21,CMV_Negative,0,0,0.3,1,13.23,2.59,0.87,368.52,6,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+1141,5308,1,1,32,CMV_Negative,2,0,0.6,0,8.37,1.52,0.5,231.45,10,6,2013,Summer,Smoker,30-39yr,No intake,Negative
+1142,285,1,2,30,CMV_Negative,0,0,0.3,1,12.58,1.04,1.93,9.28,5,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+1143,671,2,2,56,CMV_Negative,0,0,3.1,1,7.17,1.59,0.85,39.69,6,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1144,781,1,1,54,CMV_Positive,0,0,1.8,1,11.71,2.62,0.54,22.42,10,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1145,783,1,1,57,CMV_Negative,1,0,2.7,1,11.62,2.28,0.82,50.14,10,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+1146,888,1,2,61,CMV_Positive,1,0,2.2,1,10.7,2.25,1.75,25.07,5,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+1147,672,2,2,51,CMV_Positive,0,0,7.7,0,9.98,1.88,1.44,118.09,6,6,2013,Summer,Non smoker,50-59yr,No intake,Negative
+1148,684,1,2,56,CMV_Negative,1,0,0.2,1,9.12,1.65,1.09,94.25,10,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+1149,782,1,1,55,CMV_Positive,2,0,7.7,0,9.25,2.25,0.58,33.2,10,6,2013,Summer,Smoker,50-59yr,No intake,Negative
+1150,679,1,2,51,CMV_Positive,2,0,1,1,9.47,1.54,0.74,18.87,4,6,2013,Summer,Smoker,50-59yr,No intake,Positive
+1151,636,1,2,51,CMV_Positive,0,0,0.9,1,11.33,3.93,1.39,4.49,9,1,2013,Winter,Non smoker,50-59yr,No intake,Positive
+1152,22,1,2,25,CMV_Negative,1,0,2.6,1,11.49,1.27,1.14,7.55,14,1,2013,Winter,Ex smoker,20-29yr,No intake,Positive
+1153,913,2,1,65,CMV_Negative,0,0,0.3,0,11.79,5.19,0.65,230.2,3,1,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1154,425,1,2,44,CMV_Positive,0,0,1.3,1,13.58,1.41,1.7,16.09,20,12,2012,Winter,Non smoker,40-49yr,No intake,Positive
+1155,20,1,2,21,CMV_Negative,2,0,1.1,1,13.5,2.9,1.61,80.49,20,12,2012,Winter,Smoker,20-29yr,No intake,Positive
+1156,227,1,2,37,CMV_Negative,0,0,0.6,0,10.11,1.17,1.22,52.62,20,12,2012,Winter,Non smoker,30-39yr,No intake,Negative
+1157,633,1,2,56,CMV_Negative,0,0,0.4,0,11.55,2.37,0.71,45.81,20,12,2012,Winter,Non smoker,50-59yr,No intake,Negative
+1158,429,1,2,48,CMV_Negative,1,2,5.4,1,11.87,2.5,0.91,15.34,14,1,2013,Winter,Ex smoker,40-49yr,Low intake,Positive
+1159,811,2,2,63,CMV_Positive,0,0,1,1,9.95,3.17,1.03,11.56,3,1,2013,Winter,Non smoker,60-69yr,No intake,Positive
+1160,428,1,2,45,CMV_Negative,1,0,2.6,1,11.06,3.67,1.65,37.65,14,1,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+1161,226,1,2,31,CMV_Negative,0,0,1.8,1,11.58,1.71,2.01,29.72,20,12,2012,Winter,Non smoker,30-39yr,No intake,Positive
+1162,819,2,2,64,CMV_Negative,0,0,2.7,1,12.34,1.69,0.62,34.03,3,1,2013,Winter,Non smoker,60-69yr,No intake,Positive
+1163,912,2,1,67,CMV_Negative,1,0,0.4,0,12.09,2.37,0.55,37.4,3,1,2013,Winter,Ex smoker,60-69yr,No intake,Negative
+1164,532,1,1,44,CMV_Negative,2,0,1.6,0,7.95,0.73,0.81,123.08,9,1,2013,Winter,Smoker,40-49yr,No intake,Negative
+1165,228,1,2,37,CMV_Negative,0,0,1.8,0,14.05,2.11,1.08,10.22,20,12,2012,Winter,Non smoker,30-39yr,No intake,Negative
+1166,634,1,2,52,CMV_Negative,0,0,1.2,0,12.22,3.45,1.05,44.05,9,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+1167,722,1,1,57,CMV_Negative,0,0,0.3,1,12.08,9.4,0.9,22,9,1,2013,Winter,Non smoker,50-59yr,No intake,Positive
+1168,914,2,1,67,CMV_Positive,1,0,1.4,1,13.84,3.24,1.24,16.35,3,1,2013,Winter,Ex smoker,60-69yr,No intake,Positive
+1169,123,1,1,21,CMV_Negative,0,0,0.8,0,10.49,1.54,1.82,23.33,14,1,2013,Winter,Non smoker,20-29yr,No intake,Negative
+1170,284,1,2,35,CMV_Negative,1,0,0.4,1,10.62,3.58,1.57,248.33,5,6,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+1171,287,1,2,32,CMV_Positive,0,0,0.3,1,11.48,2.35,1,38.74,10,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+1172,276,2,2,31,CMV_Negative,1,0,1,1,11.63,1.77,1.97,187.49,6,6,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+1173,977,1,1,62,CMV_Negative,0,0,1.2,0,8.52,2.3,1.49,7.8,10,6,2013,Summer,Non smoker,60-69yr,No intake,Negative
+1174,83,2,2,24,CMV_Positive,0,0,3.4,0,12.69,2.17,1.25,28.64,6,6,2013,Summer,Non smoker,20-29yr,No intake,Negative
+1175,84,2,2,28,CMV_Positive,1,0,1.8,1,9.33,1.3,0.69,6.6,6,6,2013,Summer,Ex smoker,20-29yr,No intake,Positive
+1176,286,1,2,30,CMV_Negative,0,0,5.7,1,9.12,1.97,0.7,279.68,10,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+1177,670,2,2,53,CMV_Negative,0,0,0.9,1,10.14,2.66,0.86,9.51,6,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1178,681,1,2,56,CMV_Negative,1,0,1.4,1,12.24,2.74,1.23,68.76,5,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+1179,376,2,1,36,CMV_Negative,1,0,0.4,1,11.64,3.29,0.68,41.81,6,6,2013,Summer,Ex smoker,30-39yr,No intake,Positive
+1180,185,1,1,26,CMV_Negative,0,0,2.8,1,11.01,3.39,0.53,155.4,4,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+1181,683,1,2,55,CMV_Positive,0,0,0.9,1,9.81,3.16,0.52,188.22,5,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1182,5279,1,2,32,CMV_Negative,0,0,2.3,1,11.07,1.54,0.55,13.81,5,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+1183,780,1,1,59,CMV_Negative,0,0,0.4,1,12.53,2.29,1.03,13.76,5,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1184,966,2,1,64,CMV_Positive,0,2,2,1,10.71,2.89,3.99,2.86,6,6,2013,Summer,Non smoker,60-69yr,Low intake,Positive
+1185,87,1,2,22,CMV_Negative,0,0,4.8,0,10.33,1.73,1.18,140.12,10,6,2013,Summer,Non smoker,20-29yr,No intake,Negative
+1186,978,1,1,64,CMV_Negative,1,0,4.1,1,10.94,3.22,0.7,6.39,10,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+1187,975,1,1,62,CMV_Negative,1,0,0.5,1,9.67,3.18,0.81,56.42,4,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+1188,682,1,2,59,CMV_Negative,0,0,0.6,1,8.96,1.27,2.65,4.11,5,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1189,277,2,2,31,CMV_Negative,0,0,0.9,1,10.89,2.55,0.57,4.33,6,6,2013,Summer,Non smoker,30-39yr,No intake,Positive
+1190,685,1,2,54,CMV_Positive,0,0,1.9,1,9,1.51,2.14,7.59,10,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1191,289,2,2,37,CMV_Negative,2,0,2.1,1,9.57,1.51,0.86,16.88,27,6,2013,Summer,Smoker,30-39yr,No intake,Positive
+1192,95,2,2,20,CMV_Positive,2,0,1.9,1,10.28,1.2,1.19,55.86,3,7,2013,Summer,Smoker,20-29yr,No intake,Positive
+1193,696,1,2,55,CMV_Positive,0,0,0.5,1,13.11,1.58,0.62,0.74,1,7,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1194,688,2,2,52,CMV_Positive,1,0,0.6,0,11,1.88,1.66,80.89,27,6,2013,Summer,Ex smoker,50-59yr,No intake,Negative
+1195,790,1,1,52,CMV_Negative,0,0,1.1,1,12.07,3.31,0.76,80.43,2,7,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1196,190,2,1,20,CMV_Positive,0,0,1.5,1,9.96,0.97,0.78,95.59,3,7,2013,Summer,Non smoker,20-29yr,No intake,Positive
+1197,392,1,1,33,CMV_Negative,2,0,12.4,1,8.79,1.73,2.15,8.36,1,7,2013,Summer,Smoker,30-39yr,No intake,Positive
+1198,889,2,2,65,CMV_Positive,1,0,1.6,1,11.18,2.18,1.59,40.76,3,7,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+1199,894,1,2,61,CMV_Negative,0,0,8,1,8.66,1.6,0.75,6.5,2,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+1200,793,1,1,50,CMV_Negative,2,0,5.4,0,9.09,2.4,0.58,130.15,3,7,2013,Summer,Smoker,50-59yr,No intake,Negative
+1201,890,2,2,60,CMV_Negative,2,0,2.7,0,10.86,2.06,1.24,19.46,3,7,2013,Summer,Smoker,60-69yr,No intake,Negative
+1202,992,1,1,64,CMV_Negative,0,0,2,0,6.93,1.61,0.32,17.16,2,7,2013,Summer,Non smoker,60-69yr,No intake,Negative
+1203,895,1,2,68,CMV_Positive,1,0,0.7,0,9.64,3.79,1.58,51.61,2,7,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+1204,990,1,1,64,CMV_Negative,0,0,2.5,1,8.34,3.69,0.53,22.6,2,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+1205,982,2,1,63,CMV_Positive,1,0,0.7,1,9.36,1.31,0.71,565.28,27,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+1206,991,1,1,63,CMV_Positive,0,0,1.1,0,10.76,3.15,1.14,4.65,2,7,2013,Summer,Non smoker,60-69yr,No intake,Negative
+1207,989,1,1,60,CMV_Positive,0,0,0.6,1,6.79,1.52,1.02,4.31,1,7,2013,Summer,Non smoker,60-69yr,No intake,Positive
+1208,290,2,2,39,CMV_Negative,0,0,3.6,0,12.11,1.48,0.53,73.09,27,6,2013,Summer,Non smoker,30-39yr,No intake,Negative
+1209,598,1,1,48,CMV_Negative,1,0,0.7,1,8.04,1.66,1.05,24.84,3,7,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+1210,597,1,1,47,CMV_Negative,2,0,1.4,1,9.68,1.68,1.08,40.26,2,7,2013,Summer,Smoker,40-49yr,No intake,Positive
+1211,313,1,1,35,CMV_Positive,2,0,3,1,9.04,1.42,0.85,44.99,22,10,2012,Fall,Smoker,30-39yr,No intake,Positive
+1212,513,2,1,45,CMV_Positive,0,0,0.9,1,13.15,1.29,1.69,352.99,11,10,2012,Fall,Non smoker,40-49yr,No intake,Positive
+1213,512,2,1,43,CMV_Negative,1,0,0.5,1,10.58,2.94,1.34,23.62,11,10,2012,Fall,Ex smoker,40-49yr,No intake,Positive
+1214,801,1,2,66,CMV_Negative,0,0,1.2,1,9.4,1.33,1.52,8.68,16,10,2012,Fall,Non smoker,60-69yr,No intake,Positive
+1215,806,1,2,67,CMV_Positive,0,0,2.2,0,7.52,1.53,3.16,2.99,17,10,2012,Fall,Non smoker,60-69yr,No intake,Negative
+1216,311,1,1,34,CMV_Negative,0,0,1.8,0,10.12,3.68,0.78,39.78,22,10,2012,Fall,Non smoker,30-39yr,No intake,Negative
+1217,803,1,2,66,CMV_Positive,0,0,1,0,9.55,2.41,1.81,13.25,16,10,2012,Fall,Non smoker,60-69yr,No intake,Negative
+1218,903,1,1,66,CMV_Negative,0,0,1.5,1,8.63,2.38,0.82,70.01,15,10,2012,Fall,Non smoker,60-69yr,No intake,Positive
+1219,902,1,1,68,CMV_Negative,0,0,1.1,0,10.43,1.71,1.24,12.1,15,10,2012,Fall,Non smoker,60-69yr,No intake,Negative
+1220,221,1,2,35,CMV_Positive,0,0,0.3,0,14.78,4.29,1.79,10.76,24,10,2012,Fall,Non smoker,30-39yr,No intake,Negative
+1221,604,2,2,58,CMV_Negative,0,0,11.7,1,12.74,1.96,1.3,73.24,18,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+1222,906,1,1,68,CMV_Negative,0,0,0.6,1,9.37,1.57,1.31,2.81,16,10,2012,Fall,Non smoker,60-69yr,No intake,Positive
+1223,317,1,1,35,CMV_Negative,1,0,1.6,1,12.36,3.52,0.51,109.65,22,10,2012,Fall,Ex smoker,30-39yr,No intake,Positive
+1224,409,2,2,42,CMV_Negative,2,0,0.9,1,9.27,2.68,0.43,82.84,11,10,2012,Fall,Smoker,40-49yr,No intake,Positive
+1225,904,1,1,63,CMV_Positive,2,0,1.2,1,9.64,1.83,0.61,3.46,15,10,2012,Fall,Smoker,60-69yr,No intake,Positive
+1226,610,2,2,50,CMV_Positive,1,0,0.7,1,10.85,2.55,0.94,5.44,18,10,2012,Fall,Ex smoker,50-59yr,No intake,Positive
+1227,407,2,2,40,CMV_Negative,1,2,0.6,1,11.82,2,1.13,26.25,11,10,2012,Fall,Ex smoker,40-49yr,Low intake,Positive
+1228,609,2,2,56,CMV_Positive,0,0,0.2,0,7.63,1.85,1.08,16.61,18,10,2012,Fall,Non smoker,50-59yr,No intake,Negative
+1229,319,1,1,38,CMV_Negative,0,0,0.8,1,15.51,2.03,0.58,1272.81,23,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+1230,707,2,1,51,CMV_Negative,1,0,5.3,0,10.53,2.39,0.63,13.28,18,10,2012,Fall,Ex smoker,50-59yr,No intake,Negative
+1503,612,2,2,55,CMV_Negative,2,0,2,0,8.87,4.92,3.22,54.01,18,10,2012,Fall,Smoker,50-59yr,No intake,Negative
+1231,5122,2,1,25,CMV_Negative,0,0,0.7,1,12.64,3.21,1.07,15.97,2,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1232,154,2,1,27,CMV_Negative,2,0,2.3,1,11.42,1.72,0.8,71.87,22,4,2013,Spring,Smoker,20-29yr,No intake,Positive
+1233,877,2,2,61,CMV_Positive,1,0,1.7,1,10.77,2.59,1.04,43.66,22,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1234,162,1,1,28,CMV_Positive,0,0,0.4,1,13.98,3.3,0.73,29.43,29,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1235,567,2,1,49,CMV_Negative,2,0,1.2,1,10.24,1.34,0.64,45.23,24,4,2013,Spring,Smoker,40-49yr,No intake,Positive
+1236,659,2,2,59,CMV_Positive,0,0,0.5,1,10.37,2.12,0.52,54.61,22,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1237,156,2,1,23,CMV_Negative,2,0,0.2,1,12.23,2.86,1.1,22.7,23,4,2013,Spring,Smoker,20-29yr,No intake,Positive
+1238,475,2,2,40,CMV_Positive,0,0,0.5,1,12.76,1.85,0.93,264.67,23,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1239,660,2,2,56,CMV_Positive,2,0,1.2,1,11.06,1.28,0.73,228.03,23,4,2013,Spring,Smoker,50-59yr,No intake,Positive
+1240,364,2,1,37,CMV_Positive,2,0,2.2,1,8.9,2.38,0.56,15.29,24,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+1241,951,2,1,64,CMV_Positive,1,0,1.4,1,7.2,1.71,1.29,21.84,22,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1242,658,2,2,52,CMV_Negative,0,0,2.7,1,10.41,2.23,0.98,43.95,22,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1243,578,1,1,44,CMV_Negative,2,0,9.3,1,7.23,3.17,1.33,15,29,4,2013,Spring,Smoker,40-49yr,No intake,Positive
+1244,271,2,2,38,CMV_Positive,0,0,1.8,1,8.44,3.02,2.83,7.61,23,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1245,759,2,1,59,CMV_Positive,1,0,0.4,1,11.33,1.82,1.06,10.59,23,4,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+1246,580,1,1,43,CMV_Positive,1,0,0.3,1,11.22,2.04,0.78,5.83,29,4,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+1247,365,2,1,34,CMV_Negative,0,0,1,1,11.7,2.2,0.97,99.93,24,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1248,579,1,1,40,CMV_Negative,0,0,1.2,1,10.56,3.82,0.4,17.75,29,4,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1249,476,2,2,47,CMV_Negative,1,0,1.3,1,12.53,3.27,1.88,42.46,2,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+1250,758,2,1,55,CMV_Positive,0,0,0.9,1,10.66,1.77,0.44,25.62,23,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1251,657,1,2,57,CMV_Negative,0,0,2,1,10.99,1.99,1.71,18.08,25,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1252,149,1,1,22,CMV_Negative,2,0,1.2,0,8.73,1.72,1.97,123.9,25,3,2013,Spring,Smoker,20-29yr,No intake,Negative
+1253,470,1,2,46,CMV_Negative,1,0,1,1,12.23,1.92,0.71,10.62,25,3,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+1254,148,1,1,24,CMV_Positive,0,0,0.4,1,10.9,2.02,0.61,49.2,25,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1255,743,1,1,56,CMV_Negative,0,0,0.5,1,7.81,1.72,0.8,20,20,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1256,839,2,2,63,CMV_Positive,0,0,3.4,0,11.05,3.98,1.77,49.61,21,3,2013,Spring,Non smoker,60-69yr,No intake,Negative
+1257,77,1,2,23,CMV_Positive,0,0,1.4,1,11.63,2.79,0.42,49.27,26,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1258,555,2,1,42,CMV_Negative,0,0,1.1,1,10.95,3.4,0.86,33.83,20,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1259,945,1,1,63,CMV_Negative,1,0,4.2,1,10.78,4.56,0.46,702.35,20,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1260,927,2,1,62,CMV_Positive,1,0,0.6,1,9.22,1.11,0.82,3.47,21,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1261,944,1,1,62,CMV_Negative,1,0,2.5,1,9.5,2.01,0.71,148.1,20,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1262,744,1,1,59,CMV_Positive,0,0,1.8,1,12.69,2.7,1.41,1.21,20,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1263,471,1,2,45,CMV_Negative,0,0,1.9,1,12.7,2.04,1.55,22.94,25,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1264,946,1,1,65,CMV_Negative,0,0,0.6,1,9.21,1.01,1.01,45.59,25,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1265,868,1,2,65,CMV_Positive,0,0,1.8,1,12.7,2.82,1.47,64.93,26,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1266,736,2,1,59,CMV_Positive,1,0,2.2,1,11.38,2.22,1.78,6.82,21,3,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+1267,152,1,1,29,CMV_Negative,0,0,0.4,1,10.62,1.89,0.86,11.2,26,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1268,354,1,1,38,CMV_Positive,1,0,0.9,1,11.36,2.34,1.44,195.05,20,3,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1269,929,2,1,60,CMV_Negative,1,0,1.5,1,11.53,3.43,1.73,4.5,21,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1270,838,2,2,66,CMV_Positive,0,0,1.4,0,7.76,2.96,0.67,17.8,21,3,2013,Spring,Non smoker,60-69yr,No intake,Negative
+1271,147,1,1,21,CMV_Negative,0,2,1.1,1,9.68,2.66,0.82,337.27,25,3,2013,Spring,Non smoker,20-29yr,Low intake,Positive
+1272,484,1,2,41,CMV_Negative,0,0,2.7,1,11.38,1.21,2.45,30.68,15,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1273,963,1,1,63,CMV_Positive,0,0,0.6,1,9.82,1.79,1.78,1.6,21,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1274,372,2,1,33,CMV_Negative,0,0,0.5,1,9.67,2.52,0.45,411.48,16,5,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1275,663,2,2,52,CMV_Positive,1,0,0.3,1,11.08,3.03,2,104.11,16,5,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+1276,576,2,1,41,CMV_Positive,1,0,0.6,1,11.04,3.22,0.44,15.23,16,5,2013,Spring,Ex smoker,40-49yr,No intake,Positive
+1277,884,1,2,61,CMV_Negative,0,0,0.8,1,11.2,1.53,0.81,38.9,15,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1278,763,2,1,50,CMV_Positive,2,0,1.1,1,8.8,1.41,1.43,29.72,16,5,2013,Spring,Smoker,50-59yr,No intake,Positive
+1279,276,1,2,31,CMV_Negative,1,0,1,1,11.63,1.77,1.97,187.49,21,5,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1280,671,1,2,56,CMV_Negative,0,0,3.1,1,7.17,1.59,0.85,39.69,21,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1281,670,1,2,53,CMV_Negative,0,0,0.9,1,10.14,2.66,0.86,9.51,21,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1282,959,1,1,61,CMV_Negative,1,0,1.5,1,11.64,2.15,0.73,26.86,15,5,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1283,375,1,1,35,CMV_Negative,1,0,1.2,1,9.84,1,1.09,9.04,15,5,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1284,480,2,2,41,CMV_Negative,0,0,4.4,1,10.27,1.43,1.47,41,16,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1285,669,1,2,59,CMV_Negative,0,0,0.3,1,11.27,1.94,1.06,71.34,15,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1286,578,2,1,44,CMV_Negative,2,0,9.3,1,7.23,3.17,1.33,15,16,5,2013,Spring,Smoker,40-49yr,No intake,Positive
+1287,668,1,2,57,CMV_Negative,0,0,0.7,1,13.61,1.86,0.66,25.19,14,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1288,964,1,1,64,CMV_Negative,1,0,20.3,1,10.19,2.09,0.86,421.1,21,5,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1289,274,1,2,33,CMV_Positive,1,0,0.8,1,7.55,1.45,1.16,178.71,15,5,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1290,273,1,2,31,CMV_Negative,0,0,2,1,13.56,1.53,1.58,89.59,15,5,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1291,960,1,1,63,CMV_Negative,0,0,1.8,1,8.69,2.66,0.63,26.92,15,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1292,181,1,1,28,CMV_Positive,2,0,0.5,1,10.46,2.59,0.52,41.85,29,5,2013,Spring,Smoker,20-29yr,No intake,Positive
+1293,971,1,1,61,CMV_Positive,1,0,2.3,1,13.31,3.39,0.42,15.37,3,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+1295,969,1,1,61,CMV_Negative,0,0,1.5,1,13.94,1.94,0.48,178.94,29,5,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1296,482,2,2,47,CMV_Positive,0,0,0.3,1,10.72,2.14,1.94,12.71,30,5,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1297,962,2,1,67,CMV_Positive,1,0,1.2,0,5.75,2.93,0.36,70.08,29,5,2013,Spring,Ex smoker,60-69yr,No intake,Negative
+1298,180,1,1,26,CMV_Negative,0,0,1,1,12.07,2.01,1.58,11.13,29,5,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1299,668,2,2,57,CMV_Negative,0,0,0.7,1,13.61,1.86,0.66,25.19,30,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1300,373,2,1,34,CMV_Negative,2,0,0.4,1,14.15,2.31,1.02,364.98,30,5,2013,Spring,Smoker,30-39yr,No intake,Positive
+1301,769,2,1,50,CMV_Positive,0,0,0.9,1,9.12,2.45,0.59,106,30,5,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1302,183,1,1,26,CMV_Positive,0,0,8.6,1,10.14,2.88,1.55,37.82,3,6,2013,Summer,Non smoker,20-29yr,No intake,Positive
+1303,282,1,2,39,CMV_Positive,2,0,1.4,1,9.8,1.36,1.62,12.69,29,5,2013,Spring,Smoker,30-39yr,No intake,Positive
+1304,970,1,1,69,CMV_Negative,0,0,1.4,1,9.86,2.38,0.76,27.32,3,6,2013,Summer,Non smoker,60-69yr,No intake,Positive
+1305,883,2,2,67,CMV_Negative,1,0,1.5,0,9.2,6.03,0.42,0.11,30,5,2013,Spring,Ex smoker,60-69yr,No intake,Negative
+1306,779,1,1,55,CMV_Negative,1,0,5.6,1,7.67,1.67,0.37,2,3,6,2013,Summer,Ex smoker,50-59yr,No intake,Positive
+1307,179,1,1,23,CMV_Negative,1,0,0.2,1,9.07,1.13,0.75,6.17,29,5,2013,Spring,Ex smoker,20-29yr,No intake,Positive
+1308,972,1,1,65,CMV_Positive,1,0,0.5,1,7.42,2.08,0.76,48.72,4,6,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+1309,887,1,2,64,CMV_Positive,1,0,1.3,1,10.66,2.65,1.28,16.76,28,5,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1310,272,2,2,39,CMV_Negative,2,2,8,1,11.64,2.87,0.9,138.46,30,5,2013,Spring,Smoker,30-39yr,Low intake,Positive
+1311,665,2,2,51,CMV_Positive,2,0,1,1,9.83,1.93,0.7,6.17,30,5,2013,Spring,Smoker,50-59yr,No intake,Positive
+1312,497,1,2,47,CMV_Negative,1,0,0.2,1,10.67,2,1.21,167.8,1,7,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+1313,697,1,2,52,CMV_Positive,0,0,1.2,1,12.2,1.82,0.99,5.03,2,7,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1314,695,1,2,54,CMV_Negative,2,0,1.1,1,7.95,2.1,0.63,18.25,1,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+1315,988,1,1,64,CMV_Positive,1,0,0.6,1,11.7,3.38,0.8,1504.83,1,7,2013,Summer,Ex smoker,60-69yr,No intake,Positive
+1316,993,1,1,64,CMV_Negative,1,0,1.8,0,11.25,2.93,1.01,76.81,3,7,2013,Summer,Ex smoker,60-69yr,No intake,Negative
+1317,599,1,1,40,CMV_Negative,1,0,1.1,1,13.28,2.56,0.86,274.12,3,7,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+1318,496,1,2,44,CMV_Negative,0,0,0.2,1,8.55,1.6,1.2,18.27,1,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+1319,394,1,1,38,CMV_Positive,1,2,1.7,1,9.14,2.46,0.8,77.12,2,7,2013,Summer,Ex smoker,30-39yr,Low intake,Positive
+1320,494,1,2,47,CMV_Positive,1,0,1.3,1,10.25,3.88,0.79,17.14,1,7,2013,Summer,Ex smoker,40-49yr,No intake,Positive
+1321,791,1,1,55,CMV_Negative,2,0,0.3,1,13.9,1.73,0.74,113.12,2,7,2013,Summer,Smoker,50-59yr,No intake,Positive
+1322,498,1,2,43,CMV_Negative,0,0,0.4,1,12.53,4.17,1.73,46.68,2,7,2013,Summer,Non smoker,40-49yr,No intake,Positive
+1323,383,2,1,31,CMV_Negative,2,0,0.3,0,6.47,2.32,0.95,130.74,27,6,2013,Summer,Smoker,30-39yr,No intake,Negative
+1324,495,1,2,43,CMV_Positive,2,0,10.8,1,10.13,2.32,2.79,340.75,1,7,2013,Summer,Smoker,40-49yr,No intake,Positive
+1325,97,1,2,23,CMV_Negative,1,0,1.2,1,14.11,1.73,0.94,103.44,1,7,2013,Summer,Ex smoker,20-29yr,No intake,Positive
+1504,488,2,2,42,CMV_Negative,1,0,0.4,0,9.02,1.93,4.03,8.4,3,7,2013,Summer,Ex smoker,40-49yr,No intake,Negative
+1326,596,1,1,43,CMV_Negative,2,0,2.3,1,8.85,2.2,0.99,666.04,2,7,2013,Summer,Smoker,40-49yr,No intake,Positive
+1327,194,1,1,21,CMV_Negative,2,0,0.2,1,10.14,2.36,1.25,53.97,3,7,2013,Summer,Smoker,20-29yr,No intake,Positive
+1328,698,1,2,50,CMV_Positive,1,2,1.2,1,10.91,2.52,1.64,28.75,3,7,2013,Summer,Ex smoker,50-59yr,Low intake,Positive
+1329,792,1,1,53,CMV_Negative,2,0,2.2,0,6.68,2.3,0.39,24.73,3,7,2013,Summer,Smoker,50-59yr,No intake,Negative
+1330,393,1,1,36,CMV_Negative,0,0,0.3,1,11.82,1.76,1.13,190.58,1,7,2013,Summer,Non smoker,30-39yr,No intake,Positive
+1331,687,2,2,58,CMV_Positive,0,0,0.3,1,8.18,3.35,0.76,12.85,27,6,2013,Summer,Non smoker,50-59yr,No intake,Positive
+1332,350,1,1,34,CMV_Negative,1,0,2,1,13.72,3.08,1.64,45.95,27,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+1333,732,1,1,59,CMV_Negative,0,0,0.6,1,11.01,3.27,0.5,39.8,26,2,2013,Winter,Non smoker,50-59yr,No intake,Positive
+1334,835,1,2,64,CMV_Positive,1,0,0.5,1,10.11,1.76,0.46,4.92,26,2,2013,Winter,Ex smoker,60-69yr,No intake,Positive
+1335,256,1,2,39,CMV_Negative,1,0,3.5,1,9.53,2.6,1.42,11.15,25,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+1336,259,1,2,38,CMV_Positive,0,0,1.6,1,12.36,1.82,0.72,34.15,26,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1337,733,1,1,58,CMV_Negative,0,0,1,1,10.54,1.41,0.44,43.75,26,2,2013,Winter,Non smoker,50-59yr,No intake,Positive
+1338,248,2,2,34,CMV_Negative,2,0,0.3,0,9.33,2.49,0.59,24.06,27,2,2013,Winter,Smoker,30-39yr,No intake,Negative
+1340,467,1,2,47,CMV_Positive,2,0,0.9,1,8.96,1.95,1.02,25.73,4,3,2013,Spring,Smoker,40-49yr,No intake,Positive
+1341,58,2,2,23,CMV_Positive,0,0,0.6,1,14.59,3.29,1.27,12.87,28,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1342,458,2,2,40,CMV_Negative,0,0,1.4,0,10.84,1.15,1.03,12.79,28,2,2013,Winter,Non smoker,40-49yr,No intake,Negative
+1343,926,1,1,64,CMV_Positive,1,0,1.9,1,10.91,1.68,1.28,71.12,27,2,2013,Winter,Ex smoker,60-69yr,No intake,Positive
+1344,342,2,1,33,CMV_Negative,1,0,0.3,1,9.53,1.89,1.15,92.05,28,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+1345,925,1,1,66,CMV_Negative,0,0,0.4,1,9.74,1.76,1.72,25.84,27,2,2013,Winter,Non smoker,60-69yr,No intake,Positive
+1346,255,1,2,37,CMV_Negative,0,0,0.4,1,10.41,3.2,0.74,11.2,25,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1347,61,2,2,22,CMV_Negative,1,0,15.4,1,12.39,3.72,0.82,21.26,28,2,2013,Winter,Ex smoker,20-29yr,No intake,Positive
+1348,547,2,1,48,CMV_Negative,2,0,0.5,0,9.88,2.62,1.78,20.81,28,2,2013,Winter,Smoker,40-49yr,No intake,Negative
+1349,351,1,1,30,CMV_Positive,1,0,2,1,11.43,2.01,1.11,104.62,4,3,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1350,548,2,1,43,CMV_Negative,2,0,1.8,0,10.8,2.63,1.58,2064.72,28,2,2013,Winter,Smoker,40-49yr,No intake,Negative
+1351,70,1,2,25,CMV_Positive,2,0,6.2,1,8.8,1.29,0.68,10.02,26,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+1352,343,2,1,33,CMV_Negative,2,0,0.3,1,11.07,1.95,0.9,27.04,28,2,2013,Winter,Smoker,30-39yr,No intake,Positive
+1353,44,1,2,21,CMV_Negative,0,0,3.4,1,10.59,1.9,0.67,242.91,5,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1354,49,1,2,24,CMV_Negative,2,0,1.4,1,7.91,1.54,0.95,39.88,6,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+1355,338,1,1,38,CMV_Positive,0,0,0.9,0,9.61,1.86,2.23,2465.98,5,2,2013,Winter,Non smoker,30-39yr,No intake,Negative
+1356,450,1,2,46,CMV_Negative,1,0,2.8,1,7.75,1.57,1.09,49.66,4,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+1357,723,2,1,57,CMV_Positive,0,0,2,0,10.12,0.87,0.69,27.61,31,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+1358,455,1,2,46,CMV_Negative,2,0,0.6,1,10.57,1.65,0.93,86.82,6,2,2013,Winter,Smoker,40-49yr,No intake,Positive
+1359,543,1,1,43,CMV_Negative,2,0,1.3,0,8.52,1.92,0.78,26.17,5,2,2013,Winter,Smoker,40-49yr,No intake,Negative
+1360,135,1,1,22,CMV_Negative,0,0,0.2,1,11.54,2.05,1.52,593.75,4,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1361,921,1,1,68,CMV_Negative,0,0,3.1,0,8.03,3,1.03,59.83,5,2,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1362,134,1,1,22,CMV_Negative,0,0,0.5,1,9.67,1.23,0.98,229.41,4,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1363,48,1,2,24,CMV_Negative,1,0,0.3,1,9.33,1.94,0.74,41.26,6,2,2013,Winter,Ex smoker,20-29yr,No intake,Positive
+1364,133,1,1,26,CMV_Positive,2,0,3,1,10.57,1.28,1.23,130.7,4,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+1365,431,2,2,47,CMV_Negative,1,0,0.5,0,7.67,1.38,0.85,23.12,31,1,2013,Winter,Ex smoker,40-49yr,No intake,Negative
+1366,232,2,2,35,CMV_Negative,2,0,3.6,1,7.56,1.59,1.22,164.63,31,1,2013,Winter,Smoker,30-39yr,No intake,Positive
+1367,50,1,2,27,CMV_Positive,0,30,3.6,1,13.79,2.44,1.25,67.01,6,2,2013,Winter,Non smoker,20-29yr,High intake,Positive
+1368,329,2,1,38,CMV_Negative,0,0,1,1,11.13,2.03,0.97,43.78,31,1,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1369,23,2,2,22,CMV_Negative,0,0,0.4,0,11.68,1.54,1.13,33.35,31,1,2013,Winter,Non smoker,20-29yr,No intake,Negative
+1370,242,1,2,35,CMV_Positive,0,0,1,0,11.44,0.9,0.69,42.68,4,2,2013,Winter,Non smoker,30-39yr,No intake,Negative
+1371,42,1,2,21,CMV_Negative,0,0,6.3,0,15.44,1.49,1.83,75.86,4,2,2013,Winter,Non smoker,20-29yr,No intake,Negative
+1373,71,1,2,20,CMV_Negative,0,0,2.3,1,12.07,2.41,2.46,148.43,27,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1374,258,1,2,38,CMV_Positive,0,0,0.3,1,12.53,2.84,1.06,24.5,26,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1375,924,1,1,64,CMV_Positive,1,0,1.7,1,12.33,4.51,1.01,107.78,27,2,2013,Winter,Ex smoker,60-69yr,No intake,Positive
+1376,63,2,2,20,CMV_Positive,2,0,0.4,1,11.98,1.61,1.16,14.47,27,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+1377,257,1,2,37,CMV_Positive,2,0,1.9,1,12.88,3.81,0.66,114.02,26,2,2013,Winter,Smoker,30-39yr,No intake,Positive
+1378,349,1,1,36,CMV_Negative,1,0,0.9,1,12.29,3.17,0.86,41.38,26,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+1379,728,2,1,55,CMV_Negative,0,0,1.1,0,9.98,2.76,0.71,14.8,28,2,2013,Winter,Non smoker,50-59yr,No intake,Negative
+1380,344,2,1,30,CMV_Negative,1,0,0.8,1,11.86,1.82,2.8,965.74,27,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+1381,545,2,1,42,CMV_Negative,1,0,0.6,0,10.21,2,1,29.11,28,2,2013,Winter,Ex smoker,40-49yr,No intake,Negative
+1382,734,1,1,50,CMV_Positive,2,0,0.4,1,8.61,2.2,0.8,754.59,27,2,2013,Winter,Smoker,50-59yr,No intake,Positive
+1383,260,1,2,38,CMV_Negative,1,0,5.8,1,9.58,1.65,0.98,6.48,26,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+1384,341,2,1,32,CMV_Positive,1,0,2.1,1,8.56,1.89,0.6,51.67,28,2,2013,Winter,Ex smoker,30-39yr,No intake,Positive
+1385,235,2,2,39,CMV_Positive,0,0,3.5,1,10.46,2.53,1.23,2.13,27,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1386,340,2,1,35,CMV_Negative,0,0,0.8,0,7.51,2.73,0.68,16.93,28,2,2013,Winter,Non smoker,30-39yr,No intake,Negative
+1387,554,1,1,48,CMV_Negative,2,0,3,1,8.93,1.91,1.5,41.85,26,2,2013,Winter,Smoker,40-49yr,No intake,Positive
+1388,466,1,2,40,CMV_Negative,1,0,0.5,1,10.44,1.19,1.44,39.88,26,2,2013,Winter,Ex smoker,40-49yr,No intake,Positive
+1389,213,1,2,33,CMV_Positive,0,0,6.7,1,10.46,1.87,1.1,121.75,23,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+1390,706,2,1,50,CMV_Positive,0,0,0.4,0,10.36,1.59,1.64,9.12,18,10,2012,Fall,Non smoker,50-59yr,No intake,Negative
+1391,705,2,1,52,CMV_Positive,0,0,0.3,1,8.27,2.57,1.02,31.89,18,10,2012,Fall,Non smoker,50-59yr,No intake,Positive
+1392,939,2,1,63,CMV_Negative,1,2,3.3,1,9.83,1.82,2.28,39.71,27,3,2013,Spring,Ex smoker,60-69yr,Low intake,Positive
+1393,947,1,1,61,CMV_Negative,1,0,0.5,1,9.63,2.53,1.09,13.75,2,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1394,473,1,2,48,CMV_Positive,0,0,1,1,9.8,0.85,1.43,45.12,27,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1395,932,2,1,62,CMV_Negative,2,0,0.4,1,10.52,2.53,1.93,133,28,3,2013,Spring,Smoker,60-69yr,No intake,Positive
+1396,357,1,1,38,CMV_Negative,0,0,1.2,1,11.88,3.57,0.38,253.54,2,4,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1397,934,2,1,62,CMV_Negative,1,0,2.3,1,8.88,1.97,1.52,108.84,28,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1398,752,1,1,53,CMV_Positive,0,0,1.5,1,8.35,2.04,0.67,23.35,2,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1399,78,1,2,28,CMV_Negative,0,0,0.3,1,11.04,1.68,3.66,1.79,2,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1400,270,1,2,36,CMV_Negative,1,0,2.3,1,14.14,2.58,2.33,145.82,26,3,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1401,948,1,1,62,CMV_Negative,0,0,0.6,1,6.87,1.72,0.88,6.17,2,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1402,938,2,1,64,CMV_Positive,2,2,10,1,8.42,1.81,1.33,25.77,27,3,2013,Spring,Smoker,60-69yr,Low intake,Positive
+1403,871,1,2,62,CMV_Negative,0,0,0.8,1,8.66,4.02,0.57,8.41,27,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1404,937,2,1,68,CMV_Positive,0,0,2.2,1,8.64,2.06,1.44,30.81,27,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1405,931,2,1,64,CMV_Negative,1,0,0.6,1,11.37,0.88,0.62,16.71,28,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1406,353,2,1,39,CMV_Negative,0,0,2.5,1,10.86,1.73,1.37,21.41,28,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1407,79,1,2,27,CMV_Negative,0,0,0.4,1,12.26,2.95,1.31,57.44,2,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1408,870,1,2,63,CMV_Positive,1,0,2.2,1,10.9,1.72,2.28,3.94,27,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1409,933,2,1,66,CMV_Negative,2,0,1.4,1,8.39,1.36,0.81,85.94,28,3,2013,Spring,Smoker,60-69yr,No intake,Positive
+1410,743,2,1,56,CMV_Negative,0,0,0.5,1,7.81,1.72,0.8,20,3,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1411,744,2,1,59,CMV_Positive,0,0,1.8,1,12.69,2.7,1.41,1.21,3,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1412,949,1,1,64,CMV_Negative,0,0,0.3,0,9.49,2.35,1.37,8.4,2,4,2013,Spring,Non smoker,60-69yr,No intake,Negative
+1413,747,1,1,51,CMV_Negative,0,0,1.2,1,11.22,3.4,0.52,23.12,26,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1414,150,1,1,22,CMV_Negative,0,0,0.2,1,8.37,1.3,0.51,244.54,25,3,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1415,737,2,1,53,CMV_Positive,0,30,1,1,11.29,3.14,0.77,13.3,21,3,2013,Spring,Non smoker,50-59yr,High intake,Positive
+1416,735,2,1,54,CMV_Positive,1,0,3.8,0,9.44,3.1,0.8,376.27,21,3,2013,Spring,Ex smoker,50-59yr,No intake,Negative
+1417,560,1,1,43,CMV_Negative,0,2,0.8,1,10.86,3.34,0.66,19.55,25,3,2013,Spring,Non smoker,40-49yr,Low intake,Positive
+1418,745,1,1,57,CMV_Negative,0,0,1.3,1,10.6,1.45,1.9,13.49,25,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1419,837,2,2,67,CMV_Negative,0,0,1.1,0,9.33,0.81,1.13,120.44,21,3,2013,Spring,Non smoker,60-69yr,No intake,Negative
+1420,263,2,2,34,CMV_Negative,0,0,0.3,1,12.4,2.37,1.08,63.48,20,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1505,928,2,1,64,CMV_Negative,0,0,1.2,1,13.67,2.78,1.4,975.57,21,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1421,558,1,1,48,CMV_Negative,0,0,3.4,1,9.72,2.08,1.49,18.41,20,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1422,559,1,1,49,CMV_Negative,0,0,0.9,1,10.42,2.38,0.8,42.48,20,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1423,742,1,1,54,CMV_Positive,0,0,23.2,1,8.22,3.91,1.05,6.3,20,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1424,261,2,2,33,CMV_Positive,0,0,3,1,13.14,2.72,1.21,47.18,21,3,2013,Spring,Non smoker,30-39yr,No intake,Positive
+1426,844,2,2,63,CMV_Negative,0,0,1.6,1,9.66,2.17,1.24,19.33,20,3,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1427,930,2,1,63,CMV_Positive,1,0,1.8,1,9.52,3.8,1.19,10.44,21,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1428,656,1,2,52,CMV_Positive,0,0,3.5,1,11.12,3.59,1.1,62.18,25,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1429,556,2,1,48,CMV_Positive,0,0,2,1,13.23,1.73,0.68,4.58,20,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1430,472,1,2,41,CMV_Positive,0,0,1.4,1,13.28,1.57,1.74,12.24,26,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1431,151,1,1,23,CMV_Negative,1,0,2.9,1,12.23,1.6,0.93,470.19,25,3,2013,Spring,Ex smoker,20-29yr,No intake,Positive
+1432,451,1,2,49,CMV_Positive,1,0,0.4,0,9.73,1.03,1.49,2.88,5,2,2013,Winter,Ex smoker,40-49yr,No intake,Negative
+1433,454,1,2,41,CMV_Negative,2,0,2.8,0,9.34,2.22,1.39,21.22,5,2,2013,Winter,Smoker,40-49yr,No intake,Negative
+1434,430,2,2,44,CMV_Negative,0,0,3,1,10.49,2.76,1.29,43.11,31,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1435,337,1,1,32,CMV_Positive,1,0,0.2,0,9.15,1.6,0.62,49.61,4,2,2013,Winter,Ex smoker,30-39yr,No intake,Negative
+1436,542,1,1,44,CMV_Negative,0,0,1.1,1,11.51,2.31,2.51,99.8,4,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1437,435,2,2,40,CMV_Negative,0,0,1,1,12.73,2.59,1.66,34.59,31,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1438,432,2,2,46,CMV_Negative,0,0,7.5,0,10.78,2.09,1.69,38.18,31,1,2013,Winter,Non smoker,40-49yr,No intake,Negative
+1439,243,1,2,30,CMV_Negative,0,0,3.1,1,15.71,1.84,1.05,13.45,5,2,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1440,453,1,2,49,CMV_Negative,1,0,0.4,0,12.8,2.37,3.17,5.43,5,2,2013,Winter,Ex smoker,40-49yr,No intake,Negative
+1441,452,1,2,42,CMV_Negative,0,0,0.6,1,12.01,1.66,2.64,243.19,5,2,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1442,434,2,2,44,CMV_Positive,2,0,0.8,1,6.44,1.75,1.52,32.28,31,1,2013,Winter,Smoker,40-49yr,No intake,Positive
+1443,124,2,1,25,CMV_Negative,2,0,0.3,1,9.41,3.63,0.75,61.69,31,1,2013,Winter,Smoker,20-29yr,No intake,Positive
+1444,136,1,1,23,CMV_Negative,2,0,0.6,0,8.07,1.09,0.8,20.29,4,2,2013,Winter,Smoker,20-29yr,No intake,Negative
+1445,46,1,2,25,CMV_Negative,0,0,0.8,1,12.57,1.16,1.29,12.11,5,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1446,45,1,2,21,CMV_Negative,0,0,2.4,1,10,2.11,0.99,12.25,5,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1447,43,1,2,23,CMV_Negative,0,0,2.3,1,10.28,1.79,1.78,6.89,4,2,2013,Winter,Non smoker,20-29yr,No intake,Positive
+1448,137,1,1,29,CMV_Negative,2,0,1,1,6.26,1.5,0.82,1003.48,5,2,2013,Winter,Smoker,20-29yr,No intake,Positive
+1449,829,1,2,66,CMV_Negative,0,0,2,0,7.96,2.33,1.15,74.46,4,2,2013,Winter,Non smoker,60-69yr,No intake,Negative
+1450,47,1,2,27,CMV_Negative,0,0,3,0,13.88,2.09,1.36,18.71,6,2,2013,Winter,Non smoker,20-29yr,No intake,Negative
+1451,535,2,1,40,CMV_Negative,0,0,0.6,1,11.6,0.44,0.74,0.42,31,1,2013,Winter,Non smoker,40-49yr,No intake,Positive
+1452,828,1,2,60,CMV_Positive,1,0,1.3,1,15.48,3.11,1.14,159.9,4,2,2013,Winter,Ex smoker,60-69yr,No intake,Positive
+1453,869,1,2,61,CMV_Positive,1,0,1.4,1,7.72,1.42,1.51,58.37,27,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1454,355,1,1,37,CMV_Negative,1,0,0.8,1,10.22,2.68,0.84,535.75,27,3,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1455,153,1,1,24,CMV_Positive,0,0,1.3,1,13.23,1.85,1.79,1.7,2,4,2013,Spring,Non smoker,20-29yr,No intake,Positive
+1456,936,2,1,65,CMV_Negative,1,0,0.5,0,8.37,2.33,0.58,135.79,28,3,2013,Spring,Ex smoker,60-69yr,No intake,Negative
+1457,748,1,1,55,CMV_Negative,0,2,0.4,1,11.89,2.01,1.87,41.6,26,3,2013,Spring,Non smoker,50-59yr,Low intake,Positive
+1458,749,1,1,59,CMV_Positive,1,0,0.7,1,14.05,3.72,0.9,18.46,27,3,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+1459,750,1,1,53,CMV_Negative,1,0,0.6,1,11.79,2.07,1.73,68.62,27,3,2013,Spring,Ex smoker,50-59yr,No intake,Positive
+1460,738,2,1,52,CMV_Negative,0,0,0.8,1,11.18,1.27,0.65,73.2,28,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1461,557,2,1,41,CMV_Negative,0,0,0.6,1,9.72,4.07,1.56,161.94,28,3,2013,Spring,Non smoker,40-49yr,No intake,Positive
+1462,751,1,1,50,CMV_Positive,0,0,0.5,1,15.61,3.25,2.21,23.32,27,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1463,356,1,1,31,CMV_Positive,2,0,1.1,1,12.27,2,0.55,425.38,2,4,2013,Spring,Smoker,30-39yr,No intake,Positive
+1464,935,2,1,60,CMV_Negative,1,0,8.5,1,9.65,1.32,0.5,41.12,28,3,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1465,352,2,1,38,CMV_Negative,1,0,1.4,1,12.6,3.63,0.6,157.56,28,3,2013,Spring,Ex smoker,30-39yr,No intake,Positive
+1466,874,1,2,64,CMV_Negative,0,0,3.4,1,8.76,1.09,1.13,37.58,2,4,2013,Spring,Non smoker,60-69yr,No intake,Positive
+1467,872,1,2,66,CMV_Negative,0,0,0.6,0,10.1,1.9,2.98,16.42,2,4,2013,Spring,Non smoker,60-69yr,No intake,Negative
+1468,740,2,1,57,CMV_Negative,0,0,1,1,9.2,3.68,0.9,44.02,27,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1469,742,2,1,54,CMV_Positive,0,0,23.2,1,8.22,3.91,1.05,6.3,3,4,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1470,849,2,2,63,CMV_Positive,1,2,1.5,1,10.17,1.27,0.91,37.65,28,3,2013,Spring,Ex smoker,60-69yr,Low intake,Positive
+1471,873,1,2,62,CMV_Positive,1,0,7.5,1,11.95,2.09,0.79,79.59,2,4,2013,Spring,Ex smoker,60-69yr,No intake,Positive
+1472,739,2,1,56,CMV_Negative,0,0,0.6,1,9,1.77,1.07,114.24,28,3,2013,Spring,Non smoker,50-59yr,No intake,Positive
+1473,27,1,2,20,CMV_Negative,0,0,1.3,0,11.82,1.75,1.02,5.01,16,1,2013,Winter,Non smoker,20-29yr,No intake,Negative
+1474,434,1,2,44,CMV_Positive,2,0,0.8,1,6.44,1.75,1.52,32.28,15,1,2013,Winter,Smoker,40-49yr,No intake,Positive
+1475,230,1,2,35,CMV_Negative,0,0,0.4,1,11.53,1.79,1.16,39.84,15,1,2013,Winter,Non smoker,30-39yr,No intake,Positive
+1477,433,1,2,48,CMV_Negative,0,0,0.7,0,9.01,3.29,1.31,17.23,15,1,2013,Winter,Non smoker,40-49yr,No intake,Negative
+1478,639,1,2,52,CMV_Negative,1,0,0.3,0,16.21,1.85,1.95,9.21,16,1,2013,Winter,Ex smoker,50-59yr,No intake,Negative
+1479,24,1,2,25,CMV_Negative,2,0,1.2,1,6.13,0.47,0.99,9.13,15,1,2013,Winter,Smoker,20-29yr,No intake,Positive
+1480,723,1,1,57,CMV_Positive,0,0,2,0,10.12,0.87,0.69,27.61,15,1,2013,Winter,Non smoker,50-59yr,No intake,Negative
+1481,214,1,2,37,CMV_Negative,0,0,2,1,11.33,1.8,1.49,55.84,23,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+1482,312,1,1,32,CMV_Negative,0,0,0.5,1,13.37,2.29,0.55,45.9,22,10,2012,Fall,Non smoker,30-39yr,No intake,Positive
+1483,703,2,1,58,CMV_Negative,2,0,2.5,1,9.58,3.09,1.3,34.49,18,10,2012,Fall,Smoker,50-59yr,No intake,Positive
+1485,222,1,2,33,CMV_Positive,2,0,7.2,0,9.8,1.5,1.41,148.01,24,10,2012,Fall,Smoker,30-39yr,No intake,Negative

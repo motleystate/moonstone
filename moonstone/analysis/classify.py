@@ -9,6 +9,7 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.feature_selection import RFECV
 
 from moonstone.analysis import stats
+from moonstone.normalization.processed import ScalingNormalization
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class ML(object):
         and combine count data with any metadata.
         Pandas data frames requires indexes to be of the same type in order to correctly merge.
 
-        For the moment is appear that metadata samples, if they are numbered, result in a int64 index type.
+        For the moment it appears that metadata samples, if they are numbered, result in a int64 index type.
         Count data yields an 'object' type, even if samples are numbered.
 
         Thus we will check for mismatched index type and try to correct"""
@@ -46,19 +47,12 @@ class ML(object):
 
     def svm(self, variable=""):
         logger.info(f'Starting SVM analysis with variable: {variable}')
-        if variable == 'all':
-            pass  # Later to include an iterator over all clinical variables.
 
         df_final = ML.merge(self, variable)
 
         # Setup the features and labels
         x = np.array(df_final.drop([variable], axis=1).astype(float))
-        # RBF kernel assumes features centered around zero, with equal variance.
-        # Metagenomic data is sparse. maxabs_scale() handles both of these conditions.
-        x_maxabs_scaled = preprocessing.maxabs_scale(x)
-        logger.info("Counts standardized by Maximum Absolute Value. Check Mean & Variance near Zero:")
-
-        stats.normalized_stats(x_maxabs_scaled)
+        x_scaled = ScalingNormalization(x)
         y = np.array(df_final[variable])
 
         # My variable counter
@@ -75,7 +69,7 @@ class ML(object):
 
     def roc_analysis(self, variable=""):
         logger.info(f'Starting ROC analysis with variable: {variable}')
-        df_final = SVM.merge(self, variable)
+        df_final = SVM.merge(self, variable)  # Pandas df with one clinical column and all count data
 
         x = np.array(df_final.drop([variable], axis=1).astype(float))
         x = preprocessing.maxabs_scale(x)
