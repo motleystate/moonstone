@@ -6,6 +6,7 @@ output/
 
 # Vscode
 .vscode
+.idea
 
 .coverage
 

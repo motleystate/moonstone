@@ -1,12 +1,12 @@
 import unittest
 import pandas as pd
 
+from moonstone.normalization.processed.scaling_normalization import StandardScaler
+
 
 class MyTestCase(unittest.TestCase):
 
     def test_standard_scaler(self):
-        self.assertEqual(True, False)
-
         df = pd.DataFrame(
             [
                 [1., -1., 2.],
@@ -15,7 +15,6 @@ class MyTestCase(unittest.TestCase):
             ],
             columns=['A', 'B', 'C']
         )
-
         df_expected = pd.DataFrame(
             [
                 [0., -1.224745, 1.336306],
@@ -24,6 +23,8 @@ class MyTestCase(unittest.TestCase):
             ],
             columns=['A', 'B', 'C']
         )
+        scaler = StandardScaler(df).scale_x
+        pd.testing.assert_frame_equal(scaler, df_expected)
 
 
 if __name__ == '__main__':

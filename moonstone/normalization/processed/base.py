@@ -7,7 +7,6 @@ class BaseScaling:
 
     def scaler(self):
         """Overridden in child classes to perform a specific scaling."""
-
         return self.x
 
     @property
