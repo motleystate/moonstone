@@ -71,7 +71,7 @@ class ML(object):
 
     def roc_analysis(self, variable=""):
         logger.info(f'Starting ROC analysis with variable: {variable}')
-        df_final = SVM.merge(self, variable)  # Pandas df with one clinical column and all count data
+        df_final = ML.merge(self, variable)  # Pandas df with one clinical column and all count data
 
         x = np.array(df_final.drop([variable], axis=1).astype(float))
         x = preprocessing.maxabs_scale(x)
@@ -138,7 +138,7 @@ class ML(object):
 
     def feature_analysis(self, variable=""):
         logger.info(f'Running SVM feature importance analysis with variable: {variable}')
-        df_final = SVM.merge(self, variable)
+        df_final = ML.merge(self, variable)
         logger.info('Feature Analysis successfully collected merged database.')
 
         # Setup the data
