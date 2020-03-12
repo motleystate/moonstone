@@ -7,7 +7,7 @@ setup(
     author='Kenzo-Hugo Hillion, Sean Kennedy',
     author_email='kehillio@pasteur.fr',
     install_requires=[
-        'pandas==0.25.3',
+        'pandas==1.0.1',
         'scikit-learn==0.21.3',
         'matplotlib',
         'plotly',

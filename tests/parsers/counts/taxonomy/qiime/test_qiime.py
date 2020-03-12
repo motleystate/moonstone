@@ -9,86 +9,26 @@ from moonstone.parsers.counts.taxonomy import (
 
 
 class TestQiime2Parser(TestCase):
-    """
-    expected data filepath = exdfp
-    tested data filepath = tdfp
-    """
 
-    def test_import_dataframe(self):
-        tdfp = os.path.join(os.path.dirname(__file__), 'qiime_files/raw_data_to_import.csv')
-        tested_object = Qiime2Parser(tdfp)
-        expected_object = pd.DataFrame(
+    def setUp(self):
+        input_path = os.path.join(os.path.dirname(__file__), 'raw_qiime2.csv')
+        self.qiime2parser = Qiime2Parser(input_path, sep=',')
+
+    def test_to_dataframe(self):
+        """
+        Test based on input.tsv file
+        """
+        expected_df = pd.DataFrame(
             [
-                    ["D_0__Bacteria;D_1__Bacteroidetes;D_2__Bacteroidia;D_3__Bacteroidales", 0, 0, 0],
-                    ["D_0__Bacteria;D_1__Proteobacteria;D_2__Gammaproteobacteria;D_3__Betaproteobacteriales", 0, 0, 0],
+                ['Bacteria', 'Bacteroidetes', 'Bacteroidia', 'Bacteroidales', 'Tannerellaceae', 'Macellibacteroides', 0, 0, 0, 1],  # noqa
+                ['Bacteria', 'Proteobacteria', 'Gammaproteobacteria', 'Betaproteobacteriales', 'Chitinibacteraceae', 'Chitinibacteraceae (family)', 0, 2, 0, 0],  # noqa
+                ['Bacteria', 'Actinobacteria', 'Acidimicrobiia', 'Microtrichales', 'Microtrichaceae', 'Microtrichaceae (family)', 0, 0, 3, 0],  # noqa
+                ['Bacteria', 'Proteobacteria', 'Alphaproteobacteria', 'Caulobacterales', 'Hyphomonadaceae', 'Hyphomonadaceae (family)', 5, 0, 0, 0],  # noqa
             ],
-            columns=["OTU ID", "Sample 1", "Sample 2", 'Sample 3']
+            columns=[
+                'kingdom', 'phylum', 'class', 'order', 'family', 'genus',
+                'Sample 1', 'Sample 2', 'Sample 3', 'Sample 4'
+            ]
         )
-        pd.testing.assert_frame_equal(tested_object._import_dataframe(), expected_object)
-
-    def test_spliting_into_taxa_columns(self):
-        filepath = os.path.join(os.path.dirname(__file__), 'qiime_files/test_1_import_data.csv')
-        tdfp = pd.read_csv(filepath, squeeze=True)
-        tested_object = Qiime2Parser(filepath)
-        exdfp = [
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Bacteroidetes',	None, 'D', 2, "", 'Bacteroidia',
-             "D", 3, "", 'Bacteroidales', 'D', 4, "", 'Tannerellaceae', 'D', 5, "", 'Macellibacteroides'],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Proteobacteria',	None, 'D', 2, "", 'Gammaproteobacteria',
-             "D", 3, "", 'Betaproteobacteriales', 'D', 4, "", 'Chitinibacteraceae', 'D', 5, "", 'Deefgea'],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Actinobacteria',	None, 'D', 2, "", 'Acidimicrobiia',
-             "D", 3, "", 'Microtrichales', 'D', 4, "", 'Microtrichaceae', 'D', 5, "", None],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Deinococcus',	'Thermus', 'D', 2, "", 'Deinococci',
-             "D", 3, "", 'Deinococcales', 'D', 4, "", 'Deinococcaceae', 'D', 5, "", None],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Proteobacteria',	None, 'D', 2, "", 'Alphaproteobacteria',
-             "D", 3, "", 'Caulobacterales', 'D', 4, "", 'Hyphomonadaceae', "", "", "", None],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Patescibacteria',	None, 'D', 2, "", 'Saccharimonadia',
-             "D", 3, "", 'Saccharimonadales', 'D', 4, "", None, 'D', 5, "", None],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Proteobacteria',	None, 'D', 2, "", 'Alphaproteobacteria',
-             "D", 3, "", 'Rhodobacterales', 'D', 4, "", 'Rhodobacteraceae', 'D', 5, "", 'Cereibacter'],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Fibrobacteres',	None, 'D', 2, "", 'Fibrobacteria',
-             "D", 3, "", 'Fibrobacterales', 'D', 4, "", 'Fibrobacteraceae', 'D', 5, "", None],
-        ]
-        expected_object = pd.DataFrame(exdfp, columns=[0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 3,
-                                                       0, 1, 2, 3, 0, 1, 2, 3], dtype=str)
-        pd.testing.assert_frame_equal(tested_object.spliting_into_taxa_columns(tdfp), expected_object)
-
-    def test_naming_taxa_columns(self):
-        tdfp = [
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Bacteroidetes',	None, 'D', 2, "", 'Bacteroidia',
-             "D", 3, "", 'Bacteroidales', 'D', 4, "", 'Tannerellaceae', 'D', 5, "", 'Macellibacteroides'],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Proteobacteria',	None, 'D', 2, "", 'Gammaproteobacteria',
-             "D", 3, "", 'Betaproteobacteriales', 'D', 4, "", 'Chitinibacteraceae', 'D', 5, "", 'Deefgea'],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Actinobacteria',	None, 'D', 2, "", 'Acidimicrobiia',
-             "D", 3, "", 'Microtrichales', 'D', 4, "", 'Microtrichaceae', 'D', 5, "", None],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Deinococcus',	'Thermus', 'D', 2, "", 'Deinococci',
-             "D", 3, "", 'Deinococcales', 'D', 4, "", 'Deinococcaceae', 'D', 5, "", None],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Proteobacteria',	None, 'D', 2, "", 'Alphaproteobacteria',
-             "D", 3, "", 'Caulobacterales', 'D', 4, "", 'Hyphomonadaceae', "", "", "", None],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Patescibacteria',	None, 'D', 2, "", 'Saccharimonadia',
-             "D", 3, "", 'Saccharimonadales', 'D', 4, "", None, 'D', 5, "", None],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Proteobacteria',	None, 'D', 2, "", 'Alphaproteobacteria',
-             "D", 3, "", 'Rhodobacterales', 'D', 4, "", 'Rhodobacteraceae', 'D', 5, "", 'Cereibacter'],
-            ['D', 0, "", 'Bacteria', 'D', 1, "", 'Fibrobacteres',	None, 'D', 2, "", 'Fibrobacteria',
-             "D", 3, "", 'Fibrobacterales', 'D', 4, "", 'Fibrobacteraceae', 'D', 5, "", None],
-        ]
-        tdfp = pd.DataFrame(tdfp, columns=[0, 1, 2, 3, 0, 1, 2, 3, 4, 0, 1, 2, 3, 0, 1, 2, 3,
-                                           0, 1, 2, 3, 0, 1, 2, 3], dtype=str)
-        tested_object = Qiime2Parser(tdfp)
-        exdfp = os.path.join(os.path.dirname(__file__), 'qiime_files/test_3_taxa_data.csv')
-        expected_object = pd.read_csv(exdfp, dtype=str)
-        pd.testing.assert_frame_equal(tested_object.naming_taxa_columns(tdfp), expected_object)
-
-    def test_filling_missing_taxa_values(self):
-        filepath = os.path.join(os.path.dirname(__file__), 'qiime_files/test_3_taxa_data.csv')
-        tdfp = pd.read_csv(filepath, dtype=str)
-        tested_object = Qiime2Parser(filepath)
-        exdfp = os.path.join(os.path.dirname(__file__), 'qiime_files/test_4_taxa_df_completed.csv')
-        expected_object = pd.read_csv(exdfp, dtype=str)
-        pd.testing.assert_frame_equal(tested_object.filling_missing_taxa_values(tdfp), expected_object)
-
-    def test_standard_taxa_df(self):
-        tdfp = os.path.join(os.path.dirname(__file__), 'qiime_files/raw_data.csv')
-        tested_object = Qiime2Parser(tdfp)
-        exdfp = os.path.join(os.path.dirname(__file__), 'qiime_files/test_5_final_df_with_taxa.csv')
-        expected_object = pd.read_csv(exdfp, index_col=['kingdom', 'phylum', 'class', 'order', 'family', 'genus'])
-        pd.testing.assert_frame_equal(tested_object.dataframe, expected_object)
+        expected_df = expected_df.set_index(['kingdom', 'phylum', 'class', 'order', 'family', 'genus'])
+        pd.testing.assert_frame_equal(self.qiime2parser.dataframe, expected_df)

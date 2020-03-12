@@ -1,1 +1,2 @@
-from .geometric_mean_normalization import GeometricMeanNormalization  # noqa
+from .geometric_mean import GeometricMeanNormalization  # noqa
+from .total_counts import TotalCountsNormalization  # noqa
