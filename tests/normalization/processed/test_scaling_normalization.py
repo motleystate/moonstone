@@ -1,30 +1,28 @@
 import unittest
-import pandas as pd
+import numpy as np
 
 from moonstone.normalization.processed.scaling_normalization import StandardScaler
 
 
-class MyTestCase(unittest.TestCase):
+class TestStandardScaler(unittest.TestCase):
 
     def test_standard_scaler(self):
-        df = pd.DataFrame(
+        raw = np.array(
             [
                 [1., -1., 2.],
                 [2., 0., 0.],
                 [0., 1., -1]
-            ],
-            columns=['A', 'B', 'C']
+            ]
         )
-        df_expected = pd.DataFrame(
+        expected = np.array(
             [
                 [0., -1.224745, 1.336306],
                 [1.224745, 0., -0.267261],
                 [-1.224745, 1.224745, -1.069045],
-            ],
-            columns=['A', 'B', 'C']
+            ]
         )
-        scaler = StandardScaler(df).scale_x
-        pd.testing.assert_frame_equal(scaler, df_expected)
+        scaler = StandardScaler.scaler(raw)
+        np.array_equal(scaler, expected)
 
 
 if __name__ == '__main__':
