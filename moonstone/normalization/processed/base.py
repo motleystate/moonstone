@@ -11,7 +11,7 @@ class BaseScaling:
 
     @property
     def scale_x(self):
-        if getattr(self, "_scaled_df", None) is None:
+        if getattr(self, "_scaled_x", None) is None:
             self._scaled_x = self.scaler()
             self.x = self._scaled_x
         return self._scaled_x

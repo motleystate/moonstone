@@ -22,7 +22,7 @@ class StandardScaler(BaseScaling):
         if not isinstance(self.raw_x, np.ndarray):
             raise ValueError('A NumPy array is required for normalization. Got {}'.format(type(self.raw_x)))
 
-    def scaler(self) -> np.ndarray:
+    def scaler(self):
         """
         Takes a NumPy array of the independent variables, or features, as 'x' for ML training.
         """
