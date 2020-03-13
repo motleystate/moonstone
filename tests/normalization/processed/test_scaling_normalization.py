@@ -23,7 +23,3 @@ class TestStandardScaler(unittest.TestCase):
         )
         scaler = StandardScaler(raw).scale_x
         np.array_equal(scaler, expected)
-
-
-if __name__ == '__main__':
-    unittest.main()
