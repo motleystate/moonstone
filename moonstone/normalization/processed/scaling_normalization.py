@@ -2,13 +2,13 @@ import logging
 import numpy as np
 from sklearn import preprocessing
 
-from moonstone.normalization.processed.base import BaseScaling
+from moonstone.normalization.processed.base import BaseScaler
 from moonstone.analysis import stats
 
 logger = logging.getLogger(__name__)
 
 
-class StandardScaler(BaseScaling):
+class StandardScaler(BaseScaler):
     """
     ML algorithms such as SVM assume that all features are centered around zero and have
     similar variance. Scikit-learn module preprocessing.scale performs this normalization on a single array.
@@ -22,7 +22,7 @@ class StandardScaler(BaseScaling):
         if not isinstance(self.raw_x, np.ndarray):
             raise ValueError('A NumPy array is required for normalization. Got {}'.format(type(self.raw_x)))
 
-    def scaler(self):
+    def scale(self):
         """
         Takes a NumPy array of the independent variables, or features, as 'x' for ML training.
         """

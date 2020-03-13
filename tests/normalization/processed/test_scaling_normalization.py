@@ -21,5 +21,5 @@ class TestStandardScaler(unittest.TestCase):
                 [-1.224745, 1.224745, -1.069045],
             ]
         )
-        scaler = StandardScaler(raw).scale_x
-        np.array_equal(scaler, expected)
+        scaled_x = StandardScaler(raw).scaled_x
+        np.array_equal(scaled_x, expected)
