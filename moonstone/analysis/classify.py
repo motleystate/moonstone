@@ -7,9 +7,9 @@ from sklearn import preprocessing, svm
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.metrics import roc_curve, auc
 from sklearn.feature_selection import RFECV
-
 from moonstone.analysis import stats
 from moonstone.normalization.processed.scaling_normalization import StandardScaler
+from moonstone.utils.df_merge import MergeDF
 
 logger = logging.getLogger(__name__)
 
@@ -21,41 +21,20 @@ class ML(object):
         self.metadata = metadata
         self.outdir = outdir
 
-    def merge(self, variable):
-        logger.info('Merge function called to merge count data and metadata.')
-        logger.info(f'Variable {variable} from metadata file will be merged with counts.')
-        dc = self.countfile
-        dm = self.metadata
-
-        """The naming/numbering of samples is going to be variable.
-        Merging appear to be the best option to preserve sample designations
-        and combine count data with any metadata.
-        Pandas data frames requires indexes to be of the same type in order to correctly merge.
-
-        For the moment it appears that metadata samples, if they are numbered, result in a int64 index type.
-        Count data yields an 'object' type, even if samples are numbered.
-
-        Thus we will check for mismatched index type and try to correct"""
-        if not isinstance(dc.index, type(dm.index)):
-            logger.warning(f'Index types do not match: {type(dc.index)} and {type(dm.index)}.')
-            dc.set_index(np.int64(np.array(dc.index)), inplace=True)
-            logger.info(f' Indexes reset. Count Index={type(dc.index)}, Metadata Index={type(dm.index)}')
-
-        df = pd.merge(dm[variable], dc, left_index=True, right_index=True)
-        logger.info('Merge function completed. Returning merged data frame.')
-        return df  # returned to analyze function as 'df_final'
-
     def svm(self, variable=""):
         logger.info(f'Starting SVM analysis with variable: {variable}')
 
-        df_final = ML.merge(self, variable)
+        # Collect metadata and count data in a single DataFrame
+        merger = MergeDF(self.countfile, self.metadata, variable)
+        df_final = merger.merged_df
 
         # Setup the features and labels
         x = np.array(df_final.drop([variable], axis=1).astype(float))
-
-        x_scaled = StandardScaler(x).scaler()
-
         y = np.array(df_final[variable])
+
+        # Scale the Features
+        scaler = StandardScaler(x)
+        x_scaled = scaler.scaled_x
 
         # My variable counter
         stats.count_items(y)
@@ -71,7 +50,8 @@ class ML(object):
 
     def roc_analysis(self, variable=""):
         logger.info(f'Starting ROC analysis with variable: {variable}')
-        df_final = ML.merge(self, variable)  # Pandas df with one clinical column and all count data
+        merger = MergeDF(self.countfile, self.metadata, variable)
+        df_final = merger.merged_df
 
         x = np.array(df_final.drop([variable], axis=1).astype(float))
         x = preprocessing.maxabs_scale(x)
@@ -138,7 +118,8 @@ class ML(object):
 
     def feature_analysis(self, variable=""):
         logger.info(f'Running SVM feature importance analysis with variable: {variable}')
-        df_final = ML.merge(self, variable)
+        merger = MergeDF(self.countfile, self.metadata, variable)
+        df_final = merger.merged_df
         logger.info('Feature Analysis successfully collected merged database.')
 
         # Setup the data
