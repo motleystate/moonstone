@@ -43,7 +43,7 @@ class GeometricMeanNormalization(BaseNormalization):
         removed_nb_rows = non_zero_dataf.shape[0]
         logger.info("%s/%s rows dropped", total_nb_rows - removed_nb_rows, total_nb_rows)
         if removed_nb_rows / total_nb_rows <= 0.5:
-            logger.warning("It represents %s %% of the rows",
+            logger.warning("Zero-filtering has removed %s %% of items!",
                            (total_nb_rows - removed_nb_rows) / total_nb_rows*100)
         self._removed_zero_df = df[~df.index.isin(non_zero_dataf.index)]
         return non_zero_dataf
@@ -77,7 +77,14 @@ class GeometricMeanNormalization(BaseNormalization):
         if getattr(self, "_scaling_factors", None) is None:
             non_zero_log_df = self.remove_zero_and_apply_log(self.grouped_df)
             substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
-            scaling_factors = substracted_mean_df.rpow(self.log_number).replace(np.nan, 0).median()
+            while substracted_mean_df.rpow(self.log_number).median().isna().any():
+                logging.warning('Zero filtering of %i is too strict to compute scaling factors, trying %i' %
+                                (self.zero_threshold, self.zero_threshold - 5))
+                self.zero_threshold = self.zero_threshold - 5
+                non_zero_log_df = self.remove_zero_and_apply_log(self.grouped_df)
+                substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
+
+            scaling_factors = substracted_mean_df.rpow(self.log_number).median()
             setattr(self, "_scaling_factors", scaling_factors)
         return self._scaling_factors
 
