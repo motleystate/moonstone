@@ -77,6 +77,13 @@ class GeometricMeanNormalization(BaseNormalization):
         if getattr(self, "_scaling_factors", None) is None:
             non_zero_log_df = self.remove_zero_and_apply_log(self.grouped_df)
             substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
+            while substracted_mean_df.rpow(self.log_number).median().isna().any():
+                logging.warning('Zero filtering of %i is too strict to compute scaling factors, trying %i' %
+                                (self.zero_threshold, self.zero_threshold - 5))
+                self.zero_threshold = self.zero_threshold - 5
+                non_zero_log_df = self.remove_zero_and_apply_log(self.grouped_df)
+                substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
+
             scaling_factors = substracted_mean_df.rpow(self.log_number).median()
             setattr(self, "_scaling_factors", scaling_factors)
         return self._scaling_factors
