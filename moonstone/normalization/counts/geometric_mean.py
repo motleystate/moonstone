@@ -43,7 +43,7 @@ class GeometricMeanNormalization(BaseNormalization):
         removed_nb_rows = non_zero_dataf.shape[0]
         logger.info("%s/%s rows dropped", total_nb_rows - removed_nb_rows, total_nb_rows)
         if removed_nb_rows / total_nb_rows <= 0.5:
-            logger.warning("It represents %s %% of the rows",
+            logger.warning("Zero-filtering has removed %s %% of items!",
                            (total_nb_rows - removed_nb_rows) / total_nb_rows*100)
         self._removed_zero_df = df[~df.index.isin(non_zero_dataf.index)]
         return non_zero_dataf

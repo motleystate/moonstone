@@ -185,7 +185,7 @@ class TestGeometricMeanNormalization(TestCase):
         ind = ["Gen_1", 'Gen_2', "Gen_3", 'Gen_4']
         more_zero_example = pd.DataFrame(data, columns=column_names, index=ind)
         tested_object = GeometricMeanNormalization(more_zero_example, zero_threshold=70)
-        data = [3.648263, 0.371980, 0.686732, 0.458165]
+        data = [3.648263, 0.588685, 0.686732, 0.458165]
         ind = ['Sample_1', 'Sample_2', 'Sample_3', 'Sample_4']
         expected_result = pd.Series(data, index=ind)
         pd.testing.assert_series_equal(tested_object.scaling_factors, expected_result)
