@@ -5,7 +5,19 @@
 
 This repository aims to gather different scripts and items to help performing data analysis from metagenomics data.
 
-## Install
+It also contains work for the `moonstone` library that will be moved to github in the future. This library aims to provide a way of performing analysis of metagenomics counts from raw data to statistical analysis.
+
+Thus, in moonstone you will find:
+
+* parsers for common file types for metagenomics counts
+* modules for cleaning and filtering
+* normalization modules
+* analysis modules
+* visualization modules
+
+The idea is to keep track of every steps applied to a raw data to be able to easily share the analysis and reproduce it.
+
+## Install moonstone
 
 Set up a Python 3 virtual env, for instance:
 
@@ -60,7 +72,7 @@ optional arguments:
 
 ## Development guide
 
-To work a a new feature, related or not to an issue, we open a new branch from the development (currently `master`) branch to work on it.
+To work on a new feature, related or not to an issue, we open a new branch from the development (currently `master`) branch to work on it.
 
 > *If an issue is opened, we recommend to name your branch with the issue number at the begining, e.g. 5-my-new-feature*
 
@@ -72,4 +84,4 @@ Once done, work is reviewed through a merge request to keep developers up to dat
 
 * Sean Kennedy
 * Kenzo-Hugo Hillion
-* Mariela FURSTENHEIM
+* Mariela Furstenheim
