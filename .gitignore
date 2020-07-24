@@ -3,6 +3,7 @@
 __pycache__/
 **.egg-info/
 output/
+*.pyc
 
 # Vscode
 .vscode
@@ -15,3 +16,7 @@ output
 
 # Mac files
 .DS_Store
+
+
+# virtual environment
+.env*/

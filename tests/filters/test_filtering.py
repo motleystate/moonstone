@@ -140,3 +140,43 @@ class TestFiltering(TestCase):
         expected_object.columns.name = 'sample'
         pd.testing.assert_frame_equal(tested_object_instance.deleting_only_zeros_rows(tested_object),
                                       expected_object)
+
+    def test_compute_threshold_best_n_percent(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'specie_1': [10, 0, 0, 2],
+                'specie_2': [25, 6, 3, 9],
+                'specie_3': [9, 7, 8, 3],
+                'specie_4': [3, 2, 1, 0],
+                'specie_5': [8, 3, 0, 1],
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        tested_object.columns.name = 'sample'
+        tested_object_instance = Filtering(tested_object)
+        expected_object = float(2.9)
+        self.assertEqual(tested_object_instance.compute_threshold_best_n_percent(),
+                         expected_object)
+
+    def test_keep_data(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'specie_1': [10, 0, 0, 2],
+                'specie_2': [25, 6, 3, 9],
+                'specie_3': [9, 7, 8, 3],
+                'specie_4': [3, 2, 1, 0],
+                'specie_5': [8, 3, 0, 1],
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        tested_object.columns.name = 'sample'
+        tested_object_instance = Filtering(tested_object)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'specie_1': [10, 0, 0, 2],
+                'specie_2': [25, 6, 3, 9],
+                'specie_3': [9, 7, 8, 3],
+                'specie_5': [8, 3, 0, 1],
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        expected_object.columns.name = 'sample'
+        pd.testing.assert_frame_equal(tested_object_instance.keep_data(),
+                                      expected_object)
