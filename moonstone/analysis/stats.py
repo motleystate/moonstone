@@ -58,6 +58,24 @@ class Descriptive(object):
         # plt.show()
 
 
+class FilteringStats(object):
+    def __init__(self, df):
+        self.logger = module_logger
+        self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
+        self.df = df
+
+    def by_mean(self):
+        """Compute number of remaining items and reads for different thresholds"""
+        items_dict = {}  # key = filtering value, value = # of remaining items
+        reads_dict = {}
+        counts_df_mean = pd.concat([self.df.sum(axis=1), self.df.mean(axis=1)], axis=1)
+        for x in np.arange(.1, 10, .1):  # This fits the current project but need to be generalized.
+            counts_df_mean.drop(counts_df_mean[counts_df_mean[1] < x].index, inplace=True)
+            items_dict[x] = counts_df_mean.shape[0]
+            reads_dict[x] = counts_df_mean[0].sum()
+        return items_dict, reads_dict
+
+
 """Count data from metagenomic experiments is usually space.
 Definitions can vary, but generally >50% zeros who indicate a sparse matrix.
 Normalization / Standardization before running algorithms usually results is improved performance and, indeed,
