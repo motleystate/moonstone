@@ -5,3 +5,9 @@
 
 Welcome to moonstone's documentation!
 =====================================
+
+.. toctree::
+    :caption: User guide
+    :maxdepth: 2
+
+    user_guide/installation
