@@ -17,6 +17,9 @@
 
 # -- Project information -----------------------------------------------------
 
+# The master toctree document.
+master_doc = 'index'
+
 project = 'moonstone'
 copyright = '2020, Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy'
 author = 'Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy'
