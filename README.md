@@ -1,6 +1,7 @@
 # Moonstone
 
 ![Python package](https://github.com/motleystate/moonstone/workflows/Python%20package/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/moonstone/badge/?version=latest)](https://moonstone.readthedocs.io/en/latest/?badge=latest)
 
 This repository aims to gather different scripts and items to help performing data analysis from metagenomics data.
 

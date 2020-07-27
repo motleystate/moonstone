@@ -20,3 +20,6 @@ output
 
 # virtual environment
 .env*/
+
+# readthedocs
+_build/
