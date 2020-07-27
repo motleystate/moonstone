@@ -1,7 +1,6 @@
-# Metagenomics Data Analysis
+# Moonstone
 
-[![pipeline status](https://gitlab.pasteur.fr/metagenomics/data-analysis/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/metagenomics/data-analysis/commits/master)
-[![coverage report](https://gitlab.pasteur.fr/metagenomics/data-analysis/badges/master/coverage.svg)](https://gitlab.pasteur.fr/metagenomics/data-analysis/commits/master)
+![Python package](https://github.com/motleystate/moonstone/workflows/Python%20package/badge.svg)
 
 This repository aims to gather different scripts and items to help performing data analysis from metagenomics data.
 
@@ -77,11 +76,3 @@ To work on a new feature, related or not to an issue, we open a new branch from 
 > *If an issue is opened, we recommend to name your branch with the issue number at the begining, e.g. 5-my-new-feature*
 
 Once done, work is reviewed through a merge request to keep developers up to date on the development of moonstone.
-
---------
-
-## Contributors
-
-* Sean Kennedy
-* Kenzo-Hugo Hillion
-* Mariela Furstenheim

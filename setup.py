@@ -1,10 +1,12 @@
 from setuptools import setup, find_packages
 
+exec(open('moonstone/version.py').read())
+
 setup(
     name="moonstone",
-    version="0.0.1",
+    version=__version__,  # noqa
     description='Utilities for metagenomics data analysis using machine learning.',
-    author='Kenzo-Hugo Hillion, Sean Kennedy',
+    author='Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy',
     author_email='kehillio@pasteur.fr',
     install_requires=[
         'pandas==1.0.1',
