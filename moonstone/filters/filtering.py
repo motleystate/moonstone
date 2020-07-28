@@ -1,14 +1,17 @@
+import logging
+
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
 from moonstone.analysis.stats import (
     FilteringStats
 )
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-import logging
+from moonstone.core.module_base import ModuleBase
 
 logger = logging.getLogger(__name__)
 
 
-class Filtering:
+class Filtering(ModuleBase):
     """
     This class can be used to filter out the data where:
      - Some samples are not included in the metadata.
