@@ -44,14 +44,14 @@ Clone the repository and install moonstone with the following commands:
 
 .. Note::
     Installing moonstone will install the following dependencies :
-        - pandas==1.0.1
-        - scikit-learn==0.21.3
+        - pandas (==1.0.1)
+        - scikit-learn (==0.21.3)
         - matplotlib
         - plotly
         - statsmodels
         - python-slugify
         - pyaml
-        - numpy==1.18.1
+        - numpy (==1.18.1)
 
 Uninstallation procedure
 =========================

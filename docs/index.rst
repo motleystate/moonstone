@@ -11,3 +11,13 @@ Welcome to moonstone's documentation!
     :maxdepth: 2
 
     user_guide/installation
+    user_guide/get_started_with_moonstone
+
+
+.. toctree::
+    :caption: Changelogs
+    :maxdepth: 1
+
+    changelogs
+
+
