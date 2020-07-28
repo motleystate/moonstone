@@ -9,6 +9,7 @@ output/
 .vscode
 .idea
 
+coverage.xml
 .coverage
 
 # Default output directory from moonstone
@@ -16,7 +17,6 @@ output
 
 # Mac files
 .DS_Store
-
 
 # virtual environment
 .env*/
