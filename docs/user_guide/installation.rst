@@ -3,9 +3,9 @@ Installation
 ************
 
 Pre-requisites
-============
+==============
 
-moonstone works with version of Python 3.6 and 3.7
+moonstone currently works with version of Python 3.6 and 3.7.
 
 .. Note::
     We highly recommend the use of a virtual environment such as `virtualenv`_, `pyenv`_ or `conda`_.

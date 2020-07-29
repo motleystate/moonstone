@@ -3,15 +3,28 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to moonstone's documentation!
+Welcome to Moonstone's documentation!
 =====================================
+
+.. toctree::
+    :caption: Moonstone
+    :maxdepth: 1
+
+    why_moonstone
 
 .. toctree::
     :caption: User guide
     :maxdepth: 2
 
     user_guide/installation
-    user_guide/get_started_with_moonstone
+    user_guide/getting_started_with_moonstone
+
+
+.. toctree::
+    :caption: Contribution guide
+    :maxdepth: 1
+
+    contribution_guide/contributing
 
 
 .. toctree::
