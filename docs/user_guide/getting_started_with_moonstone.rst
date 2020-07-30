@@ -42,6 +42,22 @@ different sources and format them in a homogeneous configuration using pandas da
 .. image:: /img/countparser.png
   :alt: Countparser example
 
+How does it work?
+'''''''''''''''''
+
+The parsers are made in a way you do not have to care about the different options for parsing with `pandas.read_csv`:
+
+.. code-block:: python
+
+    from moonstone.parsers import YourFavoriteParser
+
+    parser = YourFavoriteParser("/path/to/your/favorite/file.csv")
+    df = parser.dataframe
+
+.. Note::
+    Every parsers work more or less in the same way, by accessing the parsed result through the ``dataframe``
+    property of your Parsers instance.
+
 What format Moonstone can handle?
 '''''''''''''''''''''''''''''''''
 
