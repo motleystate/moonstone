@@ -1,11 +1,9 @@
 import logging
 
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-
 from moonstone.analysis.stats import (
     FilteringStats
 )
+from moonstone.filters.filteringplot import FilteringPlot
 from moonstone.core.module_base import ModuleBase
 
 logger = logging.getLogger(__name__)
@@ -53,41 +51,6 @@ class Filtering(ModuleBase):
         self.steps.append('deleting_only_zeros_rows')
         return df[df.sum(axis=1) != 0.0]
 
-    def plot_threshold_vs_remaining_data(self, items_dict, reads_dict, threshold,
-                                         items_name='items'):
-        '''  The x and y set below are are are either integers or floats.
-        Be aware that some opperation will require an np.array  '''
-        x_items = list(items_dict.keys())  # get x values for plotting
-        x_reads = list(reads_dict.keys())
-        y_items = list(items_dict.values())  # get y values for plotting
-        y_reads = list(reads_dict.values())
-        '''  The figure visualizing the data and the filtering.  '''
-        fig = make_subplots(specs=[[{"secondary_y": True}]])  # To set a second y-axis.
-        fig.add_trace(
-            go.Scatter(x=x_items, y=y_items, name="Retained Items: left axis"),
-            secondary_y=False,
-        )
-        fig.add_trace(
-            go.Scatter(x=x_reads, y=y_reads, name="Retained Reads: right axis"),
-            secondary_y=True,
-        )
-        fig.add_trace(
-            go.Scatter(x=[threshold, threshold], y=[0, self.raw_reads_number], name="90% Reads Threshold"),
-            secondary_y=True,
-        )
-        # Add figure title
-        fig.update_layout(
-            title_text="Number of %s and reads in function of the threshold value" % items_name,
-            title_x=0.5
-        )
-        # Set x-axis title
-        fig.update_xaxes(title_text="threshold value")
-        # Set y-axes titles
-        fig.update_yaxes(title_text="number of %s" % items_name, secondary_y=False)
-        fig.update_yaxes(title_text="number of reads", secondary_y=True)
-        fig.show()
-        return -1
-
     def compute_threshold_best_n_percent(self, percentage_to_keep=0.9, plot=False):
         FS_instance = FilteringStats(self.counts_df)
         items_dict, reads_dict = FilteringStats.by_mean(FS_instance)
@@ -100,17 +63,16 @@ class Filtering(ModuleBase):
         logger.info('Filtering threshold set to %.2f.' % threshold)
         logger.info('Retaining %.1f%% of the data results in %i retained reads.'
                     % (percentage_to_keep * 100, reads))
-        if plot:
-            Filtering.plot_threshold_vs_remaining_data(self, items_dict, reads_dict, threshold)
-        return threshold
+        self.mean_read_threshold = threshold
 
     def keep_data(self, percentage_to_keep=0.9, mean_reads_threshold=False):
         self.steps.append('keeping_data')
         if not mean_reads_threshold:
-            mean_reads_threshold = Filtering.compute_threshold_best_n_percent(
+            Filtering.compute_threshold_best_n_percent(
                 self, percentage_to_keep
             )
         else:
+            self.mean_reads_threshold = mean_reads_threshold
             logger.info('Filtering threshold set to %.2f.' % mean_reads_threshold)
         self.counts_df.drop(self.counts_df[self.counts_df.mean(axis=1) < mean_reads_threshold].index, inplace=True)
         remaining_items = self.counts_df.shape[0]
@@ -120,3 +82,6 @@ class Filtering(ModuleBase):
         logger.info('Retained %.2f%% of items and %.2f%% of reads' % (remaining_items / self.raw_items_number * 100,
                                                                       remaining_reads / self.raw_reads_number * 100))
         return self.counts_df
+
+    def visualize(self, items_dict, reads_dict, write_file=False):
+        FilteringPlot.threshold_vs_remaining_data(self, items_dict, reads_dict, self.mean_reads_threshold)
