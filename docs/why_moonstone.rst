@@ -11,7 +11,8 @@ for statistical analysis and visualization.
 .. _Qiime2: https://qiime2.org/
 .. _Kraken: https://ccb.jhu.edu/software/kraken/
 
-The main motivation is to provide modules to help handling the different part of an analysis of metagenomics counts.
+The main motivation is to provide modules to help handling the different part of your analysis and offer a way
+to easily share and reproduce it.
 
 .. Note::
-    Each module is tested and thefore guarantee to perform what it is designed for.
+    Each module is tested and is thefore guaranted to perform what it is designed for.

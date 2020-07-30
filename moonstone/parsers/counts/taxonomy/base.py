@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 import pandas as pd
 
@@ -11,10 +13,12 @@ class TaxonomyCountsBaseParser(BaseParser):
     ]
     taxa_column = 'OTU ID'
 
-    def _fill_none(self, taxa_df):
+    def _fill_none(self, taxa_df: pd.DataFrame) -> pd.DataFrame:
         """
-        This function serves to obtain a data frame that fills the None values with the last valid value and
-        the category where it belonged to. E.g:
+        This method is used to obtain a dataframe that fills the None values with the last valid value and
+        the category where it belonged to.
+
+        e.g:
 
         Before:
         column names     kingdom  phylum            family         genus
@@ -29,9 +33,9 @@ class TaxonomyCountsBaseParser(BaseParser):
         taxa_df_filled_none = taxa_df.combine_first(taxa_df_with_rank_filled_none)
         return taxa_df_filled_none
 
-    def _merge_genus_species(self, taxa_df):
+    def _merge_genus_species(self, taxa_df: pd.DataFrame) -> pd.DataFrame:
 
-        def join_genus_species(genus_and_species):
+        def join_genus_species(genus_and_species: List):
             """
             :param genus_and_species: list of 2 items
             """
@@ -45,11 +49,10 @@ class TaxonomyCountsBaseParser(BaseParser):
         taxa_df['species'] = taxa_df[['genus', 'species']].apply(lambda x: join_genus_species(x), axis=1)
         return taxa_df
 
-    def split_taxa_fill_none(self, df, sep=";",  taxo_prefix="__", merge_genus_species=False,
-                             terms_to_remove=None):
+    def split_taxa_fill_none(self, df: pd.DataFrame, sep: str = ";",  taxo_prefix: str = "__",
+                             merge_genus_species: bool = False, terms_to_remove: List = None) -> pd.DataFrame:
         """
         :param terms_to_remove: if specified, list of term to remove from taxa names (e.g. uncultured)
-        :type terms_to_remove: LIST
         """
 
         def remove_taxo_prefix(string):

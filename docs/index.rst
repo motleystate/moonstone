@@ -28,6 +28,13 @@ Welcome to Moonstone's documentation!
 
 
 .. toctree::
+    :caption: API Documentation
+    :maxdepth: 3
+
+    api_docs/parsers
+
+
+.. toctree::
     :caption: Changelogs
     :maxdepth: 1
 
