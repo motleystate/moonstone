@@ -1,1 +1,5 @@
-from .filtering import Filtering  # noqa
+from .filtering import (  # noqa
+    Filtering,
+    FilteringBase,
+    MeanFiltering
+)

@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 
 from moonstone.filters.filtering import (
-    Filtering
+    Filtering,
+    MeanFiltering
 )
 
 
@@ -152,12 +153,12 @@ class TestFiltering(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         tested_object.columns.name = 'sample'
-        tested_object_instance = Filtering(tested_object)
+        tested_object_instance = MeanFiltering(tested_object)
         expected_object = float(2.9)
         self.assertEqual(tested_object_instance.compute_threshold_best_n_percent(),
                          expected_object)
 
-    def test_keep_data(self):
+    def test_filter(self):
         tested_object = pd.DataFrame.from_dict(
             {
                 'specie_1': [10, 0, 0, 2],
@@ -168,7 +169,7 @@ class TestFiltering(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         tested_object.columns.name = 'sample'
-        tested_object_instance = Filtering(tested_object)
+        tested_object_instance = MeanFiltering(tested_object)
         expected_object = pd.DataFrame.from_dict(
             {
                 'specie_1': [10, 0, 0, 2],
@@ -178,5 +179,5 @@ class TestFiltering(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         expected_object.columns.name = 'sample'
-        pd.testing.assert_frame_equal(tested_object_instance.keep_data(),
+        pd.testing.assert_frame_equal(tested_object_instance.filter(),
                                       expected_object)
