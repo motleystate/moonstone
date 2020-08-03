@@ -1,12 +1,16 @@
 import pandas as pd
 
 
-class BaseParser(object):
+class BaseParser:
 
-    def __init__(self, file_path, sep='\t', no_header=False, parsing_options=None):
+    def __init__(self, file_path: str, sep: str = '\t', no_header: bool = False, parsing_options: dict = None):
         """
-        :param parsing_options: Extra parsing options for `read_csv` method, see pandas documentation
-        :type parsing_options: DICT
+        :param file_path: path of the input file to be parsed
+        :param sep: delimiter to use (same behaviour as ``read_csv`` from pandas_)
+        :param no_header: set to True if table has no header
+        :param parsing_options: Extra parsing options for ``read_csv`` method, (see pandas_ documentation)
+
+        .. _pandas: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html
         """
         self.file_path = file_path
         self.sep = sep
@@ -18,10 +22,16 @@ class BaseParser(object):
             self.parsing_options = {}
 
     @property
-    def dataframe(self):
+    def dataframe(self) -> pd.DataFrame:
+        """
+        retrieve the pandas dataframe constructed from the input file
+        """
         if getattr(self, '_dataframe', None) is None:
             self._dataframe = self.to_dataframe()
         return self._dataframe
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> pd.DataFrame:
+        """
+        method that handles the loading and parsing of your file into a pandas dataframe
+        """
         return pd.read_csv(self.file_path, sep=self.sep, header=self.header, **self.parsing_options)
