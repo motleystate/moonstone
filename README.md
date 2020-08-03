@@ -4,19 +4,19 @@
 [![Documentation Status](https://readthedocs.org/projects/moonstone/badge/?version=latest)](https://moonstone.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/motleystate/moonstone/branch/master/graph/badge.svg)](https://codecov.io/gh/motleystate/moonstone)
 
-This repository aims to gather different scripts and items to help performing data analysis from metagenomics data.
-
-It also contains work for the `moonstone` library that will be moved to github in the future. This library aims to provide a way of performing analysis of metagenomics counts from raw data to statistical analysis.
+Moonstone aims to provide a way of performing analysis of metagenomics counts from raw data to statistical analysis and visualization of the results.
 
 Thus, in moonstone you will find:
 
 * parsers for common file types for metagenomics counts
-* modules for cleaning and filtering
+* modules for cleaning and filtering your data
 * normalization modules
 * analysis modules
 * visualization modules
 
-The idea is to keep track of every steps applied to a raw data to be able to easily share the analysis and reproduce it.
+The main idea is to keep track of every steps applied to a raw data to be able to easily share the analysis and reproduce it.
+
+Please check our [documentation](https://moonstone.readthedocs.io/en/latest/?badge=latest) for more information.
 
 ## Install moonstone
 
@@ -28,23 +28,21 @@ source moonstone/bin/activate
 (moonstone) $
 ```
 
-Then simply clone and install the library:
+Then simply install the last published version of moonstone:
 
 ```bash
-(moonstone) $ git clone https://gitlab.pasteur.fr/metagenomics/data-analysis.git
-(moonstone) $ cd data-analysis
-(moonstone) $ pip install .  # you can use -e option to make an editable install
+(moonstone) $ pip install moonstone
 ```
 
 You can also install dependencies required for development : `pip install -r requirements-dev.txt`.
 
 --------
 
-## Quickstart with moonstone
+## Quickstart with moonstone on the command-line
 
-More detailed documentation is available on the [wiki](https://gitlab.pasteur.fr/metagenomics/data-analysis/-/wikis/Home).
+More detailed documentation is available on the [documentation](https://moonstone.readthedocs.io/en/latest/?badge=latest).
 
-Moonstone is directly callable from your terminal:
+Moonstone is directly callable from your terminal for available built-in analysis scripts:
 
 ```bash
 (moonstone) $ moonstone --help
@@ -77,4 +75,4 @@ To work on a new feature, related or not to an issue, we open a new branch from 
 
 > *If an issue is opened, we recommend to name your branch with the issue number at the begining, e.g. 5-my-new-feature*
 
-Once done, work is reviewed through a merge request to keep developers up to date on the development of moonstone.
+Once done, work is reviewed through a pull request.

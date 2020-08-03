@@ -21,8 +21,8 @@
 master_doc = 'index'
 
 project = 'moonstone'
-copyright = '2020, Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy'
-author = 'Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy'
+copyright = u'2020, Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy'
+author = u'Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy'
 
 
 # -- General configuration ---------------------------------------------------
@@ -31,6 +31,8 @@ author = 'Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx_autodoc_typehints',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

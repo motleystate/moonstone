@@ -1,3 +1,5 @@
+from pandas import DataFrame
+
 from moonstone.parsers.counts.taxonomy.base import TaxonomyCountsBaseParser
 
 
@@ -12,7 +14,7 @@ class SunbeamKraken2Parser(TaxonomyCountsBaseParser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, parsing_options={'skiprows': 1}, **kwargs)
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> DataFrame:
         df = super().to_dataframe()
         # Rename first column to NCBI_taxonomy_ID
         df.columns = [self.new_otu_id_name] + list(df.columns[1:])
