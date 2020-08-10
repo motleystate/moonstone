@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class ModuleBase:
+class BaseModule:
 
     def visualize(self, write_file=False):
         """

@@ -1,5 +1,6 @@
 from .filtering import (  # noqa
     Filtering,
-    FilteringBase,
+)
+from .filtering_by_mean import (  # noqa
     MeanFiltering
 )
