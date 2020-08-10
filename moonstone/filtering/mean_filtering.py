@@ -116,6 +116,5 @@ class MeanFiltering(BaseFiltering):
             pass
         return {
             "title": "Filtering by mean",
-            # "text": "Some text about the module"
             "data": data_dic
         }

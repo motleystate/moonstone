@@ -6,7 +6,7 @@ import numpy as np
 from moonstone.filtering.filtering import (
     Filtering,
 )
-from moonstone.filtering.filtering_by_mean import (
+from moonstone.filtering.mean_filtering import (
     MeanFiltering
 )
 

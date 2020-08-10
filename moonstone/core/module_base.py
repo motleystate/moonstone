@@ -14,12 +14,15 @@ class BaseModule:
 
     def generate_report_data(self):
         """
-        Overload this method to perform normalization in child classes
+        Overload this method to perform data reporting in child classes
         """
         logger.warning("No report data available for this module, please overload.")
         return {
             "title": "Report title",
-            "text": "Some text about the module"
+            "data": {
+                "var1": "parameters and/or",
+                "var2": "results in numbers"
+            }
         }
 
     @property
