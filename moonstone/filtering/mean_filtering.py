@@ -22,27 +22,27 @@ class MeanFiltering(BaseFiltering):
     """
     def __init__(self, dataframe, threshold: float = None, percentage_to_keep: Optional[float] = 90):
         """
-        :param threshold: mean read count threshold, when not specified the threshold 
+        :param threshold: mean read count threshold, when not specified the threshold
                           is therefore computed based on percentage_to_keep
         :param percentage_to_keep: percentage of read you wish to keep, between 0 and 100,
                                    overridden if threshold is set
         """
         super().__init__(dataframe)
         self.threshold = threshold
-        if not threshold:
+        if threshold is None:
             self.percentage_to_keep = percentage_to_keep
 
     def compute_threshold_best_n_percent(self) -> float:
         """
         method that computes a threshold based on the percentage of read to keep.
         This method is called in the method filter() when no threshold is given
-        """        
+        """
         FS_instance = FilteringStats(self.df)
         self._items_dict, self._reads_dict = FilteringStats.by_mean(FS_instance)
         reads_dict_sort = sorted(self._reads_dict.items(), key=lambda x: x[0])  # Sorting by threshold equate to reverse
         #                                                                        sorting by value but a little quicker
-        for i in reads_dict_sort:
-            if (i[1] / self.raw_reads_number) * 100 > self.percentage_to_keep:  # i[0]:threshold; i[1]:remaining number of reads
+        for i in reads_dict_sort:                                       # i[0]:threshold; i[1]:remaining number of reads
+            if (i[1] / self.raw_reads_number) * 100 > self.percentage_to_keep:
                 threshold = float('%.1f' % i[0])
                 reads = int(i[1])
         logger.info('Computing filtering mean read count threshold...')
@@ -54,7 +54,7 @@ class MeanFiltering(BaseFiltering):
 
     def filter(self) -> pd.DataFrame:
         self.steps.append('filtering_by_mean')
-        if not self.threshold:
+        if self.threshold is None:
             self.compute_threshold_best_n_percent()
         logger.info('Filtering with threshold set to %.2f...' % self.threshold)
         filtered_df = self.df
@@ -115,8 +115,8 @@ class MeanFiltering(BaseFiltering):
         try:
             self._items_dict
         except AttributeError:
-            FS_instance = FilteringStats(self.df)
-            self._items_dict, self._reads_dict = FilteringStats.by_mean(FS_instance)
+            fs_instance = FilteringStats(self.df)
+            self._items_dict, self._reads_dict = FilteringStats.by_mean(fs_instance)
         self.plot_threshold_vs_remaining_data(html_output_file)
 
     def generate_report_data(self) -> dict:
@@ -129,11 +129,8 @@ class MeanFiltering(BaseFiltering):
             "n_items_removed": self.raw_items_number-self.remaining_items_number,
             "n_reads_removed": self.raw_reads_number-self.remaining_reads_number
             }
-        try:
-            self.percentage_to_keep
+        if getattr(self, 'percentage_to_keep', None) is not None:
             data_dic['percentage_to_keep'] = self.percentage_to_keep
-        except AttributeError:
-            pass
         return {
             "title": "Filtering by mean",
             "data": data_dic
