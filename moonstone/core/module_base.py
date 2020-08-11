@@ -12,7 +12,7 @@ class BaseModule:
         logger.warning("No visualization available for this module, please overload.")
         pass
 
-    def generate_report_data(self):
+    def generate_report_data(self) -> dict:
         """
         Overload this method to perform data reporting in child classes
         """
@@ -26,7 +26,7 @@ class BaseModule:
         }
 
     @property
-    def report_data(self):
+    def report_data(self) -> dict:
         if getattr(self, "_report_data", None) is None:
             self._report_data = self.generate_report_data()
         return self._report_data
