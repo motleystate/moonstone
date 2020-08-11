@@ -195,13 +195,30 @@ class TestFiltering(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         tested_object.columns.name = 'sample'
-        tested_object_instance = MeanFiltering(tested_object, 3.6)
+        tested_object_instance = MeanFiltering(tested_object, threshold=3.6)
         expected_object = pd.DataFrame.from_dict(
             {
                 'specie_2': [25, 6, 3, 9],
                 'specie_3': [9, 7, 8, 3],
             },
             orient='index', columns=['1', '2', '3', '4'])
+        expected_object.columns.name = 'sample'
+        pd.testing.assert_frame_equal(tested_object_instance.filter(),
+                                      expected_object)
+
+    def test_filter_threshold_zero(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'specie_1': [10, 0, 0, 2],
+                'specie_2': [25, 6, 3, 9],
+                'specie_3': [9, 7, 8, 3],
+                'specie_4': [3, 2, 1, 0],
+                'specie_5': [8, 3, 0, 1],
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        tested_object.columns.name = 'sample'
+        tested_object_instance = MeanFiltering(tested_object, threshold=0)
+        expected_object = tested_object.copy()
         expected_object.columns.name = 'sample'
         pd.testing.assert_frame_equal(tested_object_instance.filter(),
                                       expected_object)
