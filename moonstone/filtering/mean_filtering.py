@@ -53,7 +53,6 @@ class MeanFiltering(BaseFiltering):
         return threshold
 
     def filter(self) -> pd.DataFrame:
-        self.steps.append('filtering_by_mean')
         if self.threshold is None:
             self.compute_threshold_best_n_percent()
         logger.info('Filtering with threshold set to %.2f...' % self.threshold)
@@ -112,9 +111,7 @@ class MeanFiltering(BaseFiltering):
 
         :param html_output_file: name of the html output file, default set to False
         """
-        try:
-            self._items_dict
-        except AttributeError:
+        if getattr(self, '_items_dict', None) is None:
             fs_instance = FilteringStats(self.df)
             self._items_dict, self._reads_dict = FilteringStats.by_mean(fs_instance)
         self.plot_threshold_vs_remaining_data(html_output_file)

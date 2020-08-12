@@ -10,7 +10,6 @@ class BaseFiltering(BaseModule):
         :param dataframe: pandas dataframe, output of parsers' step
         """
         self.df = dataframe
-        self.steps = []
         self.raw_items_number = self.df.shape[0]
         self.raw_reads_number = self.df.sum().sum()
 
