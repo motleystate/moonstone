@@ -6,7 +6,7 @@ import scipy.stats as st
 from statsmodels.stats.multitest import multipletests
 
 from moonstone.transformers.mergers import MergeCountsAndMetadata
-from moonstone.filters.filtering import Filtering
+from moonstone.filtering.filtering import Filtering
 
 logger = logging.getLogger(__name__)
 

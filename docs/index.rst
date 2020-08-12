@@ -32,6 +32,7 @@ Welcome to Moonstone's documentation!
     :maxdepth: 3
 
     api_docs/parsers
+    api_docs/filtering
 
 
 .. toctree::
