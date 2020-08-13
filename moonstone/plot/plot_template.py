@@ -5,51 +5,51 @@ import pandas as pd
 import pylab as plt
 
 
-class HistogramTemplate:
+class Histogram:
 
-    def __init__(self, dataframe, **kwargs):
+    def __init__(self, dataframe, plotting_options, **kwargs):
         self.df = dataframe
-        if 'output' in kwargs.keys() and kwargs['output']:
-            self.output = kwargs['output']
-
-    def compute_asymetric_bins(maximum, negative=False):
-        """Logish bins"""
-        if negative:
-            # code to write
-            print("negative")
+        self.plotting_options = plotting_options
+        if 'output_file' in kwargs.keys() and kwargs['output_file']:
+            self.output_file = kwargs['output_file']
+            if self.output_file is True:
+                # no name given for the output file so a generic name will be given
+                self.output_file = "histogram.html"
         else:
-            magnitude = int(math.log10(maximum))
-            binsvalues = [-0.1]                       # to have the 0 value
-            i = 0
-            while i < magnitude:
-                binsvalues += list(np.arange(2*10**i, 10**(i+1)+1, 10**i))
-                i += 1
-            # i=magnitude
-            binsvalues += list(np.arange(2*10**i, maximum+10**i, 10**i))        # up to maximum
+            self.output_file = False
+
+    def compute_asymetric_bins(self):
+        """Logish bins"""
+        maximum = self.df.max()
+        magnitude = int(math.log10(maximum))
+        binsvalues = [-0.1]                       # to have the 0 value
+        i = 0
+        while i < magnitude:
+            binsvalues += list(np.arange(2*10**i, 10**(i+1)+1, 10**i))
+            i += 1
+        # i=magnitude
+        binsvalues += list(np.arange(2*10**i, maximum+10**i, 10**i))        # up to maximum
         return binsvalues
 
-    def in_bins(df, bins_values, normalize=False):
-        if isinstance(df, pd.Series):
-            out = pd.cut(df, bins=bins_values)   # put every seq in the appropriate bin
-            counts = pd.value_counts(out, normalize=normalize)
-            counts = counts.reindex(out.cat.categories)
-        else:
-            print("ERROR : Wrong given argument type : need a Series")     # what error to give ?
-            return "ERROR"
-        return counts
+    def in_bins(self, bins_values):
+        self.df = pd.cut(self.df, bins=bins_values)   # put every items in the appropriate bin
 
-    def one_hist(self, y, title, xlabel, ylabel, **kwargs):
-        xvalues = np.arange(1, (len(y))*1.5, 1.5)
-        xnames = list(y.index)
+    def count(self, normalize=False):
+        counts = pd.value_counts(self.df, normalize=normalize)
+        self.counts = counts.reindex(self.df.cat.categories)
+
+    def one_hist(self, title, xlabel, ylabel):
+        xvalues = np.arange(1, (len(self.counts))*1.5, 1.5)
+        xnames = list(self.counts.index)
 
         fig, ax = plt.subplots(figsize=(20, 15))
 
-        if 'log' in kwargs.keys() and kwargs['log']:
+        if 'log' in self.plotting_options.keys() and self.plotting_options['log']:
             pyplot.yscale('log')
             pyplot.grid(which='minor', axis='both')
             ax.set_axisbelow(True)  # grid lines are behind the rest
 
-        x = plt.bar(xvalues, y, 1)   # noqa
+        x = plt.bar(xvalues, self.counts, 1)   # noqa
 
         plt.xticks(xvalues, xnames)
         plt.xticks(rotation=90)
@@ -59,5 +59,5 @@ class HistogramTemplate:
         plt.ylabel(ylabel, fontsize=24, labelpad=20)
         plt.show()
 
-        if 'output_file' in kwargs.keys() and kwargs['output_file']:
-            fig.savefig(kwargs['output_file'])
+        if self.output_file:
+            fig.savefig(self.output_file)

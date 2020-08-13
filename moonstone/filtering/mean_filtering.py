@@ -109,12 +109,12 @@ class MeanFiltering(BaseFiltering):
         """
         method to visualize the filtering on the data
 
-        :param html_output_file: name of the html output file, default set to False
+        :param html_output_file: name of the html output file
         """
         if getattr(self, '_items_dict', None) is None:
             fs_instance = FilteringStats(self.df)
             self._items_dict, self._reads_dict = FilteringStats.by_mean(fs_instance)
-        self.plot_threshold_vs_remaining_data(html_output_file)
+        self._plot_threshold_vs_remaining_data(html_output_file)
 
     def generate_report_data(self) -> dict:
         """
