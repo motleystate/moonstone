@@ -1,15 +1,32 @@
+import math
+from matplotlib import pyplot
 import numpy as np
 import pandas as pd
 import pylab as plt
-from matplotlib import pyplot
 
 
-class PlotTemplateDataFrame:
+class HistogramTemplate:
 
     def __init__(self, dataframe, **kwargs):
         self.df = dataframe
         if 'output' in kwargs.keys() and kwargs['output']:
             self.output = kwargs['output']
+
+    def compute_asymetric_bins(maximum, negative=False):
+        """Logish bins"""
+        if negative:
+            # code to write
+            print("negative")
+        else:
+            magnitude = int(math.log10(maximum))
+            binsvalues = [-0.1]                       # to have the 0 value
+            i = 0
+            while i < magnitude:
+                binsvalues += list(np.arange(2*10**i, 10**(i+1)+1, 10**i))
+                i += 1
+            # i=magnitude
+            binsvalues += list(np.arange(2*10**i, maximum+10**i, 10**i))        # up to maximum
+        return binsvalues
 
     def in_bins(df, bins_values, normalize=False):
         if isinstance(df, pd.Series):
@@ -32,9 +49,8 @@ class PlotTemplateDataFrame:
             pyplot.grid(which='minor', axis='both')
             ax.set_axisbelow(True)  # grid lines are behind the rest
 
-        # x = plt.bar(xvalues, y, 1)   # commented for now so that flake8 doesnt
-        #                                make an error but it invalidate the all fct
-        #                                anyway I'll have to change it to plotly to make it interactive
+        x = plt.bar(xvalues, y, 1)   # noqa
+
         plt.xticks(xvalues, xnames)
         plt.xticks(rotation=90)
         ax.tick_params(axis='both', which='major', labelsize=20)
@@ -43,5 +59,5 @@ class PlotTemplateDataFrame:
         plt.ylabel(ylabel, fontsize=24, labelpad=20)
         plt.show()
 
-        if self.output:
-            fig.savefig(self.output)
+        if 'output_file' in kwargs.keys() and kwargs['output_file']:
+            fig.savefig(kwargs['output_file'])
