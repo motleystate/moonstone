@@ -21,7 +21,7 @@ class TestPlotStatsData(TestCase):
             orient='index', columns=['1', '2', '3', '4'])
         tested_object.columns.name = 'sample'
         tested_object_instance = PlotStatsData(tested_object, items_name='species')   # noqa
-        # tested_object_instance.plot_mean()
+        tested_object_instance.plot_mean(show=False)
         # expected_object = ?????
         # self.assertEqual(tested_object_instance.plot_mean(),
         #                 expected_object)
