@@ -3,8 +3,8 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from moonstone.filtering.filtering import (
-    Filtering,
+from moonstone.filtering.basics_filtering import (
+    Filtering, NoCountsFiltering
 )
 
 
@@ -140,3 +140,44 @@ class TestFiltering(TestCase):
         expected_object.columns.name = 'sample'
         pd.testing.assert_frame_equal(tested_object_instance.deleting_only_zeros_rows(tested_object),
                                       expected_object)
+
+
+class TestNoCountsFiltering(TestCase):
+
+    def test_int_df(self):
+        test_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 2, 1, 0],
+                'specie_2': [25, 6, 3, 9],
+                'specie_3': [0, 0, 0, 0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        test_df.columns.name = 'sample'
+        tested_filtering = NoCountsFiltering(test_df)
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 2, 1, 0],
+                'specie_2': [25, 6, 3, 9]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        expected_df.columns.name = 'sample'
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
+    def test_float_df(self):
+        test_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3.0, 2.0, 1.0, 0.0],
+                'specie_2': [25.0, 6.0, 3.0, 9.0],
+                'specie_3': [0.0, 0.0, 0.0, 0.0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        test_df.columns.name = 'sample'
+        tested_filtering = NoCountsFiltering(test_df)
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3.0, 2.0, 1.0, 0.0],
+                'specie_2': [25.0, 6.0, 3.0, 9.0],
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        expected_df.columns.name = 'sample'
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)

@@ -1,8 +1,16 @@
+import pandas as pd
+
 from moonstone.core.module_base import BaseModule
+from moonstone.filtering.base import BaseFiltering
 
 
 class Filtering(BaseModule):
     """
+    @TODO to be removed
+    This is a deprecated class that remains as long as all part of moonstone using it is updated:
+    * main.py
+    * differentialanalysis.py
+
     This class can be used to filter out the data where:
      - Some samples are not included in the metadata.
      - Some rows contain non relevant information
@@ -40,5 +48,15 @@ class Filtering(BaseModule):
         return self.counts_df
 
     def deleting_only_zeros_rows(self, df):
+        """DEPRECATED replaced by NoCountsFiltering"""
         self.steps.append('deleting_only_zeros_rows')
         return df[df.sum(axis=1) != 0.0]
+
+
+class NoCountsFiltering(BaseFiltering):
+    """
+    Remove columns/samples with no counts
+    """
+
+    def filter(self) -> pd.DataFrame:
+        return self.df[self.df.sum(axis=1) != 0.0]
