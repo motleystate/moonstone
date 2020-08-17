@@ -1,7 +1,9 @@
+from typing import List
+
 import pandas as pd
 
 from moonstone.core.module_base import BaseModule
-from moonstone.filtering.base import BaseFiltering
+from moonstone.filtering.base import BothAxisFiltering
 
 
 class Filtering(BaseModule):
@@ -53,22 +55,49 @@ class Filtering(BaseModule):
         return df[df.sum(axis=1) != 0.0]
 
 
-class NoCountsFiltering(BaseFiltering):
+class NoCountsFiltering(BothAxisFiltering):
     """
     Remove rows (default) or columns with no counts
     """
-
-    def __init__(self, dataframe: pd.DataFrame, axis: int = 1):
-        """
-        :param axis: axis to apply filtering (index (0) or columns(1))
-        """
-        super().__init__(dataframe)
-        if axis not in [0, 1]:
-            raise ValueError(f"axis needs to be 0 (index) or 1 (columns)")
-        self.axis = axis
 
     def filter(self) -> pd.DataFrame:
         indices = self.df.sum(axis=self.axis) != 0.0
         if self.axis == 1:
             return self.df.loc[indices]
         return self.df.loc[:, indices]
+
+
+class NamesFiltering(BothAxisFiltering):
+    """
+    Filtering based on row (default) or column names
+    """
+
+    def __init__(self, dataframe: pd.DataFrame, names: List[str], axis: int = 1, keep: bool = True):
+        """
+        :param names: list of row or column names
+        :param axis: axis to apply filtering (index (0) or columns(1))
+        :param keep: keep column (discard them if set to False)
+        """
+        self.names = names
+        self.keep = keep
+        super().__init__(dataframe, axis=axis)
+
+    def _validate_parameters(self):
+        if isinstance(self.df.index, pd.MultiIndex):
+            raise TypeError(f"{__class__.__name__} does not support filtering on MultiIndex dataframes.")
+
+    def _select_names(self):
+        if self.axis == 1:
+            return self.df.loc[self.names, :]
+        return self.df.loc[:, self.names]
+
+    def _exclude_names(self):
+        if self.axis == 1:
+            return self.df.loc[self.df.index.difference(self.names), :]
+        return self.df.loc[:, self.df.columns.difference(self.names)]
+
+    def filter(self) -> pd.DataFrame:
+        if self.keep:
+            return self._select_names()
+        else:
+            return self._exclude_names()

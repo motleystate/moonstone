@@ -30,3 +30,21 @@ class BaseFiltering(BaseModule, BaseDF, ABC):
         method that filters the items on your pandas dataframe.
         """
         pass
+
+
+class BothAxisFiltering(BaseFiltering, ABC):
+    """
+    Base for Filtering classes on both
+    """
+
+    def __init__(self, dataframe: pd.DataFrame, axis: int = 1):
+        """
+        :param axis: axis to apply filtering (index (0) or columns(1))
+        """
+        super().__init__(dataframe)
+        self.axis = axis
+        self._validate_parameters()
+
+    def _validate_parameters(self):
+        if self.axis not in [0, 1]:
+            raise ValueError(f"axis needs to be 0 (index) or 1 (columns)")
