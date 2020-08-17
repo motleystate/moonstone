@@ -55,8 +55,20 @@ class Filtering(BaseModule):
 
 class NoCountsFiltering(BaseFiltering):
     """
-    Remove columns/samples with no counts
+    Remove rows (default) or columns with no counts
     """
 
+    def __init__(self, dataframe: pd.DataFrame, axis: int = 1):
+        """
+        :param axis: axis to apply filtering (index (0) or columns(1))
+        """
+        super().__init__(dataframe)
+        if axis not in [0, 1]:
+            raise ValueError(f"axis needs to be 0 (index) or 1 (columns)")
+        self.axis = axis
+
     def filter(self) -> pd.DataFrame:
-        return self.df[self.df.sum(axis=1) != 0.0]
+        indices = self.df.sum(axis=self.axis) != 0.0
+        if self.axis == 1:
+            return self.df.loc[indices]
+        return self.df.loc[:, indices]
