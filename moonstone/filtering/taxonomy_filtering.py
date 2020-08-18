@@ -15,7 +15,7 @@ class TaxonomyNamesFiltering(BaseFiltering):
         axis: int = 1, level: str = 'species', keep: bool = True
     ):
         """
-        :param names: list of row or column names
+        :param names: list of index names
         :param level: level of the MultiIndex to filter on
         :param keep: keep column (discard them if set to False)
         """
