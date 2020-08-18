@@ -47,4 +47,4 @@ class BothAxisFiltering(BaseFiltering, ABC):
 
     def _validate_parameters(self):
         if self.axis not in [0, 1]:
-            raise ValueError(f"axis needs to be 0 (index) or 1 (columns)")
+            raise ValueError("axis needs to be 0 (index) or 1 (columns)")
