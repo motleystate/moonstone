@@ -87,14 +87,12 @@ class NamesFiltering(BothAxisFiltering):
             raise TypeError(f"{__class__.__name__} does not support filtering on MultiIndex dataframes.")
 
     def _select_names(self):
-        if self.axis == 1:
+        if self.axis == 0:
             return self.df.loc[self.names, :]
         return self.df.loc[:, self.names]
 
     def _exclude_names(self):
-        if self.axis == 1:
-            return self.df.loc[self.df.index.difference(self.names), :]
-        return self.df.loc[:, self.df.columns.difference(self.names)]
+        return self.df.drop(self.names, axis=self.axis)
 
     def filter(self) -> pd.DataFrame:
         if self.keep:

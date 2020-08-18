@@ -12,7 +12,7 @@ Thus, in moonstone you will find:
 * modules for cleaning and filtering your data
 * normalization modules
 * analysis modules
-* visualization modules
+* plot modules
 
 The main idea is to keep track of every steps applied to a raw data to be able to easily share the analysis and reproduce it.
 

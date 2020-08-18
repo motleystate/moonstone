@@ -215,7 +215,7 @@ class TestNamesFiltering(TestCase):
             orient='index', columns=['1', '2', '3', '4'])
         test_df.columns.name = 'sample'
         selected_rows = ['specie_1', 'specie_2']
-        tested_filtering = NamesFiltering(test_df, selected_rows, axis=1, keep=True)
+        tested_filtering = NamesFiltering(test_df, selected_rows, axis=0, keep=True)
         expected_df = pd.DataFrame.from_dict(
             {
                 'specie_1': [3, 2, 1, 0],
@@ -235,7 +235,7 @@ class TestNamesFiltering(TestCase):
             orient='index', columns=['1', '2', '3', '4'])
         test_df.columns.name = 'sample'
         selected_rows = ['specie_1', 'specie_2']
-        tested_filtering = NamesFiltering(test_df, selected_rows, axis=1, keep=False)
+        tested_filtering = NamesFiltering(test_df, selected_rows, axis=0, keep=False)
         expected_df = pd.DataFrame.from_dict(
             {
                 'specie_3': [0, 7, 5, 0]
@@ -254,7 +254,7 @@ class TestNamesFiltering(TestCase):
             orient='index', columns=['1', '2', '3', '4'])
         test_df.columns.name = 'sample'
         selected_rows = ['1', '3']
-        tested_filtering = NamesFiltering(test_df, selected_rows, axis=0, keep=True)
+        tested_filtering = NamesFiltering(test_df, selected_rows, axis=1, keep=True)
         expected_df = pd.DataFrame.from_dict(
             {
                 'specie_1': [3, 1],
@@ -275,7 +275,7 @@ class TestNamesFiltering(TestCase):
             orient='index', columns=['1', '2', '3', '4'])
         test_df.columns.name = 'sample'
         selected_rows = ['1', '3']
-        tested_filtering = NamesFiltering(test_df, selected_rows, axis=0, keep=False)
+        tested_filtering = NamesFiltering(test_df, selected_rows, axis=1, keep=False)
         expected_df = pd.DataFrame.from_dict(
             {
                 'specie_1': [2, 0],
