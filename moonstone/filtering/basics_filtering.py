@@ -84,7 +84,7 @@ class NamesFiltering(BothAxisFiltering):
 
     def _validate_parameters(self):
         if isinstance(self.df.index, pd.MultiIndex):
-            raise TypeError(f"{__class__.__name__} does not support filtering on MultiIndex dataframes.")
+            raise TypeError(f"{self.__class__.__name__} does not support filtering on MultiIndex dataframes.")
 
     def _select_names(self):
         if self.axis == 0:
