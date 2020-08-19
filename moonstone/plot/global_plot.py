@@ -1,6 +1,7 @@
 import pandas as pd
+import sys
 import typing
-from typing import Optional, Union, List
+from typing import Optional, List
 import warnings
 
 from moonstone.plot.plot_template import (
@@ -21,31 +22,33 @@ def _check_list_of(listx, expectedtype):
     """
     check the type of what's in listx
     """
-    print("called with ", listx, expectedtype)
-    if all(isinstance(s, expectedtype) for s in listx) is True:
-        return True
-    else:
-        return expectedtype._name+'['+expectedtype.__args__[0].__name__+']'
+    return all(isinstance(s, expectedtype) for s in listx)
 
 
-def _check_type(to_check, expectedtype: Union[type, typing._GenericAlias]):
+def _check_type(to_check, expectedtype: type):
+    # type(List[str]) = typing._GenericAlias in python3.7 and typing.GenericMeta in python3.6
     """
     check if type of 'to_check' is right
     """
-    print("espectedtype =", expectedtype)
-    if type(expectedtype) == list:      # if list of str/int etc. List[type]
-        return _check_list_of(to_check, expectedtype)
+    if sys.version_info[1] >= 7:
+        typeList = typing._GenericAlias
+    else:
+        typeList = typing.GenericMeta
+    if type(expectedtype) == typeList:      # if List[<type>] (<type> = str, int etc.)
+        if type(to_check) == list:
+            if _check_list_of(to_check, expectedtype.__args__[0]) is True:
+                return True
+        return expectedtype._name+'['+expectedtype.__args__[0].__name__+']'
     else:
         if type(to_check) == expectedtype:
             return True
         else:
-            print(expectedtype)
-            return expectedtype.__name__     # PROBLEM BC List[str]
+            return expectedtype.__name__
 
 
-def _check_type_s(to_check, expectedtype_s: Union[type, typing._GenericAlias]):
+def _check_type_s(to_check, expectedtype_s: type):
     """
-    check if type of 'to_check' is right
+    check if type of 'to_check' is right. Dispatcher if several types are allowed (then expectedtype_s is a list) or not
     """
     if type(expectedtype_s) == list:    # if more than one type allowed
         type_in_str_for_warning = []
@@ -54,7 +57,7 @@ def _check_type_s(to_check, expectedtype_s: Union[type, typing._GenericAlias]):
             if s is True:
                 return True
             else:
-                type_in_str_for_warning += s
+                type_in_str_for_warning += [s]
         return " or ".join(type_in_str_for_warning)   # return what will be in the error raised
     else:                               # if only one type
         if _check_type(to_check, expectedtype_s):
@@ -70,17 +73,18 @@ def _check_types_in_plotting_options(plotting_options: dict):
     expectedtype = {'log': bool, 'colorbar': [str, List[str]], 'tickangle': [int, float]}
     cleaned_plotting_options = {}
     for i in plotting_options.keys():
-        print("hey ho", i, plotting_options[i], expectedtype[i])
         if i in expectedtype.keys():
-            print("est-ce que tu m'entends")
             s = _check_type_s(plotting_options[i], expectedtype[i])
             if s is True:
-                print("there")
                 cleaned_plotting_options[i] = plotting_options[i]
             else:
-                print("here")
-                warnings.warn('Warning : %s value in plotting_options must be a %s, %s given. Value overidden' %
-                              (i, s, type(plotting_options[i]).__name__))
+                if type(plotting_options[i]) == list and 'List' in s:
+                    # warning when the problem is not the overall type but the type of elements in list
+                    warnings.warn(('Warning : %s value in plotting_options must be a %s. \
+Please check the type of elements in the list given. Value overridden') % (i, s))
+                else:
+                    warnings.warn('Warning : %s value in plotting_options must be a %s, %s given. Value overridden' %
+                                  (i, s, type(plotting_options[i]).__name__))
     return cleaned_plotting_options
 
 
@@ -111,8 +115,8 @@ class PlotStatsData():
         """
         if plotting_options is None:
             plotting_options = {}
-        # else:
-        #    plotting_options = _check_types_in_plotting_options(plotting_options)
+        else:
+            plotting_options = _check_types_in_plotting_options(plotting_options)
 
         plotting_options = _add_x_to_plotting_options(
             plotting_options, 'log', True)
@@ -156,8 +160,8 @@ class PlotStatsMetadata():
     def plot_sex(self, plotting_options: dict = None, show: Optional[bool] = True, output_file: Optional[str] = False):
         if plotting_options is None:
             plotting_options = {}
-        # else:
-        #    plotting_options = _check_types_in_plotting_options(plotting_options)
+        else:
+            plotting_options = _check_types_in_plotting_options(plotting_options)
 
         plotting_options = _add_x_to_plotting_options(
             plotting_options, 'colorbar', ['pink', 'blue'])
@@ -175,8 +179,8 @@ class PlotStatsMetadata():
                  show: Optional[bool] = True, output_file: Optional[str] = False):
         if plotting_options is None:
             plotting_options = {}
-        # else:
-        #    plotting_options = _check_types_in_plotting_options(plotting_options)
+        else:
+            plotting_options = _check_types_in_plotting_options(plotting_options)
 
         hist_fig = Histogram(self.metadata_df['age'], plotting_options, show=show, output_file=output_file)
 
@@ -195,8 +199,8 @@ class PlotStatsMetadata():
                    show: Optional[bool] = True, output_file: Optional[str] = False):
         if plotting_options is None:
             plotting_options = {}
-        # else:
-        #    plotting_options = _check_types_in_plotting_options(plotting_options)
+        else:
+            plotting_options = _check_types_in_plotting_options(plotting_options)
 
         bar_fig = BarGraph(self.metadata_df[column_name], plotting_options, show=show, output_file=output_file)
         bar_fig.count()    # normalize or not?
