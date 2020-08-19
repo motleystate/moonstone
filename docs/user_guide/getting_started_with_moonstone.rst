@@ -141,5 +141,21 @@ Normalization
 Analysis
 """"""""
 
-Visualization
-"""""""""""""
+Plot
+"""""
+
+At any point of your work on your data, Moonstone provides standard plots to visualize your data and metadata.
+
+Plot available for data :
+
+- the mean distribution of your data (`plot_mean`)
+- ...tbc...
+
+Plot available for metadata :
+
+- the age distribution of patients (whose samples are originated from) (`plot_age`)
+- the sex distribution of patients (whose samples are originated from) (`plot_sex`)
+- etc. (`plot_other`)
+
+.. Note::
+    More details about available operations can be found in the API documentation about :ref:`api_plot`.
