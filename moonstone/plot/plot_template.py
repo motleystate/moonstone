@@ -1,41 +1,60 @@
+from abc import ABC
 import math
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.io
+from typing import Union
 
 
-class BaseGraph():
+class BaseGraph(ABC):
 
-    def __init__(self, dataframe, plotting_options, **kwargs):
+    def __init__(self, dataframe: pd.DataFrame, plotting_options: dict = None,
+                 show: bool = True, output_file: Union[bool, str] = False):
+        """
+        :param dataframe: pandas dataframe generated with moonstone
+        :param show: set to False if you don't want to show the plot
+        :param output_file: name of the output file
+        :param plotting_options: options of plotting that will override the default setup \n
+                                 [!] Make sure the value given to an argument is of the right type \n
+                                 options allowed : 'log': `bool` ; 'colorbar': `[str, List[str]]` ;
+                                 'tickangle': `[int, float]`
+        """
         self.df = dataframe
         self.plotting_options = plotting_options
-        if 'show' in kwargs.keys():
-            if type(kwargs['show']) == bool:
-                self.show = kwargs['show']
-            else:
-                raise ValueError('Error : show value must be a bool, %s given' % type(kwargs['show']).__name__)
-        if 'output_file' in kwargs.keys() and kwargs['output_file']:
-            self.output_file = kwargs['output_file']
-            if self.output_file is True:
-                # no name given for the output file so a generic name will be given
-                self.output_file = "graph.html"
+
+        if type(show) == bool:
+            self.show = show
         else:
-            self.output_file = False
+            raise ValueError('Error : show value must be a bool, %s given' % type(show).__name__)
+
+        self.output_file = output_file
+        if self.output_file is True:
+            # if no name given for the output file, a generic name is generated
+            if dataframe.name is not None:
+                self.output_file = dataframe.name+"_"+self.__class__.__name__+".html"
+            else:
+                self.output_file = self.__class__.__name__+".html"
+
+    def plot_one_graph(self, title: str, xlabel: str, ylabel: str):
+        """
+        method that plots the graph
+        """
+        # instantiate fig
+
+        # treat every plotting options by updating layout
+
+        # if self.show is True:
+        #    fig.show()
+
+        # if self.output_file:
+        #    plotly.io.write_html(fig, self.output_file)
+        pass
 
 
 class BarGraph(BaseGraph):
 
-    def compute_symetric_bins(self, step):
-        maximum = self.df.max()
-        minimum = int(self.df.min()/step) * step
-        self.bins_values = [minimum]
-        i = 1
-        while self.bins_values[i-1] < maximum:
-            self.bins_values += [self.bins_values[i-1]+step]
-            i += 1
-
-    def compute_asymetric_bins(self):
+    def compute_heterogeneous_bins(self):
         """Logish bins"""
         maximum = self.df.max()
         magnitude = int(math.log10(maximum))
@@ -47,7 +66,7 @@ class BarGraph(BaseGraph):
         # i=magnitude
         self.bins_values += list(np.arange(2*10**i, maximum+10**i, 10**i))        # up to maximum
 
-    def in_bins_and_count(self, normalize=False):
+    def in_bins_and_count(self, normalize: bool = False):
         binned_df = pd.cut(self.df, bins=self.bins_values)   # put every items in the appropriate bin
         counts = pd.value_counts(binned_df, normalize=normalize)
         counts = counts.reindex(binned_df.cat.categories)
@@ -57,7 +76,7 @@ class BarGraph(BaseGraph):
         self.xnames = [self.xnames[i].replace('(', ']') for i in range(len(self.xnames))]
         self.yvalues = list(counts)
 
-    def count(self, normalize=False):
+    def count(self, normalize: bool = False):
         counts = pd.value_counts(self.df, normalize=normalize)
         counts = counts.sort_index()
 
@@ -68,7 +87,7 @@ class BarGraph(BaseGraph):
         for i in range(len(self.xnames)):
             self.xnames[i] = replace_dic[self.xnames[i]]
 
-    def plot_one_graph(self, title, xlabel, ylabel):
+    def plot_one_graph(self, title: str, xlabel: str, ylabel: str):
         fig = go.Figure([go.Bar(x=self.xnames, y=self.yvalues)])
 
         if 'log' in self.plotting_options.keys() and self.plotting_options['log']:
@@ -82,7 +101,7 @@ class BarGraph(BaseGraph):
         fig.update_xaxes(title_text=xlabel)
         fig.update_yaxes(title_text=ylabel)
 
-        if self.show:
+        if self.show is True:
             fig.show()
 
         if self.output_file:
@@ -91,13 +110,13 @@ class BarGraph(BaseGraph):
 
 class Histogram(BaseGraph):
 
-    def plot_one_graph(self, title, xlabel, ylabel, step):   # see if we add nbinsx options
+    def plot_one_graph(self, title: str, xlabel: str, ylabel: str,
+                       step: Union[int, float]):   # see if we add nbinsx options
         minimum = int(self.df.min()/step) * step
         maximum = self.df.max()
-        fig = go.Figure([go.Histogram(x=self.df, xbins=dict(start=minimum, end=maximum, size=5), autobinx=False)])
+        fig = go.Figure([go.Histogram(x=self.df, xbins=dict(start=minimum, end=maximum, size=step), autobinx=False)])
 
         if 'log' in self.plotting_options.keys() and self.plotting_options['log'] is True:
-            print("ici")
             fig.update_layout(yaxis_type="log")
         if 'tickangle' in self.plotting_options.keys():
             fig.update_xaxes(tickangle=self.plotting_options['tickangle'])
@@ -108,7 +127,7 @@ class Histogram(BaseGraph):
         fig.update_xaxes(title_text=xlabel)
         fig.update_yaxes(title_text=ylabel)
 
-        if self.show:
+        if self.show is True:
             fig.show()
 
         if self.output_file:

@@ -32,7 +32,7 @@ def _check_type(to_check, expectedtype: type):
     # type(List[str]) = typing._GenericAlias in python3.7 and typing.GenericMeta in python3.6
     if sys.version_info[1] >= 7:
         typeList = typing._GenericAlias
-        # typeListName = expectedtype._name
+        # typeListName = expectedtype._name       # for now only typing type is List so not necessary
     else:
         typeList = typing.GenericMeta
         # typeListName = str(p._gorg).split('.')[1]
@@ -135,7 +135,7 @@ class PlotStatsData():
         df_mean = self.df.mean(axis=1)
         bar_fig = BarGraph(df_mean, plotting_options, show=show, output_file=output_file)
 
-        bar_fig.compute_asymetric_bins()
+        bar_fig.compute_heterogeneous_bins()
         bar_fig.in_bins_and_count()    # normalize or not?
         bar_fig.plot_one_graph(
             "Distribution of %s mean" % self.items_name,
