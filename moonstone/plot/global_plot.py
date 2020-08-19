@@ -26,19 +26,21 @@ def _check_list_of(listx, expectedtype):
 
 
 def _check_type(to_check, expectedtype: type):
-    # type(List[str]) = typing._GenericAlias in python3.7 and typing.GenericMeta in python3.6
     """
     check if type of 'to_check' is right
     """
+    # type(List[str]) = typing._GenericAlias in python3.7 and typing.GenericMeta in python3.6
     if sys.version_info[1] >= 7:
         typeList = typing._GenericAlias
+        # typeListName = expectedtype._name
     else:
         typeList = typing.GenericMeta
+        # typeListName = str(p._gorg).split('.')[1]
     if type(expectedtype) == typeList:      # if List[<type>] (<type> = str, int etc.)
         if type(to_check) == list:
             if _check_list_of(to_check, expectedtype.__args__[0]) is True:
                 return True
-        return expectedtype._name+'['+expectedtype.__args__[0].__name__+']'
+        return 'List['+expectedtype.__args__[0].__name__+']'
     else:
         if type(to_check) == expectedtype:
             return True
@@ -48,7 +50,8 @@ def _check_type(to_check, expectedtype: type):
 
 def _check_type_s(to_check, expectedtype_s: type):
     """
-    check if type of 'to_check' is right. Dispatcher if several types are allowed (then expectedtype_s is a list) or not
+    check if type of 'to_check' is right.
+    Dispatcher if several types are allowed (then expectedtype_s is a list) or not
     """
     if type(expectedtype_s) == list:    # if more than one type allowed
         type_in_str_for_warning = []
@@ -68,7 +71,8 @@ def _check_type_s(to_check, expectedtype_s: type):
 
 def _check_types_in_plotting_options(plotting_options: dict):
     """
-    check types of plotting options given by the user
+    check types of plotting options given by the user.
+    Create a new dictionary cleaned_plotting_options without the options that are of the wrong type
     """
     expectedtype = {'log': bool, 'colorbar': [str, List[str]], 'tickangle': [int, float]}
     cleaned_plotting_options = {}
