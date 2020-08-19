@@ -84,7 +84,9 @@ class NamesFiltering(BothAxisFiltering):
 
     def _validate_parameters(self):
         if isinstance(self.df.index, pd.MultiIndex):
-            raise TypeError(f"{self.__class__.__name__} does not support filtering on MultiIndex dataframes.")
+            error_message = f"{self.__class__.__name__} does not support filtering on MultiIndex dataframes." + \
+                " You might want to use moonstone.filtering.TaxonomyNamesFiltering instead."
+            raise TypeError(error_message)
 
     def _select_names(self):
         if self.axis == 0:

@@ -6,7 +6,7 @@ import numpy as np
 from moonstone.filtering.taxonomy_filtering import TaxonomyNamesFiltering
 
 
-class TestTaxonomyNamesFilteringg(TestCase):
+class TestTaxonomyNamesFiltering(TestCase):
 
     def test_selecting_rows_multiindex_species_level(self):
         test_df = pd.DataFrame.from_dict(
