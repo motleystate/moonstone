@@ -3,8 +3,10 @@ import os
 import sys
 import logging
 
-from moonstone.parsers import (filtering, handleCounts, handleMetadata)
+from moonstone.parsers import (handleCounts, handleMetadata)
 from moonstone.analysis import (classify, clustering, randomForest, stats)
+from moonstone.filtering.mean_filtering import MeanFiltering
+
 
 """ Moonstone is designed as a means of enabling machine learning analysis of metagenomic sequencing data.
 The program englobes the following functionalities:
@@ -99,8 +101,8 @@ def filter_count_df(count_df, min_read_mean, outdir_path):
     :return: filtered count dataframe
     """
     check_sparse = stats.Density(count_df)
-    filtered = filtering.Filtering(count_df, min_read_mean)
-    count_df = filtered.by_mean()
+    filtering = MeanFiltering(count_df, threshold=min_read_mean)
+    count_df = filtering.filtered_df
     filtered_stats = stats.Descriptive(count_df, outdir_path)
     filtered_stats.matrix_stats('filtered_variables.csv')
     count_df.to_csv(path_or_buf=outdir_path+'/'+'filteredCountFile.csv')

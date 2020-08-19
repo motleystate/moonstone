@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 class MeanFiltering(BaseFiltering):
     """
     This class allows to filter the data according to their mean read count,
-    and remove the data that have a poor mean read count.
+    and remove the items that have mean read count below a given threshold.
+
     You can either give a mean read count threshold or the percentage of data
     that you wish to keep (the threshold will then be computed for you).
     """

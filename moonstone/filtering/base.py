@@ -37,7 +37,7 @@ class BothAxisFiltering(BaseFiltering, ABC):
     Base for Filtering classes on both
     """
 
-    def __init__(self, dataframe: pd.DataFrame, axis: int = 1):
+    def __init__(self, dataframe: pd.DataFrame, axis: int = 0):
         """
         :param axis: axis to apply filtering (index (0) or columns(1))
         """
