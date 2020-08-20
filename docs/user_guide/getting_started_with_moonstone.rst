@@ -146,6 +146,50 @@ Plot
 
 At any point of your work on your data, Moonstone provides standard plots to visualize your data and metadata.
 
+.. Note::
+    More details about available operations can be found in the API documentation about :ref:`api_plot`.
+
+
+How does it work?
+'''''''''''''''''
+
+To plot your data, you need to instantiate a `PlotStatsData` object with a pandas dataframe generated with moonstone (at any steps)
+
+.. code-block:: python
+
+    from moonstone.plot import PlotStatsData
+
+    # instantiation
+    plot_instance = PlotStatsData(df)
+
+    # call one (or more) plotting method(s)
+    plot_instance.YourFavoritePlot()
+    plot_instance.AnotherOfYourFavoritePlot()
+
+Likewise, for the metada
+
+.. code-block:: python
+
+    from moonstone.plot import PlotStatsMetadata
+
+    plot_instance = PlotStatsMetadata(metadata_df)
+    plot_instance.YourFavoritePlot()
+
+Arguments can be given to any plotting methods of both classes, 
+    ... to override the standard parameters of plotting of the method with the argument `plotting_options`.
+    ... or to ask for a html file to be generated with the argument `output_file`
+    ... or even to ask not to show the plot with the argument `show` set to False
+
+.. code-block:: python
+
+    plotting_options={'colorbar' : 'red', 'tickangle' : 90}
+    plot_instance.YourFavoritePlot(plotting_options=plotting_options, output_file='mygraph.html', show=False)
+
+
+
+What can be plotted with this module?
+'''''''''''''''''''''''''''''''''''''
+
 Plot available for data :
 
 - the mean distribution of your data (`plot_mean`)
@@ -156,6 +200,3 @@ Plot available for metadata :
 - the age distribution of patients (whose samples are originated from) (`plot_age`)
 - the sex distribution of patients (whose samples are originated from) (`plot_sex`)
 - etc. (`plot_other`)
-
-.. Note::
-    More details about available operations can be found in the API documentation about :ref:`api_plot`.
