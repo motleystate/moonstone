@@ -12,6 +12,8 @@ v0.2
 v0.2.0 (not released)
 ---------------------
 
+* Add base for each module (with ``visualize()`` method and ``data_report`` property)
+* Use the new base for ``MeanFiltering`` module.
 * Refactoring of ``Filtering`` class into several classes:
 
   * ``NoCountsFiltering`` that filters on rows or columns with no counts at all
