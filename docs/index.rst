@@ -34,6 +34,7 @@ Welcome to Moonstone's documentation!
 
     api_docs/parsers
     api_docs/filtering
+    api_docs/plot
 
 
 .. toctree::
