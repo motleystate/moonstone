@@ -6,6 +6,26 @@ Changelogs
 
 Summary of developments of moonstone library.
 
+v0.2
+====
+
+v0.2.0 (not released)
+---------------------
+
+* Add base for each module (with ``visualize()`` method and ``data_report`` property)
+* Use the new base for ``MeanFiltering`` module.
+* Refactoring of ``Filtering`` class into several classes:
+
+  * ``NoCountsFiltering`` that filters on rows or columns with no counts at all
+  * ``NamesFiltering`` that filters on a given list of row or columns names
+
+    * Either keep the names
+    * Or exclude them
+  * ``TaxonomyNamesFiltering`` that filters on a given list of index names at a chosen level
+
+    * Either keep the names
+    * Or exclude them
+
 v0.1
 ====
 
