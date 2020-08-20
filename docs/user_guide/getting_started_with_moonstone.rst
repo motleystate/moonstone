@@ -153,27 +153,27 @@ At any point of your work on your data, Moonstone provides standard plots to vis
 How does it work?
 '''''''''''''''''
 
-To plot your data, you need to instantiate a `PlotStatsData` object with a pandas dataframe generated with moonstone (at any steps)
+To plot your data, you need to instantiate a `PlotCountsStats` object with a pandas dataframe generated with moonstone (at any steps)
 
 .. code-block:: python
 
-    from moonstone.plot import PlotStatsData
+    from moonstone.plot import PlotCountsStats
 
     # instantiation
-    plot_instance = PlotStatsData(df)
+    plot_instance = PlotCountsStats(df)
 
     # call one (or more) plotting method(s)
-    plot_instance.YourFavoritePlot()
-    plot_instance.AnotherOfYourFavoritePlot()
+    plot_instance.your_favorite_plot()
+    plot_instance.another_of_your_favorite_plot()
 
 Likewise, for the metada
 
 .. code-block:: python
 
-    from moonstone.plot import PlotStatsMetadata
+    from moonstone.plot import PlotMetadataStats
 
-    plot_instance = PlotStatsMetadata(metadata_df)
-    plot_instance.YourFavoritePlot()
+    plot_instance = PlotMetadataStats(metadata_df)
+    plot_instance.your_favorite_plot()
 
 Arguments can be given to any plotting methods of both classes, 
     ... to override the standard parameters of plotting of the method with the argument `plotting_options`.
@@ -183,7 +183,7 @@ Arguments can be given to any plotting methods of both classes,
 .. code-block:: python
 
     plotting_options={'colorbar' : 'red', 'tickangle' : 90}
-    plot_instance.YourFavoritePlot(plotting_options=plotting_options, output_file='mygraph.html', show=False)
+    plot_instance.your_favorite_plot(plotting_options=plotting_options, output_file='mygraph.html', show=False)
 
 
 

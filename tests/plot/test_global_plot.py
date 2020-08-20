@@ -3,12 +3,12 @@ from unittest import TestCase
 import pandas as pd
 
 from moonstone.plot.global_plot import (
-    PlotStatsData,
-    PlotStatsMetadata
+    PlotCountsStats,
+    PlotMetadataStats
 )
 
 
-class TestPlotStatsData(TestCase):
+class TestPlotCountsStats(TestCase):
 
     def test_plot_mean(self):
         tested_object = pd.DataFrame.from_dict(
@@ -21,14 +21,14 @@ class TestPlotStatsData(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         tested_object.columns.name = 'sample'
-        tested_object_instance = PlotStatsData(tested_object, items_name='species')
+        tested_object_instance = PlotCountsStats(tested_object, items_name='species')
         tested_object_instance.plot_mean(show=False)
         # expected_object = ?????
         # self.assertEqual(tested_object_instance.plot_mean(),
         #                 expected_object)
 
 
-class TestPlotStatsMetadata(TestCase):
+class TestPlotMetadataStats(TestCase):
 
     def test_plot_sex(self):
         tested_object = pd.DataFrame.from_dict(
@@ -40,7 +40,7 @@ class TestPlotStatsMetadata(TestCase):
                 'E': [18, 'M', 'n']
             },
             orient='index', columns=['age', 'sex', 'smoker'])
-        tested_object_instance = PlotStatsMetadata(tested_object)
+        tested_object_instance = PlotMetadataStats(tested_object)
         tested_object_instance.plot_sex(show=False)
         # expected_object = ?????
 
@@ -54,7 +54,7 @@ class TestPlotStatsMetadata(TestCase):
                 'E': [18, 'M', 'n']
             },
             orient='index', columns=['age', 'sex', 'smoker'])
-        tested_object_instance = PlotStatsMetadata(tested_object)
+        tested_object_instance = PlotMetadataStats(tested_object)
         tested_object_instance.plot_age(show=False,
                                         plotting_options={'log': 'zzeezez', 'colorbar': ['red', 63], 'tickangle': 50})
         # expected_object = ?????

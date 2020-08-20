@@ -7,7 +7,7 @@ Plot
 Data
 =====
 
-.. autoclass:: moonstone.plot.global_plot.PlotStatsData
+.. autoclass:: moonstone.plot.global_plot.PlotCountsStats
     :members:
     :undoc-members:
     :special-members: __init__
@@ -17,7 +17,7 @@ Data
 Metadata
 ========
 
-.. autoclass:: moonstone.plot.global_plot.PlotStatsMetadata
+.. autoclass:: moonstone.plot.global_plot.PlotMetadataStats
     :members:
     :undoc-members:
     :special-members: __init__

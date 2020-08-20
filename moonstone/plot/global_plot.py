@@ -105,7 +105,7 @@ def _add_x_to_plotting_options(plotting_options: dict, x: str, defaultvalue):
         return plotting_options
 
 
-class PlotStatsData():
+class PlotCountsStats():
 
     def __init__(self, dataframe: pd.DataFrame, items_name: str = "items"):
         self.df = dataframe
@@ -143,6 +143,13 @@ class PlotStatsData():
             "number of samples",
             )
 
+
+class PlotTaxonomyStats():
+
+    def __init__(self, dataframe: pd.DataFrame, items_name: str = "items"):
+        self.df = dataframe
+        self.items_name = items_name
+
     def _plot_taxonomy_classification(self, level_of_interest, plotting_options: dict = None,
                                       show: Optional[bool] = True, output_file: Optional[str] = False):
         """
@@ -166,7 +173,7 @@ class PlotStatsData():
     # heatmap -> in analysis?
 
 
-class PlotStatsMetadata():
+class PlotMetadataStats():
 
     def __init__(self, metadata_dataframe: pd.DataFrame):
         self.metadata_df = metadata_dataframe
