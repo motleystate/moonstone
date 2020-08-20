@@ -9,8 +9,8 @@ Summary of developments of moonstone library.
 v0.2
 ====
 
-v0.2.0 (not released)
----------------------
+v0.2.0
+------
 
 * Add base for each module (with ``visualize()`` method and ``data_report`` property)
 * Use the new base for ``MeanFiltering`` module.
@@ -24,7 +24,9 @@ v0.2.0 (not released)
   * ``TaxonomyNamesFiltering`` that filters on a given list of index names at a chosen level
 
     * Either keep the names
-    * Or exclude them
+    * Or exclude them 
+* Add base module for plots
+* Add class `BaseGraph` and child classes ``Histogram`` and ``BarGraph``
 
 v0.1
 ====
