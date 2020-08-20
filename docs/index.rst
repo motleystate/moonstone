@@ -18,6 +18,7 @@ Welcome to Moonstone's documentation!
 
     user_guide/installation
     user_guide/getting_started_with_moonstone
+    user_guide/available_classes
 
 
 .. toctree::

@@ -7,7 +7,7 @@ from moonstone.filtering.base import BaseFiltering
 
 class TaxonomyNamesFiltering(BaseFiltering):
     """
-    Filtering based on row (default) or column names for multiindex dataframe.
+    Filtering a Taxonomy multiindexed dataframe on index names at a chosen level.
     """
 
     def __init__(
