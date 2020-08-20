@@ -12,7 +12,7 @@ class TaxonomyNamesFiltering(BaseFiltering):
 
     def __init__(
         self, dataframe: pd.DataFrame, names: List[str],
-        axis: int = 1, level: str = 'species', keep: bool = True
+        level: str = 'species', keep: bool = True
     ):
         """
         :param names: list of index names
@@ -26,7 +26,9 @@ class TaxonomyNamesFiltering(BaseFiltering):
         self._validate_parameters()
 
     def _validate_parameters(self):
-        pass
+        if self.level not in self.df.index.names:
+            error_message = f"{self.level} not a valid level. Must be among {self.df.index.names}"
+            raise ValueError(error_message)
 
     def filter(self) -> pd.DataFrame:
         corresponding_rows = self.df.index.get_level_values(self.level).isin(self.names)
