@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import math
 import numpy as np
 import pandas as pd
@@ -36,19 +36,12 @@ class BaseGraph(ABC):
             else:
                 self.output_file = self.__class__.__name__+".html"
 
+    @abstractmethod
     def plot_one_graph(self, title: str, xlabel: str, ylabel: str):
         """
         method that plots the graph
+        needs to be defined in every child class
         """
-        # instantiate fig
-
-        # treat every plotting options by updating layout
-
-        # if self.show is True:
-        #    fig.show()
-
-        # if self.output_file:
-        #    plotly.io.write_html(fig, self.output_file)
         pass
 
 
