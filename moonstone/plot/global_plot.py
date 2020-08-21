@@ -133,14 +133,17 @@ class PlotCountsStats():
             plotting_options, 'tickangle', -60)
 
         df_mean = self.df.mean(axis=1)
-        bar_fig = BarGraph(df_mean, plotting_options, show=show, output_file=output_file)
 
+        bar_fig = BarGraph(df_mean)
         bar_fig.compute_heterogeneous_bins()
         bar_fig.in_bins_and_count()    # normalize or not?
         bar_fig.plot_one_graph(
             "Distribution of %s mean" % self.items_name,
             "mean of the number of reads",
             "number of samples",
+            plotting_options,
+            show=show,
+            output_file=output_file
             )
 
 
@@ -178,11 +181,12 @@ class PlotMetadataStats():
     def __init__(self, metadata_dataframe: pd.DataFrame):
         self.metadata_df = metadata_dataframe
 
-    def plot_age(self, step=None, plotting_options: dict = None,
+    def plot_age(self, bins_size=None, plotting_options: dict = None,
                  show: Optional[bool] = True, output_file: Optional[str] = False):
         """
         method to visualize the age distribution of patients (whose the samples are originated from)
 
+        :param bins_size: size of the bins of the Histogram
         :param show: set to False if you don't want to show the plot
         :param output_file: name of the output file
         :param plotting_options: options of plotting that will override the default setup \n
@@ -195,16 +199,19 @@ class PlotMetadataStats():
         else:
             plotting_options = _check_types_in_plotting_options(plotting_options)
 
-        hist_fig = Histogram(self.metadata_df['age'], plotting_options, show=show, output_file=output_file)
+        hist_fig = Histogram(self.metadata_df['age'])
 
-        if step is None:
-            step = 1
+        if bins_size is None:
+            bins_size = 1
 
         hist_fig.plot_one_graph(
             "Age distribution in the samples",
             "age",
             "number of samples",
-            step
+            bins_size,
+            plotting_options,
+            show=show,
+            output_file=output_file
             )
 
     def plot_sex(self, plotting_options: dict = None, show: Optional[bool] = True, output_file: Optional[str] = False):
@@ -226,13 +233,16 @@ class PlotMetadataStats():
         plotting_options = _add_x_to_plotting_options(
             plotting_options, 'colorbar', ['pink', 'blue'])
 
-        bar_fig = BarGraph(self.metadata_df['sex'], plotting_options, show=show, output_file=output_file)
+        bar_fig = BarGraph(self.metadata_df['sex'])
         bar_fig.count()    # normalize or not?
         bar_fig.reset_xnames({'F': 'Female', 'M': 'Male'})
         bar_fig.plot_one_graph(
             "Sex distribution in the samples",
             "sex",
             "number of samples",
+            plotting_options,
+            show=show,
+            output_file=output_file
             )
 
     def plot_other(self, column_name, title=None, xlabel=None,
@@ -257,7 +267,7 @@ class PlotMetadataStats():
         else:
             plotting_options = _check_types_in_plotting_options(plotting_options)
 
-        bar_fig = BarGraph(self.metadata_df[column_name], plotting_options, show=show, output_file=output_file)
+        bar_fig = BarGraph(self.metadata_df[column_name])
         bar_fig.count()    # normalize or not?
         if reset_xnames_dic is not None:
             bar_fig.reset_xnames(reset_xnames_dic)
@@ -269,4 +279,7 @@ class PlotMetadataStats():
             title,
             xlabel,
             "number of samples",
+            plotting_options,
+            show=show,
+            output_file=output_file
             )

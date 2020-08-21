@@ -9,32 +9,11 @@ from typing import Union
 
 class BaseGraph(ABC):
 
-    def __init__(self, dataframe: pd.DataFrame, plotting_options: dict = None,
-                 show: bool = True, output_file: Union[bool, str] = False):
+    def __init__(self, dataframe: pd.DataFrame):
         """
         :param dataframe: pandas dataframe generated with moonstone
-        :param show: set to False if you don't want to show the plot
-        :param output_file: name of the output file
-        :param plotting_options: options of plotting that will override the default setup \n
-                                 [!] Make sure the value given to an argument is of the right type \n
-                                 options allowed : 'log': `bool` ; 'colorbar': `[str, List[str]]` ;
-                                 'tickangle': `[int, float]`
         """
         self.df = dataframe
-        self.plotting_options = plotting_options
-
-        if type(show) == bool:
-            self.show = show
-        else:
-            raise ValueError('Error : show value must be a bool, %s given' % type(show).__name__)
-
-        self.output_file = output_file
-        if self.output_file is True:
-            # if no name given for the output file, a generic name is generated
-            if dataframe.name is not None:
-                self.output_file = dataframe.name+"_"+self.__class__.__name__+".html"
-            else:
-                self.output_file = self.__class__.__name__+".html"
 
     @abstractmethod
     def plot_one_graph(self, title: str, xlabel: str, ylabel: str):
@@ -43,6 +22,38 @@ class BaseGraph(ABC):
         needs to be defined in every child class
         """
         pass
+
+    def _handle_colorbar_plotly(self, value):
+        self.fig.update_traces(marker_color=value)
+
+    def _handle_log_plotly(self, value):
+        self.fig.update_layout(yaxis_type="log")
+
+    def _handle_tickangle_plotly(self, value):
+        self.fig.update_xaxes(tickangle=value)
+
+    def _handle_plotting_options_plotly(self, plotting_options):
+        for option in plotting_options.keys():
+            handler = f"_handle_{option}_plotly"
+            getattr(self, handler)(plotting_options[option])
+
+    def _display_titles_plotly(self, title, xlabel, ylabel):
+        self.fig.update_layout(title_text=title, title_x=0.5)
+        self.fig.update_xaxes(title_text=xlabel)
+        self.fig.update_yaxes(title_text=ylabel)
+
+    def _handle_output_plotly(self, show, output_file):
+        if show is True:
+            self.fig.show()
+
+        if output_file:
+            if output_file is True:
+                # if no name given for the output file, a generic name is generated
+                if self.dataframe.name is not None:
+                    output_file = self.dataframe.name+"_"+self.__class__.__name__+".html"
+                else:
+                    output_file = self.__class__.__name__+".html"
+            plotly.io.write_html(self.fig, output_file)
 
 
 class BarGraph(BaseGraph):
@@ -80,48 +91,26 @@ class BarGraph(BaseGraph):
         for i in range(len(self.xnames)):
             self.xnames[i] = replace_dic[self.xnames[i]]
 
-    def plot_one_graph(self, title: str, xlabel: str, ylabel: str):
-        fig = go.Figure([go.Bar(x=self.xnames, y=self.yvalues)])
+    def plot_one_graph(self, title: str, xlabel: str, ylabel: str, plotting_options: dict,
+                       show: bool = True, output_file: Union[bool, str] = False):
+        self.fig = go.Figure([go.Bar(x=self.xnames, y=self.yvalues)])
 
-        if 'log' in self.plotting_options.keys() and self.plotting_options['log']:
-            fig.update_layout(yaxis_type="log")
-        if 'tickangle' in self.plotting_options.keys():
-            fig.update_xaxes(tickangle=self.plotting_options['tickangle'])
-        if 'colorbar' in self.plotting_options.keys():
-            fig.update_traces(marker_color=self.plotting_options['colorbar'])
-
-        fig.update_layout(title_text=title, title_x=0.5)
-        fig.update_xaxes(title_text=xlabel)
-        fig.update_yaxes(title_text=ylabel)
-
-        if self.show is True:
-            fig.show()
-
-        if self.output_file:
-            plotly.io.write_html(fig, self.output_file)
+        self._handle_plotting_options_plotly(plotting_options)
+        self._display_titles_plotly(title, xlabel, ylabel)
+        self._handle_output_plotly(show, output_file)
 
 
 class Histogram(BaseGraph):
 
     def plot_one_graph(self, title: str, xlabel: str, ylabel: str,
-                       step: Union[int, float]):   # see if we add nbinsx options
-        minimum = int(self.df.min()/step) * step
+                       bins_size: Union[int, float], plotting_options: dict = None,
+                       show: bool = True, output_file: Union[bool, str] = False):
+        # see if we add nbinsx options
+        minimum = int(self.df.min()/bins_size) * bins_size
         maximum = self.df.max()
-        fig = go.Figure([go.Histogram(x=self.df, xbins=dict(start=minimum, end=maximum, size=step), autobinx=False)])
+        self.fig = go.Figure([go.Histogram(x=self.df, xbins=dict(start=minimum, end=maximum, size=bins_size),
+                                           autobinx=False)])
 
-        if 'log' in self.plotting_options.keys() and self.plotting_options['log'] is True:
-            fig.update_layout(yaxis_type="log")
-        if 'tickangle' in self.plotting_options.keys():
-            fig.update_xaxes(tickangle=self.plotting_options['tickangle'])
-        if 'colorbar' in self.plotting_options.keys():
-            fig.update_traces(marker_color=self.plotting_options['colorbar'])
-
-        fig.update_layout(title_text=title, title_x=0.5)
-        fig.update_xaxes(title_text=xlabel)
-        fig.update_yaxes(title_text=ylabel)
-
-        if self.show is True:
-            fig.show()
-
-        if self.output_file:
-            plotly.io.write_html(fig, self.output_file)
+        self._handle_plotting_options_plotly(plotting_options)
+        self._display_titles_plotly(title, xlabel, ylabel)
+        self._handle_output_plotly(show, output_file)
