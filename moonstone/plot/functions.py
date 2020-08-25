@@ -49,10 +49,7 @@ def check_type_s(to_check, expectedtype_s: type):
                 type_in_str_for_warning += [s]
         return " or ".join(type_in_str_for_warning)   # return what will be in the error raised
     else:                               # if only one type
-        if check_type(to_check, expectedtype_s):
-            return True
-        else:
-            return expectedtype_s.__name__                         # return what will be in the error raised
+        return check_type(to_check, expectedtype_s)                        # return what will be in the error raised
 
 
 def check_types_in_plotting_options(plotting_options: dict):
