@@ -5,7 +5,7 @@ from moonstone.parsers.counts.taxonomy.base import TaxonomyCountsBaseParser
 
 class Qiime2Parser(TaxonomyCountsBaseParser):
     """
-    This class is used to parse the data obtained by Qiime2 (https://qiime2.org/).
+    Parse output csv data obtained by `Qiime2 <https://qiime2.org/>`_.
     """
 
     taxa_column = '#OTU ID'

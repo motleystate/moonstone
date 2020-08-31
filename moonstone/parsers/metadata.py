@@ -10,6 +10,9 @@ from .base import BaseParser
 
 
 class MetadataParser(BaseParser):
+    """
+    Parse metadata file and allows to apply transformations on them (cleaning...).
+    """
 
     def __init__(self, *args, cleaning_operations: dict = None, **kwargs):
         """

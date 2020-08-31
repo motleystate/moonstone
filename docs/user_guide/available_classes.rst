@@ -30,38 +30,29 @@ List
 
 Classic and simple parsers:
 
-+----------------------------+--------------------------------------------------------------------------------+
-| Class name                 | Description                                                                    |
-+============================+================================================================================+
-| ``MetadataParser``         | Parse metadata file and allows to apply transformations on them (cleaning...). |
-+----------------------------+--------------------------------------------------------------------------------+
+.. currentmodule:: moonstone.parsers.metadata
+.. autosummary::
+   :nosignatures:
+
+    MetadataParser
 
 Counts parsers (``from moonstone.parsers.counts``):
 
-+----------------------------+----------------------------------------------------------------+
-| Class name                 | Description                                                    |
-+============================+================================================================+
-| ``Picrust2PathwaysParser`` | Predicted sample pathway abundances output file from Picrust2_ |
-+----------------------------+----------------------------------------------------------------+
+.. currentmodule:: moonstone.parsers.counts.picrust2
+.. autosummary::
+   :nosignatures:
 
-.. _Picrust2: https://github.com/picrust/picrust2/wiki
+    Picrust2PathwaysParser
 
 Taxonomy counts parsers (``from moonstone.parsers.counts.taxonomy``):
 
-+--------------------------+---------------------------------------------------------+
-| Class name               | Description                                             |
-+==========================+=========================================================+
-| ``SunbeamKraken2Parser`` | output from Kraken2_ merge table from Sunbeam_ pipeline |
-+--------------------------+---------------------------------------------------------+
-| ``Metaphlan2Parser``     | output from Metaphlan2_ merged table                    |
-+--------------------------+---------------------------------------------------------+
-| ``Qiime2Parser``         | parse output csv data obtained by Qiime2_               |
-+--------------------------+---------------------------------------------------------+
+.. currentmodule:: moonstone.parsers.counts.taxonomy
+.. autosummary::
+   :nosignatures:
 
-.. _Sunbeam: https://github.com/sunbeam-labs/sunbeam
-.. _Kraken2: https://ccb.jhu.edu/software/kraken2/
-.. _Metaphlan2: https://github.com/biobakery/MetaPhlAn
-.. _Qiime2: https://qiime2.org/
+    kraken2.SunbeamKraken2Parser
+    metaphlan2.Metaphlan2Parser
+    qiime.Qiime2Parser
 
 .. Note::
     More details on API documentation for :ref:`api_parsers`.
@@ -84,17 +75,14 @@ How it works?
 List
 """"
 
-+----------------------------+-------------------------------------------------------------------------------+
-| Class name                 | Description                                                                   |
-+============================+===============================================================================+
-| ``NoCountsFiltering``      | Remove rows (default) or columns with no counts.                              |
-+----------------------------+-------------------------------------------------------------------------------+
-| ``NamesFiltering``         | Filtering based on row (default) or column names.                             |
-+----------------------------+-------------------------------------------------------------------------------+
-| ``TaxonomyNamesFiltering`` | Filtering a Taxonomy multiindexed dataframe on index names at a chosen level. |
-+----------------------------+-------------------------------------------------------------------------------+
-| ``MeanFiltering``          | Remove items below a given mean threshold.                                    |
-+----------------------------+-------------------------------------------------------------------------------+
+.. currentmodule:: moonstone.filtering
+.. autosummary::
+   :nosignatures:
+
+    basics_filtering.NoCountsFiltering
+    basics_filtering.NamesFiltering
+    taxonomy_filtering.TaxonomyNamesFiltering
+    mean_filtering.MeanFiltering
 
 .. Note::
     More details on API documentation for :ref:`api_filtering`.
@@ -117,17 +105,14 @@ How it works?
 List
 """"
 
-+--------------------------------+------------------------------------------------------+
-| Class name                     | Description                                          |
-+================================+======================================================+
-| ``GeometricMeanNormalization`` | normalization based on the one performed by DeSeq2_. |
-+--------------------------------+------------------------------------------------------+
-| ``TotalCountsNormalization``   | normalization based on total counts.                 |
-+--------------------------------+------------------------------------------------------+
+.. currentmodule:: moonstone.normalization.counts
+.. autosummary::
+   :nosignatures:
 
-.. _DeSeq2: https://bioconductor.org/packages/release/bioc/html/DESeq2.html
+    geometric_mean.GeometricMeanNormalization
+    total_counts.TotalCountsNormalization
 
-.. _av_normalization:
+.. _av_plot:
 
 Plot
 ====
@@ -149,13 +134,12 @@ How it works?
 List
 """"
 
-+-----------------------+--------------------------------------------------------+
-| Class name            | Description                                            |
-+=======================+========================================================+
-| ``PlotCountsStats``   | Several plots available to visualize simple count data |
-+-----------------------+--------------------------------------------------------+
-| ``PlotMetadataStats`` | Several plots available to visualize metadata          |
-+-----------------------+--------------------------------------------------------+
+.. currentmodule:: moonstone.plot.global_plot
+.. autosummary::
+   :nosignatures:
+
+   PlotCountsStats
+   PlotMetadataStats
 
 .. Note::
     More details on API documentation for :ref:`api_plot`.
