@@ -126,3 +126,36 @@ List
 +--------------------------------+------------------------------------------------------+
 
 .. _DeSeq2: https://bioconductor.org/packages/release/bioc/html/DESeq2.html
+
+.. _av_normalization:
+
+Plot
+====
+
+How it works?
+"""""""""""""
+
+.. code-block:: python
+
+    from moonstone.plot import PlotCountsStats
+
+    # instantiation
+    plot_instance = PlotCountsStats(df)
+
+    # call one (or more) plotting method(s)
+    plot_instance.your_favorite_plot()
+    plot_instance.another_of_your_favorite_plot()
+
+List
+""""
+
++-----------------------+--------------------------------------------------------+
+| Class name            | Description                                            |
++=======================+========================================================+
+| ``PlotCountsStats``   | Several plots available to visualize simple count data |
++-----------------------+--------------------------------------------------------+
+| ``PlotMetadataStats`` | Several plots available to visualize metadata          |
++-----------------------+--------------------------------------------------------+
+
+.. Note::
+    More details on API documentation for :ref:`api_plot`.
