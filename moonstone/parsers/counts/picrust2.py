@@ -3,6 +3,8 @@ from moonstone.parsers.base import BaseParser
 
 class Picrust2PathwaysParser(BaseParser):
     """
+    Predicted sample pathway abundances output file from `Picrust2 <https://github.com/picrust/picrust2/wiki/>`_.
+
     Format is the following:
 
     +-----------+----------+----------+

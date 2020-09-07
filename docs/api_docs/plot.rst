@@ -1,11 +1,11 @@
 .. _api_plot:
 
-*****
+****
 Plot
-*****
+****
 
 Data
-=====
+====
 
 .. autoclass:: moonstone.plot.global_plot.PlotCountsStats
     :members:

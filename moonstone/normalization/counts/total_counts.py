@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class TotalCountsNormalization(BaseNormalization):
     """
-    normalization based on total counts
+    normalization based on total counts.
     """
 
     @property

@@ -5,7 +5,7 @@ from moonstone.parsers.counts.taxonomy.base import TaxonomyCountsBaseParser
 
 class Metaphlan2Parser(TaxonomyCountsBaseParser):
     """
-    Parse output from metaphlan2 merged table
+    Parse output from `Metaphlan2 <https://github.com/biobakery/MetaPhlAn/>`_ merged table.
     """
 
     taxa_column = 'ID'

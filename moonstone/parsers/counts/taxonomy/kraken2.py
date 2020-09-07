@@ -5,7 +5,8 @@ from moonstone.parsers.counts.taxonomy.base import TaxonomyCountsBaseParser
 
 class SunbeamKraken2Parser(TaxonomyCountsBaseParser):
     """
-    Parse output from Kraken2 merge table from Sunbeam pipeline
+    Parse output from `Kraken2 <https://ccb.jhu.edu/software/kraken2/>`_
+    merge table from `Sunbeam <https://github.com/sunbeam-labs/sunbeam/>`_ pipeline.
     """
 
     taxa_column = 'Consensus Lineage'
