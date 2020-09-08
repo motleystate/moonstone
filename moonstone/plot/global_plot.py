@@ -74,7 +74,7 @@ def _check_types_in_plotting_options(plotting_options: dict):
     check types of plotting options given by the user.
     Create a new dictionary cleaned_plotting_options without the options that are of the wrong type
     """
-    expectedtype = {'log': bool, 'colorbar': [str, List[str]], 'tickangle': [int, float]}
+    expectedtype = {'log': [bool, str], 'colorbar': [str, List[str]], 'tickangle': [int, float]}
     cleaned_plotting_options = {}
     for i in plotting_options.keys():
         if i in expectedtype.keys():

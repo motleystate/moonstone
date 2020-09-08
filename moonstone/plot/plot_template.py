@@ -28,10 +28,12 @@ class BaseGraph(ABC):
         self.fig.update_traces(marker_color=value)
 
     def _handle_log_plotly(self, value):
-        if "xaxis" in value:
-            self.fig.update_layout(xaxis_type="log")
-        elif "yaxis" in value or value is True:
+        if value is False:
+            pass
+        elif value is True or "yaxis" in value:
             self.fig.update_layout(yaxis_type="log")
+        elif "xaxis" in value:
+            self.fig.update_layout(xaxis_type="log")
 
     def _handle_tickangle_plotly(self, value):
         self.fig.update_xaxes(tickangle=value)
