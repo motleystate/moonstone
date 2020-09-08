@@ -20,6 +20,9 @@ Or should we put that in the analysis module?
 
 
 class PlotCountsStats():
+    """
+    Several plots available to visualize simple count data.
+    """
 
     def __init__(self, dataframe: pd.DataFrame, items_name: str = "items"):
         self.df = dataframe
@@ -59,6 +62,9 @@ class PlotCountsStats():
 
 
 class PlotTaxonomyStats():
+    """
+    Several plots available to visualize taxonomy count data.
+    """
 
     def __init__(self, dataframe: pd.DataFrame, items_name: str = "items"):
         self.df = dataframe
@@ -88,6 +94,9 @@ class PlotTaxonomyStats():
 
 
 class PlotMetadataStats():
+    """
+    Several plots available to visualize metadata.
+    """
 
     def __init__(self, metadata_dataframe: pd.DataFrame):
         self.metadata_df = metadata_dataframe
