@@ -56,5 +56,13 @@ class TestPlotMetadataStats(TestCase):
             orient='index', columns=['age', 'sex', 'smoker'])
         tested_object_instance = PlotMetadataStats(tested_object)
         tested_object_instance.plot_age(show=False,
-                                        plotting_options={'log': 'zzeezez', 'colorbar': ['red', 63], 'tickangle': 50})
+                                        plotting_options={'log': False, 'colorbar': 'red', 'tickangle': 50,
+                                                          'shapes': [
+                                                               {"x0": 0.5, "y0": 1, "x1": 1, "y1": 1, "xref": "paper",
+                                                                "line": {"dash": "dash", "color": "red", "width": 2}},
+                                                               {"x0": 1,
+                                                                "xref": "paper", "line": {"color": "blue", "width": 2}}
+                                                               ]
+                                                          }
+                                        )
         # expected_object = ?????

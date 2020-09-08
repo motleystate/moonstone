@@ -14,6 +14,7 @@ class BaseGraph(ABC):
         :param dataframe: pandas dataframe generated with moonstone
         """
         self.df = dataframe
+        self.fig = go.Figure()
 
     @abstractmethod
     def plot_one_graph(self, title: str, xlabel: str, ylabel: str):
@@ -27,10 +28,21 @@ class BaseGraph(ABC):
         self.fig.update_traces(marker_color=value)
 
     def _handle_log_plotly(self, value):
-        self.fig.update_layout(yaxis_type="log")
+        if value is True:
+            self.fig.update_layout(yaxis_type="log")
 
     def _handle_tickangle_plotly(self, value):
         self.fig.update_xaxes(tickangle=value)
+
+    def _handle_shapes_plotly(self, value):
+        """
+        :param value: list of dictionnary for all the shapes to draw, with values for type,
+                      x0, y0, x1, y1, xref [optional], yref [optional],
+                      line dictionnary [optional]
+                      -> line dictionnary contains lines descriptor like width, color,
+                         or dash (dash, dashdot, dot etc.)
+        """
+        self.fig.update_layout(shapes=value)
 
     def _handle_plotting_options_plotly(self, plotting_options):
         for option in plotting_options.keys():
@@ -49,8 +61,8 @@ class BaseGraph(ABC):
         if output_file:
             if output_file is True:
                 # if no name given for the output file, a generic name is generated
-                if self.dataframe.name is not None:
-                    output_file = self.dataframe.name+"_"+self.__class__.__name__+".html"
+                if self.df.name is not None:
+                    output_file = self.df.name+"_"+self.__class__.__name__+".html"
                 else:
                     output_file = self.__class__.__name__+".html"
             plotly.io.write_html(self.fig, output_file)

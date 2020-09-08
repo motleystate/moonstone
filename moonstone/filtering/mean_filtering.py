@@ -88,7 +88,10 @@ class MeanFiltering(BaseFiltering):
             secondary_y=True,
         )
         fig.add_trace(
-            go.Scatter(x=[self.threshold, self.threshold], y=[0, self.raw_reads_number], name="90% Reads Threshold"),
+            go.Scatter(x=[self.threshold, self.threshold],
+                       y=[0, self.raw_reads_number],
+                       mode='lines',
+                       name="90% Reads Threshold"),
             secondary_y=True,
         )
         # Add figure title

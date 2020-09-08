@@ -89,6 +89,8 @@ Please check the type of elements in the list given. Value overridden') % (i, s)
                 else:
                     warnings.warn('Warning : %s value in plotting_options must be a %s, %s given. Value overridden' %
                                   (i, s, type(plotting_options[i]).__name__))
+        else:
+            cleaned_plotting_options[i] = plotting_options[i]
     return cleaned_plotting_options
 
 
