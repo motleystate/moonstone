@@ -23,3 +23,6 @@ output
 
 # readthedocs
 _build/
+
+# local notebooks
+notebooks/

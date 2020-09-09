@@ -1,37 +1,37 @@
 import sys
 import typing
-from typing import List
+from typing import List, Union
 import warnings
 
 
-def check_list_of(listx, expectedtype):    # expectedtype can be tuple of type
+def check_list_type(items, expected_type: Union[tuple, type]) -> bool:
     """
-    check the type of what's in listx
+    check if the type of the different items correspond to the expectedtype(s)
     """
-    return all(isinstance(s, expectedtype) for s in listx)
+    return all(isinstance(s, expected_type) for s in items)
 
 
-def check_type(to_check, expectedtype: type):
+def check_type(to_check, expected_type: type):
     """
     check if type of 'to_check' is right
     """
     # type(List[str]) = typing._GenericAlias in python3.7 and typing.GenericMeta in python3.6
     if sys.version_info[1] >= 7:
         typeList = typing._GenericAlias
-        # typeListName = expectedtype._name       # for now only typing type is List so not necessary
+        # typeListName = expected_type._name       # for now only typing type is List so not necessary
     else:
         typeList = typing.GenericMeta
         # typeListName = str(p._gorg).split('.')[1]
-    if type(expectedtype) == typeList:      # if List[<type>] (<type> = str, int etc.)
+    if type(expected_type) == typeList:      # if List[<type>] (<type> = str, int etc.)
         if type(to_check) == list:
-            if check_list_of(to_check, expectedtype.__args__[0]) is True:
+            if check_list_type(to_check, expected_type.__args__[0]) is True:
                 return True
-        return 'List['+expectedtype.__args__[0].__name__+']'
+        return 'List[' + expected_type.__args__[0].__name__ + ']'
     else:
-        if type(to_check) == expectedtype:
+        if type(to_check) == expected_type:
             return True
         else:
-            return expectedtype.__name__
+            return expected_type.__name__
 
 
 def check_type_s(to_check, expectedtype_s: type):
