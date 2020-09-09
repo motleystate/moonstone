@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.plot.plot_template import (
+from moonstone.plot.graphs.bargraph import (
     CategoryBarGraph, DistributionBarGraph
 )
 

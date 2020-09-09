@@ -7,7 +7,7 @@ from moonstone.plot.utils import (
 )
 
 
-class TestFunctions(TestCase):
+class TestUtils(TestCase):
 
     def test_check_list_type(self):
         self.assertTrue(check_list_type(['A', 'B', 'C'], str))
