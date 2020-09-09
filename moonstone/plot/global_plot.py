@@ -94,17 +94,28 @@ Please check the type of elements in the list given. Value overridden') % (i, s)
     return cleaned_plotting_options
 
 
-def _add_x_to_plotting_options(plotting_options: dict, x: str, defaultvalue):
+def _add_x_to_plotting_options(plotting_options: dict, option_cat: str, x: str, defaultvalue):
     """
     don't override given plotting_options, meaning it only add the default value
     if value not already defined in plotting_options
     ~~~ MAYBE DELETE THIS METHOD ~~~
     """
-    if x not in plotting_options.keys():    # if x not already specified (not given or not of the right type)
-        plotting_options[x] = defaultvalue
+    if option_cat not in plotting_options.keys():    # if x not already specified (not given or not of the right type)
+        plotting_options[option_cat] = {x: defaultvalue}
+        return plotting_options
+    elif 'x' not in plotting_options[option_cat].keys():
+        plotting_options[option_cat][x] = defaultvalue
         return plotting_options
     else:
         return plotting_options
+
+
+def _add_default_titles_to_plotting_options(plotting_options: dict, title: str, xlabel: str, ylabel: str):
+    plotting_options = _add_x_to_plotting_options(plotting_options, 'layout', 'title_text', title)
+    plotting_options = _add_x_to_plotting_options(plotting_options, 'layout', 'title_x', 0.5)
+    plotting_options = _add_x_to_plotting_options(plotting_options, 'xaxes', 'title_text', xlabel)
+    plotting_options = _add_x_to_plotting_options(plotting_options, 'yaxes', 'title_text', ylabel)
+    return plotting_options
 
 
 class PlotCountsStats():
@@ -125,14 +136,17 @@ class PlotCountsStats():
                                  'tickangle': `[int, float]`
         """
         if plotting_options is None:
-            plotting_options = {}
+            plotting_options = {'layout': {'title_text': "Distribution of %s mean" % self.items_name, 'title_x': 0.5,
+                                           'yaxis_type': 'log'},
+                                'xaxes': {'title_text': "sex", 'tickangle': -60},
+                                'yaxes': {'title_text': "number of samples"}}
         else:
-            plotting_options = _check_types_in_plotting_options(plotting_options)
-
-        plotting_options = _add_x_to_plotting_options(
-            plotting_options, 'log', True)
-        plotting_options = _add_x_to_plotting_options(
-            plotting_options, 'tickangle', -60)
+            plotting_options = _add_default_titles_to_plotting_options(plotting_options,
+                                                                       "Distribution of %s mean" % self.items_name,
+                                                                       "mean of the number of reads",
+                                                                       "number of samples")
+            plotting_options = _add_x_to_plotting_options(plotting_options, 'layout', 'yaxis_type', 'log')
+            plotting_options = _add_x_to_plotting_options(plotting_options, 'xaxes', 'tickangle', -60)
 
         df_mean = self.df.mean(axis=1)
 
@@ -140,9 +154,6 @@ class PlotCountsStats():
         bar_fig.compute_heterogeneous_bins()
         bar_fig.in_bins_and_count()    # normalize or not?
         bar_fig.plot_one_graph(
-            "Distribution of %s mean" % self.items_name,
-            "mean of the number of reads",
-            "number of samples",
             plotting_options,
             show=show,
             output_file=output_file
@@ -197,9 +208,13 @@ class PlotMetadataStats():
                                  'tickangle': `[int, float]`
         """
         if plotting_options is None:
-            plotting_options = {}
+            plotting_options = {'layout': {'title_text': "Age distribution in the samples", 'title_x': 0.5},
+                                'xaxes': {'title_text': "age"},
+                                'yaxes': {'title_text': "number of samples"}}
         else:
-            plotting_options = _check_types_in_plotting_options(plotting_options)
+            plotting_options = _add_default_titles_to_plotting_options(plotting_options,
+                                                                       "Age distribution in the samples",
+                                                                       "age", "number of samples")
 
         hist_fig = Histogram(self.metadata_df['age'])
 
@@ -207,9 +222,6 @@ class PlotMetadataStats():
             bins_size = 1
 
         hist_fig.plot_one_graph(
-            "Age distribution in the samples",
-            "age",
-            "number of samples",
             bins_size,
             plotting_options,
             show=show,
@@ -224,24 +236,25 @@ class PlotMetadataStats():
         :param output_file: name of the output file
         :param plotting_options: options of plotting that will override the default setup \n
                                  [!] Make sure the value given to an argument is of the right type \n
-                                 options allowed : 'log': `bool` ; 'colorbar': `[str, List[str]]` ;
+                                 options allowed : 'log': `bool` ; 'marker_color': `[str, List[str]]` ;
                                  'tickangle': `[int, float]`
         """
-        if plotting_options is None:
-            plotting_options = {}
-        else:
-            plotting_options = _check_types_in_plotting_options(plotting_options)
 
-        plotting_options = _add_x_to_plotting_options(
-            plotting_options, 'colorbar', ['pink', 'blue'])
+        if plotting_options is None:
+            plotting_options = {'layout': {'title_text': "Sex distribution in the samples", 'title_x': 0.5},
+                                'xaxes': {'title_text': "sex"},
+                                'yaxes': {'title_text': "number of samples"},
+                                'traces': {'marker_color': ['pink', 'blue']}}
+        else:
+            plotting_options = _add_default_titles_to_plotting_options(plotting_options,
+                                                                       "Sex distribution in the samples",
+                                                                       "sex", "number of samples")
+            plotting_options = _add_x_to_plotting_options(plotting_options, 'traces', 'marker_color', ['pink', 'blue'])
 
         bar_fig = BarGraph(self.metadata_df['sex'])
         bar_fig.count()    # normalize or not?
         bar_fig.reset_xnames({'F': 'Female', 'M': 'Male'})
         bar_fig.plot_one_graph(
-            "Sex distribution in the samples",
-            "sex",
-            "number of samples",
             plotting_options,
             show=show,
             output_file=output_file

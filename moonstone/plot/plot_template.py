@@ -24,39 +24,38 @@ class BaseGraph(ABC):
         """
         pass
 
-    def _handle_colorbar_plotly(self, value):
-        self.fig.update_traces(marker_color=value)
-
-    def _handle_log_plotly(self, value):
-        if value is False:
-            pass
-        elif value is True or "yaxis" in value:
-            self.fig.update_layout(yaxis_type="log")
-        elif "xaxis" in value:
-            self.fig.update_layout(xaxis_type="log")
-
-    def _handle_tickangle_plotly(self, value):
-        self.fig.update_xaxes(tickangle=value)
-
-    def _handle_shapes_plotly(self, value):
+    def _handle_plotting_options_plotly(self, plotting_options: dict):
         """
-        :param value: list of dictionnary for all the shapes to draw, with values for type,
+        :param plotting_options: dictionary of dictionaries where the keys are the level to update
+        ( "layout" | "traces" | "xaxes" | "yaxes" ...)
+
+        Examples of keys that can be specified in layout dictionary :
+
+        :param yaxis_type xaxis_type: Sets the axis type. By default, plotly attempts to determined the axis type
+        by looking into the data of the traces that referenced the axis in question.
+        ("-" | "linear" | "log" | "date" | "category" | "multicategory")
+        :param shapes: list of dictionary for all the shapes to draw, with values for type,
                       x0, y0, x1, y1, xref [optional], yref [optional],
-                      line dictionnary [optional]
-                      -> line dictionnary contains lines descriptor like width, color,
+                      line dictionary [optional]
+                      -> line dictionary contains lines descriptor like width, color,
                          or dash (dash, dashdot, dot etc.)
+        :param title_text: title of the graph
+        :param title_y title_x: coordinates of the title
+
+        See `plotly documentation
+        <https://plotly.com/python-api-reference/generated/plotly.graph_objects.Layout.html>`_.
+
+
+        Examples of keys that can be specified in traces dictionary :
+        :param marker_color
+
+        Examples of keys that can be specified in xaxes dictionary or yaxes dictionary :
+        :param tickangle: degree of orientation of tick labels
+        :param title_text: label of the axis
         """
-        self.fig.update_layout(shapes=value)
-
-    def _handle_plotting_options_plotly(self, plotting_options):
         for option in plotting_options.keys():
-            handler = f"_handle_{option}_plotly"
-            getattr(self, handler)(plotting_options[option])
-
-    def _display_titles_plotly(self, title, xlabel, ylabel):
-        self.fig.update_layout(title_text=title, title_x=0.5)
-        self.fig.update_xaxes(title_text=xlabel)
-        self.fig.update_yaxes(title_text=ylabel)
+            updater = f"update_{option}"
+            getattr(self.fig, updater)(plotting_options[option])
 
     def _handle_output_plotly(self, show, output_file):
         if show is True:
@@ -107,18 +106,17 @@ class BarGraph(BaseGraph):
         for i in range(len(self.xnames)):
             self.xnames[i] = replace_dic[self.xnames[i]]
 
-    def plot_one_graph(self, title: str, xlabel: str, ylabel: str, plotting_options: dict,
+    def plot_one_graph(self, plotting_options: dict,
                        show: bool = True, output_file: Union[bool, str] = False):
         self.fig = go.Figure([go.Bar(x=self.xnames, y=self.yvalues)])
 
         self._handle_plotting_options_plotly(plotting_options)
-        self._display_titles_plotly(title, xlabel, ylabel)
         self._handle_output_plotly(show, output_file)
 
 
 class Histogram(BaseGraph):
 
-    def plot_one_graph(self, title: str, xlabel: str, ylabel: str,
+    def plot_one_graph(self,
                        bins_size: Union[int, float], plotting_options: dict = None,
                        show: bool = True, output_file: Union[bool, str] = False):
         # see if we add nbinsx options
@@ -128,5 +126,4 @@ class Histogram(BaseGraph):
                                            autobinx=False)])
 
         self._handle_plotting_options_plotly(plotting_options)
-        self._display_titles_plotly(title, xlabel, ylabel)
         self._handle_output_plotly(show, output_file)
