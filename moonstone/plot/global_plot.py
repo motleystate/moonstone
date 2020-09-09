@@ -4,8 +4,7 @@ from typing import Optional
 from moonstone.plot.plot_template import (
     CategoryBarGraph, DistributionBarGraph, Histogram
 )
-from moonstone.plot.functions import (
-    check_types_in_plotting_options,
+from moonstone.plot.utils import (
     add_x_to_plotting_options
 )
 
@@ -42,8 +41,6 @@ class PlotCountsStats():
         """
         if plotting_options is None:
             plotting_options = {}
-        else:
-            plotting_options = check_types_in_plotting_options(plotting_options)
 
         plotting_options = add_x_to_plotting_options(
             plotting_options, 'log', True)
@@ -116,8 +113,6 @@ class PlotMetadataStats():
         """
         if plotting_options is None:
             plotting_options = {}
-        else:
-            plotting_options = check_types_in_plotting_options(plotting_options)
 
         hist_fig = Histogram(self.metadata_df['age'], plotting_options, show=show, output_file=output_file)
 
@@ -144,8 +139,6 @@ class PlotMetadataStats():
         """
         if plotting_options is None:
             plotting_options = {}
-        else:
-            plotting_options = check_types_in_plotting_options(plotting_options)
 
         plotting_options = add_x_to_plotting_options(
             plotting_options, 'colorbar', ['pink', 'blue'])
@@ -180,8 +173,6 @@ class PlotMetadataStats():
         """
         if plotting_options is None:
             plotting_options = {}
-        else:
-            plotting_options = check_types_in_plotting_options(plotting_options)
 
         bar_fig = CategoryBarGraph(self.metadata_df[column_name], plotting_options, show=show, output_file=output_file)
         bar_fig.count()    # normalize or not?

@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import plotly.io
 from typing import Union
 
-from moonstone.plot.functions import (
+from moonstone.plot.utils import (
     check_list_type
 )
 
