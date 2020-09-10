@@ -31,8 +31,8 @@ class DifferentialAnalysis:
         logger.info('removing rows with only zeros')
         filtering_instance = NoCountsFiltering(self.read_count_df)
         self.read_count_df = filtering_instance.filtered_df
-        instance = MergeCountsAndMetadata(self.metadata_df, self.read_count_df)
-        self.full_table = instance.full_dataframe_with_features_in_columns
+        instance = MergeCountsAndMetadata(self.read_count_df, self.metadata_df)
+        self.full_table = instance.full_df_with_features_in_columns
 
     @property
     def number_columns_to_skip(self):

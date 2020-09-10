@@ -26,10 +26,10 @@ class TestMergeCountsAndMetadata(TestCase):
             },
             orient='index', columns=[1, 2, 3, 4])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = MergeCountsAndMetadata(tested_object_metadata, tested_object_reads)
+        tested_object = MergeCountsAndMetadata(tested_object_reads, tested_object_metadata)
         self.assertTrue(tested_object.check_column_names())
 
-    def test_full_dataframe_with_different_sample_number(self):
+    def test_full_df_with_different_sample_number(self):
         tested_object_reads = pd.DataFrame.from_dict(
             {
                 'specie_1': [3, 2, 1, 0],
@@ -44,11 +44,11 @@ class TestMergeCountsAndMetadata(TestCase):
             },
             orient='index', columns=[1, 2, 3])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = MergeCountsAndMetadata(tested_object_metadata, tested_object_reads)
+        tested_object = MergeCountsAndMetadata(tested_object_reads, tested_object_metadata)
         with pytest.raises(Exception):
-            assert tested_object.full_dataframe
+            assert tested_object.full_df
 
-    def test_full_dataframe(self):
+    def test_full_df(self):
         tested_object_reads = pd.DataFrame.from_dict(
             {
                 'specie_1': [3, 2, 1, 0],
@@ -63,7 +63,7 @@ class TestMergeCountsAndMetadata(TestCase):
             },
             orient='index', columns=[1, 2, 3, 4])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = MergeCountsAndMetadata(tested_object_metadata, tested_object_reads)
+        tested_object = MergeCountsAndMetadata(tested_object_reads, tested_object_metadata)
         expected_object = pd.DataFrame.from_dict(
             {
                 'Sex': ['M', 'F', 'M', "F"],
@@ -73,9 +73,9 @@ class TestMergeCountsAndMetadata(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         expected_object.columns.name = 'sample'
-        pd.testing.assert_frame_equal(tested_object.full_dataframe, expected_object)
+        pd.testing.assert_frame_equal(tested_object.full_df, expected_object)
 
-    def test_full_dataframe_with_features_in_columns(self):
+    def test_full_df_with_features_in_columns(self):
         tested_object_reads = pd.DataFrame.from_dict(
             {
                 'specie_1': [3, 2, 1, 0],
@@ -90,7 +90,7 @@ class TestMergeCountsAndMetadata(TestCase):
             },
             orient='index', columns=[1, 2, 3, 4])
         tested_object_metadata.columns.name = 'sample'
-        tested_object = MergeCountsAndMetadata(tested_object_metadata, tested_object_reads)
+        tested_object = MergeCountsAndMetadata(tested_object_reads, tested_object_metadata)
         expected_object = pd.DataFrame.from_dict(
             {
                 '1': ['M', 25, 3, 25],
@@ -100,5 +100,5 @@ class TestMergeCountsAndMetadata(TestCase):
             },
             orient='index', columns=['Sex', 'AGE', 'specie_1', 'specie_2'], dtype=str)
         expected_object.index.name = 'sample'
-        pd.testing.assert_frame_equal(tested_object.full_dataframe_with_features_in_columns.astype(str),
+        pd.testing.assert_frame_equal(tested_object.full_df_with_features_in_columns.astype(str),
                                       expected_object)
