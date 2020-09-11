@@ -210,6 +210,7 @@ Arguments can be given to any plotting methods of both classes,
 - ... or to ask for a html file to be generated with the argument `output_file`
 - ... or even to ask not to show the plot with the argument `show` set to False
 
+
 .. code-block:: python
 
     plotting_options={'traces': {'marker_color' : 'red'}, 'xaxes': {'tickangle' : 90}}
