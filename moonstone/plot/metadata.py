@@ -2,15 +2,15 @@ import pandas as pd
 from typing import Optional
 
 from moonstone.plot.graphs.bargraph import (
-    CategoryBarGraph
+    BarGraph
 )
 from moonstone.plot.graphs.histogram import Histogram
-from moonstone.plot.utils import (
+from moonstone.utils.plot import (
     add_x_to_plotting_options
 )
 
 
-class PlotMetadataStats():
+class PlotMetadataStats:
     """
     Several plots available to visualize metadata.
     """
@@ -66,7 +66,7 @@ class PlotMetadataStats():
             plotting_options, 'colorbar', ['pink', 'blue']
         )
 
-        bar_fig = CategoryBarGraph(
+        bar_fig = BarGraph(
             pd.value_counts(self.metadata_df[sex_col]),
             plotting_options, show=show, output_file=output_file
         )
@@ -98,12 +98,12 @@ class PlotMetadataStats():
         if plotting_options is None:
             plotting_options = {}
 
-        bar_fig = CategoryBarGraph(
+        bar_fig = BarGraph(
             pd.count_values(self.metadata_df[column_name]),
             plotting_options, show=show, output_file=output_file
         )
-        if reset_xnames_dic is not None:
-            bar_fig.reset_xnames(reset_xnames_dic)
+        # if reset_xnames_dic is not None:
+        #     bar_fig.reset_xnames(reset_xnames_dic)
         if title is None:
             title = column_name+" distribution in the samples"
         if xlabel is None:

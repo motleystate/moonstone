@@ -1,18 +1,10 @@
-import math
-from abc import ABC
-
-import numpy as np
-import pandas as pd
 import plotly.graph_objects as go
 import plotly.io
 
-from moonstone.plot.utils import (
-    check_list_type
-)
 from moonstone.plot.graphs.base import BaseGraph
 
 
-class BaseBarGraph(BaseGraph, ABC):
+class BarGraph(BaseGraph):
 
     def _set_plotting_options(self, fig, plotting_options):
         if 'log' in self.plotting_options.keys() and self.plotting_options['log']:
@@ -31,6 +23,17 @@ class BaseBarGraph(BaseGraph, ABC):
         if ylabel is not None:
             fig.update_yaxes(title_text=ylabel)
         return fig
+
+    def _get_chart(self, orientation: str = "v", ascending: bool = None) -> go.Bar:
+        if ascending is not None:
+            data = self.data.sort_values(ascending=ascending)
+        else:
+            data = self.data
+        x = list(data.index)
+        y = list(data)
+        if orientation == "v":
+            return go.Bar(x=x, y=y, orientation=orientation)
+        return go.Bar(x=y, y=x, orientation=orientation)
 
     def plot_one_graph(self, orientation: str = "v", ascending: bool = None,
                        title: str = None, xlabel: str = None, ylabel: str = None,
@@ -55,69 +58,3 @@ class BaseBarGraph(BaseGraph, ABC):
 
         if self.output_file:
             plotly.io.write_html(fig, self.output_file)
-
-
-class CategoryBarGraph(BaseBarGraph):
-
-    def _get_chart(self, orientation: str = "v", ascending: bool = None) -> go.Bar:
-        if ascending is not None:
-            data = self.data.sort_values(ascending=ascending)
-        else:
-            data = self.data
-        x = list(data.index)
-        y = list(data)
-        if orientation == "v":
-            return go.Bar(x=x, y=y, orientation=orientation)
-        return go.Bar(x=y, y=x, orientation=orientation)
-
-
-class DistributionBarGraph(BaseBarGraph):
-
-    def compute_heterogeneous_bins(self):
-        """Logish bins"""
-        maximum = self.data.max()
-        magnitude = int(math.log10(maximum))
-        bval = [-0.1]                       # to have the 0 value
-        i = 0
-        while i < magnitude:
-            bval += list(np.arange(2*10**i, 10**(i+1)+1, 10**i))
-            i += 1
-        # i=magnitude
-        bval += list(np.arange(2*10**i, maximum+10**i, 10**i))        # up to maximum
-        return bval
-
-    @property
-    def bins_values(self):
-        """
-        retrieves bins_values, and compute it if no values given
-        """
-        if getattr(self, '_bins_values', None) is None:
-            self.bins_values = self.compute_heterogeneous_bins()
-        return self._bins_values
-
-    @bins_values.setter
-    def bins_values(self, bins_values):
-        if type(bins_values) == list and check_list_type(bins_values, (int, float, np.integer)):
-            self._bins_values = bins_values
-        else:
-            raise ValueError("Error : expecting list of numerical values (int, float) in bins_values.")
-
-    def in_bins_and_count(self, normalize: bool = False):
-        binned_df = pd.cut(self.data, bins=self.bins_values)   # put every items in the appropriate bin
-        data = pd.value_counts(binned_df, normalize=normalize)
-        data = data.reindex(binned_df.cat.categories)
-        new_xnames = list(data.index.astype(str))
-        new_xnames[0] = new_xnames[0].replace('(-0.1', '[0.0')
-        new_xnames = [new_xnames[i].replace('(', ']') for i in range(len(new_xnames))]
-        data.index = new_xnames
-        return data
-
-    def _get_chart(self, orientation: str = "v", ascending: bool = None) -> go.Bar:
-        data = self.in_bins_and_count()
-        if ascending is not None:
-            data = data.sort_values(ascending=ascending)
-        x = list(data.index)
-        y = list(data)
-        if orientation == "v":
-            return go.Bar(x=x, y=y, orientation=orientation)
-        return go.Bar(x=y, y=x, orientation=orientation)

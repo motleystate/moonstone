@@ -1,10 +1,11 @@
 import pandas as pd
 from typing import Optional
 
-from moonstone.plot.graphs.bargraph import DistributionBarGraph
-from moonstone.plot.utils import (
+from moonstone.plot.graphs.bargraph import BarGraph
+from moonstone.utils.plot import (
     add_x_to_plotting_options
 )
+from moonstone.utils.pandas.series import SeriesBinning
 
 
 # What people might want to visualize?
@@ -40,11 +41,9 @@ class PlotCountsStats():
         plotting_options = add_x_to_plotting_options(
             plotting_options, 'tickangle', -60)
 
-        df_mean = self.df.mean(axis=1)
-        bar_fig = DistributionBarGraph(df_mean, plotting_options, show=show, output_file=output_file)
-
-        bar_fig.compute_heterogeneous_bins()
-        bar_fig.in_bins_and_count()    # normalize or not?
+        mean_series = self.df.mean(axis=1)
+        binned_mean = SeriesBinning(mean_series).binned_data
+        bar_fig = BarGraph(binned_mean, plotting_options, show=show, output_file=output_file)
         bar_fig.plot_one_graph(
             title="Distribution of %s mean" % self.items_name,
             xlabel="mean of the number of reads",

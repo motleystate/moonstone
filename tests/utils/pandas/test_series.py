@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.utils.pandas.series import SeriesStatsBuilder
+from moonstone.utils.pandas.series import SeriesStatsBuilder, SeriesBinning
 
 
 class TestSeriesStatsBuilder(TestCase):
@@ -70,3 +70,32 @@ class TestSeriesStatsBuilder(TestCase):
         stats_builder = SeriesStatsBuilder(series)
         tested_dict = stats_builder.build_stats()
         self.assertDictEqual(tested_dict, expected_dict)
+
+
+class TestSeriesBinning(TestCase):
+
+    def test_compute_heterogeneous_bins(self):
+        tested_object = pd.Series(
+            {
+                'gene_1': 10.5,
+                'gene_2': 5.9,
+                'gene_3': 9,
+            })
+        tested_object.name = 'mean read count'
+        tested_object_instance = SeriesBinning(tested_object)
+        tested_object_instance.bins_values     # call compute_heterogeneous_bins()
+        expected_object = [-0.1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20.0]
+        self.assertListEqual(tested_object_instance.bins_values, expected_object)
+
+    def test_compute_binned_data(self):
+        series = pd.Series(
+            [5, 8, 10], index=['i1', 'i2', 'i3']
+        )
+        expected_object = pd.Series(
+            [1, 2], index=[']0, 5]', ']5, 10]']
+        )
+        tested_object_instance = SeriesBinning(series)
+        tested_object_instance.bins_values = [0, 5, 10]
+        tested_object = tested_object_instance.compute_binned_data()
+        pd.testing.assert_series_equal(tested_object, expected_object)
+        pd.testing.assert_series_equal(tested_object_instance.binned_data, expected_object)

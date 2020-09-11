@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from moonstone.plot.utils import (
+from moonstone.utils.plot import (
     check_list_type, add_x_to_plotting_options
 )
 
