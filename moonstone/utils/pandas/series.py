@@ -52,7 +52,7 @@ class SeriesBinning:
         """Logish bins"""
         maximum = self.data.max()
         magnitude = int(math.log10(maximum))
-        bval = [-0.1]  # to have the 0 value
+        bval = [-0.1, 1]  # to have the 0 value
         i = 0
         while i < magnitude:
             bval += list(np.arange(2*10**i, 10**(i+1)+1, 10**i))

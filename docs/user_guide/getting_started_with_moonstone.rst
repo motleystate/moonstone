@@ -205,13 +205,15 @@ Likewise, for the metada
     plot_instance.your_favorite_plot()
 
 Arguments can be given to any plotting methods of both classes,
-    ... to override the standard parameters of plotting of the method with the argument `plotting_options`.
-    ... or to ask for a html file to be generated with the argument `output_file`
-    ... or even to ask not to show the plot with the argument `show` set to False
+
+- ... to override the standard parameters of plotting of the method with the argument `plotting_options`.
+- ... or to ask for a html file to be generated with the argument `output_file`
+- ... or even to ask not to show the plot with the argument `show` set to False
+
 
 .. code-block:: python
 
-    plotting_options={'colorbar' : 'red', 'tickangle' : 90}
+    plotting_options={'traces': {'marker_color' : 'red'}, 'xaxes': {'tickangle' : 90}}
     plot_instance.your_favorite_plot(plotting_options=plotting_options, output_file='mygraph.html', show=False)
 
 

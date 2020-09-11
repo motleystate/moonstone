@@ -26,7 +26,7 @@ v0.2.0
     * Either keep the names
     * Or exclude them 
 * Add base module for plots
-* Add class `BaseGraph` and child classes ``Histogram`` and ``BarGraph``
+* Add class ``BaseGraph`` and child classes ``Histogram`` and ``BarGraph``
 
 v0.1
 ====

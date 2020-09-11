@@ -35,4 +35,18 @@ class TestPlotMetadataStats(TestCase):
             },
             orient='index', columns=['age', 'sex', 'smoker'])
         tested_object_instance = PlotMetadataStats(tested_object)
-        tested_object_instance.plot_age(show=False)
+        tested_object_instance.plot_age(show=False,
+                                        plotting_options={'layout': {'yaxis_type': 'log',
+                                                                     'shapes': [
+                                                                         {"x0": 0, "y0": 1, "x1": 1, "y1": 1,
+                                                                          "xref": "paper",
+                                                                          "line": {"dash": "dash",
+                                                                                   "color": "red", "width": 2}},
+                                                                         {"x0": 0.5, "y0": 0, "x1": 0.5, "y1": 1,
+                                                                          "xref": "paper", "yref": "paper",
+                                                                          "line": {"color": "blue", "width": 2}}
+                                                                          ]},
+                                                          'traces': {'marker_color': 'red'},
+                                                          'xaxes': {'tickangle': 50}
+                                                          }
+                                        )

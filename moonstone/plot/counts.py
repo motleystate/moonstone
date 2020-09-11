@@ -3,7 +3,8 @@ from typing import Optional
 
 from moonstone.plot.graphs.bargraph import BarGraph
 from moonstone.utils.plot import (
-    add_x_to_plotting_options
+    add_x_to_plotting_options,
+    add_default_titles_to_plotting_options
 )
 from moonstone.utils.pandas.series import SeriesBinning
 
@@ -34,20 +35,25 @@ class PlotCountsStats():
                                  'tickangle': `[int, float]`
         """
         if plotting_options is None:
-            plotting_options = {}
-
-        plotting_options = add_x_to_plotting_options(
-            plotting_options, 'log', True)
-        plotting_options = add_x_to_plotting_options(
-            plotting_options, 'tickangle', -60)
+            plotting_options = {'layout': {'title_text': "Distribution of %s mean" % self.items_name, 'title_x': 0.5,
+                                           'yaxis_type': 'log'},
+                                'xaxes': {'title_text': "sex", 'tickangle': -60},
+                                'yaxes': {'title_text': "number of samples"}}
+        else:
+            plotting_options = add_default_titles_to_plotting_options(plotting_options,
+                                                                      "Distribution of %s mean" % self.items_name,
+                                                                      "mean of the number of reads",
+                                                                      "number of samples")
+            plotting_options = add_x_to_plotting_options(plotting_options, 'layout', 'yaxis_type', 'log')
+            plotting_options = add_x_to_plotting_options(plotting_options, 'xaxes', 'tickangle', -60)
 
         mean_series = self.df.mean(axis=1)
         binned_mean = SeriesBinning(mean_series).binned_data
         bar_fig = BarGraph(binned_mean, plotting_options, show=show, output_file=output_file)
         bar_fig.plot_one_graph(
-            title="Distribution of %s mean" % self.items_name,
-            xlabel="mean of the number of reads",
-            ylabel="number of samples",
+            plotting_options,
+            show=show,
+            output_file=output_file
         )
 
 
@@ -73,10 +79,6 @@ class PlotCountsStats():
 #                                  options allowed : 'log': `bool` ; 'colorbar': `[str, List[str]]` ;
 #                                  'tickangle': `[int, float]`
 #         """
-#         if plotting_options is None:
-#             plotting_options = {}
-#         else:
-#             plotting_options = check_types_in_plotting_options(plotting_options)
 
         # mean by sample or nb of samples with ?
 
