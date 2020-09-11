@@ -143,3 +143,32 @@ List
 
 .. Note::
     More details on API documentation for :ref:`api_plot`.
+
+Analysis
+========
+
+How it works?
+"""""""""""""
+
+.. code-block:: python
+
+    from moonstone.analysis import DifferentialAnalysis
+
+    # instantiation
+    analysis_instance = DifferentialAnalysis(df, metadata_df)
+    analysis_instance.differential_analysis_by_feature(features, type_of_features, test_to_use, correction_method_used)
+
+.. Note::
+    The way analysis instances work will change using a defined common way of performing analysis.
+
+List
+""""
+
+.. currentmodule:: moonstone.analysis
+.. autosummary::
+   :nosignatures:
+
+   differential_analysis.DifferentialAnalysis
+
+.. Note::
+    More details on API documentation for :ref:`api_plot`.
