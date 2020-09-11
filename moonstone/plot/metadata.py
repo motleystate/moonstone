@@ -45,7 +45,10 @@ class PlotMetadataStats():
             step
             )
 
-    def plot_sex(self, plotting_options: dict = None, show: Optional[bool] = True, output_file: Optional[str] = False):
+    def plot_sex(
+        self, sex_col: str = "sex", plotting_options: dict = None, show: Optional[bool] = True,
+        output_file: Optional[str] = False
+    ):
         """
         method to visualize the sex distribution of patients (whose the samples are originated from)
 
@@ -60,16 +63,18 @@ class PlotMetadataStats():
             plotting_options = {}
 
         plotting_options = add_x_to_plotting_options(
-            plotting_options, 'colorbar', ['pink', 'blue'])
+            plotting_options, 'colorbar', ['pink', 'blue']
+        )
 
-        bar_fig = CategoryBarGraph(self.metadata_df['sex'], plotting_options, show=show, output_file=output_file)
-        # bar_fig.count()    # normalize or not?
-        # bar_fig.reset_xnames({'F': 'Female', 'M': 'Male'})
+        bar_fig = CategoryBarGraph(
+            pd.value_counts(self.metadata_df[sex_col]),
+            plotting_options, show=show, output_file=output_file
+        )
         bar_fig.plot_one_graph(
             title="Sex distribution in the samples",
             xlabel="sex",
             ylabel="number of samples",
-            )
+        )
 
     def plot_category_distribution(
         self, column_name, title=None, xlabel=None,
@@ -93,8 +98,10 @@ class PlotMetadataStats():
         if plotting_options is None:
             plotting_options = {}
 
-        bar_fig = CategoryBarGraph(self.metadata_df[column_name], plotting_options, show=show, output_file=output_file)
-        bar_fig.count()    # normalize or not?
+        bar_fig = CategoryBarGraph(
+            pd.count_values(self.metadata_df[column_name]),
+            plotting_options, show=show, output_file=output_file
+        )
         if reset_xnames_dic is not None:
             bar_fig.reset_xnames(reset_xnames_dic)
         if title is None:
