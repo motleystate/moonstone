@@ -6,6 +6,20 @@ Changelogs
 
 Summary of developments of moonstone library.
 
+v0.3
+====
+
+v0.3.0
+------
+
+* Refactor use of plotting_options : iteration through dict.keys() + exported in ``BaseGraph`` (Parent Class)
+* ``plotting_options``, ``output_file`` and show dealt with in ``plot_one_graph`` (instead of at instantiation)
+* Refactoring of ``BarGraph``
+* Relocation of functions : ``check_list_of`` and ``add_x_to_plotting_options`` in `utils/plot.py`
+* Relocation of method to bin series in ``utils/pandas/series.py``
+* Transition to autosummary in available classes
+* Listing of plot classes in available classes
+
 v0.2
 ====
 
@@ -24,7 +38,7 @@ v0.2.0
   * ``TaxonomyNamesFiltering`` that filters on a given list of index names at a chosen level
 
     * Either keep the names
-    * Or exclude them 
+    * Or exclude them
 * Add base module for plots
 * Add class ``BaseGraph`` and child classes ``Histogram`` and ``BarGraph``
 
