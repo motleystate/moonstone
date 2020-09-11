@@ -134,12 +134,12 @@ How it works?
 List
 """"
 
-.. currentmodule:: moonstone.plot.global_plot
+.. currentmodule:: moonstone.plot
 .. autosummary::
    :nosignatures:
 
-   PlotCountsStats
-   PlotMetadataStats
+   counts.PlotCountsStats
+   metadata.PlotMetadataStats
 
 .. Note::
     More details on API documentation for :ref:`api_plot`.
