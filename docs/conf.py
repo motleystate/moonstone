@@ -33,6 +33,7 @@ author = u'Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_autodoc_typehints',
+    'sphinx.ext.autosummary'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

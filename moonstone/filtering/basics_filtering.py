@@ -2,7 +2,6 @@ from typing import List
 
 import pandas as pd
 
-from moonstone.core.module_base import BaseModule
 from moonstone.filtering.base import BothAxisFiltering
 
 
