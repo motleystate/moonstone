@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 class DifferentialAnalysis:
+    """
+    Perform differential analysis using chosen method.
+    """
 
     available_tests = {
         'dichotomic': ['t_test', 'wilcoxon_rank_test'],
