@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Union
 
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.io
 
 

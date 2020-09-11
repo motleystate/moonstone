@@ -33,12 +33,14 @@ class TestUtils(TestCase):
                              {'traces': {'marker_color': 'red'}})
 
     def test_add_default_titles_to_plotting_options(self):
-        title="graph about something"
-        xlabel="something"
-        ylabel="samples"
+        title = "graph about something"
+        xlabel = "something"
+        ylabel = "samples"
 
         # test with empty dictionary
         plotting_options = {}
-        print(add_default_titles_to_plotting_options(plotting_options, title, xlabel, ylabel))
-        #self.assertDictEqual(add_default_titles_to_plotting_options(plotting_options, title, xlabel, ylabel),
-        #                     {})
+        expected_plotting_options = {'layout': {'title_text': 'graph about something', 'title_x': 0.5},
+                                     'xaxes': {'title_text': 'something'},
+                                     'yaxes': {'title_text': 'samples'}}
+        self.assertDictEqual(add_default_titles_to_plotting_options(plotting_options, title, xlabel, ylabel),
+                             expected_plotting_options)

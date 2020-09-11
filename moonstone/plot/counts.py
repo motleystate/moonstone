@@ -41,9 +41,9 @@ class PlotCountsStats():
                                 'yaxes': {'title_text': "number of samples"}}
         else:
             plotting_options = add_default_titles_to_plotting_options(plotting_options,
-                                                                       "Distribution of %s mean" % self.items_name,
-                                                                       "mean of the number of reads",
-                                                                       "number of samples")
+                                                                      "Distribution of %s mean" % self.items_name,
+                                                                      "mean of the number of reads",
+                                                                      "number of samples")
             plotting_options = add_x_to_plotting_options(plotting_options, 'layout', 'yaxis_type', 'log')
             plotting_options = add_x_to_plotting_options(plotting_options, 'xaxes', 'tickangle', -60)
 

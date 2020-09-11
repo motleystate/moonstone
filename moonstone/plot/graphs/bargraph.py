@@ -1,7 +1,6 @@
 from typing import Union
 
 import plotly.graph_objects as go
-import plotly.io
 
 from moonstone.plot.graphs.base import BaseGraph
 

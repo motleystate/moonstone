@@ -38,8 +38,8 @@ class PlotMetadataStats:
                                 'yaxes': {'title_text': "number of samples"}}
         else:
             plotting_options = add_default_titles_to_plotting_options(plotting_options,
-                                                                       "Age distribution in the samples",
-                                                                       "age", "number of samples")
+                                                                      "Age distribution in the samples",
+                                                                      "age", "number of samples")
 
         hist_fig = Histogram(self.metadata_df['age'])
 
@@ -74,8 +74,8 @@ class PlotMetadataStats:
                                 'traces': {'marker_color': ['pink', 'blue']}}
         else:
             plotting_options = add_default_titles_to_plotting_options(plotting_options,
-                                                                       "Sex distribution in the samples",
-                                                                       "sex", "number of samples")
+                                                                      "Sex distribution in the samples",
+                                                                      "sex", "number of samples")
             plotting_options = add_x_to_plotting_options(plotting_options, 'traces', 'marker_color', ['pink', 'blue'])
 
         bar_fig = BarGraph(
@@ -112,8 +112,8 @@ class PlotMetadataStats:
                                 'yaxes': {'title_text': "number of samples"}}
         else:
             plotting_options = add_default_titles_to_plotting_options(plotting_options,
-                                                                       column_name+" distribution in the samples",
-                                                                       column_name, "number of samples")
+                                                                      column_name+" distribution in the samples",
+                                                                      column_name, "number of samples")
 
         bar_fig = BarGraph(
             pd.count_values(self.metadata_df[column_name]),
