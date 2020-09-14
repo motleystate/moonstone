@@ -1,14 +1,16 @@
-class BaseNormalization:
+from abc import ABC, abstractmethod
 
-    def __init__(self, df):
-        self.raw_df = df
-        self.df = df
+from moonstone.core.module_base import BaseModule, BaseDF
 
+
+class BaseNormalization(BaseModule, BaseDF, ABC):
+
+    @abstractmethod
     def normalize(self):
         """
         Overload this method to perform normalization in child classes
         """
-        return self.raw_df
+        pass
 
     @property
     def normalized_df(self):
