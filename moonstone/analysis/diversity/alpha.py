@@ -56,7 +56,7 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
                                                                       title,
                                                                       xlabel, ylabel)
 
-        hist_fig = Histogram(self._alpha_diversity_indexes)
+        hist_fig = Histogram(self.alpha_diversity_indexes)
         hist_fig.plot_one_graph(
             bins_size,
             plotting_options=plotting_options,
@@ -76,4 +76,3 @@ class ShannonIndex(AlphaDiversity):
         for i in self.df.columns:
             Seriesdic[i] = skbio.diversity.alpha.shannon(self.df[i], base)
         return pd.Series(Seriesdic)
-
