@@ -10,13 +10,14 @@ setup(
     author_email='kehillio@pasteur.fr',
     install_requires=[
         'pandas==1.0.1',
-        'scikit-learn==0.21.3',
         'matplotlib',
         'plotly',
         'statsmodels',
         'python-slugify',
         'pyaml',
-        'numpy==1.18.1'
+        'numpy==1.18.1',
+        'scikit-bio',
+        'scikit-learn==0.21.3',
     ],
     packages=find_packages(),
     entry_points={'console_scripts': ['moonstone=moonstone.main:run']},

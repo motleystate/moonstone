@@ -4,24 +4,52 @@
 #
 #    pip-compile
 #
+backcall==0.2.0           # via ipython
+cachecontrol==0.12.6      # via scikit-bio
+certifi==2020.6.20        # via requests
+chardet==3.0.4            # via requests
 cycler==0.10.0            # via matplotlib
+cython==0.29.21           # via hdmedians
+decorator==4.4.2          # via ipython, scikit-bio
+hdmedians==0.13           # via scikit-bio
+idna==2.10                # via requests
+ipython-genutils==0.2.0   # via traitlets
+ipython==7.18.1           # via scikit-bio
+jedi==0.17.2              # via ipython
 joblib==0.16.0            # via scikit-learn
 kiwisolver==1.2.0         # via matplotlib
-matplotlib==3.3.0         # via moonstone (setup.py)
-numpy==1.18.1             # via matplotlib, moonstone (setup.py), pandas, patsy, scikit-learn, scipy, statsmodels
-pandas==1.0.1             # via moonstone (setup.py), statsmodels
+lockfile==0.12.2          # via scikit-bio
+matplotlib==3.3.0         # via moonstone (setup.py), scikit-bio
+msgpack==1.0.0            # via cachecontrol
+natsort==7.0.1            # via scikit-bio
+numpy==1.18.1             # via hdmedians, matplotlib, moonstone (setup.py), pandas, patsy, scikit-bio, scikit-learn, scipy, statsmodels
+pandas==1.0.1             # via moonstone (setup.py), scikit-bio, statsmodels
+parso==0.7.1              # via jedi
 patsy==0.5.1              # via statsmodels
+pexpect==4.8.0            # via ipython
+pickleshare==0.7.5        # via ipython
 pillow==7.2.0             # via matplotlib
 plotly==4.9.0             # via moonstone (setup.py)
+prompt-toolkit==3.0.7     # via ipython
+ptyprocess==0.6.0         # via pexpect
 pyaml==20.4.0             # via moonstone (setup.py)
+pygments==2.7.0           # via ipython
 pyparsing==2.4.7          # via matplotlib
 python-dateutil==2.8.1    # via matplotlib, pandas
 python-slugify==4.0.1     # via moonstone (setup.py)
 pytz==2020.1              # via pandas
 pyyaml==5.3.1             # via pyaml
+requests==2.24.0          # via cachecontrol
 retrying==1.3.3           # via plotly
-scikit-learn==0.21.3      # via moonstone (setup.py)
-scipy==1.5.2              # via scikit-learn, statsmodels
+scikit-bio==0.5.6         # via moonstone (setup.py)
+scikit-learn==0.21.3      # via moonstone (setup.py), scikit-bio
+scipy==1.5.2              # via scikit-bio, scikit-learn, statsmodels
 six==1.15.0               # via cycler, patsy, plotly, python-dateutil, retrying
 statsmodels==0.11.1       # via moonstone (setup.py)
 text-unidecode==1.3       # via python-slugify
+traitlets==5.0.4          # via ipython
+urllib3==1.25.10          # via requests
+wcwidth==0.2.5            # via prompt-toolkit
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
