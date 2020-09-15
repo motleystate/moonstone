@@ -76,3 +76,13 @@ class ShannonIndex(AlphaDiversity):
         for i in self.df.columns:
             Seriesdic[i] = skbio.diversity.alpha.shannon(self.df[i], base)
         return pd.Series(Seriesdic)
+
+
+class SimpsonInverseIndex(AlphaDiversity):
+
+    def compute_alpha_diversity(self):
+        # steps to compute the index
+        Seriesdic = {}
+        for i in self.df.columns:
+            Seriesdic[i] = skbio.diversity.alpha.enspie(self.df[i])
+        return pd.Series(Seriesdic)
