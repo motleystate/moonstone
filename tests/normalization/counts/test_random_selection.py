@@ -42,10 +42,11 @@ class TestRandomSelection(TestCase):
     def test_normalize_threshold_100(self):
         # Define what we expect here, do we want to filter out instead below threshold?
         expected_data = [
-            [100, 1, 48, 75],
-            [0, 24, 1, 0],
-            [0, 25, 1, 25],
+            [100, 75],
+            [0, 0],
+            [0, 25],
         ]
-        expected_df = pd.DataFrame(expected_data, columns=self.column_names, index=self.index)
+        expected_columns = ['Sample_1', 'Sample_4']
+        expected_df = pd.DataFrame(expected_data, columns=expected_columns, index=self.index)
         tested_normalization = RandomSelection(self.raw_df, threshold=100, random_seed=2935)
         pd.testing.assert_frame_equal(tested_normalization.normalized_df, expected_df)

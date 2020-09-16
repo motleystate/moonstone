@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import pandas as pd
 
+from moonstone.filtering.basics_filtering import NamesFiltering
 from moonstone.normalization.base import BaseNormalization
 
 logger = logging.getLogger(__name__)
@@ -20,11 +21,14 @@ class RandomSelection(BaseNormalization):
             self.threshold = threshold
         else:
             self.threshold = self.df.sum().min()
-        # Filters out samples below this threshold?
+        # Filters out samples below the threshold
+        samples_to_remove = self.raw_df.columns[self.raw_df.sum() < self.threshold]
+        if not samples_to_remove.empty:
+            self.df = NamesFiltering(self.raw_df, samples_to_remove, axis=1, keep=False).filtered_df
 
     def _randomly_select_counts(self, column_name: str):
         np.random.seed(self.random_seed)  # set the random seed
-        counts = self.raw_df[column_name]
+        counts = self.df[column_name]
         if counts.sum() <= self.threshold:
             return counts
         probabilities = counts / counts.sum()
@@ -35,7 +39,7 @@ class RandomSelection(BaseNormalization):
 
     def normalize(self) -> pd.DataFrame:
         normalized_df = pd.DataFrame()
-        for sample in self.raw_df.columns:
+        for sample in self.df.columns:
             normalized_df = pd.concat([normalized_df, self._randomly_select_counts(sample)], axis=1)
-        normalized_df.columns = self.raw_df.columns
+        normalized_df.columns = self.df.columns
         return normalized_df.fillna(0).astype(int)

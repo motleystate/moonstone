@@ -1,8 +1,11 @@
+import logging
 from typing import List
 
 import pandas as pd
 
 from moonstone.filtering.base import BothAxisFiltering
+
+logger = logging.getLogger(__name__)
 
 
 class NoCountsFiltering(BothAxisFiltering):
@@ -28,9 +31,16 @@ class NamesFiltering(BothAxisFiltering):
         :param axis: axis to apply filtering (index (0) or columns(1))
         :param keep: keep column (discard them if set to False)
         """
-        self.names = names
+        self.names = list(names)
         self.keep = keep
+        self._log_action()
         super().__init__(dataframe, axis=axis)
+
+    def _log_action(self):
+        if self.keep:
+            logger.info(f"Selecting {self.names} from dataframe...")
+        else:
+            logger.info(f"Removing {self.names} from dataframe...")
 
     def _validate_parameters(self):
         if isinstance(self.df.index, pd.MultiIndex):
