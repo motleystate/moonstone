@@ -116,7 +116,7 @@ class PlotMetadataStats:
                                                                       column_name, "number of samples")
 
         bar_fig = BarGraph(
-            pd.count_values(self.metadata_df[column_name]),
+            pd.value_counts(self.metadata_df[column_name]),
         )
         # if reset_xnames_dic is not None:
         #     bar_fig.reset_xnames(reset_xnames_dic)
