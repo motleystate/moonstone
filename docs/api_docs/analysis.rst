@@ -12,3 +12,13 @@ Differential Analysis
     :undoc-members:
     :special-members: __init__
     :inherited-members:
+
+
+Alpha diversity
+===============
+
+.. automodule:: moonstone.analysis.diversity.alpha
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:

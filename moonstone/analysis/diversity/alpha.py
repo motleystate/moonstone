@@ -13,17 +13,12 @@ from moonstone.utils.plot import (
 )
 
 
-class BaseAnalysis(BaseModule, BaseDF, ABC):
-    """
-    ????
-    """
-    def __init__(self, dataframe: Union[pd.Series, pd.DataFrame]):
-        super().__init__(dataframe)
-
-
 class AlphaDiversity(BaseModule, BaseDF, ABC):
 
     def __init__(self, dataframe: Union[pd.Series, pd.DataFrame]):
+        """
+        :param dataframe: taxonomy count table normalized to have each samples with the same number of reads
+        """
         super().__init__(dataframe)
         self.index_name = " ".join(re.findall('[A-Z][^A-Z]*', self.__class__.__name__)).lower()
 
@@ -66,7 +61,9 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
 
 
 class ShannonIndex(AlphaDiversity):
-
+    """
+    Perform calculation of the shannon index for each samples of the dataframe
+    """
     def compute_alpha_diversity(self, base: Union[int, float] = 2):    # compute_shannon_diversity
         """
         :param base: logarithm base chosen (NB : for ln, base=math.exp(1))
@@ -79,7 +76,9 @@ class ShannonIndex(AlphaDiversity):
 
 
 class SimpsonInverseIndex(AlphaDiversity):
-
+    """
+    Perform calculation of the simpson inverse index for each samples of the dataframe
+    """
     def compute_alpha_diversity(self):
         # steps to compute the index
         Seriesdic = {}
