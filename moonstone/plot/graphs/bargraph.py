@@ -23,5 +23,6 @@ class BarGraph(BaseGraph):
                        show: bool = True, output_file: Union[bool, str] = False):
         fig = go.Figure(self._get_chart(orientation=orientation, ascending=ascending))
 
-        fig = self._handle_plotting_options_plotly(fig, plotting_options)
+        if plotting_options is not None:
+            fig = self._handle_plotting_options_plotly(fig, plotting_options)
         self._handle_output_plotly(fig, show, output_file)
