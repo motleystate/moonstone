@@ -11,10 +11,16 @@ logger = logging.getLogger(__name__)
 
 class RandomSelection(BaseNormalization):
     """
-    Randomly select counts for each sample based on a threshold.
+    Randomly select a given number of counts (threshold) among all different items
+    (genes, taxonomical annotation...) for each sample. Random selection takes into account the
+    initial counts to influence the probability of picking one item or another.
     """
 
     def __init__(self, df: pd.DataFrame, threshold: int = None, random_seed: int = 2935):
+        """
+        :param threshold: total number of counts to pick by sample
+        :param random_seed: random seed to use for random picking of counts
+        """
         super().__init__(df)
         self.random_seed = random_seed
         if threshold is not None:

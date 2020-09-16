@@ -8,7 +8,7 @@ class BaseNormalization(BaseModule, BaseDF, ABC):
     @abstractmethod
     def normalize(self):
         """
-        Overload this method to perform normalization in child classes
+        Method to perform normalization
         """
         pass
 

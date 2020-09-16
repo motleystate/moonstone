@@ -167,8 +167,42 @@ Moonstone provides several means of filtering your data (non exhaustive list):
 Normalization
 """""""""""""
 
+You might need to normalize your data in order to perform comparisons and analysis.
+
+.. Note::
+    More details about available operations can be found in the API documentation about :ref:`api_normalization`.
+
+How does it work?
+'''''''''''''''''
+
+.. code-block:: python
+
+    from moonstone.normalization import YourFavouriteNormalization
+
+    normalization = YourFavouriteNormalization(your_df)
+    df = normalization.normalized_df
+
+.. Note::
+    You might have to provide extra parameters during instantiation of the class. Look at :ref:`api_normalization`
+    for more information.
+
+
 Analysis
 """"""""
+
+How it works?
+"""""""""""""
+
+.. code-block:: python
+
+    from moonstone.analysis import DifferentialAnalysis
+
+    # instantiation
+    analysis_instance = DifferentialAnalysis(df, metadata_df)
+    analysis_instance.differential_analysis_by_feature(features, type_of_features, test_to_use, correction_method_used)
+
+.. Note::
+    The way analysis instances work will change using a defined common way of performing analysis.
 
 Plot
 """""
