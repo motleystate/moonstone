@@ -27,25 +27,40 @@ class DownsizePair(BaseDownsizing):
             print(f"\nWarning files {self.raw_f} and {self.raw_r} are the same! Expected Forward and Reverse!\n")
 
         records: int = sum(1 for _ in open(self.raw_f)) // 4
+        print('Found %i reads' % records)
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
 
-        # forward_reads, reverse_reads = open(self.raw_f), open(self.raw_r)
-        downsized_forward, downsized_reverse = \
-            open(self.raw_f + ".downsized", "w"), open(self.raw_r + ".downsized", "w")
+        forward_reads = open(self.raw_f, 'r')
+        reverse_reads = open(self.raw_r, 'r')
+        downsized_forward = open(self.raw_f + ".downsized", "w+")
+        downsized_reverse = open(self.raw_r + ".downsized", "w+")
+
         rec_no = - 1
         for rr in rand_reads:
             # Read records in the file (groups of 4 for fastq)
             # Until the record being read is no longer less that one of the ordered random (oxymoron?) records
             while rec_no < rr:
                 rec_no += 1
-                for i in range(4):
-                    self.raw_f.readline()
-                for i in range(4):
-                    self.raw_r.readline()
+                forward_reads.readline(4)
+                reverse_reads.readline(4)
             # Once rec_no == rr (we find a matching record), we write that record, forward and reverse.
             for i in range(4):
-                downsized_forward.write(self.raw_f.readline())
-                downsized_reverse.write(self.raw_r.readline())
+                downsized_forward.write(forward_reads.readline())
+                downsized_reverse.write(reverse_reads.readline())
             rec_no += 1
 
-        print("wrote to %s, %s" % (downsized_forward.name, downsized_reverse.name))
+        # Close raw read files.
+        forward_reads.close()
+        reverse_reads.close()
+        # Reset file objects of downsized reads so we can count them. Count them.
+        downsized_forward.seek(0)
+        downsized_reverse.seek(0)
+        downsized_forward_count = sum(1 for _ in downsized_forward) / 4
+        downsized_reverse_count = sum(1 for _ in downsized_reverse) / 4
+        # Close the downsized files.
+
+        print('Wrote %i reads to to %s.\nWrote %i reads to %s' %
+              (downsized_forward_count, downsized_forward.name, downsized_reverse_count, downsized_reverse.name))
+
+    def downsize_single(self):
+        pass
