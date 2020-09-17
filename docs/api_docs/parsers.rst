@@ -10,6 +10,12 @@ Counts
 Simple Counts
 """""""""""""
 
+.. automodule:: moonstone.parsers.counts.genes
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
+
 .. automodule:: moonstone.parsers.counts.picrust2
     :members:
     :undoc-members:

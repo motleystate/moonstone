@@ -20,12 +20,12 @@ class TestTotalCountsNormalization(TestCase):
         self.raw_df = pd.DataFrame(self.raw_data, columns=self.column_names, index=self.index)
 
     def test_normalize(self):
-        tested_data = [
+        expected_data = [
             [99.5, 2.0, 96.0, 75.0],
             [0.0, 48.0, 2.0, 0.0],
             [1.0, 50.0, 2.0, 25.0],
         ]
-        expected_df = pd.DataFrame(tested_data, columns=self.column_names, index=self.index)
+        expected_df = pd.DataFrame(expected_data, columns=self.column_names, index=self.index)
         tested_normalization = TotalCountsNormalization(self.raw_df)
         pd.testing.assert_frame_equal(tested_normalization.normalized_df, expected_df)
         # Check scaling factors
