@@ -38,11 +38,12 @@ Classic and simple parsers:
 
 Counts parsers (``from moonstone.parsers.counts``):
 
-.. currentmodule:: moonstone.parsers.counts.picrust2
+.. currentmodule:: moonstone.parsers.counts
 .. autosummary::
    :nosignatures:
 
-    Picrust2PathwaysParser
+    genes.GeneCountsParser
+    picrust2.Picrust2PathwaysParser
 
 Taxonomy counts parsers (``from moonstone.parsers.counts.taxonomy``):
 

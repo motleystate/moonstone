@@ -28,9 +28,9 @@ class RandomSelection(BaseNormalization):
         else:
             self.threshold = self.df.sum().min()
         # Filters out samples below the threshold
-        samples_to_remove = self.raw_df.columns[self.raw_df.sum() < self.threshold]
-        if not samples_to_remove.empty:
-            self.df = NamesFiltering(self.raw_df, samples_to_remove, axis=1, keep=False).filtered_df
+        self.samples_to_remove = self.raw_df.columns[self.raw_df.sum() < self.threshold]
+        if not self.samples_to_remove.empty:
+            self.df = NamesFiltering(self.raw_df, self.samples_to_remove, axis=1, keep=False).filtered_df
 
     def _randomly_select_counts(self, column_name: str):
         np.random.seed(self.random_seed)  # set the random seed
@@ -45,7 +45,13 @@ class RandomSelection(BaseNormalization):
 
     def normalize(self) -> pd.DataFrame:
         normalized_df = pd.DataFrame()
+        cpt = 0
+        total = len(self.df.columns)
         for sample in self.df.columns:
             normalized_df = pd.concat([normalized_df, self._randomly_select_counts(sample)], axis=1)
+            cpt += 1
+            if cpt % 10 == 0:
+                logger.info(f"{cpt}/{total} done so far...")
+        logger.info(f"[Done] {cpt}/{total}.")
         normalized_df.columns = self.df.columns
         return normalized_df.fillna(0).astype(int)
