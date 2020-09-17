@@ -13,14 +13,16 @@ class DownsizePair(BaseDownsizing):
     https://doi.org/10.1371/journal.pcbi.1003531
     """
 
-    def __init__(self, raw_f, raw_r, n=1000):
+    def __init__(self, raw_f, raw_r, n=1000, seed=623):
         """Paired reads assumes forward and reverse FASTQ files.
-        n is the number of reads that will be randomly picked, with a default of 1000."""
+        n is the number of reads that will be randomly picked, with a default of 1000.
+        A random seed is preset to 62375 to allow for reproducibility"""
 
         super().__init__(raw_f, raw_r)
         self.raw_f = raw_f
         self.raw_r = raw_r
         self.downsize_to = n
+        self.seed = seed
 
     def downsize_pair(self):
         if self.raw_f == self.raw_r:
@@ -28,6 +30,7 @@ class DownsizePair(BaseDownsizing):
 
         records: int = sum(1 for _ in open(self.raw_f)) // 4
         print('Found %i reads' % records)
+        random.seed(self.seed)
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
 
         forward_reads = open(self.raw_f, 'r')
