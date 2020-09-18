@@ -55,3 +55,24 @@ class RandomSelection(BaseNormalization):
         logger.info(f"[Done] {cpt}/{total}.")
         normalized_df.columns = self.df.columns
         return normalized_df.fillna(0).astype(int)
+
+
+class TaxonomyRandomSelection(RandomSelection):
+    """
+    Allow random selection for taxonomy multi-indexed dataframes.
+    """
+
+    def __init__(self, df: pd.DataFrame, *args, **kwargs):
+        no_index_df = df.reset_index()
+        self.index_names = df.index.names
+        new_df = no_index_df.set_index(
+            no_index_df[self.index_names].agg('-'.join, axis=1)
+        ).drop(self.index_names, axis=1)
+        super().__init__(new_df, **kwargs)
+
+    def normalize(self) -> pd.DataFrame:
+        single_index_norm_df = super().normalize()
+        multi_index_norm_df = single_index_norm_df.reset_index(drop=True)
+        multi_index_norm_df.index = single_index_norm_df.index.str.split('-', expand=True)
+        multi_index_norm_df.index.names = self.index_names
+        return multi_index_norm_df
