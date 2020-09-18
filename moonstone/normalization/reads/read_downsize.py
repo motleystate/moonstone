@@ -29,7 +29,7 @@ class DownsizePair(BaseDownsizing):
             print(f"\nWarning files {self.raw_f} and {self.raw_r} are the same! Expected Forward and Reverse!\n")
 
         records: int = sum(1 for _ in open(self.raw_f)) // 4
-        print('Found %i reads' % records)
+        logger.info('Found %i reads' % records)
         random.seed(self.seed)
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
 
@@ -61,8 +61,10 @@ class DownsizePair(BaseDownsizing):
         downsized_forward_count = sum(1 for _ in downsized_forward) / 4
         downsized_reverse_count = sum(1 for _ in downsized_reverse) / 4
         # Close the downsized files.
+        downsized_forward.close()
+        downsized_reverse.close()
 
-        print('Wrote %i reads to to %s.\nWrote %i reads to %s' %
+        logger.info('Wrote %i reads to to %s.\nWrote %i reads to %s' %
               (downsized_forward_count, downsized_forward.name, downsized_reverse_count, downsized_reverse.name))
 
     def downsize_single(self):
