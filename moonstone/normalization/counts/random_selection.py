@@ -26,7 +26,7 @@ class RandomSelection(BaseNormalization):
         if threshold is not None:
             self.threshold = threshold
         else:
-            self.threshold = self.df.sum().min()
+            self.threshold = int(self.df.sum().min())
         # Filters out samples below the threshold
         self.samples_to_remove = self.raw_df.columns[self.raw_df.sum() < self.threshold]
         if not self.samples_to_remove.empty:
@@ -35,7 +35,7 @@ class RandomSelection(BaseNormalization):
     def _randomly_select_counts(self, column_name: str):
         np.random.seed(self.random_seed)  # set the random seed
         counts = self.df[column_name]
-        if counts.sum() <= self.threshold:
+        if counts.sum() <= self.threshold + 1:
             return counts
         probabilities = counts / counts.sum()
         new_counts = np.unique(
@@ -54,7 +54,7 @@ class RandomSelection(BaseNormalization):
                 logger.info(f"{cpt}/{total} done so far...")
         logger.info(f"[Done] {cpt}/{total}.")
         normalized_df.columns = self.df.columns
-        return normalized_df.fillna(0).astype(int)
+        return normalized_df.fillna(0).astype(float)
 
 
 class TaxonomyRandomSelection(RandomSelection):
