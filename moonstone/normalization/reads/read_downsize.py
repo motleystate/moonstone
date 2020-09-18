@@ -13,30 +13,28 @@ class DownsizePair(BaseDownsizing):
     https://doi.org/10.1371/journal.pcbi.1003531
     """
 
-    def __init__(self, raw_f, raw_r, n=1000, seed=623):
+    def __init__(self, raw_file_f, raw_file_r, n=1000, seed=623):
         """Paired reads assumes forward and reverse FASTQ files.
         n is the number of reads that will be randomly picked, with a default of 1000.
         A random seed is preset to 62375 to allow for reproducibility"""
 
-        super().__init__(raw_f, raw_r)
-        self.raw_f = raw_f
-        self.raw_r = raw_r
+        super().__init__(raw_file_f, raw_file_r)
         self.downsize_to = n
         self.seed = seed
 
     def downsize_pair(self):
-        if self.raw_f == self.raw_r:
-            print(f"\nWarning files {self.raw_f} and {self.raw_r} are the same! Expected Forward and Reverse!\n")
+        if self.raw_file_f == self.raw_file_r:
+            print(f"\nWarning files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!\n")
 
-        records: int = sum(1 for _ in open(self.raw_f)) // 4
+        records: int = sum(1 for _ in open(self.raw_file_f)) // 4
         logger.info('Found %i reads' % records)
         random.seed(self.seed)
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
 
-        forward_reads = open(self.raw_f, 'r')
-        reverse_reads = open(self.raw_r, 'r')
-        downsized_forward = open(self.raw_f + ".downsized", "w+")
-        downsized_reverse = open(self.raw_r + ".downsized", "w+")
+        forward_reads = open(self.raw_file_f, 'r')
+        reverse_reads = open(self.raw_file_r, 'r')
+        downsized_forward = open(self.raw_file_f + ".downsized", "w+")
+        downsized_reverse = open(self.raw_file_r + ".downsized", "w+")
 
         rec_no = - 1
         for rr in rand_reads:
