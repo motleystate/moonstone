@@ -24,26 +24,28 @@ class DownsizePair(BaseDownsizing):
 
     def downsize_pair(self):
         if self.raw_file_f == self.raw_file_r:
-            print(f"\nWarning files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!\n")
+            print(f"\nFiles {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!\n")
 
         records: int = sum(1 for _ in open(self.raw_file_f)) // 4
         logger.info('Found %i reads' % records)
         random.seed(self.seed)
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
+        print(rand_reads)
 
         forward_reads = open(self.raw_file_f, 'r')
         reverse_reads = open(self.raw_file_r, 'r')
         downsized_forward = open(self.raw_file_f + ".downsized", "w+")
         downsized_reverse = open(self.raw_file_r + ".downsized", "w+")
 
-        rec_no = - 1
+        rec_no = -1
         for rr in rand_reads:
             # Read records in the file (groups of 4 for fastq)
             # Until the record being read is no longer less that one of the ordered random (oxymoron?) records
             while rec_no < rr:
                 rec_no += 1
-                forward_reads.readline(4)
-                reverse_reads.readline(4)
+                for i in range(4):
+                    forward_reads.readline()
+                    reverse_reads.readline()
             # Once rec_no == rr (we find a matching record), we write that record, forward and reverse.
             for i in range(4):
                 downsized_forward.write(forward_reads.readline())
@@ -62,8 +64,9 @@ class DownsizePair(BaseDownsizing):
         downsized_forward.close()
         downsized_reverse.close()
 
-        logger.info('Wrote %i reads to to %s.\nWrote %i reads to %s' %
-              (downsized_forward_count, downsized_forward.name, downsized_reverse_count, downsized_reverse.name))
+        logger.info('Wrote %i reads to to %s.\nWrote %i reads to %s' % (downsized_forward_count, downsized_forward.name,
+                                                                        downsized_reverse_count, downsized_reverse.name)
+                    )
 
     def downsize_single(self):
         pass
