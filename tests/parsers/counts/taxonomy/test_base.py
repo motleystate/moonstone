@@ -2,13 +2,13 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.parsers.counts.taxonomy.base import TaxonomyCountsBaseParser
+from moonstone.utils.taxonomy import TaxonomyCountsBase
 
 
 class TestTaxonomyCountsBaseParser(TestCase):
 
     def setUp(self):
-        self.parser = TaxonomyCountsBaseParser('unexisting_file')
+        self.parser = TaxonomyCountsBase('unexisting_file')
 
     def test_fill_none(self):
         taxa_df = pd.DataFrame(
