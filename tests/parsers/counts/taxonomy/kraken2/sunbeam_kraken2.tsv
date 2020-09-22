@@ -2,4 +2,4 @@
 #OTU ID	SAMPLE_1	SAMPLE_2	Consensus Lineage
 2	5.5	6.0	k__Bacteria; p__; c__; o__; f__; g__; s__
 186826	4.3	2.1	k__Bacteria; p__Firmicutes; c__Bacilli; o__Lactobacillales; f__; g__; s__
-109790	1.0	2.0	k__Bacteria; p__Firmicutes; c__Bacilli; o__Lactobacillales; f__Lactobacillaceae; g__Lactobacillus; s__jensenii
+109790	1.0	12.0	k__Bacteria; p__Firmicutes; c__Bacilli; o__Lactobacillales; f__Lactobacillaceae; g__Lactobacillus; s__jensenii
