@@ -62,17 +62,18 @@ class TaxonomyRandomSelection(RandomSelection):
     Allow random selection for taxonomy multi-indexed dataframes.
     """
 
-    def __init__(self, df: pd.DataFrame, *args, **kwargs):
+    def __init__(self, df: pd.DataFrame, concat_char: str = ';', *args, **kwargs):
+        self.concat_char = concat_char
         no_index_df = df.reset_index()
         self.index_names = df.index.names
         new_df = no_index_df.set_index(
-            no_index_df[self.index_names].agg('-'.join, axis=1)
+            no_index_df[self.index_names].agg(self.concat_char.join, axis=1)
         ).drop(self.index_names, axis=1)
         super().__init__(new_df, **kwargs)
 
     def normalize(self) -> pd.DataFrame:
         single_index_norm_df = super().normalize()
         multi_index_norm_df = single_index_norm_df.reset_index(drop=True)
-        multi_index_norm_df.index = single_index_norm_df.index.str.split('-', expand=True)
+        multi_index_norm_df.index = single_index_norm_df.index.str.split((self.concat_char), expand=True)
         multi_index_norm_df.index.names = self.index_names
         return multi_index_norm_df
