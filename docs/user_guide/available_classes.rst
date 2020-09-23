@@ -113,6 +113,7 @@ List
     geometric_mean.GeometricMeanNormalization
     total_counts.TotalCountsNormalization
     random_selection.RandomSelection
+    random_selection.TaxonomyRandomSelection
 
 .. _av_plot:
 
