@@ -5,10 +5,10 @@ import pandas as pd
 from moonstone.utils.taxonomy import TaxonomyCountsBase
 
 
-class TestTaxonomyCountsBaseParser(TestCase):
+class TestTaxonomyCountsBase(TestCase):
 
     def setUp(self):
-        self.parser = TaxonomyCountsBase('unexisting_file')
+        self.taxonomy_instance = TaxonomyCountsBase()
 
     def test_fill_none(self):
         taxa_df = pd.DataFrame(
@@ -25,7 +25,7 @@ class TestTaxonomyCountsBaseParser(TestCase):
             ],
             columns=['kingdom', 'phylum']
         )
-        tested_df = self.parser._fill_none(taxa_df)
+        tested_df = self.taxonomy_instance._fill_none(taxa_df)
         pd.testing.assert_frame_equal(tested_df, expected_df)
 
     def test_merge_genus_species(self):
@@ -47,7 +47,7 @@ class TestTaxonomyCountsBaseParser(TestCase):
             ],
             columns=['genus', 'species']
         )
-        tested_df = self.parser._merge_genus_species(taxa_df)
+        tested_df = self.taxonomy_instance._merge_genus_species(taxa_df)
         pd.testing.assert_frame_equal(tested_df, expected_df)
 
     def test_taxa_fill_none(self):
@@ -56,7 +56,7 @@ class TestTaxonomyCountsBaseParser(TestCase):
                 ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae', 5.5, 6.5],
                 ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales', 9.5, 7.3],
             ],
-            columns=[self.parser.taxa_column, 'sample_1', 'sample_2']
+            columns=[self.taxonomy_instance.taxa_column, 'sample_1', 'sample_2']
         )
         expected_df = pd.DataFrame(
             [
@@ -65,7 +65,7 @@ class TestTaxonomyCountsBaseParser(TestCase):
             ],
             columns=['kingdom', 'phylum', 'class', 'order', 'family', 'sample_1', 'sample_2']
         )
-        tested_df = self.parser.split_taxa_fill_none(df, sep='|')
+        tested_df = self.taxonomy_instance.split_taxa_fill_none(df, sep='|')
         pd.testing.assert_frame_equal(tested_df, expected_df)
 
     def test_taxa_fill_none_terms_to_remove(self):
@@ -74,7 +74,7 @@ class TestTaxonomyCountsBaseParser(TestCase):
                 ['k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__term_to_remove', 5.5, 6.5],
                 ['k__Bacteria|p__Proteobacteria|c__Alphaproteobacteria|o__Caulobacterales|f__uncultured', 9.5, 7.3],
             ],
-            columns=[self.parser.taxa_column, 'sample_1', 'sample_2']
+            columns=[self.taxonomy_instance.taxa_column, 'sample_1', 'sample_2']
         )
         terms_to_remove = ['term_to_remove', 'uncultured']
         expected_df = pd.DataFrame(
@@ -84,5 +84,5 @@ class TestTaxonomyCountsBaseParser(TestCase):
             ],
             columns=['kingdom', 'phylum', 'class', 'order', 'family', 'sample_1', 'sample_2']
         )
-        tested_df = self.parser.split_taxa_fill_none(df, sep='|', terms_to_remove=terms_to_remove)
+        tested_df = self.taxonomy_instance.split_taxa_fill_none(df, sep='|', terms_to_remove=terms_to_remove)
         pd.testing.assert_frame_equal(tested_df, expected_df)
