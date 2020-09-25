@@ -1,7 +1,11 @@
+import logging
 import pandas as pd
 from typing import Union
 
 from moonstone.utils.taxonomy import TaxonomyCountsBase
+
+logger = logging.getLogger(__name__)
+
 
 
 class GenesToTaxonomy(TaxonomyCountsBase):
@@ -18,29 +22,27 @@ class GenesToTaxonomy(TaxonomyCountsBase):
         self.taxonomy_df = taxonomy_dataframe
         self.taxa_column = taxa_column
 
-    def stats_on_taxonomy_merge(self, merged_df):
+    def reindex_with_taxonomy(self):
         """
-        :param merged_df needs to have been merged with the indicator arg set to True
-        """
-        tot = merged_df['_merge'].size
-        both_counts = merged_df['_merge'].value_counts()['both']
-        print(f"Merge of taxonomic data to the count dataframe for {both_counts} items ({(both_counts/tot)*100}%).")
-        if both_counts != tot:
-            print("If these results aren't as expected, \
-please check that the indexes (items name) of both dataframes match.")
-            print("You can access the list of items without taxonomic infos \
-by checking the .without_infos_index attribute.")
-            self.without_infos_index = merged_df.loc[merged_df['_merge'] == 'left_only'].index
+        reindexation on taxonomic informations (if there are).
 
-    def reindex_with_taxonomy(self, stats: bool = True):
+        NB: You can access the list of items without taxonomic infos by checking the .without_infos_index attributes
         """
-        :param stats: boolean to show merging stats
-        """
+        # merging of count dataframe with taxonomy dataframe
         new_df = self.df.merge(self.taxonomy_df[self.taxa_column], how='left',
-                               left_index=True, right_index=True, indicator=stats)
-        if stats is True:
-            self.stats_on_taxonomy_merge(new_df)
-            new_df = new_df.drop(['_merge'], axis=1)
+                               left_index=True, right_index=True, indicator=True)
+        # stats and warnings on merge
+        tot = new_df['_merge'].size
+        both_counts = new_df['_merge'].value_counts()['both']
+        logger.info(f"Merge of taxonomic data to the count dataframe for {both_counts} items ({(both_counts/tot)*100}%).")
+        if both_counts != tot:
+            logger.info("If these results aren't as expected, \
+please check that the indexes (items name) of both dataframes match.")
+            logger.info("You can access the list of items without taxonomic infos \
+by checking the .without_infos_index attribute.")
+        self.without_infos_index = new_df['_merge'].loc[new_df['_merge'] == 'left_only'].index
+
+        new_df = new_df.drop(['_merge'], axis=1)
         new_df[self.taxa_column] = new_df[self.taxa_column].fillna(value='k__; p__; c__; o__; f__; g__; s__')
         new_df = self.split_taxa_fill_none(new_df, sep="; ", merge_genus_species=True)
         new_df = new_df.set_index(self.taxonomical_names[:self._rank_level])
