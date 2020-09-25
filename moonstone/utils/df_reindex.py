@@ -7,10 +7,16 @@ from moonstone.utils.taxonomy import TaxonomyCountsBase
 class GenesToTaxonomy(TaxonomyCountsBase):
 
     def __init__(self, dataframe: Union[pd.Series, pd.DataFrame],
-                 taxonomy_file: str = None, taxa_column: str = 'full_tax'):
+                 taxonomy_dataframe: Union[pd.Series, pd.DataFrame], taxa_column: str = 'full_tax'):
+        """
+        :param dataframe : genes counts dataframe
+        :param taxonomy_dataframe : index items (genes) names and with a column with the full taxonomic informations
+        following the `Kraken2 <https://ccb.jhu.edu/software/kraken2/>`_ format 'k__; p__; c__; o__; f__; g__; s__
+        :param taxa_column : name of the column in taxonomy_dataframe containing the full taxonomic informations
+        """
         self.df = dataframe
-        self.taxonomy_file = taxonomy_file
-        self.taxa_column = taxa_column   # noqa
+        self.taxonomy_df = taxonomy_dataframe
+        self.taxa_column = taxa_column
 
     def stats_on_taxonomy_merge(self, merged_df):
         """
@@ -45,20 +51,3 @@ by checking the .without_infos_index attribute.")
         if getattr(self, "_reindexed_df", None) is None:
             self._reindexed_df = self.reindex_with_taxonomy()
         return self._reindexed_df
-
-    @property
-    def taxonomy_df(self):
-        """
-        retrieves taxonomy_df, and read it from given taxonomy_file if no value has been given
-        """
-        if getattr(self, "_taxonomy_df", None) is None:
-            if self.taxonomy_file is not None:
-                self._taxonomy_df = pd.read_csv(self.taxonomy_file)
-                self._taxonomy_df = self._taxonomy_df.set_index(self.taxa_column)
-            else:
-                raise ValueError("No taxonomy_df nor taxonomy_file has been specified")
-        return self._taxonomy_df
-
-    @taxonomy_df.setter
-    def taxonomy_df(self, taxonomy_df):
-        self._taxonomy_df = taxonomy_df
