@@ -30,7 +30,7 @@ class DownsizePair(BaseDownsizing):
         logger.info('Found %i reads' % records)
         random.seed(self.seed)
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
-        
+
         forward_reads = open(self.raw_file_f, 'r')
         reverse_reads = open(self.raw_file_r, 'r')
         downsized_forward = open(self.raw_file_f + ".downsized", "w+")
