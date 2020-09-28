@@ -4,6 +4,7 @@ from typing import Union, Optional
 
 import pandas as pd
 import re
+from scipy import stats
 import skbio
 
 from moonstone.core.module_base import BaseModule, BaseDF
@@ -14,6 +15,8 @@ from moonstone.utils.plot import (
 
 
 class AlphaDiversity(BaseModule, BaseDF, ABC):
+
+    bins_size = 0.1
 
     def __init__(self, dataframe: Union[pd.Series, pd.DataFrame]):
         """
@@ -35,7 +38,15 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             self._alpha_diversity_indexes = self.compute_alpha_diversity()
         return self._alpha_diversity_indexes
 
-    def visualize(self, bins_size: Union[int, float] = 0.1, plotting_options: dict = None,
+    def stats(self):
+        # copy-paste from Descriptive in moonstone.analysis.stats
+        print(f"Descriptive statistics of {self.index_name}:")
+
+        properties = ['Number of Variable', 'Min / Max', 'Mean', 'Variance', 'Skewness', 'Kurtosis / Fisher']
+        for i in range(len(stats.describe(self.alpha_diversity_indexes))):
+            print(f"\t{properties[i]} = {stats.describe(self.alpha_diversity_indexes)[i]}")
+
+    def visualize(self, bins_size: Union[int, float] = None, plotting_options: dict = None,
                   show: Optional[bool] = True, output_file: Optional[str] = False):
 
         title = self.index_name+" (alpha diversity) distribution across the samples"
@@ -51,6 +62,9 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
                                                                       title,
                                                                       xlabel, ylabel)
 
+        if bins_size is None:
+            bins_size = self.bins_size
+
         hist_fig = Histogram(self.alpha_diversity_indexes)
         hist_fig.plot_one_graph(
             bins_size,
@@ -64,6 +78,8 @@ class ShannonIndex(AlphaDiversity):
     """
     Perform calculation of the shannon index for each samples of the dataframe
     """
+    bins_size = 0.1
+
     def compute_alpha_diversity(self, base: Union[int, float] = 2):    # compute_shannon_diversity
         """
         :param base: logarithm base chosen (NB : for ln, base=math.exp(1))
@@ -79,6 +95,8 @@ class SimpsonInverseIndex(AlphaDiversity):
     """
     Perform calculation of the simpson inverse index for each samples of the dataframe
     """
+    bins_size = 100
+
     def compute_alpha_diversity(self):
         # steps to compute the index
         Seriesdic = {}
