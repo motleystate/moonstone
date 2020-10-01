@@ -5,6 +5,7 @@ from moonstone.utils.log_messages import warn_once, reset_warnings_decorator
 
 logger = logging.getLogger(__name__)
 
+
 class TestLogMessage(TestCase):
 
     def test_warn_once_simple_case(self):
@@ -22,7 +23,7 @@ class TestLogMessage(TestCase):
             logger.warning("not tracked")             # not tracked
             for i in range(2, 11):
                 warn_once(logger, f"tracked warning message #{i}")
-            warn_once(logger, "tracked warning message #1") # not printed because in the 10 messages tracked
+            warn_once(logger, "tracked warning message #1")  # not printed because in the 10 messages tracked
             # But kick itself out to put itself back as most recent
             # -> I don't like it but I should create a personalized tracker and I don't care enough
 
@@ -51,7 +52,8 @@ class TestLogMessage(TestCase):
         with self.assertLogs('tests.utils.test_log_messages', level='WARNING') as log:
             testing_function_without_decorator(1)
             self.assertEqual(len(log.output), 2)
-            self.assertEqual(log.output[0], "WARNING:tests.utils.test_log_messages:tracked warning message (w/o decorator)")
+            self.assertEqual(
+                log.output[0], "WARNING:tests.utils.test_log_messages:tracked warning message (w/o decorator)")
             self.assertEqual(log.output[1], "WARNING:tests.utils.test_log_messages:different log message 1")
 
         with self.assertLogs('tests.utils.test_log_messages', level='WARNING') as log:
@@ -68,9 +70,11 @@ class TestLogMessage(TestCase):
         with self.assertLogs('tests.utils.test_log_messages', level='WARNING') as log:
             testing_function_with_decorator()
             self.assertEqual(len(log.output), 1)
-            self.assertEqual(log.output[0], "WARNING:tests.utils.test_log_messages:tracked warning message (w/ decorator)")
+            self.assertEqual(
+                log.output[0], "WARNING:tests.utils.test_log_messages:tracked warning message (w/ decorator)")
 
         with self.assertLogs('tests.utils.test_log_messages', level='WARNING') as log:
             testing_function_with_decorator()
             self.assertEqual(len(log.output), 1)
-            self.assertEqual(log.output[0], "WARNING:tests.utils.test_log_messages:tracked warning message (w/ decorator)")
+            self.assertEqual(
+                log.output[0], "WARNING:tests.utils.test_log_messages:tracked warning message (w/ decorator)")

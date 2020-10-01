@@ -8,8 +8,8 @@ from moonstone.utils.df_reindex import GenesToTaxonomy
 
 class TestGenesToTaxonomy(TestCase):
 
-    def test_reindex_with_taxonomy(self):
-        df = pd.DataFrame(
+    def setUp(self):
+        self.df = pd.DataFrame(
             [
                 [23, 7],
                 [15, 4],
@@ -17,6 +17,9 @@ class TestGenesToTaxonomy(TestCase):
             columns=['sample_1', 'sample_2'],
             index=['gene_1', 'gene_2']  # index dtype='object'
         )
+
+    def test_reindex_with_taxonomy(self):
+
         df_taxo = pd.DataFrame(
             [
                 [147802,
@@ -49,19 +52,12 @@ f__Enterococcaceae; g__Enterococcus; s__faecium']
         )
         df_expected.index.set_names(["kingdom", "phylum", "class", "order", "family", "genus", "species"], inplace=True)
 
-        reindexation_instance = GenesToTaxonomy(df, df_taxo)
+        reindexation_instance = GenesToTaxonomy(self.df, df_taxo)
         reindexed_df = reindexation_instance.reindexed_df
         pd.testing.assert_frame_equal(reindexed_df, df_expected)
 
-    def test_reindex_with_taxonomy_missing_infos_dropped(self):
-        df = pd.DataFrame(
-            [
-                [23, 7],
-                [15, 4],
-            ],
-            columns=['sample_1', 'sample_2'],
-            index=['gene_1', 'gene_2']  # index dtype='object'
-        )
+    def test_reindex_with_taxonomy_missing_infos(self):
+
         df_taxo = pd.DataFrame(
             [
                 [147802,
@@ -90,7 +86,7 @@ f__Enterococcaceae; g__Enterococcus; s__faecium']
         )
         df_expected.index.set_names(["kingdom", "phylum", "class", "order", "family", "genus", "species"], inplace=True)
 
-        reindexation_instance = GenesToTaxonomy(df, df_taxo)
+        reindexation_instance = GenesToTaxonomy(self.df, df_taxo)
         reindexed_df = reindexation_instance.reindexed_df
         pd.testing.assert_frame_equal(reindexed_df, df_expected)
         pd.testing.assert_index_equal(reindexation_instance.without_info_index, pd.Index(['gene_2'], dtype='object'))
@@ -155,6 +151,7 @@ f__Enterococcaceae; g__Enterococcus; s__faecium']
             columns=['sample_1', 'sample_2'],
             index=['gene_1', 'gene_2', 'gene_4']  # index dtype='object'
         )
+
         df_taxo = pd.DataFrame(
             [
                 [147802,
@@ -190,14 +187,6 @@ f__Enterococcaceae; g__Enterococcus; s__faecium']
         pd.testing.assert_frame_equal(reindexed_df, df_expected)
 
     def test_reindex_with_taxonomy_summing(self):
-        df = pd.DataFrame(
-            [
-                [23, 7],
-                [15, 4],
-            ],
-            columns=['sample_1', 'sample_2'],
-            index=['gene_1', 'gene_2']  # index dtype='object'
-        )
         df_taxo = pd.DataFrame(
             [
                 [147802,
@@ -226,7 +215,7 @@ f__Lactobacillaceae; g__Lactobacillus; s__iners']
          )
         df_expected.index.set_names(["kingdom", "phylum", "class", "order", "family", "genus", "species"], inplace=True)
 
-        reindexation_instance = GenesToTaxonomy(df, df_taxo)
+        reindexation_instance = GenesToTaxonomy(self.df, df_taxo)
         reindexed_df = reindexation_instance.reindexed_df
         pd.testing.assert_frame_equal(reindexed_df, df_expected)
 

@@ -202,8 +202,7 @@ set to default (all).", log.output)
 
 class TestSimpsonInverseIndex(TestCase):
 
-    def test_compute_alpha_diversity(self):
-
+    def setUp(self):
         tested_object = pd.DataFrame.from_dict(
             {
                 'species1': [4, 4, 0, 0, 4],
@@ -212,7 +211,9 @@ class TestSimpsonInverseIndex(TestCase):
                 'species4': [0, 3, 0, 0, 4]
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
-        tested_object_instance = SimpsonInverseIndex(tested_object)
+        self.tested_object_instance = SimpsonInverseIndex(tested_object)
+
+    def test_compute_alpha_diversity(self):
         expected_object = pd.Series({
             'sample1': 1.470588,
             'sample2': 1.960000,
@@ -220,7 +221,7 @@ class TestSimpsonInverseIndex(TestCase):
             'sample4': 1.000000,
             'sample5': 3.958904
         })
-        pd.testing.assert_series_equal(tested_object_instance.compute_diversity(), expected_object)
+        pd.testing.assert_series_equal(self.tested_object_instance.compute_diversity(), expected_object)
 
     def test_visualize(self):
         # Not real test but make sure that visualize() runs without errors
