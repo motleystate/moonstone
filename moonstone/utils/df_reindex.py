@@ -7,7 +7,6 @@ from moonstone.utils.taxonomy import TaxonomyCountsBase
 logger = logging.getLogger(__name__)
 
 
-
 class GenesToTaxonomy(TaxonomyCountsBase):
 
     def __init__(self, dataframe: Union[pd.Series, pd.DataFrame],
@@ -34,7 +33,8 @@ class GenesToTaxonomy(TaxonomyCountsBase):
         # stats and warnings on merge
         tot = new_df['_merge'].size
         both_counts = new_df['_merge'].value_counts()['both']
-        logger.info(f"Merge of taxonomic data to the count dataframe for {both_counts} items ({(both_counts/tot)*100}%).")
+        logger.info(f"Merge of taxonomic data to the count dataframe for {both_counts} items \
+({(both_counts/tot)*100}%).")
         if both_counts != tot:
             logger.info("If these results aren't as expected, \
 please check that the indexes (items name) of both dataframes match.")

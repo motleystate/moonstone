@@ -46,12 +46,16 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
         for i in range(len(stats.describe(self.alpha_diversity_indexes))):
             print(f"\t{properties[i]} = {stats.describe(self.alpha_diversity_indexes)[i]}")
 
-    def visualize(self, bins_size: Union[int, float] = None, plotting_options: dict = None,
+    def visualize(self, bins_size: Union[int, float] = None,
+                  xmin: Union[int, float, str] = None, plotting_options: dict = None,
                   show: Optional[bool] = True, output_file: Optional[str] = False):
 
         title = self.index_name+" (alpha diversity) distribution across the samples"
         xlabel = self.index_name
         ylabel = "number of samples"
+
+        if bins_size is None:
+            bins_size = self.bins_size
 
         if plotting_options is None:
             plotting_options = {'layout': {'title_text': title, 'title_x': 0.5},
@@ -61,9 +65,6 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             plotting_options = add_default_titles_to_plotting_options(plotting_options,
                                                                       title,
                                                                       xlabel, ylabel)
-
-        if bins_size is None:
-            bins_size = self.bins_size
 
         hist_fig = Histogram(self.alpha_diversity_indexes)
         hist_fig.plot_one_graph(
