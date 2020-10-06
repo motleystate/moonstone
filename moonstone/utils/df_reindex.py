@@ -1,11 +1,11 @@
 import logging
+import numpy as np
 import pandas as pd
 from typing import Union
 
 from moonstone.utils.taxonomy import TaxonomyCountsBase
 
 logger = logging.getLogger(__name__)
-
 
 
 class GenesToTaxonomy(TaxonomyCountsBase):
@@ -22,7 +22,7 @@ class GenesToTaxonomy(TaxonomyCountsBase):
         self.taxonomy_df = taxonomy_dataframe
         self.taxa_column = taxa_column
 
-    def reindex_with_taxonomy(self):
+    def reindex_with_taxonomy(self, method: str = 'sum'):
         """
         reindexation on taxonomic informations (if there are).
 
@@ -34,7 +34,8 @@ class GenesToTaxonomy(TaxonomyCountsBase):
         # stats and warnings on merge
         tot = new_df['_merge'].size
         both_counts = new_df['_merge'].value_counts()['both']
-        logger.info(f"Merge of taxonomic data to the count dataframe for {both_counts} items ({(both_counts/tot)*100}%).")
+        logger.info(f"Merge of taxonomic data to the count dataframe for {both_counts} items \
+({(both_counts/tot)*100}%).")
         if both_counts != tot:
             logger.info("If these results aren't as expected, \
 please check that the indexes (items name) of both dataframes match.")
@@ -46,6 +47,13 @@ by checking the .without_infos_index attribute.")
         new_df[self.taxa_column] = new_df[self.taxa_column].fillna(value='k__; p__; c__; o__; f__; g__; s__')
         new_df = self.split_taxa_fill_none(new_df, sep="; ", merge_genus_species=True)
         new_df = new_df.set_index(self.taxonomical_names[:self._rank_level])
+        if method == 'sum':
+            nb_levels = len(self.taxonomical_names[:self._rank_level])
+            new_df = new_df.sum(level=list(range(nb_levels)))
+        elif method == 'count':
+            new_df[:] = np.where(new_df > 0, 1, 0)    # presence/absence -> is > 0 then presence (1) else absence (0)
+            nb_levels = len(self.taxonomical_names[:self._rank_level])
+            new_df = new_df.sum(level=list(range(nb_levels)))
         return new_df
 
     @property
