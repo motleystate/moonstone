@@ -26,6 +26,9 @@ class GenesToTaxonomy(TaxonomyCountsBase):
         """
         reindexation on taxonomic informations (if there are).
 
+        :param method: how to combine genes' informations of genes that have the same taxonomy. Choose 'sum' to sum the counts
+        or 'count' to only have the number of genes with this taxonomy
+
         NB: You can access the list of items without taxonomic infos by checking the .without_infos_index attributes
         """
         # merging of count dataframe with taxonomy dataframe
