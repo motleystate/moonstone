@@ -5,11 +5,10 @@ from typing import Union, Optional
 
 import pandas as pd
 import skbio
-from plotly import graph_objects as go
 
 from moonstone.core.module_base import BaseModule, BaseDF
 from moonstone.plot.graphs.histogram import Histogram
-from moonstone.plot.graphs.violin import ViolinGraph
+from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
 from moonstone.utils.plot import (
     add_default_titles_to_plotting_options
 )
@@ -79,8 +78,6 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
         if mode not in ['histogram', 'violin']:
             logger.warning("%s not a available mode, set to default (histogram)", mode)
             mode = "histogram"
-        if plotting_options is None:
-            plotting_options = {}
 
         if mode == "histogram":
             self._visualize_histogram(bins_size, plotting_options, show, output_file)
@@ -89,26 +86,21 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
 
     def visualize_groups(self, metadata_df: pd.DataFrame, group_col: str, plotting_options: dict = None,
                          show: Optional[bool] = True, output_file: Optional[str] = False):
-        groups = list(metadata_df[group_col].unique())
-        groups.sort()
-
-        df = pd.concat([metadata_df['MOTIF_INC'], self.alpha_diversity_indexes], axis=1).dropna()
-
-        fig = go.Figure()
-        for group in groups:
-            fig.add_trace(go.Violin(x=df['MOTIF_INC'][df['MOTIF_INC'] == group],
-                                    y=df['alpha_index'][df['MOTIF_INC'] == group],
-                                    name=str(group),
-                                    box_visible=True,
-                                    points='all',
-                                    meanline_visible=True,
-                                    text=df.index))
-        fig.update_layout(
-            title_text=f"<b>{self.index_name.capitalize()}-index</b><br><i>grouped by {group_col}",
-            xaxis_title=f"{group_col}",
-            yaxis_title="Alpha indexes"
+        title = f"Distribution of <b>{self.index_name.capitalize()}</b> among samples<br><i>grouped by {group_col}"
+        xlabel = f"{group_col}"
+        ylabel = f"{self.index_name.capitalize()}"
+        plotting_options = add_default_titles_to_plotting_options(
+            plotting_options, title, xlabel, ylabel
         )
-        fig.show()
+
+        df = pd.concat([metadata_df[group_col], self.alpha_diversity_indexes], axis=1).dropna()
+        violin_fig = GroupViolinGraph(df)
+        violin_fig.plot_one_graph(
+            self.ALPHA_DIVERSITY_INDEXES_NAME, group_col,
+            plotting_options=plotting_options,
+            show=show,
+            output_file=output_file,
+        )
 
 
 class ShannonIndex(AlphaDiversity):
