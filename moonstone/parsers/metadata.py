@@ -14,7 +14,7 @@ class MetadataParser(BaseParser):
     Parse metadata file and allows to apply transformations on them (cleaning...).
     """
 
-    def __init__(self, *args, cleaning_operations: dict = None, **kwargs):
+    def __init__(self, *args, index_col: str = 'sample', cleaning_operations: dict = None, **kwargs):
         """
         Cleaning operations are based on DataFrameCleaner object that allow to perform transformation
         operations on different columns.
@@ -23,8 +23,10 @@ class MetadataParser(BaseParser):
 
             {'col_name': [('operation1', 'operation1_options'), ('operation2', 'operation2_options')]}
 
+        :param index_col: name of the column used as dataframe index
         :param cleaning_operations: cleaning operations to apply to the input table
         """
+        self.index_col = index_col
         self.cleaning_operations = cleaning_operations
         if self.cleaning_operations is None:
             self.cleaning_operations = {}
@@ -38,7 +40,7 @@ class MetadataParser(BaseParser):
                 transf_name = transformation[0]
                 transf_options = transformation[1]
                 df_cleaner.run_transform(col_name, transf_name, transf_options)
-        return df_cleaner.df
+        return df_cleaner.df.set_index(self.index_col)
 
     def get_stats(self) -> List[Dict]:
         """
