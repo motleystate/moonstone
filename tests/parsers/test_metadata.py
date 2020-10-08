@@ -17,28 +17,16 @@ class TestMetadataParser(TestCase):
     def test_parse_file(self):
         expected_df = pd.DataFrame(
             {
-                'col_1': ['s1', 's2', 's3'],
                 'col_2': [13.3, 15.3, 19.1],
                 'col_3': ['M', 'F', 'M']
             }
         )
-        parser = MetadataParser(self.metadata_file)
+        expected_df.index = pd.Index(['s1', 's2', 's3'], name='col_1')
+        parser = MetadataParser(self.metadata_file, index_col='col_1')
         assert_frame_equal(parser.dataframe, expected_df)
 
     def test_get_stats_headers(self):
         expected_list = [
-            {
-                'col_name': 'col_1',
-                'col_type': 'object',
-                'python_col_type': 'str',
-                'n_values': 3,
-                'n_uniq_values': 3,
-                'values_repartition': {
-                    's1': 1,
-                    's2': 1,
-                    's3': 1
-                }
-            },
             {
                 'col_name': 'col_2',
                 'col_type': 'float64',
@@ -64,23 +52,11 @@ class TestMetadataParser(TestCase):
                 }
             }
         ]
-        parser = MetadataParser(self.metadata_file)
+        parser = MetadataParser(self.metadata_file, index_col='col_1')
         self.assertListEqual(parser.get_stats(), expected_list)
 
     def test_get_stats_no_header(self):
         expected_list = [
-            {
-                'col_name': 0,
-                'col_type': 'object',
-                'python_col_type': 'str',
-                'n_values': 3,
-                'n_uniq_values': 3,
-                'values_repartition': {
-                    's1': 1,
-                    's2': 1,
-                    's3': 1
-                }
-            },
             {
                 'col_name': 1,
                 'col_type': 'float64',
@@ -106,39 +82,39 @@ class TestMetadataParser(TestCase):
                 }
             }
         ]
-        parser = MetadataParser(self.metadata_file_no_header, no_header=True)
+        parser = MetadataParser(self.metadata_file_no_header, no_header=True, index_col=0)
         self.assertListEqual(parser.get_stats(), expected_list)
 
     def test_parse_file_force_dtype(self):
         expected_df = pd.DataFrame(
             {
-                'col_1': ['s1', 's2', 's3'],
                 'col_2': ['13.3', '15.3', '19.1'],
                 'col_3': ['M', 'F', 'M']
             }
         )
+        expected_df.index = pd.Index(['s1', 's2', 's3'], name='col_1')
         parsing_options = {
             'dtype': {
                 'col_2': 'object'
             }
         }
-        parser = MetadataParser(self.metadata_file, parsing_options=parsing_options)
+        parser = MetadataParser(self.metadata_file, parsing_options=parsing_options, index_col='col_1')
         assert_frame_equal(parser.dataframe, expected_df)
 
     def test_parse_dirty_metadata_and_clean(self):
         expected_df = pd.DataFrame(
             {
-                'sample': ['s1', 's2', 's3', 's4'],
                 'age': [29, 48, 36, 25],
             }
         )
+        expected_df.index = pd.Index(['s1', 's2', 's3', 's4'], name='sample')
         cleaning_operations = {
             'samples': [
                 ('to_slug', {}),
                 ('rename', {'new_name': 'sample'})
             ]
         }
-        parser = MetadataParser(self.metadata_file_dirty, sep=",", cleaning_operations=cleaning_operations)
+        parser = MetadataParser(self.metadata_file_dirty, sep=",", cleaning_operations=cleaning_operations, index_col='sample')
         assert_frame_equal(parser.dataframe, expected_df)
 
 
@@ -192,11 +168,11 @@ class TestYAMLBasedMetadataParser(TestCase):
     def test_parse_end_to_end(self):
         metadata_file_dirty = os.path.join(os.path.dirname(__file__), "data/metadata/dirty_metadata.tsv")
         config_file = os.path.join(os.path.dirname(__file__), "data/metadata/config.yaml")
-        parser = YAMLBasedMetadataParser(metadata_file_dirty, config_file, sep=",")
+        parser = YAMLBasedMetadataParser(metadata_file_dirty, config_file, sep=",", index_col="sample")
         expected_df = pd.DataFrame(
             {
-                'sample': ['s1', 's2', 's3', 's4'],
                 'age': ['29', '48', '36', '25'],
             }
         )
+        expected_df.index = pd.Index(['s1', 's2', 's3', 's4'], name='sample')
         pd.testing.assert_frame_equal(parser.metadata_parser.dataframe, expected_df)

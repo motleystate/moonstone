@@ -79,6 +79,8 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
         if mode not in ['histogram', 'violin']:
             logger.warning("%s not a available mode, set to default (histogram)", mode)
             mode = "histogram"
+        if plotting_options is None:
+            plotting_options = {}
 
         if mode == "histogram":
             self._visualize_histogram(bins_size, plotting_options, show, output_file)
@@ -107,7 +109,6 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             yaxis_title="Alpha indexes"
         )
         fig.show()
-
 
 
 class ShannonIndex(AlphaDiversity):
