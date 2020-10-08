@@ -1,6 +1,6 @@
 import logging
 import re
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Union, Optional
 
 import pandas as pd
@@ -26,11 +26,12 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
         super().__init__(dataframe)
         self.index_name = " ".join(re.findall('[A-Z][^A-Z]*', self.__class__.__name__)).lower()
 
+    @abstractmethod
     def compute_alpha_diversity(self):
         """
         method that compute the alpha diversity
         """
-        return "choose index computation method"
+        pass
 
     @property
     def alpha_diversity_indexes(self):
@@ -84,8 +85,14 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
         elif mode == "violin":
             self._visualize_violin(plotting_options, show, output_file)
 
-    def visualize_groups(self, metadata_df: pd.DataFrame, group_col: str, plotting_options: dict = None,
-                         show: Optional[bool] = True, output_file: Optional[str] = False):
+    def visualize_groups(
+        self, metadata_df: pd.DataFrame, group_col: str, plotting_options: dict = None,
+        show: Optional[bool] = True, output_file: Optional[str] = False
+    ):
+        """
+        :param metadata_df: dataframe containing metadata and information to group the data
+        :param group_col: column from metadata_df used to group the data
+        """
         title = f"Distribution of <b>{self.index_name.capitalize()}</b> among samples<br><i>grouped by {group_col}"
         xlabel = f"{group_col}"
         ylabel = f"{self.index_name.capitalize()}"
