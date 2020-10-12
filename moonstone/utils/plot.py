@@ -24,6 +24,8 @@ def add_x_to_plotting_options(plotting_options: dict, option_cat: str, x: str, d
 
 
 def add_default_titles_to_plotting_options(plotting_options: dict, title: str, xlabel: str, ylabel: str):
+    if plotting_options is None:
+        plotting_options = {}
     plotting_options = add_x_to_plotting_options(plotting_options, 'layout', 'title_text', title)
     plotting_options = add_x_to_plotting_options(plotting_options, 'layout', 'title_x', 0.5)
     plotting_options = add_x_to_plotting_options(plotting_options, 'xaxes', 'title_text', xlabel)
