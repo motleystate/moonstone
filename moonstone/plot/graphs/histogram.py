@@ -24,14 +24,12 @@ class Histogram(BaseGraph):
 
         fig = go.Figure(self._get_chart(bins_size=bins_size))
 
-        if plotting_options is None and (bins_size is not None or xmin is not None):
-            plotting_options = {}
+        if bins_size is not None:
+            plotting_options = add_x_to_plotting_options(plotting_options, 'xaxes', 'dtick', bins_size)
+        if xmin is not None:
+            xmax = (int(self.data.max() / bins_size) + 1) * bins_size
+            plotting_options = add_x_to_plotting_options(plotting_options, 'xaxes', 'range', [xmin, xmax])
         if plotting_options is not None:
-            if bins_size is not None:
-                plotting_options = add_x_to_plotting_options(plotting_options, 'xaxes', 'dtick', bins_size)
-            if xmin is not None:
-                xmax = (int(self.data.max() / bins_size) + 1) * bins_size
-                plotting_options = add_x_to_plotting_options(plotting_options, 'xaxes', 'range', [xmin, xmax])
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
 
         self._handle_output_plotly(fig, show, output_file)
