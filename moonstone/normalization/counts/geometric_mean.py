@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class GeometricMeanNormalization(BaseNormalization):
     """
     normalization based on the one performed by
-    `DeSeq2 <https://bioconductor.org/packages/release/bioc/html/DESeq2.html/>`_.
+    `DeSeq2 <https://bioconductor.org/packages/release/bioc/html/DESeq2.html>`_.
 
     info: https://hbctraining.github.io/DGE_workshop/lessons/02_DGE_count_normalization.html
     """

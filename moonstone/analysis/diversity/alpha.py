@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from typing import Union, Optional
 
 import pandas as pd
-import re
 from scipy import stats
 import skbio
 

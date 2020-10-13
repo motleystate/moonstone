@@ -56,14 +56,6 @@ f__Enterococcaceae; g__Enterococcus; s__faecium']
 
     def test_reindex_with_taxonomy_missing_infos(self):
         # for now, if there aren't any taxonomic information, the gene is dropped
-        df = pd.DataFrame(
-            [
-                [23, 7],
-                [15, 4],
-            ],
-            columns=['sample_1', 'sample_2'],
-            index=['gene_1', 'gene_2']  # index dtype='object'
-        )
         df_taxo = pd.DataFrame(
             [
                 [147802,
