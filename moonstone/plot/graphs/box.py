@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from moonstone.plot.graphs.base import BaseGraph
 
 
-class ViolinGraph(BaseGraph):
+class BoxGraph(BaseGraph):
 
     def plot_one_graph(
         self, plotting_options: dict = None,
@@ -14,20 +14,22 @@ class ViolinGraph(BaseGraph):
     ):
         fig = go.Figure(
             [
-                go.Violin(
+                go.Box(
                     y=self.data,
-                    points='all',
-                    meanline_visible=True,
+                    boxpoints='all',
                     text=self.data.index,
                     name="All"
                 )
             ]
         )
 
+        if plotting_options is not None:
+            fig = self._handle_plotting_options_plotly(fig, plotting_options)
+
         self._handle_output_plotly(fig, show, output_file, log_scale)
 
 
-class GroupViolinGraph(BaseGraph):
+class GroupBoxGraph(BaseGraph):
 
     def plot_one_graph(
         self, data_col: str, group_col: str, plotting_options: dict = None,
@@ -42,12 +44,13 @@ class GroupViolinGraph(BaseGraph):
         groups.sort()
         fig = go.Figure()
         for group in groups:
-            fig.add_trace(go.Violin(x=self.data[group_col][self.data[group_col] == group],
-                                    y=self.data[data_col][self.data[group_col] == group],
-                                    name=str(group),
-                                    box_visible=True,
-                                    points='all',
-                                    meanline_visible=True,
-                                    text=self.data.index))
+            fig.add_trace(go.Box(x=self.data[group_col][self.data[group_col] == group],
+                                 y=self.data[data_col][self.data[group_col] == group],
+                                 name=str(group),
+                                 boxpoints='all',
+                                 text=self.data.index))
+
+        if plotting_options is not None:
+            fig = self._handle_plotting_options_plotly(fig, plotting_options)
 
         self._handle_output_plotly(fig, show, output_file, log_scale)

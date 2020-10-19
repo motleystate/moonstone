@@ -62,7 +62,10 @@ class BaseGraph(ABC):
             getattr(fig, updater)(plotting_options[option])
         return fig
 
-    def _handle_output_plotly(self, fig, show, output_file):
+    def _handle_output_plotly(self, fig, show: bool, output_file: str, log_scale: bool = False):
+        if log_scale:
+            fig.update_yaxes(type="log")
+
         if show is True:
             fig.show()
 
