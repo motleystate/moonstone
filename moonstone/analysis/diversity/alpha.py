@@ -102,7 +102,7 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
         elif mode == "violin":
             self._visualize_violin(plotting_options, show, output_file, log_scale=log_scale)
         elif mode == "boxplot":
-            self._visualize_box(plotting_options, show, output_file, log_scale=log_scale)
+            self._visualize_boxplot(plotting_options, show, output_file, log_scale=log_scale)
 
     def visualize_groups(
         self, metadata_df: pd.DataFrame, group_col: str, plotting_options: dict = None,
