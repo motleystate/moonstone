@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 from moonstone.filtering.basics_filtering import (
-    NoCountsFiltering, NamesFiltering
+    NoCountsFiltering, NamesFiltering, ByPercentageNaNFiltering
 )
 
 
@@ -167,3 +167,39 @@ class TestNamesFiltering(TestCase):
         selected_rows = ['specie_1', 'specie_2']
         with self.assertRaises(TypeError):
             tested_filtering = NamesFiltering(test_df, selected_rows, axis=1, keep=True)  # noqa
+
+
+class TestByPercentageNaNFiltering(TestCase):
+
+    def setUp(self):
+        self.test_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [np.nan, 2, 1, 0],
+                'specie_2': [np.nan, 6, np.nan, np.nan],
+                'specie_3': [0, 7, 5, 0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        self.test_df.columns.name = 'sample'
+
+    def test_filter_by_nan_percentage_rows(self):
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [np.nan, 2, 1.0, 0.0],         # transform into float during filtering -> no idea why
+                'specie_3': [0.0, 7, 5.0, 0.0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        expected_df.columns.name = 'sample'
+        tested_filtering = ByPercentageNaNFiltering(self.test_df, percentage_nan_allowed=50, axis=0)
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
+    def test_filter_by_nan_percentage_columns(self):
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [2, 1, 0],
+                'specie_2': [6, np.nan, np.nan],
+                'specie_3': [7, 5, 0]
+            },
+            orient='index', columns=['2', '3', '4'])
+        expected_df.columns.name = 'sample'
+        tested_filtering = ByPercentageNaNFiltering(self.test_df, percentage_nan_allowed=50, axis=1)
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)

@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 
@@ -61,3 +61,19 @@ class NamesFiltering(BothAxisFiltering):
             return self._select_names()
         else:
             return self._exclude_names()
+
+
+class ByPercentageNaNFiltering(BothAxisFiltering):
+
+    def __init__(self, dataframe: pd.DataFrame, percentage_nan_allowed: Union[int, float] = 80, axis: int = 0):
+        """
+        :param percentage_nan_allowed: maximum percentage of NaN values allowed (between 0 and 100)
+        :param axis: axis to apply filtering (index (0) or columns(1))
+        """
+        self.percentage_nan_allowed = percentage_nan_allowed / 100
+        super().__init__(dataframe, axis=axis)
+
+    def filter(self) -> pd.DataFrame:
+        if self.axis == 0:
+            return self.df[self.df.isnull().mean(axis=1) <= self.percentage_nan_allowed]
+        return self.df.loc[:, self.df.isnull().mean() <= self.percentage_nan_allowed]
