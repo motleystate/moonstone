@@ -114,7 +114,8 @@ class TestMetadataParser(TestCase):
                 ('rename', {'new_name': 'sample'})
             ]
         }
-        parser = MetadataParser(self.metadata_file_dirty, sep=",", cleaning_operations=cleaning_operations, index_col='sample')
+        parser = MetadataParser(self.metadata_file_dirty, sep=",", cleaning_operations=cleaning_operations,
+                                index_col='sample')
         assert_frame_equal(parser.dataframe, expected_df)
 
 

@@ -2,10 +2,10 @@ from typing import List
 
 import pandas as pd
 
-from moonstone.filtering.base import BaseFiltering
+from moonstone.filtering.base import CountsFiltering
 
 
-class TaxonomyNamesFiltering(BaseFiltering):
+class TaxonomyNamesFiltering(CountsFiltering):
     """
     Filtering a Taxonomy multiindexed dataframe on index names at a chosen level.
     """

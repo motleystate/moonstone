@@ -3,12 +3,14 @@ from typing import List, Union
 
 import pandas as pd
 
-from moonstone.filtering.base import BothAxisFiltering
+from moonstone.filtering.base import (
+    BothAxisFiltering, CountsFiltering
+)
 
 logger = logging.getLogger(__name__)
 
 
-class NoCountsFiltering(BothAxisFiltering):
+class NoCountsFiltering(BothAxisFiltering, CountsFiltering):
     """
     Remove rows (default) or columns with no counts.
     """
@@ -63,7 +65,7 @@ class NamesFiltering(BothAxisFiltering):
             return self._exclude_names()
 
 
-class ByPercentageNaNFiltering(BothAxisFiltering):
+class NaNPercentageFiltering(BothAxisFiltering):
 
     def __init__(self, dataframe: pd.DataFrame, percentage_nan_allowed: Union[int, float] = 80, axis: int = 0):
         """
@@ -77,3 +79,34 @@ class ByPercentageNaNFiltering(BothAxisFiltering):
         if self.axis == 0:
             return self.df[self.df.isnull().mean(axis=1) <= self.percentage_nan_allowed]
         return self.df.loc[:, self.df.isnull().mean() <= self.percentage_nan_allowed]
+
+
+class NumberOfDifferentValuesFiltering(BothAxisFiltering):
+    def __init__(self, dataframe: pd.DataFrame, min_number_values: int = 2,
+                 na: bool = False, axis: int = 0):
+        """
+        :param min_number_values: minimum number of different values accepted
+        :param na: NaN values counted as a different value or not
+        :param axis: axis to apply filtering (index (0) or columns(1))
+        """
+        self.min_number_values = min_number_values
+        self.na = na
+        super().__init__(dataframe, axis=axis)
+
+    def filter(self) -> pd.DataFrame:
+        new_df = self.df
+        if self.axis == 0:
+            for row in self.df.index:
+                x = pd.Series(new_df.loc[row].unique())
+                if not self.na:
+                    x = x.dropna()
+                if len(x) < self.min_number_values:
+                    new_df.drop(row, inplace=True, axis=0)
+            return new_df
+        for col in self.df.columns:
+            x = pd.Series(new_df[col].unique())
+            if not self.na:
+                x = x.dropna()
+            if len(x) < self.min_number_values:
+                new_df.drop(col, inplace=True, axis=1)
+        return new_df
