@@ -3,9 +3,11 @@ from typing import Union
 
 import pandas as pd
 import plotly.io
+import plotly.graph_objects as go
 
 
 class BaseGraph(ABC):
+    DEFAULT_COLOR = "#666666"
 
     def __init__(self, data: Union[pd.Series, pd.DataFrame], plotting_options: dict = None,
                  show: bool = True, output_file: Union[bool, str] = False):
@@ -77,3 +79,52 @@ class BaseGraph(ABC):
                 else:
                     output_file = self.__class__.__name__+".html"
             plotly.io.write_html(fig, output_file)
+
+
+class GroupBaseGraph(BaseGraph):
+
+    DEFAULT_COLORS = [
+        "#A63A50", "#FFBF00", "#68ace8", "#97bf8f", "#28464B",
+        "#6D5A72", "#FF8A5B", "#7C9EB2", "#F4F1DE", "#9CD08F",
+    ]
+
+    def __init__(self, *args, **kwargs):
+        self.color_counter = 0
+        super().__init__(*args, **kwargs)
+
+    def _gen_default_color_dict(self, groups: list):
+        return {groups[i]: self.DEFAULT_COLORS[i % len(self.DEFAULT_COLORS)] for i in range(0, len(groups))}
+
+    def _get_group_color(self, group: str, group_color: dict):
+        return group_color.get(group, self.DEFAULT_COLOR)
+
+    @abstractmethod
+    def _gen_fig_trace(self, x: list, y: list, name: str, text: list, color: str):
+        pass
+
+    def plot_one_graph(
+        self, data_col: str, group_col: str, plotting_options: dict = None,
+        show: bool = True, output_file: Union[bool, str] = False,
+        log_scale: bool = False, colors: dict = None,
+    ):
+        """
+        :param data_col: column with data to visualize
+        :param group_col: column used to group data
+        """
+        groups = list(self.data[group_col].unique())
+        groups.sort()
+        if colors is None:
+            colors = self._gen_default_color_dict(groups)
+        fig = go.Figure()
+
+        for group in groups:
+            fig.add_trace(self._gen_fig_trace(
+                self.data[group_col][self.data[group_col] == group],
+                self.data[data_col][self.data[group_col] == group],
+                str(group), self.data.index, self._get_group_color(group, colors)
+            ))
+
+        if plotting_options is not None:
+            fig = self._handle_plotting_options_plotly(fig, plotting_options)
+
+        self._handle_output_plotly(fig, show, output_file, log_scale)

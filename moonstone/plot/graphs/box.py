@@ -2,7 +2,7 @@ from typing import Union
 
 import plotly.graph_objects as go
 
-from moonstone.plot.graphs.base import BaseGraph
+from moonstone.plot.graphs.base import BaseGraph, GroupBaseGraph
 
 
 class BoxGraph(BaseGraph):
@@ -18,7 +18,8 @@ class BoxGraph(BaseGraph):
                     y=self.data,
                     boxpoints='all',
                     text=self.data.index,
-                    name="All"
+                    name="All",
+                    marker_color=self.DEFAULT_COLOR,
                 )
             ]
         )
@@ -29,28 +30,14 @@ class BoxGraph(BaseGraph):
         self._handle_output_plotly(fig, show, output_file, log_scale)
 
 
-class GroupBoxGraph(BaseGraph):
+class GroupBoxGraph(GroupBaseGraph):
 
-    def plot_one_graph(
-        self, data_col: str, group_col: str, plotting_options: dict = None,
-        show: bool = True, output_file: Union[bool, str] = False,
-        log_scale: bool = False
-    ):
-        """
-        :param data_col: column with data to visualize
-        :param group_col: column used to group data
-        """
-        groups = list(self.data[group_col].unique())
-        groups.sort()
-        fig = go.Figure()
-        for group in groups:
-            fig.add_trace(go.Box(x=self.data[group_col][self.data[group_col] == group],
-                                 y=self.data[data_col][self.data[group_col] == group],
-                                 name=str(group),
-                                 boxpoints='all',
-                                 text=self.data.index))
-
-        if plotting_options is not None:
-            fig = self._handle_plotting_options_plotly(fig, plotting_options)
-
-        self._handle_output_plotly(fig, show, output_file, log_scale)
+    def _gen_fig_trace(self, x: list, y: list, name: str, text: list, color: str):
+        return go.Box(
+            x=x,
+            y=y,
+            name=name,
+            text=text,
+            marker_color=color,
+            boxpoints='all',
+        )

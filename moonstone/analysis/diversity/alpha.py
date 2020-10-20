@@ -107,7 +107,7 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
     def visualize_groups(
         self, metadata_df: pd.DataFrame, group_col: str, plotting_options: dict = None,
         show: Optional[bool] = True, output_file: Optional[str] = False,
-        log_scale: bool = False, mode: str = 'boxplot'
+        log_scale: bool = False, mode: str = 'boxplot', colors: dict = None,
     ):
         """
         :param metadata_df: dataframe containing metadata and information to group the data
@@ -135,6 +135,7 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             show=show,
             output_file=output_file,
             log_scale=log_scale,
+            colors=colors,
         )
 
 
