@@ -66,7 +66,7 @@ class BaseGraph(ABC):
 
     def _handle_output_plotly(self, fig, show: bool, output_file: str, log_scale: bool = False):
         if log_scale:
-            fig.update_yaxes(type="log")
+            fig.update_yaxes(type="log", title=f"{fig.layout.yaxis.title.text} (log)")
 
         if show is True:
             fig.show()
@@ -105,14 +105,17 @@ class GroupBaseGraph(BaseGraph):
     def plot_one_graph(
         self, data_col: str, group_col: str, plotting_options: dict = None,
         show: bool = True, output_file: Union[bool, str] = False,
-        log_scale: bool = False, colors: dict = None,
+        log_scale: bool = False, colors: dict = None, sort_groups: bool = False,
+        groups: list = None,
     ):
         """
         :param data_col: column with data to visualize
         :param group_col: column used to group data
         """
-        groups = list(self.data[group_col].unique())
-        groups.sort()
+        if groups is None:
+            groups = list(self.data[group_col].unique())
+        if sort_groups:
+            groups.sort()
         if colors is None:
             colors = self._gen_default_color_dict(groups)
         fig = go.Figure()
