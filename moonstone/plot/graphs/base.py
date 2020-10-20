@@ -118,10 +118,10 @@ class GroupBaseGraph(BaseGraph):
         fig = go.Figure()
 
         for group in groups:
+            filtered_df = self.data[self.data[group_col] == group]
             fig.add_trace(self._gen_fig_trace(
-                self.data[group_col][self.data[group_col] == group],
-                self.data[data_col][self.data[group_col] == group],
-                str(group), self.data.index, self._get_group_color(group, colors)
+                filtered_df[group_col], filtered_df[data_col],
+                str(group), filtered_df.index, self._get_group_color(group, colors)
             ))
 
         if plotting_options is not None:
