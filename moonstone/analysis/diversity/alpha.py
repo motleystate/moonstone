@@ -96,11 +96,16 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             output_file=output_file,
         )
 
-    def visualize(self, mode: str = 'histogram', bins_size: Union[int, float] = 0.1, plotting_options: dict = None,
-                  show: Optional[bool] = True, output_file: Optional[str] = False, log_scale: bool = False):
+    def visualize(
+        self, mode: str = 'histogram', bins_size: Union[int, float] = 0.1, log_scale: bool = False,
+        show: bool = True, output_file: str = False, plotting_options: dict = None,
+    ):
         """
-        :param mode: how to display (histogram or violin)
+        :param mode: how to display (histogram, boxplot, or violin)
         :param bins_size: [mode histo only] size of the histo bins
+        :param show: display your graph
+        :param output_file: file path to output your html graph
+        :param plotting_options: plotly plotting_options
         """
         if mode not in ['histogram', 'violin', 'boxplot']:
             logger.warning("%s not a available mode, set to default (histogram)", mode)
@@ -114,14 +119,20 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             self._visualize_boxplot(plotting_options, show, output_file, log_scale)
 
     def visualize_groups(
-        self, metadata_df: pd.DataFrame, group_col: str, plotting_options: dict = None,
-        show: Optional[bool] = True, output_file: Optional[str] = False,
-        log_scale: bool = False, mode: str = 'boxplot', colors: dict = None,
-        groups: list = None
+        self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
+        log_scale: bool = False, colors: dict = None, groups: list = None,
+        show: bool = True, output_file: str = False,
+        plotting_options: dict = None,
     ):
         """
         :param metadata_df: dataframe containing metadata and information to group the data
         :param group_col: column from metadata_df used to group the data
+        :param mode: how to display (boxplot, or violin)
+        :param colors: overides color for groups. format {group_id: color}
+        :param groups: specifically select groups to display among group_col
+        :param show: display your graph
+        :param output_file: file path to output your html graph
+        :param plotting_options: plotly plotting_options
         """
         if mode not in ['violin', 'boxplot']:
             logger.warning("%s not a available mode, set to default (histogram)", mode)
