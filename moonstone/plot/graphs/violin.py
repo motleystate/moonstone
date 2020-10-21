@@ -10,7 +10,6 @@ class ViolinGraph(BaseGraph):
     def plot_one_graph(
         self, plotting_options: dict = None,
         show: bool = True, output_file: Union[bool, str] = False,
-        log_scale: bool = False
     ):
         fig = go.Figure(
             [
@@ -24,7 +23,10 @@ class ViolinGraph(BaseGraph):
             ]
         )
 
-        self._handle_output_plotly(fig, show, output_file, log_scale)
+        if plotting_options is not None:
+            fig = self._handle_plotting_options_plotly(fig, plotting_options)
+
+        self._handle_output_plotly(fig, show, output_file)
 
 
 class GroupViolinGraph(GroupBaseGraph):

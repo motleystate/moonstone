@@ -64,10 +64,7 @@ class BaseGraph(ABC):
             getattr(fig, updater)(plotting_options[option])
         return fig
 
-    def _handle_output_plotly(self, fig, show: bool, output_file: str, log_scale: bool = False):
-        if log_scale:
-            fig.update_yaxes(type="log", title=f"{fig.layout.yaxis.title.text} (log)")
-
+    def _handle_output_plotly(self, fig, show: bool, output_file: str):
         if show is True:
             fig.show()
 
@@ -105,8 +102,7 @@ class GroupBaseGraph(BaseGraph):
     def plot_one_graph(
         self, data_col: str, group_col: str, plotting_options: dict = None,
         show: bool = True, output_file: Union[bool, str] = False,
-        log_scale: bool = False, colors: dict = None, sort_groups: bool = False,
-        groups: list = None,
+        colors: dict = None, sort_groups: bool = False, groups: list = None,
     ):
         """
         :param data_col: column with data to visualize
@@ -130,4 +126,4 @@ class GroupBaseGraph(BaseGraph):
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
 
-        self._handle_output_plotly(fig, show, output_file, log_scale)
+        self._handle_output_plotly(fig, show, output_file)

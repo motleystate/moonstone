@@ -11,7 +11,8 @@ from moonstone.plot.graphs.box import GroupBoxGraph, BoxGraph
 from moonstone.plot.graphs.histogram import Histogram
 from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
 from moonstone.utils.plot import (
-    add_default_titles_to_plotting_options
+    add_default_titles_to_plotting_options,
+    add_x_to_plotting_options
 )
 
 logger = logging.getLogger(__name__)
@@ -42,12 +43,22 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             self._alpha_diversity_indexes.name = self.ALPHA_DIVERSITY_INDEXES_NAME
         return self._alpha_diversity_indexes
 
-    def _visualize_histogram(self, bins_size, plotting_options, show, output_file):
+    def _handle_plotting_options(self, plotting_options: dict, title: str, xlabel: str, ylabel: str, log_scale: bool):
+        if plotting_options is None:
+            plotting_options = {}
+        if log_scale:
+            plotting_options = add_x_to_plotting_options(plotting_options, 'yaxes', 'type', "log")
+            ylabel = f"{ylabel} (log)"
+        return add_default_titles_to_plotting_options(
+            plotting_options, title, xlabel, ylabel
+        )
+
+    def _visualize_histogram(self, bins_size, plotting_options, show, output_file, log_scale: bool):
         title = self.index_name + " (alpha diversity) distribution across the samples"
         xlabel = self.index_name
         ylabel = "number of samples"
-        plotting_options = add_default_titles_to_plotting_options(
-            plotting_options, title, xlabel, ylabel
+        plotting_options = self._handle_plotting_options(
+            plotting_options, title, xlabel, ylabel, log_scale
         )
         hist_fig = Histogram(self.alpha_diversity_indexes)
         hist_fig.plot_one_graph(
@@ -57,34 +68,32 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             output_file=output_file,
         )
 
-    def _visualize_violin(self, plotting_options, show, output_file, log_scale: bool = False):
+    def _visualize_violin(self, plotting_options: dict, show: bool, output_file: str, log_scale: bool):
         title = self.index_name + " (alpha diversity) distribution across the samples"
         xlabel = "Group"
         ylabel = self.index_name
-        plotting_options = add_default_titles_to_plotting_options(
-            plotting_options, title, xlabel, ylabel
+        plotting_options = self._handle_plotting_options(
+            plotting_options, title, xlabel, ylabel, log_scale
         )
         violing_fig = ViolinGraph(self.alpha_diversity_indexes)
         violing_fig.plot_one_graph(
             plotting_options=plotting_options,
             show=show,
             output_file=output_file,
-            log_scale=log_scale,
         )
 
-    def _visualize_boxplot(self, plotting_options, show, output_file, log_scale: bool = False):
+    def _visualize_boxplot(self, plotting_options: dict, show: bool, output_file: str, log_scale: bool):
         title = self.index_name + " (alpha diversity) distribution across the samples"
         xlabel = "Group"
         ylabel = self.index_name
-        plotting_options = add_default_titles_to_plotting_options(
-            plotting_options, title, xlabel, ylabel
+        plotting_options = self._handle_plotting_options(
+            plotting_options, title, xlabel, ylabel, log_scale
         )
         violing_fig = BoxGraph(self.alpha_diversity_indexes)
         violing_fig.plot_one_graph(
             plotting_options=plotting_options,
             show=show,
             output_file=output_file,
-            log_scale=log_scale,
         )
 
     def visualize(self, mode: str = 'histogram', bins_size: Union[int, float] = 0.1, plotting_options: dict = None,
@@ -98,11 +107,11 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             mode = "histogram"
 
         if mode == "histogram":
-            self._visualize_histogram(bins_size, plotting_options, show, output_file)
+            self._visualize_histogram(bins_size, plotting_options, show, output_file, log_scale)
         elif mode == "violin":
-            self._visualize_violin(plotting_options, show, output_file, log_scale=log_scale)
+            self._visualize_violin(plotting_options, show, output_file, log_scale)
         elif mode == "boxplot":
-            self._visualize_boxplot(plotting_options, show, output_file, log_scale=log_scale)
+            self._visualize_boxplot(plotting_options, show, output_file, log_scale)
 
     def visualize_groups(
         self, metadata_df: pd.DataFrame, group_col: str, plotting_options: dict = None,
@@ -121,8 +130,8 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
         title = f"Distribution of <b>{self.index_name.capitalize()}</b> among samples<br><i>grouped by {group_col}"
         xlabel = f"{group_col}"
         ylabel = f"{self.index_name.capitalize()}"
-        plotting_options = add_default_titles_to_plotting_options(
-            plotting_options, title, xlabel, ylabel
+        plotting_options = self._handle_plotting_options(
+            plotting_options, title, xlabel, ylabel, log_scale
         )
 
         df = pd.concat([metadata_df[group_col], self.alpha_diversity_indexes], axis=1).dropna()
@@ -135,7 +144,6 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             plotting_options=plotting_options,
             show=show,
             output_file=output_file,
-            log_scale=log_scale,
             colors=colors,
             groups=groups,
         )
