@@ -66,6 +66,9 @@ class NamesFiltering(BothAxisFiltering):
 
 
 class NaNPercentageFiltering(BothAxisFiltering):
+    """
+    Remove rows (default) or columns with a percentage of NaN values above a given percentage.
+    """
 
     def __init__(self, dataframe: pd.DataFrame, percentage: Union[int, float] = 80, axis: int = 0):
         """
@@ -81,11 +84,16 @@ class NaNPercentageFiltering(BothAxisFiltering):
 
 
 class NumberOfDifferentValuesFiltering(BothAxisFiltering):
+    """
+    Filtering of rows (default) or columns based on the number of different (unique) values they hold.
+    """
+
     def __init__(self, dataframe: pd.DataFrame,
                  min: int = None, max: int = None,
                  na: bool = False, axis: int = 0):
         """
         :param min: minimum number of different values accepted
+        :param max: maximum number of different values accepted
         :param na: NaN values counted as a different value or not
         :param axis: axis to apply filtering (index (0) or columns(1))
         """
