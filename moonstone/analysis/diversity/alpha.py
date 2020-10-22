@@ -1,7 +1,7 @@
 import logging
 import re
 from abc import ABC, abstractmethod
-from typing import Union, Optional
+from typing import Union
 
 import pandas as pd
 import skbio
@@ -29,7 +29,7 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
         self.index_name = " ".join(re.findall('[A-Z][^A-Z]*', self.__class__.__name__)).lower()
 
     @abstractmethod
-    def compute_alpha_diversity(self):
+    def compute_alpha_diversity(self) -> pd.Series:
         """
         method that compute the alpha diversity
         """
@@ -164,7 +164,7 @@ class ShannonIndex(AlphaDiversity):
     """
     Perform calculation of the shannon index for each samples of the dataframe
     """
-    def compute_alpha_diversity(self, base: Union[int, float] = 2):    # compute_shannon_diversity
+    def compute_alpha_diversity(self, base: Union[int, float] = 2) -> pd.Series:    # compute_shannon_diversity
         """
         :param base: logarithm base chosen (NB : for ln, base=math.exp(1))
         """
@@ -179,7 +179,7 @@ class SimpsonInverseIndex(AlphaDiversity):
     """
     Perform calculation of the simpson inverse index for each samples of the dataframe
     """
-    def compute_alpha_diversity(self):
+    def compute_alpha_diversity(self) -> pd.Series:
         # steps to compute the index
         Seriesdic = {}
         for i in self.df.columns:
