@@ -27,7 +27,7 @@ class TestShannonIndex(TestCase):
             'sample4': -0.000000,
             'sample5': 1.992778
         })
-        pd.testing.assert_series_equal(tested_object_instance.compute_alpha_diversity(), expected_object)
+        pd.testing.assert_series_equal(tested_object_instance.compute_diversity(), expected_object)
 
     def test_visualize(self):
         # Not real test but make sure that visualize() runs without errors
@@ -63,7 +63,7 @@ class TestSimpsonInverseIndex(TestCase):
             'sample4': 1.000000,
             'sample5': 3.958904
         })
-        pd.testing.assert_series_equal(tested_object_instance.compute_alpha_diversity(), expected_object)
+        pd.testing.assert_series_equal(tested_object_instance.compute_diversity(), expected_object)
 
     def test_visualize(self):
         # Not real test but make sure that visualize() runs without errors

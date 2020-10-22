@@ -52,7 +52,7 @@ class TestBrayCurtis(TestCase):
             ]
         )
         expected_object = pd.Series(
-            [0.333, 0.714, 1.0], index=multi_index
+            [0.333, 0.714, 1.0], index=multi_index, name=BrayCurtis.DIVERSITY_INDEXES_NAME
         )
         pd.testing.assert_series_equal(
             tested_object_instance.beta_diversity_series, expected_object,
