@@ -79,7 +79,8 @@ class NaNPercentageFiltering(BothAxisFiltering):
         super().__init__(dataframe, axis=axis)
 
     def filter(self) -> pd.DataFrame:
-        thresh = self.df.shape[1-self.axis] * (self.percentage_of_nan_allowed/100)
+        thresh = self.df.shape[1-self.axis] - self.df.shape[1-self.axis] * (self.percentage_of_nan_allowed/100)
+        print(thresh)
         return self.df.dropna(axis=self.axis, thresh=thresh)
 
 
