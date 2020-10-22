@@ -9,7 +9,7 @@ class DivideByGroup(BaseDF):
     def __init__(self, dataframe: Union[pd.Series, pd.DataFrame],
                  metadata_dataframe: pd.DataFrame):
         super().__init__(dataframe)
-        metadata_df = metadata_dataframe
+        self.metadata_df = metadata_dataframe
 
     def split_df(self, group_col: str, division_seq: str = None):
         """
@@ -17,7 +17,8 @@ class DivideByGroup(BaseDF):
         one with group_col = 1 and 2 and the other with group_col = 3 or 4
         """
         if division_seq is None:
-            division_seq = list(self.df[group_col].value_counts().index())
+            division_seq = list(self.metadata_df[group_col].unique())
+            division_seq = [[el] for el in division_seq]
         else:
             division_seq = division_seq.split("_")
             division_seq = [x.split('-') for x in division_seq]
@@ -33,8 +34,7 @@ class DivideByGroup(BaseDF):
             typ = 0
             df = self.df.transpose()
 
-        merged_df = df.merge(metadata_df[group_col], how='inner', left_index=True, right_index=True)
-
+        merged_df = df.merge(self.metadata_df[group_col], how='inner', left_index=True, right_index=True)
         list_df = []
         for i in division_seq:
             tmp = merged_df[merged_df[group_col].isin(i)]
