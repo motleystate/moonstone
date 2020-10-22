@@ -205,6 +205,11 @@ class TestByPercentageNaNFiltering(TestCase):
         tested_filtering = NaNPercentageFiltering(self.test_df, percentage=50, axis=1)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
 
+    def test_filter_columns_70_nan(self):
+        expected_df = self.test_df
+        tested_filtering = NaNPercentageFiltering(self.test_df, percentage=70, axis=1)
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
 
 class TestNumberOfDifferentValuesFiltering(TestCase):
 
