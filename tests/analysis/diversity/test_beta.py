@@ -54,7 +54,12 @@ class TestBrayCurtis(TestCase):
         expected_object = pd.Series(
             [0.333, 0.714, 1.0], index=multi_index, name=BrayCurtis.DIVERSITY_INDEXES_NAME
         )
+        # Two ways of retrieving the series
         pd.testing.assert_series_equal(
             tested_object_instance.beta_diversity_series, expected_object,
+            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+        )
+        pd.testing.assert_series_equal(
+            tested_object_instance.diversity_indexes, expected_object,
             check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )

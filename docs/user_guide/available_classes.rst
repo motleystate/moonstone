@@ -174,6 +174,7 @@ List
    differential_analysis.DifferentialAnalysis
    diversity.alpha.ShannonIndex
    diversity.alpha.SimpsonInverseIndex
+   diversity.beta.BrayCurtis
 
 .. Note::
     More details on API documentation for :ref:`api_plot`.

@@ -42,7 +42,7 @@ class BetaDiversity(DiversityBase, ABC):
 
     @property
     def beta_diversity_series(self):
-        return self.compute_diversity()
+        return self.diversity_indexes
 
     @property
     def beta_diversity_df(self):
@@ -61,7 +61,7 @@ class BetaDiversity(DiversityBase, ABC):
 
 class BrayCurtis(BetaDiversity):
     """
-    Perform calculation of the bray curtis for each pairs of samples from the dataframe
+    Perform calculation of the Bray Curtis for each pairs of samples from the dataframe
     """
     def compute_beta_diversity(self, df):    # compute_shannon_diversity
         """

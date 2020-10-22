@@ -22,3 +22,12 @@ Alpha diversity
     :undoc-members:
     :special-members: __init__
     :inherited-members:
+
+Beta diversity
+==============
+
+.. automodule:: moonstone.analysis.diversity.beta
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
