@@ -210,6 +210,37 @@ class TestByPercentageNaNFiltering(TestCase):
         tested_filtering = NaNPercentageFiltering(self.test_df, percentage=70, axis=1)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
 
+    def test_filter_rows_25_nan(self):
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [np.nan, 2, 1, 0],
+                'specie_3': [0, 7, 5, 0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        expected_df.columns.name = 'sample'        
+        tested_filtering = NaNPercentageFiltering(self.test_df, percentage=25, axis=0)
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
+
+    def test_filter_rows_0_nan(self):
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'specie_3': [0, 7, 5, 0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        expected_df.columns.name = 'sample'        
+        tested_filtering = NaNPercentageFiltering(self.test_df, percentage=0, axis=0)
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
+
+    def test_filter_rows_100_nan(self):
+        expected_df = self.test_df        
+        tested_filtering = NaNPercentageFiltering(self.test_df, percentage=100, axis=0)
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
+
+    def test_fiter_fraction(self):
+        expected_df = self.test_df
+        tested_filtering = NaNPercentageFiltering(self.test_df, percentage=200/3, axis=1)
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
+
 
 class TestNumberOfDifferentValuesFiltering(TestCase):
 
