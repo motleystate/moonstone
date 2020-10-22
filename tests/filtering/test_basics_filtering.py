@@ -190,7 +190,7 @@ class TestByPercentageNaNFiltering(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         expected_df.columns.name = 'sample'
-        tested_filtering = NaNPercentageFiltering(self.test_df, percentage_nan_allowed=50, axis=0)
+        tested_filtering = NaNPercentageFiltering(self.test_df, percentage=50, axis=0)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
 
     def test_filter_columns(self):
@@ -202,7 +202,7 @@ class TestByPercentageNaNFiltering(TestCase):
             },
             orient='index', columns=['2', '3', '4'])
         expected_df.columns.name = 'sample'
-        tested_filtering = NaNPercentageFiltering(self.test_df, percentage_nan_allowed=50, axis=1)
+        tested_filtering = NaNPercentageFiltering(self.test_df, percentage=50, axis=1)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
 
 
@@ -227,7 +227,7 @@ class TestNumberOfDifferentValuesFiltering(TestCase):
             },
             orient='index', columns=['age', 'HDL cholesterol'])
         expected_df.columns.name = 'metadata'
-        tested_filtering = NumberOfDifferentValuesFiltering(self.test_df, na=False, axis=1)
+        tested_filtering = NumberOfDifferentValuesFiltering(self.test_df, min=2, na=False, axis=1)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
 
     def test_filter_counting_nan_columns(self):
@@ -239,10 +239,10 @@ class TestNumberOfDifferentValuesFiltering(TestCase):
             },
             orient='index', columns=['age', 'smoker', 'HDL cholesterol'])
         expected_df.columns.name = 'metadata'
-        tested_filtering = NumberOfDifferentValuesFiltering(self.test_df, na=True, axis=1)
+        tested_filtering = NumberOfDifferentValuesFiltering(self.test_df, min=2, na=True, axis=1)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
 
-    def test_filter_counting_nan_rows(self):
+    def test_filter_rows(self):
         test_df_rows = self.test_df.transpose()
         expected_df = pd.DataFrame.from_dict(
             {
@@ -251,5 +251,29 @@ class TestNumberOfDifferentValuesFiltering(TestCase):
             },
             orient='index', columns=['sample_1', 'sample_2', 'sample_3'])
         expected_df.index.name = 'metadata'
-        tested_filtering = NumberOfDifferentValuesFiltering(test_df_rows, na=False, axis=0)
+        tested_filtering = NumberOfDifferentValuesFiltering(test_df_rows, min=2, na=False, axis=0)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
+
+    def test_filter_max(self):
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'sample_1': ['F', 'n', 60],
+                'sample_2': ['F', np.nan, np.nan],
+                'sample_3': ['F', 'n', 55]
+            },
+            orient='index', columns=['sex', 'smoker', 'HDL cholesterol'])
+        expected_df.columns.name = 'metadata'
+        tested_filtering = NumberOfDifferentValuesFiltering(self.test_df, max=2, na=False, axis=1)
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
+
+    def test_filter_min_max(self):
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'sample_1': [60],
+                'sample_2': [np.nan],
+                'sample_3': [55]
+            },
+            orient='index', columns=['HDL cholesterol'])
+        expected_df.columns.name = 'metadata'
+        tested_filtering = NumberOfDifferentValuesFiltering(self.test_df, min=2, max=2, na=False, axis=1)
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
