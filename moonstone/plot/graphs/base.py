@@ -103,6 +103,7 @@ class GroupBaseGraph(BaseGraph):
         self, data_col: str, group_col: str, plotting_options: dict = None,
         show: bool = True, output_file: Union[bool, str] = False,
         colors: dict = None, sort_groups: bool = False, groups: list = None,
+        **kwargs
     ):
         """
         :param data_col: column with data to visualize
@@ -120,7 +121,8 @@ class GroupBaseGraph(BaseGraph):
             filtered_df = self.data[self.data[group_col] == group]
             fig.add_trace(self._gen_fig_trace(
                 filtered_df[group_col], filtered_df[data_col],
-                str(group), filtered_df.index, self._get_group_color(group, colors)
+                str(group), filtered_df.index, self._get_group_color(group, colors),
+                **kwargs,
             ))
 
         if plotting_options is not None:

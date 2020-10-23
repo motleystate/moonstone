@@ -13,7 +13,6 @@ class BaseFiltering(BaseModule, BaseDF, ABC):
         """
         super().__init__(dataframe)
         self.raw_items_number = self.df.shape[0]
-        self.raw_reads_number = self.df.sum().sum()
 
     @property
     def filtered_df(self) -> pd.DataFrame:

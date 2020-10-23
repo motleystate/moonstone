@@ -52,10 +52,19 @@ class BetaDiversity(DiversityBase, ABC):
         df_list = []
         for group in metadata_series.unique():
             group_df = self.df.loc[:, metadata_series[metadata_series == group].index]
-            beta_div_indexes = self.compute_beta_diversity(group_df).to_series().reset_index(drop=True).to_frame()
-            beta_div_indexes.columns = [self.DIVERSITY_INDEXES_NAME]
-            beta_div_indexes[metadata_series.name] = group
-            df_list.append(beta_div_indexes)
+            beta_div_multi_indexed_df = self.compute_beta_diversity(group_df).to_series().to_frame()
+            if beta_div_multi_indexed_df.empty:  # Happens if only one item from the group
+                continue
+            # Make unique index from multi index
+            beta_div_not_indexed_df = beta_div_multi_indexed_df.reset_index()
+            index_col_names = ["level_0", "level_1"]
+            beta_div_solo_indexed_df = beta_div_not_indexed_df.set_index(
+                beta_div_not_indexed_df[index_col_names].agg('-'.join, axis=1)
+            ).drop(index_col_names, axis=1)
+            beta_div_solo_indexed_df.columns = [self.DIVERSITY_INDEXES_NAME]
+            # Add corresponding group name
+            beta_div_solo_indexed_df[metadata_series.name] = group
+            df_list.append(beta_div_solo_indexed_df)
         return pd.concat(df_list).dropna()
 
 

@@ -7,6 +7,7 @@ from typing import Union
 import pandas as pd
 
 from moonstone.core.module_base import BaseModule, BaseDF
+from moonstone.filtering.basics_filtering import NamesFiltering
 from moonstone.plot.graphs.box import GroupBoxGraph, BoxGraph
 from moonstone.plot.graphs.histogram import Histogram
 from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
@@ -141,7 +142,8 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             plotting_options, title, xlabel, ylabel, log_scale
         )
 
-        df = self._get_grouped_df(metadata_df[group_col])
+        filtered_metadata_df = NamesFiltering(metadata_df, list(self.df.columns)).filtered_df
+        df = self._get_grouped_df(filtered_metadata_df[group_col])
         if mode == "violin":
             fig = GroupViolinGraph(df)
         elif mode == "boxplot":
