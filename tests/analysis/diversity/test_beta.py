@@ -9,17 +9,19 @@ from moonstone.analysis.diversity.beta import (
 
 class TestBrayCurtis(TestCase):
 
-    def test_compute_beta_diversity_df(self):
-
-        tested_object = pd.DataFrame.from_dict(
+    def setUp(self):
+        self.tested_object = pd.DataFrame.from_dict(
             {
                 'species1': [4, 4, 0],
                 'species2': [1, 0, 2],
                 'species3': [0, 0, 0],
                 'species4': [0, 3, 0]
             },
-            orient='index', columns=['sample1', 'sample2', 'sample3'])
-        tested_object_instance = BrayCurtis(tested_object)
+            orient='index', columns=['sample1', 'sample2', 'sample3']
+        )
+
+    def test_compute_beta_diversity_df(self):
+        tested_object_instance = BrayCurtis(self.tested_object)
         expected_object = pd.DataFrame.from_dict(
             {
                 'sample1': [0, 0.333, 0.714],
@@ -35,15 +37,7 @@ class TestBrayCurtis(TestCase):
 
     def test_compute_beta_diversity_series(self):
 
-        tested_object = pd.DataFrame.from_dict(
-            {
-                'species1': [4, 4, 0],
-                'species2': [1, 0, 2],
-                'species3': [0, 0, 0],
-                'species4': [0, 3, 0]
-            },
-            orient='index', columns=['sample1', 'sample2', 'sample3'])
-        tested_object_instance = BrayCurtis(tested_object)
+        tested_object_instance = BrayCurtis(self.tested_object)
         multi_index = pd.MultiIndex.from_tuples(
             [
                 ('sample1', 'sample2'),
@@ -61,5 +55,28 @@ class TestBrayCurtis(TestCase):
         )
         pd.testing.assert_series_equal(
             tested_object_instance.diversity_indexes, expected_object,
+            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+        )
+
+    def test_analyse_grouped_df(self):
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M'],
+                'sample2': ['F'],
+                'sample3': ['F'],
+            },
+            orient='index', columns=['sex']
+        )
+        tested_object_instance = BrayCurtis(self.tested_object)
+
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample2-sample3': [1.0, 'F'],
+            },
+            orient='index', columns=['beta_index', 'sex']
+        )
+        output_df = tested_object_instance.analyse_groups(metadata_df, 'sex', show=False)
+        pd.testing.assert_frame_equal(
+            output_df, expected_object,
             check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )

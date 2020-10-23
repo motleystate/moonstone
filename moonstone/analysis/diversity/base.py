@@ -47,7 +47,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
     def _get_default_samples_label(self) -> str:
         return "Samples"
 
-    def _visualize_histogram(self, bins_size, plotting_options, show, output_file, log_scale: bool):
+    def _visualize_histogram(self, bins_size, plotting_options, show, output_file, log_scale: bool, **kwargs):
         title = self._get_default_title()
         xlabel = self.index_name
         ylabel = self._get_default_samples_label()
@@ -60,9 +60,10 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             plotting_options=plotting_options,
             show=show,
             output_file=output_file,
+            **kwargs
         )
 
-    def _visualize_violin(self, plotting_options: dict, show: bool, output_file: str, log_scale: bool):
+    def _visualize_violin(self, plotting_options: dict, show: bool, output_file: str, log_scale: bool, **kwargs):
         title = self._get_default_title()
         xlabel = self._get_default_samples_label()
         ylabel = self.index_name
@@ -74,9 +75,10 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             plotting_options=plotting_options,
             show=show,
             output_file=output_file,
+            **kwargs
         )
 
-    def _visualize_boxplot(self, plotting_options: dict, show: bool, output_file: str, log_scale: bool):
+    def _visualize_boxplot(self, plotting_options: dict, show: bool, output_file: str, log_scale: bool, **kwargs):
         title = self._get_default_title()
         xlabel = self._get_default_samples_label()
         ylabel = self.index_name
@@ -88,11 +90,12 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             plotting_options=plotting_options,
             show=show,
             output_file=output_file,
+            **kwargs
         )
 
     def visualize(
         self, mode: str = 'histogram', bins_size: Union[int, float] = 0.1, log_scale: bool = False,
-        show: bool = True, output_file: str = False, plotting_options: dict = None,
+        show: bool = True, output_file: str = False, plotting_options: dict = None, **kwargs
     ):
         """
         :param mode: how to display (histogram, boxplot, or violin)
@@ -106,53 +109,59 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             mode = "histogram"
 
         if mode == "histogram":
-            self._visualize_histogram(bins_size, plotting_options, show, output_file, log_scale)
+            self._visualize_histogram(bins_size, plotting_options, show, output_file, log_scale, **kwargs)
         elif mode == "violin":
-            self._visualize_violin(plotting_options, show, output_file, log_scale)
+            self._visualize_violin(plotting_options, show, output_file, log_scale, **kwargs)
         elif mode == "boxplot":
-            self._visualize_boxplot(plotting_options, show, output_file, log_scale)
+            self._visualize_boxplot(plotting_options, show, output_file, log_scale, **kwargs)
 
     def _get_grouped_df(self, metadata_series):
         return pd.concat([metadata_series, self.diversity_indexes], axis=1).dropna()
 
-    def visualize_groups(
+    def analyse_groups(
         self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
         log_scale: bool = False, colors: dict = None, groups: list = None,
-        show: bool = True, output_file: str = False,
-        plotting_options: dict = None,
-    ):
+        show: bool = True, output_file: str = False, make_graph: bool = True,
+        plotting_options: dict = None, **kwargs
+    ) -> pd.DataFrame:
         """
         :param metadata_df: dataframe containing metadata and information to group the data
         :param group_col: column from metadata_df used to group the data
         :param mode: how to display (boxplot, or violin)
         :param colors: overides color for groups. format {group_id: color}
         :param groups: specifically select groups to display among group_col
-        :param show: display your graph
+        :param show: also visualize
         :param output_file: file path to output your html graph
+        :param make_graph: whether or not to make the graph
         :param plotting_options: plotly plotting_options
         """
-        if mode not in ['violin', 'boxplot']:
-            logger.warning("%s not a available mode, set to default (histogram)", mode)
-            mode = "boxplot"
-
-        title = self._get_default_title()
-        xlabel = f"{group_col}"
-        ylabel = f"{self.index_name.capitalize()}"
-        plotting_options = self._handle_plotting_options(
-            plotting_options, title, xlabel, ylabel, log_scale
-        )
-
         filtered_metadata_df = NamesFiltering(metadata_df, list(self.df.columns)).filtered_df
         df = self._get_grouped_df(filtered_metadata_df[group_col])
-        if mode == "violin":
-            fig = GroupViolinGraph(df)
-        elif mode == "boxplot":
-            fig = GroupBoxGraph(df)
-        fig.plot_one_graph(
-            self.DIVERSITY_INDEXES_NAME, group_col,
-            plotting_options=plotting_options,
-            show=show,
-            output_file=output_file,
-            colors=colors,
-            groups=groups,
-        )
+
+        if make_graph:
+            if mode not in ['violin', 'boxplot']:
+                logger.warning("%s not a available mode, set to default (histogram)", mode)
+                mode = "boxplot"
+
+            title = self._get_default_title()
+            xlabel = f"{group_col}"
+            ylabel = f"{self.index_name.capitalize()}"
+            plotting_options = self._handle_plotting_options(
+                plotting_options, title, xlabel, ylabel, log_scale
+            )
+            if mode == "violin":
+                fig = GroupViolinGraph(df)
+            elif mode == "boxplot":
+                fig = GroupBoxGraph(df)
+            fig.plot_one_graph(
+                self.DIVERSITY_INDEXES_NAME, group_col,
+                plotting_options=plotting_options,
+                show=show,
+                output_file=output_file,
+                colors=colors,
+                groups=groups,
+                **kwargs
+            )
+
+        self.last_grouped_df = df
+        return df
