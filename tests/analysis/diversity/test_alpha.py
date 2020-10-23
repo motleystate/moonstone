@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+import numpy as np
 import pandas as pd
 
 from moonstone.analysis.diversity.alpha import (
@@ -9,9 +10,8 @@ from moonstone.analysis.diversity.alpha import (
 
 class TestShannonIndex(TestCase):
 
-    def test_compute_alpha_diversity(self):
-
-        tested_object = pd.DataFrame.from_dict(
+    def setUp(self):
+        self.tested_object = pd.DataFrame.from_dict(
             {
                 'species1': [4, 4, 0, 0, 4],
                 'species2': [1, 0, 2, 0, 5],
@@ -19,7 +19,8 @@ class TestShannonIndex(TestCase):
                 'species4': [0, 3, 0, 0, 4]
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
-        tested_object_instance = ShannonIndex(tested_object)
+
+    def test_compute_alpha_diversity(self):
         expected_object = pd.Series({
             'sample1': 0.721928,
             'sample2': 0.985228,
@@ -27,6 +28,8 @@ class TestShannonIndex(TestCase):
             'sample4': -0.000000,
             'sample5': 1.992778
         })
+
+        tested_object_instance = ShannonIndex(self.tested_object)
         pd.testing.assert_series_equal(tested_object_instance.compute_alpha_diversity(), expected_object)
 
     def test_visualize(self):
@@ -39,9 +42,33 @@ class TestShannonIndex(TestCase):
                 'species4': [0, 3, 0, 0, 4]
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
-        tested_object_instance = ShannonIndex(tested_object)
+        tested_object_instance = ShannonIndex(self.tested_object)
         tested_object_instance.visualize(show=False)
 
+    def test_compare_groups(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+        metadata_df = pd.DataFrame(
+            [
+                ['F', 2],
+                ['M', 1],
+                ['F', 1],
+                ['M', 1],
+                ['M', 2]
+            ],
+            columns=['sex', 'group'],
+            index=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'],
+        )
+        expected_df = pd.DataFrame(
+            [
+                [np.nan, 0.374259],
+                [0.374259, np.nan]
+            ],
+            columns=[1, 2],
+            index=[1, 2]
+        )
+
+        matrix = tested_object_instance.compare_groups(metadata_df, 'group', show_visualization=False)
+        pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
 
 class TestSimpsonInverseIndex(TestCase):
 
