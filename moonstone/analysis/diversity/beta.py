@@ -3,8 +3,10 @@ import re
 from abc import ABC, abstractmethod
 
 import pandas as pd
+import plotly.graph_objects as go
 import skbio.diversity
 from skbio.stats.distance import DistanceMatrix
+from skbio.stats.ordination import pcoa
 
 from moonstone.analysis.diversity.base import DiversityBase
 
@@ -66,6 +68,47 @@ class BetaDiversity(DiversityBase, ABC):
             beta_div_solo_indexed_df[metadata_series.name] = group
             df_list.append(beta_div_solo_indexed_df)
         return pd.concat(df_list).dropna()
+
+    @property
+    def pcoa(self):
+        if getattr(self, '_pcoa', None) is None:
+            self._pcoa = pcoa(self.beta_diversity).samples
+        return self._pcoa
+
+    def visualize_pcoa(
+        self, metadata_df: pd.DataFrame, group_col: str,
+        mode: str = 'scatter', **kwargs
+    ):
+        filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
+
+        if mode not in ['scatter']:
+            logger.warning("%s not a available mode, set to default (scatter)", mode)
+            mode = "scatter"
+        title = "PCOA"
+        xlabel = "PC1"
+        ylabel = "PC2"
+        plotting_options = self._handle_plotting_options(
+            {}, title, xlabel, ylabel, False
+        )
+
+        groups = list(filtered_metadata_df[group_col].unique())
+        fig = go.Figure()
+        for group in groups:
+            df = self.pcoa.loc[filtered_metadata_df[filtered_metadata_df[group_col] == group].index,:]
+            fig.add_trace(go.Scatter(
+                x=df['PC1'],
+                y=df['PC2'],
+                text=df.index,
+                mode='markers',
+                name=str(group)
+            ))
+
+            fig.update_layout(
+                title={'text': title},
+                xaxis={'title': 'PC1'},
+                yaxis={'title': 'PC2'}
+            )
+        fig.show()
 
 
 class BrayCurtis(BetaDiversity):

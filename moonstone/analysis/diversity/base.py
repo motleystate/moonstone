@@ -118,6 +118,9 @@ class DiversityBase(BaseModule, BaseDF, ABC):
     def _get_grouped_df(self, metadata_series):
         return pd.concat([metadata_series, self.diversity_indexes], axis=1).dropna()
 
+    def _get_filtered_df_from_metadata(self, metadata_df):
+        return NamesFiltering(metadata_df, list(self.df.columns)).filtered_df
+
     def analyse_groups(
         self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
         log_scale: bool = False, colors: dict = None, groups: list = None,
@@ -135,7 +138,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         :param make_graph: whether or not to make the graph
         :param plotting_options: plotly plotting_options
         """
-        filtered_metadata_df = NamesFiltering(metadata_df, list(self.df.columns)).filtered_df
+        filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
         df = self._get_grouped_df(filtered_metadata_df[group_col])
 
         if make_graph:
