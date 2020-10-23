@@ -3,9 +3,11 @@ from typing import Union
 
 import pandas as pd
 import plotly.io
+import plotly.graph_objects as go
 
 
 class BaseGraph(ABC):
+    DEFAULT_COLOR = "#666666"
 
     def __init__(self, data: Union[pd.Series, pd.DataFrame], plotting_options: dict = None,
                  show: bool = True, output_file: Union[bool, str] = False):
@@ -62,7 +64,7 @@ class BaseGraph(ABC):
             getattr(fig, updater)(plotting_options[option])
         return fig
 
-    def _handle_output_plotly(self, fig, show, output_file):
+    def _handle_output_plotly(self, fig, show: bool, output_file: str):
         if show is True:
             fig.show()
 
@@ -74,3 +76,54 @@ class BaseGraph(ABC):
                 else:
                     output_file = self.__class__.__name__+".html"
             plotly.io.write_html(fig, output_file)
+
+
+class GroupBaseGraph(BaseGraph):
+
+    DEFAULT_COLORS = [
+        "#A63A50", "#FFBF00", "#68ace8", "#97bf8f", "#28464B",
+        "#6D5A72", "#FF8A5B", "#7C9EB2", "#F4F1DE", "#9CD08F",
+    ]
+
+    def __init__(self, *args, **kwargs):
+        self.color_counter = 0
+        super().__init__(*args, **kwargs)
+
+    def _gen_default_color_dict(self, groups: list):
+        return {groups[i]: self.DEFAULT_COLORS[i % len(self.DEFAULT_COLORS)] for i in range(0, len(groups))}
+
+    def _get_group_color(self, group: str, group_color: dict):
+        return group_color.get(group, self.DEFAULT_COLOR)
+
+    @abstractmethod
+    def _gen_fig_trace(self, x: list, y: list, name: str, text: list, color: str):
+        pass
+
+    def plot_one_graph(
+        self, data_col: str, group_col: str, plotting_options: dict = None,
+        show: bool = True, output_file: Union[bool, str] = False,
+        colors: dict = None, sort_groups: bool = False, groups: list = None,
+    ):
+        """
+        :param data_col: column with data to visualize
+        :param group_col: column used to group data
+        """
+        if groups is None:
+            groups = list(self.data[group_col].unique())
+        if sort_groups:
+            groups.sort()
+        if colors is None:
+            colors = self._gen_default_color_dict(groups)
+        fig = go.Figure()
+
+        for group in groups:
+            filtered_df = self.data[self.data[group_col] == group]
+            fig.add_trace(self._gen_fig_trace(
+                filtered_df[group_col], filtered_df[data_col],
+                str(group), filtered_df.index, self._get_group_color(group, colors)
+            ))
+
+        if plotting_options is not None:
+            fig = self._handle_plotting_options_plotly(fig, plotting_options)
+
+        self._handle_output_plotly(fig, show, output_file)

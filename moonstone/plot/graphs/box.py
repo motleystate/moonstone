@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 from moonstone.plot.graphs.base import BaseGraph, GroupBaseGraph
 
 
-class ViolinGraph(BaseGraph):
+class BoxGraph(BaseGraph):
 
     def plot_one_graph(
         self, plotting_options: dict = None,
@@ -13,12 +13,12 @@ class ViolinGraph(BaseGraph):
     ):
         fig = go.Figure(
             [
-                go.Violin(
+                go.Box(
                     y=self.data,
-                    points='all',
-                    meanline_visible=True,
+                    boxpoints='all',
                     text=self.data.index,
-                    name="All"
+                    name="All",
+                    marker_color=self.DEFAULT_COLOR,
                 )
             ]
         )
@@ -29,16 +29,14 @@ class ViolinGraph(BaseGraph):
         self._handle_output_plotly(fig, show, output_file)
 
 
-class GroupViolinGraph(GroupBaseGraph):
+class GroupBoxGraph(GroupBaseGraph):
 
     def _gen_fig_trace(self, x: list, y: list, name: str, text: list, color: str):
-        return go.Violin(
+        return go.Box(
             x=x,
             y=y,
             name=name,
             text=text,
-            line_color=color,
-            box_visible=True,
-            points='all',
-            meanline_visible=True,
+            marker_color=color,
+            boxpoints='all',
         )
