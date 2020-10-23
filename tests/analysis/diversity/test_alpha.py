@@ -34,14 +34,6 @@ class TestShannonIndex(TestCase):
 
     def test_visualize(self):
         # Not real test but make sure that visualize() runs without errors
-        tested_object = pd.DataFrame.from_dict(
-            {
-                'species1': [4, 4, 0, 0, 4],
-                'species2': [1, 0, 2, 0, 5],
-                'species3': [0, 0, 0, 1, 4],
-                'species4': [0, 3, 0, 0, 4]
-            },
-            orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
         tested_object_instance = ShannonIndex(self.tested_object)
         tested_object_instance.visualize(show=False)
 
@@ -69,6 +61,7 @@ class TestShannonIndex(TestCase):
 
         matrix = tested_object_instance.compare_groups(metadata_df, 'group', show_visualization=False)
         pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
+
 
 class TestSimpsonInverseIndex(TestCase):
 

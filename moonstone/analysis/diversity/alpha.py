@@ -6,7 +6,7 @@ from typing import Union, Optional
 import pandas as pd
 import skbio
 
-from moonstone.analysis.statistical_test import (
+from moonstone.analysis.statistical_test import (              # noqa
     mann_whitney_u_group
 )
 from moonstone.core.module_base import BaseModule, BaseDF
