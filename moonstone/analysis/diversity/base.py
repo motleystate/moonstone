@@ -153,10 +153,10 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 plotting_options, title, xlabel, ylabel, log_scale
             )
             if mode == "violin":
-                fig = GroupViolinGraph(df)
+                graph = GroupViolinGraph(df)
             elif mode == "boxplot":
-                fig = GroupBoxGraph(df)
-            fig.plot_one_graph(
+                graph = GroupBoxGraph(df)
+            graph.plot_one_graph(
                 self.DIVERSITY_INDEXES_NAME, group_col,
                 plotting_options=plotting_options,
                 show=show,

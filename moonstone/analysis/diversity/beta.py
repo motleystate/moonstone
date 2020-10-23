@@ -1,14 +1,14 @@
 import logging
-import re
 from abc import ABC, abstractmethod
+from typing import Union
 
 import pandas as pd
-import plotly.graph_objects as go
 import skbio.diversity
 from skbio.stats.distance import DistanceMatrix
 from skbio.stats.ordination import pcoa
 
 from moonstone.analysis.diversity.base import DiversityBase
+from moonstone.plot.graphs.scatter import GroupScatterGraph, GroupScatter3DGraph
 
 logger = logging.getLogger(__name__)
 
@@ -16,10 +16,6 @@ logger = logging.getLogger(__name__)
 class BetaDiversity(DiversityBase, ABC):
     DIVERSITY_INDEXES_NAME = "beta_index"
     DEF_TITLE = "(beta diversity) distribution across the samples"
-
-    def __init__(self, dataframe: pd.DataFrame):
-        super().__init__(dataframe)
-        self.index_name = " ".join(re.findall('[A-Z][^A-Z]*', self.__class__.__name__)).capitalize()
 
     @abstractmethod
     def compute_beta_diversity(self, df) -> DistanceMatrix:
@@ -76,39 +72,39 @@ class BetaDiversity(DiversityBase, ABC):
         return self._pcoa
 
     def visualize_pcoa(
-        self, metadata_df: pd.DataFrame, group_col: str,
-        mode: str = 'scatter', **kwargs
+        self, metadata_df: pd.DataFrame, group_col: str, mode: str = 'scatter',
+        show: bool = True, output_file: Union[bool, str] = False,
+        colors: dict = None, groups: list = None,
+        plotting_options: dict = None,
     ):
-        filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
 
-        if mode not in ['scatter']:
+        filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
+        df = pd.concat([self.pcoa, filtered_metadata_df[group_col]], axis=1)
+
+        if mode not in ['scatter', 'scatter3d']:
             logger.warning("%s not a available mode, set to default (scatter)", mode)
             mode = "scatter"
-        title = "PCOA"
+        title = f"PCOA of samples from {self.index_name} distance matrix"
         xlabel = "PC1"
         ylabel = "PC2"
         plotting_options = self._handle_plotting_options(
-            {}, title, xlabel, ylabel, False
+            plotting_options, title, xlabel, ylabel, False
         )
 
-        groups = list(filtered_metadata_df[group_col].unique())
-        fig = go.Figure()
-        for group in groups:
-            df = self.pcoa.loc[filtered_metadata_df[filtered_metadata_df[group_col] == group].index,:]
-            fig.add_trace(go.Scatter(
-                x=df['PC1'],
-                y=df['PC2'],
-                text=df.index,
-                mode='markers',
-                name=str(group)
-            ))
-
-            fig.update_layout(
-                title={'text': title},
-                xaxis={'title': 'PC1'},
-                yaxis={'title': 'PC2'}
-            )
-        fig.show()
+        if mode == "scatter":
+            graph = GroupScatterGraph(df)
+            args_for_plot = ["PC1", "PC2", group_col]
+        elif mode == "scatter3d":
+            graph = GroupScatter3DGraph(df)
+            args_for_plot = ["PC1", "PC2", "PC3", group_col]
+        graph.plot_one_graph(
+            *args_for_plot,
+            plotting_options=plotting_options,
+            show=show,
+            output_file=output_file,
+            colors=colors,
+            groups=groups,
+        )
 
 
 class BrayCurtis(BetaDiversity):

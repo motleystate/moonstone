@@ -1,4 +1,8 @@
 from .bargraph import BarGraph  # noqa
-from .box import BoxGraph  # noqa
+from .box import BoxGraph, GroupBoxGraph  # noqa
 from .histogram import Histogram  # noqa
-from .violin import ViolinGraph  # noqa
+from .scatter import (  # noqa
+    ScatterGraph, GroupScatterGraph,
+    Scatter3DGraph, GroupScatter3DGraph,
+)
+from .violin import ViolinGraph, GroupViolinGraph  # noqa
