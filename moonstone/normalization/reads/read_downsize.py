@@ -1,5 +1,6 @@
 import logging
 import random
+import gzip
 
 from moonstone.normalization.reads.base import BaseDownsizing
 
@@ -13,7 +14,7 @@ class DownsizePair(BaseDownsizing):
     https://doi.org/10.1371/journal.pcbi.1003531
     """
 
-    def __init__(self, raw_file_f, raw_file_r, n=1000, seed=623):
+    def __init__(self, raw_file_f, raw_file_r, in_dir='./', out_dir='./', n=1000, seed=62375):
         """Paired reads assumes forward and reverse FASTQ files.
         n is the number of reads that will be randomly picked, with a default of 1000.
         A random seed is preset to 62375 to allow for reproducibility"""
@@ -21,20 +22,25 @@ class DownsizePair(BaseDownsizing):
         super().__init__(raw_file_f, raw_file_r)
         self.downsize_to = n
         self.seed = seed
+        self.in_dir = in_dir
+        self.out_dir = out_dir
 
     def downsize_pair(self):
+        """Selects a pseudo-random list of reads from the sequence file and returns the downsized file in the
+        same format. The seed for generating the list of reads to select is set during instantiation.
+        """
         if self.raw_file_f == self.raw_file_r:
-            print(f"\nFiles {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!\n")
+            logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
 
-        records: int = sum(1 for _ in open(self.raw_file_f)) // 4
+        records: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
         logger.info('Found %i reads' % records)
         random.seed(self.seed)
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
 
-        forward_reads = open(self.raw_file_f, 'r')
-        reverse_reads = open(self.raw_file_r, 'r')
-        downsized_forward = open(self.raw_file_f + ".downsized", "w+")
-        downsized_reverse = open(self.raw_file_r + ".downsized", "w+")
+        forward_reads = open(self.in_dir + self.raw_file_f, 'r')
+        reverse_reads = open(self.in_dir + self.raw_file_r, 'r')
+        downsized_forward = open(self.out_dir+"downsized."+self.raw_file_f, "w+")
+        downsized_reverse = open(self.out_dir+"downsized."+self.raw_file_r, "w+")
 
         rec_no = -1
         for rr in rand_reads:
@@ -65,6 +71,51 @@ class DownsizePair(BaseDownsizing):
 
         logger.info('Wrote %i reads to to %s.\nWrote %i reads to %s' % (downsized_forward_count, downsized_forward.name,
                                                                         downsized_reverse_count, downsized_reverse.name)
+                    )
+
+    def downsize_pair_gzip(self):
+        """Same as 'downsize_pair' module, but made for gzip compressed files. This module returns files using the
+        same compression"""
+        if self.raw_file_f == self.raw_file_r:
+            logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
+
+        records: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
+        logger.info('Found %i reads' % records)
+        random.seed(self.seed)
+        rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
+
+        forward_reads = gzip.open(self.in_dir + self.raw_file_f, 'rb')
+        reverse_reads = gzip.open(self.in_dir + self.raw_file_r, 'rb')
+        downsized_forward = gzip.open(self.out_dir+"downsized."+self.raw_file_f, "wb+")
+        downsized_reverse = gzip.open(self.out_dir+"downsized."+self.raw_file_r, "wb+")
+
+        rec_no = -1
+        reads_written = 0
+        for rr in rand_reads:
+            while rec_no < rr:
+                rec_no += 1
+                for i in range(4):
+                    forward_reads.readline()
+                    reverse_reads.readline()
+            for i in range(4):
+                downsized_forward.write(forward_reads.readline())
+                downsized_reverse.write(reverse_reads.readline())
+                reads_written += 1
+            rec_no += 1
+
+        forward_reads.close()
+        reverse_reads.close()
+        downsized_forward.close()
+        downsized_reverse.close()
+        with gzip.open(self.out_dir+"downsized."+self.raw_file_f, "rb") as f:
+            downsized_forward_count = sum(1 for _ in f) / 4
+        with gzip.open(self.out_dir+"downsized."+self.raw_file_r, "rb") as r:
+            downsized_reverse_count = sum(1 for _ in r) / 4
+
+        logger.info('\nWrote %i reads to to %s.\nWrote %i reads to %s' % (downsized_forward_count,
+                                                                          downsized_forward.name,
+                                                                          downsized_reverse_count,
+                                                                          downsized_reverse.name)
                     )
 
     def downsize_single(self):
