@@ -26,7 +26,7 @@ class RandomSelection(BaseNormalization):
         if threshold is not None:
             self.threshold = threshold
         else:
-            self.threshold = self.df.sum().min()
+            self.threshold = int(self.df.sum().min())
         # Filters out samples below the threshold
         self.samples_to_remove = self.raw_df.columns[self.raw_df.sum() < self.threshold]
         if not self.samples_to_remove.empty:
@@ -35,7 +35,7 @@ class RandomSelection(BaseNormalization):
     def _randomly_select_counts(self, column_name: str):
         np.random.seed(self.random_seed)  # set the random seed
         counts = self.df[column_name]
-        if counts.sum() <= self.threshold:
+        if counts.sum() <= self.threshold + 1:
             return counts
         probabilities = counts / counts.sum()
         new_counts = np.unique(
@@ -54,4 +54,26 @@ class RandomSelection(BaseNormalization):
                 logger.info(f"{cpt}/{total} done so far...")
         logger.info(f"[Done] {cpt}/{total}.")
         normalized_df.columns = self.df.columns
-        return normalized_df.fillna(0).astype(int)
+        return normalized_df.fillna(0).astype(float)
+
+
+class TaxonomyRandomSelection(RandomSelection):
+    """
+    Allow random selection for taxonomy multi-indexed dataframes.
+    """
+
+    def __init__(self, df: pd.DataFrame, concat_char: str = ';', *args, **kwargs):
+        self.concat_char = concat_char
+        no_index_df = df.reset_index()
+        self.index_names = df.index.names
+        new_df = no_index_df.set_index(
+            no_index_df[self.index_names].agg(self.concat_char.join, axis=1)
+        ).drop(self.index_names, axis=1)
+        super().__init__(new_df, **kwargs)
+
+    def normalize(self) -> pd.DataFrame:
+        single_index_norm_df = super().normalize()
+        multi_index_norm_df = single_index_norm_df.reset_index(drop=True)
+        multi_index_norm_df.index = single_index_norm_df.index.str.split((self.concat_char), expand=True)
+        multi_index_norm_df.index.names = self.index_names
+        return multi_index_norm_df

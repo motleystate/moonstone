@@ -20,7 +20,7 @@ class TestSunbeamKraken2Parser(TestCase):
             [
                 ['Bacteria', 'Bacteria (kingdom)', 'Bacteria (kingdom)', 'Bacteria (kingdom)', 'Bacteria (kingdom)', 'Bacteria (kingdom)', 'Bacteria (kingdom)', 2, 5.5, 6.0],  # noqa
                 ['Bacteria', 'Firmicutes', 'Bacilli', 'Lactobacillales', 'Lactobacillales (order)', 'Lactobacillales (order)', 'Lactobacillales (order)', 186826, 4.3, 2.1],  # noqa
-                ['Bacteria', 'Firmicutes', 'Bacilli', 'Lactobacillales', 'Lactobacillaceae', 'Lactobacillus', 'Lactobacillus_jensenii', 109790, 1.0, 2.0]  # noqa
+                ['Bacteria', 'Firmicutes', 'Bacilli', 'Lactobacillales', 'Lactobacillaceae', 'Lactobacillus', 'Lactobacillus_jensenii', 109790, 1.0, 12.0]  # noqa
             ],
             columns=[
                 'kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species',

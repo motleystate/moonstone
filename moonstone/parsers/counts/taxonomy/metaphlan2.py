@@ -1,9 +1,10 @@
 from pandas import DataFrame
 
-from moonstone.parsers.counts.taxonomy.base import TaxonomyCountsBaseParser
+from moonstone.parsers.base import BaseParser
+from moonstone.utils.taxonomy import TaxonomyCountsBase
 
 
-class Metaphlan2Parser(TaxonomyCountsBaseParser):
+class Metaphlan2Parser(TaxonomyCountsBase, BaseParser):
     """
     Parse output from `Metaphlan2 <https://github.com/biobakery/MetaPhlAn/>`_ merged table.
     """

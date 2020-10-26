@@ -3,10 +3,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from moonstone.parsers.base import BaseParser
 
-
-class TaxonomyCountsBaseParser(BaseParser):
+class TaxonomyCountsBase():
 
     taxonomical_names = [
         "kingdom", "phylum", "class", "order", "family", "genus", "species", "sTrain"
