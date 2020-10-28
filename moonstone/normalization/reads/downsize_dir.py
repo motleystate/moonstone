@@ -52,6 +52,11 @@ class DownsizeDir:
             self.out_dir = out_dir
         else:
             self.out_dir = in_dir + 'downsized/'
+            logger.info('No output directory specified.\nCreating default: %s ' % self.out_dir)
+        if not os.path.exists(self.out_dir):
+            os.mkdir(self.out_dir)
+        else:
+            logger.info('Looks like %s exists.' % self.out_dir)
 
         if processes > mp.cpu_count():
             logger.warning('Number of requested processes [%i] is greater that the number of system CPUs [%i]' %
@@ -104,8 +109,8 @@ class DownsizeDir:
         files_to_downsize = self.detect_seq_reads()
         logging.info('Found %i files.' % len(files_to_downsize))
 
-        '''This is a quick but efficient multiprocessing implementation to handle the potentially long list of files
-        in a directory. The Pool is created, the number of workers = the class 'processes' attribute. 
+        '''This is a quick but efficient multiprocessing implementation to handle retrieving information from files
+        in the target directory. The Pool is created, the number of workers = the class 'processes' attribute. 
         Results are expected as a dictionary, so the resulting 'list of dictionaries' is converted with handy 
         dict comprehension.
         '''
@@ -115,10 +120,6 @@ class DownsizeDir:
 
         list_to_downsize = pair_up(file_info_dict)
 
-        if not os.path.exists(self.out_dir):
-            os.mkdir(self.out_dir)
-        else:
-            logger.info('Looks like %s exists.' % self.out_dir)
         for k in range(len(list_to_downsize)//2):  # number of files divided by 2: one instance per pair
             instance = DownsizePair(raw_file_f=list_to_downsize[k * 2],
                                     raw_file_r=list_to_downsize[k * 2 + 1],
