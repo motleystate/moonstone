@@ -14,7 +14,7 @@ class DownsizePair(BaseDownsizing):
     https://doi.org/10.1371/journal.pcbi.1003531
     """
 
-    def __init__(self, raw_file_f, raw_file_r, in_dir='./', out_dir='./', n=1000, seed=62375):
+    def __init__(self, raw_file_f, raw_file_r, starting_reads=None, in_dir='./', out_dir='./', n=1000, seed=62375):
         """Paired reads assumes forward and reverse FASTQ files.
         n is the number of reads that will be randomly picked, with a default of 1000.
         A random seed is preset to 62375 to allow for reproducibility"""
@@ -24,15 +24,24 @@ class DownsizePair(BaseDownsizing):
         self.seed = seed
         self.in_dir = in_dir
         self.out_dir = out_dir
+        self.starting_reads = starting_reads
+
+        if self.raw_file_f == self.raw_file_r:
+            logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
+
+    def count_starting_reads(self, file):
+
 
     def downsize_pair(self):
         """Selects a pseudo-random list of reads from the sequence file and returns the downsized file in the
         same format. The seed for generating the list of reads to select is set during instantiation.
         """
-        if self.raw_file_f == self.raw_file_r:
-            logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
 
-        records: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
+        if not self.starting_reads:
+            records: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
+        else:
+            records = self.starting_reads
+
         logger.info('Found %i reads' % records)
         random.seed(self.seed)
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
@@ -76,8 +85,6 @@ class DownsizePair(BaseDownsizing):
     def downsize_pair_gzip(self):
         """Same as 'downsize_pair' module, but made for gzip compressed files. This module returns files using the
         same compression"""
-        if self.raw_file_f == self.raw_file_r:
-            logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
 
         records: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
         logger.info('Found %i reads' % records)
