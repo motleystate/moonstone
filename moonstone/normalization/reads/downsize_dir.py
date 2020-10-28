@@ -57,7 +57,7 @@ class DownsizeDir:
             logger.warning('Number of requested processes [%i] is greater that the number of system CPUs [%i]' %
                            (processes, mp.cpu_count()))
             self.processes = mp.cpu_count()
-            logger.info('Number of processes set to %i ' % self.processes)
+            logger.info('Number of processes set to maximum number of detected CPUs [%i].' % self.processes)
         else:
             self.processes = processes
             logger.info('Number of processes set to %i ' % self.processes)
@@ -104,11 +104,17 @@ class DownsizeDir:
         files_to_downsize = self.detect_seq_reads()
         logging.info('Found %i files.' % len(files_to_downsize))
 
+        '''This is a quick but efficient multiprocessing implementation to handle the potentially long list of files
+        in a directory. The Pool is created, the number of workers = the class 'processes' attribute. 
+        Results are expected as a dictionary, so the resulting 'list of dictionaries' is converted with handy 
+        dict comprehension.
+        '''
         with mp.Pool(processes=self.processes) as pool:
             results = pool.map(self.read_info, files_to_downsize, chunksize=1)
         file_info_dict = {k: v for result in results for k, v in result.items()}
 
         list_to_downsize = pair_up(file_info_dict)
+
         if not os.path.exists(self.out_dir):
             os.mkdir(self.out_dir)
         else:
