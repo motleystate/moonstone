@@ -7,7 +7,7 @@ import pandas as pd
 import skbio
 
 from moonstone.analysis.statistical_test import (              # noqa
-    mann_whitney_u_group
+    statistical_test_groups_comparison
 )
 from moonstone.core.module_base import BaseModule, BaseDF
 from moonstone.plot.graphs.box import GroupBoxGraph, BoxGraph
@@ -167,8 +167,9 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
         plotting_options: dict = None,
         show_visualization: Optional[bool] = False, output_visualization_file: Optional[str] = False
     ):
-        method = f"{stat_test}_group"
-        self.stat_test_group_matrix = eval(method+'(self.alpha_diversity_indexes, metadata_df[group_col])')
+        self.stat_test_group_matrix = statistical_test_groups_comparison(
+            self.alpha_diversity_indexes, metadata_df[group_col], stat_test=stat_test
+            )
         if show_visualization or output_visualization_file:
             self.visualize_groups(metadata_df, group_col, plotting_options=plotting_options,
                                   show=show_visualization, output_file=output_visualization_file)
