@@ -9,8 +9,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Series, stat_test: str, **kwargs):
+def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Series, stat_test: str, 
+                                       output: str = 'dataframe', **kwargs):
     """
+    :param output: {'series', 'dataframe'}
+
     In kwargs, you can pass argument for statistical test, like :
     :param equal_var: For ttest_ind, set to True if your samples have the same variance and
     you wish to perform a Student's t-test rather than a Welch's t-test (here default is False)
@@ -44,14 +47,25 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
 
     groups = new_groups
 
+    if output == 'series':
+        dic_df = {}
+        for i in range(len(groups)):
+            for j in range(i+1, len(groups)):
+                pval = eval(str(stat_test)+'(list_of_series[i], list_of_series[j], **kwargs)')[1]
+                dic_df[(groups[i], groups[j])] = pval
+                dic_df[(groups[j], groups[i])] = pval
+        mann_whitney_u_df = pd.Series(dic_df)
+        mann_whitney_u_df.index = pd.MultiIndex.from_tuples(mann_whitney_u_df.index, names=['Group', 'Group'])        
+        return mann_whitney_u_df
+        
+        
     tab = [[np.nan] * len(groups) for _ in range(len(groups))]
     for i in range(len(groups)):
         for j in range(i+1, len(groups)):
             pval = eval(str(stat_test)+'(list_of_series[i], list_of_series[j], **kwargs)')[1]
             tab[i][j] = pval
             tab[j][i] = pval
-    mann_whitney_u_df = pd.DataFrame(tab, index=groups, columns=groups)
-    return mann_whitney_u_df
+    return pd.DataFrame(tab, index=groups, columns=groups
 
 
 def mann_whitney_u(series1: pd.Series, series2: pd.Series, alternative: str = 'two-sided', **kwargs):
