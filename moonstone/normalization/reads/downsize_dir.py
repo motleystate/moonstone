@@ -123,9 +123,10 @@ class DownsizeDir:
         for k in range(len(list_to_downsize)//2):  # number of files divided by 2: one instance per pair
             instance = DownsizePair(raw_file_f=list_to_downsize[k * 2],
                                     raw_file_r=list_to_downsize[k * 2 + 1],
+                                    read_info=file_info_dict[list_to_downsize[k * 2]],
                                     in_dir=self.in_dir, out_dir=self.out_dir,
                                     n=self.downsize_to,
-                                    read_info=file_info_dict[list_to_downsize[k * 2]][2])
+                                    )
             if file_info_dict[list_to_downsize[k*2]][3] == 'Uncompressed/FASTQ':
                 logger.info(f'{list_to_downsize[k*2]} run uncompressed')
                 instance.downsize_pair()
