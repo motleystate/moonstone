@@ -1,6 +1,7 @@
 import logging
 import random
 import gzip
+import filetype
 
 from moonstone.normalization.reads.base import BaseDownsizing
 
@@ -14,7 +15,7 @@ class DownsizePair(BaseDownsizing):
     https://doi.org/10.1371/journal.pcbi.1003531
     """
 
-    def __init__(self, raw_file_f, raw_file_r, starting_reads=None, in_dir='./', out_dir='./', n=1000, seed=62375):
+    def __init__(self, raw_file_f, raw_file_r, read_info=None, in_dir='./', out_dir='./', n=1000, seed=62375):
         """Paired reads assumes forward and reverse FASTQ files.
         n is the number of reads that will be randomly picked, with a default of 1000.
         A random seed is preset to 62375 to allow for reproducibility"""
@@ -24,26 +25,36 @@ class DownsizePair(BaseDownsizing):
         self.seed = seed
         self.in_dir = in_dir
         self.out_dir = out_dir
-        self.starting_reads = starting_reads
+        self.read_info = read_info  # Contains [header, F/R, Number of reads, format]
+        # e.g. ['@A00709:44:HYG57DSXX:2:1101:10737:1266', '1', 100257, 'Uncompressed/FASTQ']
 
         if self.raw_file_f == self.raw_file_r:
             logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
 
-    def count_starting_reads(self, file):
+    def count_starting_reads(self):
+        """The function first checks to see if the starting_reads variable has already been set. If not, the filetype
+         is determined and then the appropriate means of opening the file applied. Read # is determined by counting
+         lines and dividing by 4, as per the FASTQ format. In all cases, the number of starting reads is returned.
+        """
+        if self.read_info:
+            records = self.read_info[2]
+        else:
+            file_type = filetype.guess(self.raw_file_f).mime
+            if not file_type:  # unrecognized format, e.g. fastq generates 'None' for this variable
+                records: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
+            if filetype.guess(self.raw_file_f).mime == 'application/gzip':
+                records: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
 
+        logger.info('Found %i reads' % records)
+        return records
 
     def downsize_pair(self):
         """Selects a pseudo-random list of reads from the sequence file and returns the downsized file in the
         same format. The seed for generating the list of reads to select is set during instantiation.
         """
-
-        if not self.starting_reads:
-            records: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
-        else:
-            records = self.starting_reads
-
-        logger.info('Found %i reads' % records)
         random.seed(self.seed)
+
+        records = self.count_starting_reads()
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
 
         forward_reads = open(self.in_dir + self.raw_file_f, 'r')
@@ -85,10 +96,9 @@ class DownsizePair(BaseDownsizing):
     def downsize_pair_gzip(self):
         """Same as 'downsize_pair' module, but made for gzip compressed files. This module returns files using the
         same compression"""
-
-        records: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
-        logger.info('Found %i reads' % records)
         random.seed(self.seed)
+
+        records = self.count_starting_reads()
         rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
 
         forward_reads = gzip.open(self.in_dir + self.raw_file_f, 'rb')
