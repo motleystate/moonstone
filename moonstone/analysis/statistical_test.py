@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
-from statsmodels.stats.multitest import multipletests
 from typing import List, Union
 
 from moonstone.utils.pandas.series import SeriesBinning
@@ -10,26 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Series, stat_test: str,
-                                       output: str = 'dataframe', mirror: str = True, **kwargs):
-    """
-    :param output: {'series', 'dataframe'}
-
-    In kwargs, you can pass argument for statistical test, like :
-    :param equal_var: For ttest_ind, set to True if your samples have the same variance and
-    you wish to perform a Student's t-test rather than a Welch's t-test (here default is False)
-    :param alternative: {None, 'two-sided', 'less', 'greater'} For Mann - Whitney-U, you can define
-    the alternative hypothesis.
-    :param bins: For chi2_contingency, you can define bins.
-    """
-
-
-    possibles = globals().copy()
-    possibles.update(locals())
-    method = possibles.get(stat_test)
-    if not method:
-        raise NotImplementedError("Method %s not implemented" % stat_test)
-
+def _preprocess_groups_compatison(series: pd.Series, group_series: pd.Series, stat_test: str):
     groups = list(group_series.unique())
     groups.sort()
 
@@ -50,27 +30,63 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
     if len(new_groups) == 0:
         raise RuntimeError("All groups have been dropped.")
 
+    return new_groups, list_of_series
+
+
+def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Series, stat_test: str,
+                                       output: str = 'dataframe', mirror: str = True, **kwargs):
+    """
+    :param output: {'series', 'dataframe'}
+
+    In kwargs, you can pass argument for statistical test, like :
+    :param equal_var: For ttest_ind, set to True if your samples have the same variance and
+    you wish to perform a Student's t-test rather than a Welch's t-test (here default is False)
+    :param alternative: {None, 'two-sided', 'less', 'greater'} For Mann - Whitney-U, you can define
+    the alternative hypothesis.
+    :param bins: For chi2_contingency, you can define bins.
+    """
+
+    method = ['mann_whitney_u', 'ttest_independence', 'chi2_contingency']
+    if stat_test not in method:
+        raise NotImplementedError("Method %s not implemented" % stat_test)
+
+    # split dataframe by group + warn and/or drop groups not respecting minimum number of observations
+    groups, list_of_series = _preprocess_groups_compatison(series, group_series, stat_test)
+
+    # if no bins defined, compute automatically bins that will be used to bin every series of group
     if stat_test == 'chi2_contingency' and 'bins' not in kwargs.keys():
         kwargs['bins'] = _compute_best_bins_values(list_of_series)
-
-    groups = new_groups
 
     if output == 'series':
         dic_df = {}
         for i in range(len(groups)):
             for j in range(i+1, len(groups)):
-                pval = method(list_of_series[i], list_of_series[j], **kwargs)[1]
+
+                if stat_test == 'mann_whitney_u':
+                    pval = mann_whitney_u(list_of_series[i], list_of_series[j], **kwargs)[1]
+                elif stat_test == 'ttest_independence':
+                    pval = ttest_independence(list_of_series[i], list_of_series[j], **kwargs)[1]
+                if stat_test == 'chi2_contingency':
+                    pval = chi2_contingency(list_of_series[i], list_of_series[j], **kwargs)[1]
+
                 dic_df[(groups[i], groups[j])] = pval
                 if mirror:
                     dic_df[(groups[j], groups[i])] = pval
-        mann_whitney_u_df = pd.Series(dic_df)
-        mann_whitney_u_df.index = pd.MultiIndex.from_tuples(mann_whitney_u_df.index, names=['Group', 'Group'])
-        return mann_whitney_u_df
+        pvalue_df = pd.Series(dic_df)
+        pvalue_df.index = pd.MultiIndex.from_tuples(pvalue_df.index, names=['Group', 'Group'])
+        return pvalue_df
 
     tab = [[np.nan] * len(groups) for _ in range(len(groups))]
     for i in range(len(groups)):
         for j in range(i+1, len(groups)):
-            pval = method(list_of_series[i], list_of_series[j], **kwargs)[1]
+
+            if stat_test == 'mann_whitney_u':
+                pval = mann_whitney_u(list_of_series[i], list_of_series[j], **kwargs)[1]
+            elif stat_test == 'ttest_independence':
+                pval = ttest_independence(list_of_series[i], list_of_series[j], **kwargs)[1]
+            if stat_test == 'chi2_contingency':
+                pval = chi2_contingency(list_of_series[i], list_of_series[j], **kwargs)[1]
+
             tab[i][j] = pval
             if mirror:
                 tab[j][i] = pval
