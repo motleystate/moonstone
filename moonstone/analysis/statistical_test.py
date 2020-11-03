@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
+from statsmodels.stats.multitest import multipletests
 from typing import List, Union
 
 from moonstone.utils.pandas.series import SeriesBinning
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Series, stat_test: str,
-                                       output: str = 'dataframe', **kwargs):
+                                       output: str = 'dataframe', mirror: str = True, **kwargs):
     """
     :param output: {'series', 'dataframe'}
 
@@ -21,6 +22,13 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
     the alternative hypothesis.
     :param bins: For chi2_contingency, you can define bins.
     """
+
+
+    possibles = globals().copy()
+    possibles.update(locals())
+    method = possibles.get(stat_test)
+    if not method:
+        raise NotImplementedError("Method %s not implemented" % stat_test)
 
     groups = list(group_series.unique())
     groups.sort()
@@ -51,9 +59,10 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
         dic_df = {}
         for i in range(len(groups)):
             for j in range(i+1, len(groups)):
-                pval = eval(str(stat_test)+'(list_of_series[i], list_of_series[j], **kwargs)')[1]
+                pval = method(list_of_series[i], list_of_series[j], **kwargs)[1]
                 dic_df[(groups[i], groups[j])] = pval
-                dic_df[(groups[j], groups[i])] = pval
+                if mirror:
+                    dic_df[(groups[j], groups[i])] = pval
         mann_whitney_u_df = pd.Series(dic_df)
         mann_whitney_u_df.index = pd.MultiIndex.from_tuples(mann_whitney_u_df.index, names=['Group', 'Group'])
         return mann_whitney_u_df
@@ -61,9 +70,10 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
     tab = [[np.nan] * len(groups) for _ in range(len(groups))]
     for i in range(len(groups)):
         for j in range(i+1, len(groups)):
-            pval = eval(str(stat_test)+'(list_of_series[i], list_of_series[j], **kwargs)')[1]
+            pval = method(list_of_series[i], list_of_series[j], **kwargs)[1]
             tab[i][j] = pval
-            tab[j][i] = pval
+            if mirror:
+                tab[j][i] = pval
     return pd.DataFrame(tab, index=groups, columns=groups)
 
 
@@ -141,10 +151,7 @@ def chi2_contingency(series1: pd.Series, series2: pd.Series, retbins: bool = Fal
         s1_binning.bins_values = bins
         s2_binning.bins_values = bins
     else:
-        if series1.size < series2.size:
-            bins = _compute_best_bins_values([series1, series2])
-        else:
-            bins = _compute_best_bins_values([series2, series1])
+        bins = _compute_best_bins_values([series1, series2])
         s1_binning = SeriesBinning(series1)
         s2_binning = SeriesBinning(series2)
         s1_binning.bins_values = bins
