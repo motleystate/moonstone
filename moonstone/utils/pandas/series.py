@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import pandas as pd
+from typing import Union
 
 from moonstone.utils.plot import (
     check_list_type
@@ -50,15 +51,33 @@ class SeriesBinning:
 
     def compute_heterogeneous_bins(self):
         """Logish bins"""
-        maximum = self.data.max()
-        magnitude = int(math.log10(maximum))
+        max = self.data.max()
+        magnitude = int(math.log10(max))
         bval = [-0.1, 1]  # to have the 0 value
         i = 0
         while i < magnitude:
             bval += list(np.arange(2*10**i, 10**(i+1)+1, 10**i))
             i += 1
         # i=magnitude
-        bval += list(np.arange(2*10**i, maximum+10**i, 10**i))  # up to maximum
+        bval += list(np.arange(2*10**i, max+10**i, 10**i))  # up to maximum
+        return bval
+
+    def compute_homogeneous_bins(self, min: Union[int, float] = 0, max: Union[int, float] = 'data.max()',
+                                 nb_bins: int = None):
+        """
+        :param min: lower edge of bins.
+        :param max: higher edge of bins (default is the dataframe's maximum).
+        :param nb_bins: number of bins.
+        """
+        if max == 'data.max()':
+            max = self.data.max()
+        bval = [min - 0.001]  # to have the minimum value
+        if nb_bins is None:
+            magnitude = int(math.log10(max))
+            step = 10**magnitude
+        else:
+            step = (max - min)/nb_bins
+        bval += list(np.arange(min+step, max+step, step))
         return bval
 
     @property
@@ -67,7 +86,10 @@ class SeriesBinning:
         retrieves bins_values, and compute it if no values given
         """
         if getattr(self, '_bins_values', None) is None:
-            self.bins_values = self.compute_heterogeneous_bins()
+            if getattr(self, 'heterogeneous', None):
+                self.bins_values = self.compute_heterogeneous_bins()
+            else:
+                self.bins_values = self.compute_homogeneous_bins()
         return self._bins_values
 
     @bins_values.setter
@@ -77,18 +99,30 @@ class SeriesBinning:
         else:
             raise ValueError("Error : expecting list of numerical values (int, float) in bins_values.")
 
-    def compute_binned_data(self, normalize: bool = False):
-        binned_df = pd.cut(self.data, bins=self.bins_values)   # put every items in the appropriate bin
+    def compute_binned_data(self, normalize: bool = False, heterogeneous: bool = False):
+        """
+        :param heterogeneous: set to True, if you wish for heterogenous bins
+        """
+        self.heterogeneous = heterogeneous
+
+        if getattr(self, 'nb_bins', None) is not None:
+            binned_df, bins_values = pd.cut(self.data, bins=self.nb_bins, retbins=True)
+            self.bins_values = list(bins_values)
+        else:
+            binned_df = pd.cut(self.data, bins=self.bins_values)   # put every items in the appropriate bin
         data = pd.value_counts(binned_df, normalize=normalize)
         data = data.reindex(binned_df.cat.categories)
         new_xnames = list(data.index.astype(str))
-        new_xnames[0] = new_xnames[0].replace('(-0.1', '[0.0')
+        new_xnames[0] = new_xnames[0].replace('(-0.001', '[0.0')
         new_xnames = [new_xnames[i].replace('(', ']') for i in range(len(new_xnames))]
         data.index = new_xnames
         return data
 
     @property
-    def binned_data(self):
+    def binned_data(self, normalize: bool = False, heterogeneous: bool = False):
+        """
+        :param heterogeneous: set to True, if you wish for heterogenous bins
+        """
         if getattr(self, '_binned_data', None) is None:
-            self._binned_data = self.compute_binned_data()
+            self._binned_data = self.compute_binned_data(normalize, heterogeneous)
         return self._binned_data

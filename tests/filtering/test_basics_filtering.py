@@ -217,7 +217,7 @@ class TestByPercentageNaNFiltering(TestCase):
                 'specie_3': [0, 7, 5, 0]
             },
             orient='index', columns=['1', '2', '3', '4'])
-        expected_df.columns.name = 'sample'        
+        expected_df.columns.name = 'sample'
         tested_filtering = NaNPercentageFiltering(self.test_df, percentage=25, axis=0)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
 
@@ -227,12 +227,12 @@ class TestByPercentageNaNFiltering(TestCase):
                 'specie_3': [0, 7, 5, 0]
             },
             orient='index', columns=['1', '2', '3', '4'])
-        expected_df.columns.name = 'sample'        
+        expected_df.columns.name = 'sample'
         tested_filtering = NaNPercentageFiltering(self.test_df, percentage=0, axis=0)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
 
     def test_filter_rows_100_nan(self):
-        expected_df = self.test_df        
+        expected_df = self.test_df
         tested_filtering = NaNPercentageFiltering(self.test_df, percentage=100, axis=0)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df, check_dtype=False)
 

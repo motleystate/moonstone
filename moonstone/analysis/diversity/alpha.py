@@ -6,6 +6,9 @@ from typing import Union, Optional
 import pandas as pd
 import skbio
 
+from moonstone.analysis.statistical_test import (              # noqa
+    statistical_test_groups_comparison
+)
 from moonstone.core.module_base import BaseModule, BaseDF
 from moonstone.plot.graphs.box import GroupBoxGraph, BoxGraph
 from moonstone.plot.graphs.histogram import Histogram
@@ -158,6 +161,19 @@ class AlphaDiversity(BaseModule, BaseDF, ABC):
             colors=colors,
             groups=groups,
         )
+
+    def compare_groups(
+        self, metadata_df: pd.DataFrame, group_col: str, stat_test: str = 'mann_whitney_u',
+        plotting_options: dict = None,
+        show_visualization: Optional[bool] = False, output_visualization_file: Optional[str] = False
+    ):
+        self.stat_test_group_matrix = statistical_test_groups_comparison(
+            self.alpha_diversity_indexes, metadata_df[group_col], stat_test=stat_test
+            )
+        if show_visualization or output_visualization_file:
+            self.visualize_groups(metadata_df, group_col, plotting_options=plotting_options,
+                                  show=show_visualization, output_file=output_visualization_file)
+        return self.stat_test_group_matrix
 
 
 class ShannonIndex(AlphaDiversity):
