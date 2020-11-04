@@ -119,20 +119,15 @@ class DownsizeDir:
         file_info_dict = {k: v for result in results for k, v in result.items()}
 
         list_to_downsize = pair_up(file_info_dict)
-        b = {}
+        f = []
         for k in range(len(list_to_downsize)//2):  # number of files divided by 2: one instance per pair
-            b = {'raw_file_f': list_to_downsize[k * 2],
-                 'raw_file_r': list_to_downsize[k * 2 + 1],
-                 'read_info': file_info_dict[list_to_downsize[k * 2]],
-                 'in_dir': self.in_dir, 'out_dir': self.out_dir, 'n': self.downsize_to
-                 }
-            instance = DownsizePair(**b)
-            if file_info_dict[list_to_downsize[k*2]][3] == 'Uncompressed/FASTQ':
-                logger.info(f'{list_to_downsize[k*2]} run uncompressed')
-                instance.downsize_pair()
+            f.append({'raw_file_f': list_to_downsize[k * 2],
+                      'raw_file_r': list_to_downsize[k * 2 + 1],
+                      'read_info': file_info_dict[list_to_downsize[k * 2]],
+                      'in_dir': self.in_dir, 'out_dir': self.out_dir, 'n': self.downsize_to
+                      })
+        for f in f:
+            logging.info(f'Downsizing parameters passed: {f}')
+            instance = DownsizePair(**f)
 
-            if file_info_dict[list_to_downsize[k*2]][3] == 'application/gzip':
-                logger.info(f'{list_to_downsize[k*2]} run gzip')
-                instance.downsize_pair_gzip()
-        print(b)
         logger.info('Done!')
