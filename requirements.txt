@@ -23,7 +23,7 @@ matplotlib==3.3.0         # via moonstone (setup.py), scikit-bio
 msgpack==1.0.0            # via cachecontrol
 natsort==7.0.1            # via scikit-bio
 numpy==1.18.1             # via hdmedians, matplotlib, moonstone (setup.py), pandas, patsy, scikit-bio, scikit-learn, scipy, statsmodels
-pandas~=0.25.3
+pandas==1.0.1             # via moonstone (setup.py), scikit-bio, statsmodels
 parso==0.7.1              # via jedi
 patsy==0.5.1              # via statsmodels
 pexpect==4.8.0            # via ipython
