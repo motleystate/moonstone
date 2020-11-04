@@ -82,6 +82,8 @@ List
 
     basics_filtering.NoCountsFiltering
     basics_filtering.NamesFiltering
+    basics_filtering.NaNPercentageFiltering
+    basics_filtering.NumberOfDifferentValuesFiltering
     taxonomy_filtering.TaxonomyNamesFiltering
     mean_filtering.MeanFiltering
 

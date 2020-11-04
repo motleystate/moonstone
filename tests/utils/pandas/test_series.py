@@ -74,6 +74,19 @@ class TestSeriesStatsBuilder(TestCase):
 
 class TestSeriesBinning(TestCase):
 
+    def test_compute_homoogeneous_bins(self):
+        tested_object = pd.Series(
+            {
+                'gene_1': 10.5,
+                'gene_2': 5.9,
+                'gene_3': 9,
+            })
+        tested_object.name = 'mean read count'
+        tested_object_instance = SeriesBinning(tested_object)
+        tested_object_instance.bins_values     # call compute_homogeneous_bins()
+        expected_object = [-0.001, 10, 20]
+        self.assertListEqual(tested_object_instance.bins_values, expected_object)
+
     def test_compute_heterogeneous_bins(self):
         tested_object = pd.Series(
             {
@@ -83,6 +96,7 @@ class TestSeriesBinning(TestCase):
             })
         tested_object.name = 'mean read count'
         tested_object_instance = SeriesBinning(tested_object)
+        tested_object_instance.heterogeneous = True
         tested_object_instance.bins_values     # call compute_heterogeneous_bins()
         expected_object = [-0.1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20.0]
         self.assertListEqual(tested_object_instance.bins_values, expected_object)

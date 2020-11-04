@@ -8,12 +8,12 @@ from typing import Optional
 from moonstone.analysis.stats import (
     FilteringStats
 )
-from moonstone.filtering.base import BaseFiltering
+from moonstone.filtering.base import CountsFiltering
 
 logger = logging.getLogger(__name__)
 
 
-class MeanFiltering(BaseFiltering):
+class MeanFiltering(CountsFiltering):
     """
     Remove items with a mean read count below a given threshold.
 
