@@ -25,30 +25,49 @@ class DownsizePair(BaseDownsizing):
         self.seed = seed
         self.in_dir = in_dir
         self.out_dir = out_dir
-        self.read_info = read_info  # Contains [header, F/R, Number of reads, format]
+        self.read_info = read_info  # If provided, contains [header, F/R, Number of reads, format]
         # e.g. ['@A00709:44:HYG57DSXX:2:1101:10737:1266', '1', 100257, 'Uncompressed/FASTQ']
+        self.records = None
+        self.file_type = None
+        self._file_type = False  # In case no info is provided this remains false
 
         if self.raw_file_f == self.raw_file_r:
             logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
+
+        if read_info:
+            self.records = read_info[2]
+            self.file_type = read_info[3]
+            self._file_type = True  # If file type has been provided.
+
+    @property
+    def find_file_type(self):
+        """Simple function to determine the filetype. This is generally uncompressed FASTQ or GZipped compressed.
+        If the filetype is provided, that that value is returned.
+        """
+        if self._file_type:
+            return self.file_type
+        else:
+            self.file_type = filetype.guess(self.raw_file_f).mime
+            #  Uncompressed yields NONE, while gzip yields 'application/gzip'
+            self._file_type = True
+            logger.info('File type for %s and its pair is %s' % (self.raw_file_f, self.file_type))
+            return self.file_type
 
     def count_starting_reads(self):
         """The function first checks to see if the starting_reads variable has already been set. If not, the filetype
          is determined and then the appropriate means of opening the file applied. Read # is determined by counting
          lines and dividing by 4, as per the FASTQ format. In all cases, the number of starting reads is returned.
         """
-        if self.read_info:
-            records = self.read_info[2]
-        else:
-            file_type = filetype.guess(self.raw_file_f).mime
-            if not file_type:  # unrecognized format, e.g. fastq generates 'None' for this variable
-                records: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
-            if filetype.guess(self.raw_file_f).mime == 'application/gzip':
-                records: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
+        if not self.file_type:  # unrecognized format, e.g. fastq generates 'None' for this variable
+            records: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
+
+        if filetype.guess(self.raw_file_f).mime == 'application/gzip':
+            records: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
 
         logger.info('Found %i reads' % records)
         return records
 
-    def downsize_pair(self):
+    def downsize_pair_uncompressed(self):
         """Selects a pseudo-random list of reads from the sequence file and returns the downsized file in the
         same format. The seed for generating the list of reads to select is set during instantiation.
         """
@@ -137,3 +156,8 @@ class DownsizePair(BaseDownsizing):
 
     def downsize_single(self):
         pass
+
+    def downsize_pair(self):
+        self.find_file_type()
+
+
