@@ -6,6 +6,7 @@ from typing import Union
 
 import pandas as pd
 
+from moonstone.analysis.statistical_test import statistical_test_groups_comparison
 from moonstone.core.module_base import BaseModule, BaseDF
 from moonstone.filtering.basics_filtering import NamesFiltering
 from moonstone.plot.graphs.box import GroupBoxGraph, BoxGraph
@@ -18,6 +19,8 @@ logger = logging.getLogger(__name__)
 class DiversityBase(BaseModule, BaseDF, ABC):
     DIVERSITY_INDEXES_NAME = "index"
     DEF_TITLE = "(index diversity) distribution across the samples"
+    AVAILABLE_GROUP_VIZ = ['violin', 'boxplot']
+    DEF_GROUP_VIZ = "boxplot"
 
     def __init__(self, dataframe: Union[pd.Series, pd.DataFrame]):
         """
@@ -121,12 +124,40 @@ class DiversityBase(BaseModule, BaseDF, ABC):
     def _get_filtered_df_from_metadata(self, metadata_df):
         return NamesFiltering(metadata_df, list(self.df.columns)).filtered_df
 
+    def _make_graph(
+        self, df, mode: str, group_col: str, plotting_options: dict, log_scale: bool,
+        show: bool, output_file: str, colors: dict, groups: list, **kwargs
+    ):
+        if mode not in self.AVAILABLE_GROUP_VIZ:
+            logger.warning("%s not a available mode, set to default (histogram)", mode)
+            mode = self.DEF_GROUP_VIZ
+
+        title = self._get_default_title()
+        xlabel = f"{group_col}"
+        ylabel = f"{self.index_name.capitalize()}"
+        plotting_options = self._handle_plotting_options(
+            plotting_options, title, xlabel, ylabel, log_scale
+        )
+        if mode == "violin":
+            graph = GroupViolinGraph(df)
+        elif mode == "boxplot":
+            graph = GroupBoxGraph(df)
+        graph.plot_one_graph(
+            self.DIVERSITY_INDEXES_NAME, group_col,
+            plotting_options=plotting_options,
+            show=show,
+            output_file=output_file,
+            colors=colors,
+            groups=groups,
+            **kwargs
+        )
+
     def analyse_groups(
         self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
         log_scale: bool = False, colors: dict = None, groups: list = None,
         show: bool = True, output_file: str = False, make_graph: bool = True,
-        plotting_options: dict = None, **kwargs
-    ) -> pd.DataFrame:
+        stats_test: str = "mann_whitney_u", plotting_options: dict = None, **kwargs
+    ) -> dict:
         """
         :param metadata_df: dataframe containing metadata and information to group the data
         :param group_col: column from metadata_df used to group the data
@@ -140,31 +171,18 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
         df = self._get_grouped_df(filtered_metadata_df[group_col])
+        pval = statistical_test_groups_comparison(
+            df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test
+        )
 
         if make_graph:
-            if mode not in ['violin', 'boxplot']:
-                logger.warning("%s not a available mode, set to default (histogram)", mode)
-                mode = "boxplot"
-
-            title = self._get_default_title()
-            xlabel = f"{group_col}"
-            ylabel = f"{self.index_name.capitalize()}"
-            plotting_options = self._handle_plotting_options(
-                plotting_options, title, xlabel, ylabel, log_scale
-            )
-            if mode == "violin":
-                graph = GroupViolinGraph(df)
-            elif mode == "boxplot":
-                graph = GroupBoxGraph(df)
-            graph.plot_one_graph(
-                self.DIVERSITY_INDEXES_NAME, group_col,
-                plotting_options=plotting_options,
-                show=show,
-                output_file=output_file,
-                colors=colors,
-                groups=groups,
-                **kwargs
+            self._make_graph(
+                df, mode, group_col, plotting_options, log_scale, show, output_file,
+                colors, groups, **kwargs
             )
 
         self.last_grouped_df = df
-        return df
+        return {
+            'data': df,
+            'pval': pval
+        }

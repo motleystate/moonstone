@@ -36,7 +36,7 @@ class TestShannonIndex(TestCase):
         tested_object_instance = ShannonIndex(self.tested_object)
         tested_object_instance.visualize(show=False)
 
-    def test_compare_groups(self):
+    def test_analyse_groups(self):
         tested_object_instance = ShannonIndex(self.tested_object)
         metadata_df = pd.DataFrame(
             [
@@ -58,8 +58,8 @@ class TestShannonIndex(TestCase):
             index=[1, 2]
         )
 
-        matrix = tested_object_instance.compare_groups(metadata_df, 'group', show_visualization=False)
-        pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
+        output = tested_object_instance.analyse_groups(metadata_df, 'group', make_graph=False)
+        pd.testing.assert_frame_equal(output['pval'], expected_df, check_dtype=False)
 
 
 class TestSimpsonInverseIndex(TestCase):

@@ -75,8 +75,8 @@ class TestBrayCurtis(TestCase):
             },
             orient='index', columns=['beta_index', 'sex']
         )
-        output_df = tested_object_instance.analyse_groups(metadata_df, 'sex', show=False)
+        output = tested_object_instance.analyse_groups(metadata_df, 'sex', show=False)
         pd.testing.assert_frame_equal(
-            output_df, expected_object,
+            output['data'], expected_object,
             check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
