@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def _preprocess_groups_compatison(series: pd.Series, group_series: pd.Series, stat_test: str):
+def _preprocess_groups_comparison(series: pd.Series, group_series: pd.Series, stat_test: str):
     groups = list(group_series.unique())
     groups.sort()
 
@@ -34,9 +34,10 @@ def _preprocess_groups_compatison(series: pd.Series, group_series: pd.Series, st
 
 
 def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Series, stat_test: str,
-                                       output: str = 'dataframe', mirror: str = True, **kwargs):
+                                       output: str = 'dataframe', sym: str = True, **kwargs):
     """
     :param output: {'series', 'dataframe'}
+    :param mirror: whether generated dataframe (matrix) (or MultiIndexed series) is symetric or half-full
 
     In kwargs, you can pass argument for statistical test, like :
     :param equal_var: For ttest_ind, set to True if your samples have the same variance and
@@ -51,7 +52,7 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
         raise NotImplementedError("Method %s not implemented" % stat_test)
 
     # split dataframe by group + warn and/or drop groups not respecting minimum number of observations
-    groups, list_of_series = _preprocess_groups_compatison(series, group_series, stat_test)
+    groups, list_of_series = _preprocess_groups_comparison(series, group_series, stat_test)
 
     # if no bins defined, compute automatically bins that will be used to bin every series of group
     if stat_test == 'chi2_contingency' and 'bins' not in kwargs.keys():
@@ -70,7 +71,7 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
                     pval = chi2_contingency(list_of_series[i], list_of_series[j], **kwargs)[1]
 
                 dic_df[(groups[i], groups[j])] = pval
-                if mirror:
+                if sym:
                     dic_df[(groups[j], groups[i])] = pval
         pvalue_df = pd.Series(dic_df)
         pvalue_df.index = pd.MultiIndex.from_tuples(pvalue_df.index, names=['Group', 'Group'])
@@ -88,7 +89,7 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
                 pval = chi2_contingency(list_of_series[i], list_of_series[j], **kwargs)[1]
 
             tab[i][j] = pval
-            if mirror:
+            if sym:
                 tab[j][i] = pval
     return pd.DataFrame(tab, index=groups, columns=groups)
 
@@ -161,17 +162,13 @@ def chi2_contingency(series1: pd.Series, series2: pd.Series, retbins: bool = Fal
         Another statistical test would be more appropriate to compare the 2 groups.")
         return (np.nan, np.nan)
 
-    if bins is not None:
-        s1_binning = SeriesBinning(series1)
-        s2_binning = SeriesBinning(series2)
-        s1_binning.bins_values = bins
-        s2_binning.bins_values = bins
-    else:
+    if bins is None:
         bins = _compute_best_bins_values([series1, series2])
-        s1_binning = SeriesBinning(series1)
-        s2_binning = SeriesBinning(series2)
-        s1_binning.bins_values = bins
-        s2_binning.bins_values = bins
+
+    s1_binning = SeriesBinning(series1)
+    s2_binning = SeriesBinning(series2)
+    s1_binning.bins_values = bins
+    s2_binning.bins_values = bins
 
     merged_df = pd.concat([
         s1_binning.binned_data,
