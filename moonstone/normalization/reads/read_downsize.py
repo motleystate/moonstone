@@ -27,15 +27,17 @@ class DownsizePair(BaseDownsizing):
         self.out_dir = out_dir
         self.read_info = read_info  # If provided, contains [header, F/R, Number of reads, format]
         # e.g. ['@A00709:44:HYG57DSXX:2:1101:10737:1266', '1', 100257, 'Uncompressed/FASTQ']
-        self.records = None
+        self.starting_reads = None
         self.file_type = None
         self._file_type = False  # In case no info is provided this remains false
+        self._starting_reads = False
 
         if self.raw_file_f == self.raw_file_r:
             logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
 
         if read_info:
-            self.records = read_info[2]
+            self.starting_reads = read_info[2]
+            self._starting_reads = True
             self.file_type = read_info[3]
             self._file_type = True  # If file type has been provided.
 
@@ -53,19 +55,27 @@ class DownsizePair(BaseDownsizing):
             logger.info('File type for %s and its pair is %s' % (self.raw_file_f, self.file_type))
             return self.file_type
 
+    @property
     def count_starting_reads(self):
         """The function first checks to see if the starting_reads variable has already been set. If not, the filetype
          is determined and then the appropriate means of opening the file applied. Read # is determined by counting
          lines and dividing by 4, as per the FASTQ format. In all cases, the number of starting reads is returned.
         """
-        if not self.file_type:  # unrecognized format, e.g. fastq generates 'None' for this variable
-            records: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
+        if self._starting_reads:
+            return self.starting_reads
+        else:
+            if not self._file_type:
+                self.find_file_type()
 
-        if filetype.guess(self.raw_file_f).mime == 'application/gzip':
-            records: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
+            if not self.file_type:  # unrecognized format, e.g. fastq generates 'None' for this variable
+                self.starting_reads: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
 
-        logger.info('Found %i reads' % records)
-        return records
+            if filetype.guess(self.raw_file_f).mime == 'application/gzip':
+                self.starting_reads: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
+
+            logger.info('Found %i reads' % self.starting_reads)
+            self._starting_reads = True
+            return self.starting_reads
 
     def downsize_pair_uncompressed(self):
         """Selects a pseudo-random list of reads from the sequence file and returns the downsized file in the
@@ -73,8 +83,10 @@ class DownsizePair(BaseDownsizing):
         """
         random.seed(self.seed)
 
-        records = self.count_starting_reads()
-        rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
+        if not self._starting_reads:
+            self.starting_reads = self.count_starting_reads()
+
+        rand_reads: list = sorted([random.randint(0, self.starting_reads - 1) for _ in range(self.downsize_to)])
 
         forward_reads = open(self.in_dir + self.raw_file_f, 'r')
         reverse_reads = open(self.in_dir + self.raw_file_r, 'r')
@@ -117,8 +129,10 @@ class DownsizePair(BaseDownsizing):
         same compression"""
         random.seed(self.seed)
 
-        records = self.count_starting_reads()
-        rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
+        if not self._starting_reads:
+            self.starting_reads = self.count_starting_reads()
+
+        rand_reads: list = sorted([random.randint(0, self.starting_reads - 1) for _ in range(self.downsize_to)])
 
         forward_reads = gzip.open(self.in_dir + self.raw_file_f, 'rb')
         reverse_reads = gzip.open(self.in_dir + self.raw_file_r, 'rb')
@@ -159,5 +173,12 @@ class DownsizePair(BaseDownsizing):
 
     def downsize_pair(self):
         self.find_file_type()
+        self.count_starting_reads()
 
+        if not self.file_type:
+            logging.info('Running uncompressed downsizing')
+            self.downsize_pair_uncompressed()
+        if self.file_type == 'application/gzip':
+            logger.info('Running gzip downsizing')
+            self.downsized_pair_gzip
 
