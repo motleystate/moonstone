@@ -51,6 +51,8 @@ class DownsizePair(BaseDownsizing):
         else:
             self.file_type = filetype.guess(self.raw_file_f).mime
             #  Uncompressed yields NONE, while gzip yields 'application/gzip'
+            if not self.file_type:
+                self.file_type = 'Uncompressed/FASTQ'  # Assumed here, but could add more checks for real FASTQ.
             self._file_type = True
             logger.info('File type for %s and its pair is %s' % (self.raw_file_f, self.file_type))
             return self.file_type
@@ -67,10 +69,10 @@ class DownsizePair(BaseDownsizing):
             if not self._file_type:
                 self.find_file_type()
 
-            if not self.file_type:  # unrecognized format, e.g. fastq generates 'None' for this variable
+            if self.file_type == 'Uncompressed/FASTQ':
                 self.starting_reads: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
 
-            if filetype.guess(self.raw_file_f).mime == 'application/gzip':
+            if self.file_type == 'application/gzip':
                 self.starting_reads: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
 
             logger.info('Found %i reads' % self.starting_reads)
@@ -172,13 +174,13 @@ class DownsizePair(BaseDownsizing):
         pass
 
     def downsize_pair(self):
-        self.find_file_type()
-        self.count_starting_reads()
+        self.find_file_type
+        self.count_starting_reads
 
-        if not self.file_type:
+        if self.file_type == 'Uncompressed/FASTQ':
             logging.info('Running uncompressed downsizing')
             self.downsize_pair_uncompressed()
         if self.file_type == 'application/gzip':
             logger.info('Running gzip downsizing')
-            self.downsized_pair_gzip
+            self.downsize_pair_gzip()
 
