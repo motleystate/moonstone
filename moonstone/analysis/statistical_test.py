@@ -7,6 +7,7 @@ from moonstone.utils.pandas.series import SeriesBinning
 
 import logging
 logger = logging.getLogger(__name__)
+DEFAULT_STATS_TEST = "mann_whitney_u"
 
 
 def _preprocess_groups_comparison(series: pd.Series, group_series: pd.Series, stat_test: str):
@@ -49,7 +50,9 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
 
     method = ['mann_whitney_u', 'ttest_independence', 'chi2_contingency']
     if stat_test not in method:
-        raise NotImplementedError("Method %s not implemented" % stat_test)
+        logger.warning("%s not a available mode, set to default (%s)", stat_test, DEFAULT_STATS_TEST)
+        stat_test = DEFAULT_STATS_TEST
+        # raise NotImplementedError("Method %s not implemented" % stat_test)
 
     # split dataframe by group + warn and/or drop groups not respecting minimum number of observations
     groups, list_of_series = _preprocess_groups_comparison(series, group_series, stat_test)

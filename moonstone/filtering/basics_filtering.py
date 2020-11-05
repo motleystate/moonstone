@@ -40,9 +40,9 @@ class NamesFiltering(BothAxisFiltering):
 
     def _log_action(self):
         if self.keep:
-            logger.info(f"Selecting {self.names} from dataframe...")
+            logger.debug(f"Selecting {self.names} from dataframe...")
         else:
-            logger.info(f"Removing {self.names} from dataframe...")
+            logger.debug(f"Removing {self.names} from dataframe...")
 
     def _validate_parameters(self):
         if isinstance(self.df.index, pd.MultiIndex):

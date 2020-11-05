@@ -28,16 +28,15 @@ class TestShannonIndex(TestCase):
             'sample4': -0.000000,
             'sample5': 1.992778
         })
-
         tested_object_instance = ShannonIndex(self.tested_object)
-        pd.testing.assert_series_equal(tested_object_instance.compute_alpha_diversity(), expected_object)
+        pd.testing.assert_series_equal(tested_object_instance.compute_diversity(), expected_object)
 
     def test_visualize(self):
         # Not real test but make sure that visualize() runs without errors
         tested_object_instance = ShannonIndex(self.tested_object)
         tested_object_instance.visualize(show=False)
 
-    def test_compare_groups(self):
+    def test_analyse_groups(self):
         tested_object_instance = ShannonIndex(self.tested_object)
         metadata_df = pd.DataFrame(
             [
@@ -59,8 +58,8 @@ class TestShannonIndex(TestCase):
             index=[1, 2]
         )
 
-        matrix = tested_object_instance.compare_groups(metadata_df, 'group', show_visualization=False)
-        pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
+        output = tested_object_instance.analyse_groups(metadata_df, 'group', make_graph=False)
+        pd.testing.assert_frame_equal(output['pval'], expected_df, check_dtype=False)
 
 
 class TestSimpsonInverseIndex(TestCase):
@@ -83,7 +82,7 @@ class TestSimpsonInverseIndex(TestCase):
             'sample4': 1.000000,
             'sample5': 3.958904
         })
-        pd.testing.assert_series_equal(tested_object_instance.compute_alpha_diversity(), expected_object)
+        pd.testing.assert_series_equal(tested_object_instance.compute_diversity(), expected_object)
 
     def test_visualize(self):
         # Not real test but make sure that visualize() runs without errors
