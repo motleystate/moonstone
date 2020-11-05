@@ -119,15 +119,21 @@ class DownsizeDir:
         file_info_dict = {k: v for result in results for k, v in result.items()}
 
         list_to_downsize = pair_up(file_info_dict)
-        f = []
+
+        worker_parameters = []
         for k in range(len(list_to_downsize)//2):  # number of files divided by 2: one instance per pair
-            f.append({'raw_file_f': list_to_downsize[k * 2],
-                      'raw_file_r': list_to_downsize[k * 2 + 1],
-                      'read_info': file_info_dict[list_to_downsize[k * 2]],
-                      'in_dir': self.in_dir, 'out_dir': self.out_dir, 'n': self.downsize_to
-                      })
-        for f in f:
-            logging.info(f'Downsizing parameters passed: {f}')
-            instance = DownsizePair(**f)
+            worker_parameters.append({'raw_file_f': list_to_downsize[k * 2],
+                                      'raw_file_r': list_to_downsize[k * 2 + 1],
+                                      'read_info': file_info_dict[list_to_downsize[k * 2]],
+                                      'in_dir': self.in_dir, 'out_dir': self.out_dir, 'n': self.downsize_to
+                                      })
+
+        with mp.Pool(processes=self.processes) as pool:
+            check = pool.map(self.instantiate, worker_parameters, chunksize=1)
 
         logger.info('Done!')
+
+    def instantiate(self, wp):
+        logger.info('Instantiating with parameters: %s' % wp)
+        instance = DownsizePair(**wp)
+        instance.downsize_pair()
