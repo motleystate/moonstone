@@ -28,7 +28,6 @@ class MeanFiltering(CountsFiltering):
                                    overridden if threshold is set
         """
         super().__init__(dataframe)
-        self.raw_reads_number = self.df.sum().sum()
         self.threshold = threshold
         if threshold is None:
             self.percentage_to_keep = percentage_to_keep
