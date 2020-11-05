@@ -184,5 +184,8 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         self.last_grouped_df = df
         return {
             'data': df,
-            'pval': pval
+            'pval': pval,
+            'meta': {
+                'stats_test': stats_test
+            }
         }
