@@ -1,5 +1,6 @@
 from .bargraph import BarGraph  # noqa
 from .box import BoxGraph, GroupBoxGraph  # noqa
+from .heatmap import HeatmapGraph  # noqa
 from .histogram import Histogram  # noqa
 from .scatter import (  # noqa
     ScatterGraph, GroupScatterGraph,
