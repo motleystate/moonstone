@@ -5,6 +5,7 @@ from string import capwords
 from typing import Union
 
 import pandas as pd
+from statsmodels.stats.multitest import multipletests
 
 from moonstone.analysis.statistical_test import statistical_test_groups_comparison
 from moonstone.core.module_base import BaseModule, BaseDF
@@ -156,7 +157,10 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
         log_scale: bool = False, colors: dict = None, groups: list = None,
         show: bool = True, output_file: str = False, make_graph: bool = True,
-        stats_test: str = "mann_whitney_u", plotting_options: dict = None, **kwargs
+        plotting_options: dict = None,
+        stats_test: str = 'mann_whitney_u', correction_method: str = None,
+        output_pvalue: str = 'series', sym: bool = False,
+        **kwargs
     ) -> dict:
         """
         :param metadata_df: dataframe containing metadata and information to group the data
@@ -168,12 +172,37 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         :param output_file: file path to output your html graph
         :param make_graph: whether or not to make the graph
         :param plotting_options: plotly plotting_options
+        :param stats_test: {'mann_whitney_u', 'ttest_independence', 'chi2_contingency'} statistical test
+        used to calculate the p-values between each groups
+        :param correction_method: {None, 'fdr_bh' (benjamini-hochberg), 'bonferoni'} method used (if any)
+        to correct generated p-values
+        :param output_pvalue: {'series', 'dataframe'}
+        :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
         df = self._get_grouped_df(filtered_metadata_df[group_col])
-        pval = statistical_test_groups_comparison(
-            df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test
-        )
+
+        if correction_method is not None:
+            pval = statistical_test_groups_comparison(
+                df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                output='series', sym=False
+            )
+            corrected_pval = pd.Series(multipletests(pval, alpha=0.05, method=correction_method)[1])
+            corrected_pval.index = pval.index   # postulate that the order hasn't changed
+            pval = corrected_pval
+
+            # remodelling of p-values output
+            if sym:
+                pval = pd.concat([pval, pval.reorder_levels([1, 0])])
+            if output_pvalue == 'dataframe':
+                pval = pval.unstack(level=1)
+                pval.columns.name = ''
+                pval.index.name = ''
+        else:
+            pval = statistical_test_groups_comparison(
+                df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                output=output_pvalue, sym=sym
+            )
 
         if make_graph:
             self._make_graph(

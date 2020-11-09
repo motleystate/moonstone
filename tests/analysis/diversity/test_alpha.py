@@ -58,7 +58,8 @@ class TestShannonIndex(TestCase):
             index=[1, 2]
         )
 
-        output = tested_object_instance.analyse_groups(metadata_df, 'group', make_graph=False)
+        output = tested_object_instance.analyse_groups(metadata_df, 'group', make_graph=False,
+                                                       output_pvalue='dataframe', sym=True)
         pd.testing.assert_frame_equal(output['pval'], expected_df, check_dtype=False)
 
 

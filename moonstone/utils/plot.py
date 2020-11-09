@@ -13,6 +13,8 @@ def add_x_to_plotting_options(plotting_options: dict, option_cat: str, x: str, d
     don't override given plotting_options, meaning it only add the default value
     if value not already defined in plotting_options
     """
+    if plotting_options is None:
+        plotting_options = {}
     if option_cat not in plotting_options.keys():
         plotting_options[option_cat] = {x: defaultvalue}
         return plotting_options
@@ -24,8 +26,6 @@ def add_x_to_plotting_options(plotting_options: dict, option_cat: str, x: str, d
 
 
 def add_default_titles_to_plotting_options(plotting_options: dict, title: str, xlabel: str, ylabel: str):
-    if plotting_options is None:
-        plotting_options = {}
     plotting_options = add_x_to_plotting_options(plotting_options, 'layout', 'title_text', title)
     plotting_options = add_x_to_plotting_options(plotting_options, 'layout', 'title_x', 0.5)
     plotting_options = add_x_to_plotting_options(plotting_options, 'xaxes', 'title_text', xlabel)
