@@ -156,19 +156,24 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             **kwargs
         )
 
-    def _visualize_pvalue_matrix(self, pval: pd.DataFrame):
+    def _visualize_pvalue_matrix(self, pval: pd.DataFrame, output_pval_file: str):
         graph = HeatmapGraph(pval)
         plotting_options = {
             'layout': {
                 'title': 'Heatmap visualization of p-values',
             }
         }
-        graph.plot_one_graph(colorscale=self.DEF_PVAL_COLORSCALE, plotting_options=plotting_options)
+        graph.plot_one_graph(
+            colorscale=self.DEF_PVAL_COLORSCALE,
+            plotting_options=plotting_options,
+            output_file=output_pval_file
+        )
 
     def analyse_groups(
         self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
         log_scale: bool = False, colors: dict = None, groups: list = None,
-        show: bool = True, show_pval: bool = True, output_file: str = False, make_graph: bool = True,
+        show: bool = True, output_file: str = False, make_graph: bool = True,
+        show_pval: bool = True, output_pval_file: str = False,
         stats_test: str = "mann_whitney_u", plotting_options: dict = None, **kwargs
     ) -> dict:
         """
@@ -195,7 +200,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 colors, groups, **kwargs
             )
             if show_pval:
-                self._visualize_pvalue_matrix(pval)
+                self._visualize_pvalue_matrix(pval, output_pval_file)
 
         self.last_grouped_df = df
         return {
