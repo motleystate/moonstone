@@ -10,6 +10,7 @@ from moonstone.analysis.statistical_test import statistical_test_groups_comparis
 from moonstone.core.module_base import BaseModule, BaseDF
 from moonstone.filtering.basics_filtering import NamesFiltering
 from moonstone.plot.graphs.box import GroupBoxGraph, BoxGraph
+from moonstone.plot.graphs.heatmap import HeatmapGraph
 from moonstone.plot.graphs.histogram import Histogram
 from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
 
@@ -21,6 +22,9 @@ class DiversityBase(BaseModule, BaseDF, ABC):
     DEF_TITLE = "(index diversity) distribution across the samples"
     AVAILABLE_GROUP_VIZ = ['violin', 'boxplot']
     DEF_GROUP_VIZ = "boxplot"
+    DEF_PVAL_COLORSCALE = [
+        [0, '#FFFF00'], [0.001, '#f5962a'], [0.05, '#FF0000'], [0.050001, '#000055'], [1, '#000000']
+    ]
 
     def __init__(self, dataframe: Union[pd.Series, pd.DataFrame]):
         """
@@ -152,10 +156,19 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             **kwargs
         )
 
+    def _visualize_pvalue_matrix(self, pval: pd.DataFrame):
+        graph = HeatmapGraph(pval)
+        plotting_options = {
+            'layout': {
+                'title': 'Heatmap visualization of p-values',
+            }
+        }
+        graph.plot_one_graph(colorscale=self.DEF_PVAL_COLORSCALE, plotting_options=plotting_options)
+
     def analyse_groups(
         self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
         log_scale: bool = False, colors: dict = None, groups: list = None,
-        show: bool = True, output_file: str = False, make_graph: bool = True,
+        show: bool = True, show_pval: bool = True, output_file: str = False, make_graph: bool = True,
         stats_test: str = "mann_whitney_u", plotting_options: dict = None, **kwargs
     ) -> dict:
         """
@@ -165,6 +178,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         :param colors: overides color for groups. format {group_id: color}
         :param groups: specifically select groups to display among group_col
         :param show: also visualize
+        :param show_pval: visualize p-values
         :param output_file: file path to output your html graph
         :param make_graph: whether or not to make the graph
         :param plotting_options: plotly plotting_options
@@ -180,6 +194,8 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 df, mode, group_col, plotting_options, log_scale, show, output_file,
                 colors, groups, **kwargs
             )
+            if show_pval:
+                self._visualize_pvalue_matrix(pval)
 
         self.last_grouped_df = df
         return {
