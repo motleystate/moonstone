@@ -106,6 +106,8 @@ class TestStatisticalTestFunction(TestCase):
         )
 
         expected_df = pd.Series({(1, 2): 0.3742593192802244, (2, 1): 0.3742593192802244})
+        expected_df.index.names = ['Group', 'Group']
+        
         matrix = statistical_test_groups_comparison(self.test_df, metadata_df['group'], stat_test='mann_whitney_u',
                                                     output='series', sym=True)
         pd.testing.assert_series_equal(matrix, expected_df, check_dtype=False)
@@ -124,6 +126,8 @@ class TestStatisticalTestFunction(TestCase):
         )
 
         expected_df = pd.Series({(1, 2): 0.3742593192802244})
+        expected_df.index.names = ['Group', 'Group']
+
         matrix = statistical_test_groups_comparison(self.test_df, metadata_df['group'], stat_test='mann_whitney_u',
                                                     output='series', sym=False)
         pd.testing.assert_series_equal(matrix, expected_df, check_dtype=False)

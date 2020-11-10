@@ -154,7 +154,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         )
 
     def _run_statistical_test_groups(
-        self, df: pd.DataFrame, group_col: str, stats_test: str, correction_method: str, 
+        self, df: pd.DataFrame, group_col: str, stats_test: str, correction_method: str,
         sym: bool, output_pvalue: str
     ):
         if correction_method is not None:
@@ -170,14 +170,15 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 corrected_pval = pd.concat([corrected_pval, corrected_pval.reorder_levels([1, 0])])
             if output_pvalue == 'dataframe':
                 corrected_pval = corrected_pval.unstack(level=1)
+                corrected_pval.index.name = None
+                corrected_pval.columns.name = None
             return corrected_pval
         else:
             pval = statistical_test_groups_comparison(
                 df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
                 output=output_pvalue, sym=sym
             )
-            return pval       
-
+            return pval
 
     def analyse_groups(
         self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
