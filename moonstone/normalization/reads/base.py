@@ -13,7 +13,7 @@ class BaseDownsizing:
         """Overridden in child classes to perform specified downsizing of fragment reads"""
         return self.raw_file_f
 
-    def downsize_pair(self):
+    def downsize_pair_uncompressed(self):
         """Overridden in child classes to perform specified downsizing of paired-ends reads"""
         return self.raw_file_f, self.raw_file_r
 
@@ -22,7 +22,7 @@ class BaseDownsizing:
         return self.raw_file_f, self.raw_file_r
 
     @property
-    def downsized_pair(self):
+    def downsized_pair_uncompressed(self):
         if getattr(self, "._downsized_f", None) is None:
             self._downsized_f, self_downsized_r = self.downsize_pair()
             self.raw_file_f = self._downsized_f

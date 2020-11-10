@@ -1,6 +1,7 @@
 import logging
 import random
 import gzip
+import filetype
 
 from moonstone.normalization.reads.base import BaseDownsizing
 
@@ -14,7 +15,7 @@ class DownsizePair(BaseDownsizing):
     https://doi.org/10.1371/journal.pcbi.1003531
     """
 
-    def __init__(self, raw_file_f, raw_file_r, in_dir='./', out_dir='./', n=1000, seed=62375):
+    def __init__(self, raw_file_f, raw_file_r, read_info=None, in_dir='./', out_dir='./', n=1000, seed=62375):
         """Paired reads assumes forward and reverse FASTQ files.
         n is the number of reads that will be randomly picked, with a default of 1000.
         A random seed is preset to 62375 to allow for reproducibility"""
@@ -24,18 +25,70 @@ class DownsizePair(BaseDownsizing):
         self.seed = seed
         self.in_dir = in_dir
         self.out_dir = out_dir
+        self.read_info = read_info  # If provided, contains [header, F/R, Number of reads, format]
+        # e.g. ['@A00709:44:HYG57DSXX:2:1101:10737:1266', '1', 100257, 'Uncompressed/FASTQ']
+        self.starting_reads = None
+        self.file_type = None
+        self._file_type = False  # In case no info is provided this remains false
+        self._starting_reads = False
 
-    def downsize_pair(self):
-        """Selects a pseudo-random list of reads from the sequence file and returns the downsized file in the
-        same format. The seed for generating the list of reads to select is set during instantiation.
-        """
         if self.raw_file_f == self.raw_file_r:
             logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
 
-        records: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
-        logger.info('Found %i reads' % records)
+        if read_info:
+            self.starting_reads = read_info[2]
+            self._starting_reads = True
+            self.file_type = read_info[3]
+            self._file_type = True  # If file type has been provided.
+
+    @property
+    def find_file_type(self):
+        """Simple function to determine the filetype. This is generally uncompressed FASTQ or GZipped compressed.
+        If the filetype is provided, that that value is returned.
+        """
+        if self._file_type:
+            return self.file_type
+        else:
+            self.file_type = filetype.guess(self.raw_file_f).mime
+            #  Uncompressed yields NONE, while gzip yields 'application/gzip'
+            if not self.file_type:
+                self.file_type = 'Uncompressed/FASTQ'  # Assumed here, but could add more checks for real FASTQ.
+            self._file_type = True
+            logger.info('File type for %s and its pair is %s' % (self.raw_file_f, self.file_type))
+            return self.file_type
+
+    @property
+    def count_starting_reads(self):
+        """The function first checks to see if the starting_reads variable has already been set. If not, the filetype
+         is determined and then the appropriate means of opening the file applied. Read # is determined by counting
+         lines and dividing by 4, as per the FASTQ format. In all cases, the number of starting reads is returned.
+        """
+        if self._starting_reads:
+            return self.starting_reads
+        else:
+            if not self._file_type:
+                self.find_file_type()
+
+            if self.file_type == 'Uncompressed/FASTQ':
+                self.starting_reads: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
+
+            if self.file_type == 'application/gzip':
+                self.starting_reads: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
+
+            logger.info('Found %i reads' % self.starting_reads)
+            self._starting_reads = True
+            return self.starting_reads
+
+    def downsize_pair_uncompressed(self):
+        """Selects a pseudo-random list of reads from the sequence file and returns the downsized file in the
+        same format. The seed for generating the list of reads to select is set during instantiation.
+        """
         random.seed(self.seed)
-        rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
+
+        if not self._starting_reads:
+            self.starting_reads = self.count_starting_reads()
+
+        rand_reads: list = sorted([random.randint(0, self.starting_reads - 1) for _ in range(self.downsize_to)])
 
         forward_reads = open(self.in_dir + self.raw_file_f, 'r')
         reverse_reads = open(self.in_dir + self.raw_file_r, 'r')
@@ -76,13 +129,12 @@ class DownsizePair(BaseDownsizing):
     def downsize_pair_gzip(self):
         """Same as 'downsize_pair' module, but made for gzip compressed files. This module returns files using the
         same compression"""
-        if self.raw_file_f == self.raw_file_r:
-            logger.error(f"Files {self.raw_file_f} and {self.raw_file_r} are the same! Expected Forward and Reverse!")
-
-        records: int = sum(1 for _ in gzip.open(self.in_dir + self.raw_file_f)) // 4
-        logger.info('Found %i reads' % records)
         random.seed(self.seed)
-        rand_reads: list = sorted([random.randint(0, records - 1) for _ in range(self.downsize_to)])
+
+        if not self._starting_reads:
+            self.starting_reads = self.count_starting_reads()
+
+        rand_reads: list = sorted([random.randint(0, self.starting_reads - 1) for _ in range(self.downsize_to)])
 
         forward_reads = gzip.open(self.in_dir + self.raw_file_f, 'rb')
         reverse_reads = gzip.open(self.in_dir + self.raw_file_r, 'rb')
@@ -120,3 +172,15 @@ class DownsizePair(BaseDownsizing):
 
     def downsize_single(self):
         pass
+
+    def downsize_pair(self):
+        self.find_file_type
+        self.count_starting_reads
+
+        if self.file_type == 'Uncompressed/FASTQ':
+            logging.info('Running uncompressed downsizing')
+            self.downsize_pair_uncompressed()
+        if self.file_type == 'application/gzip':
+            logger.info('Running gzip downsizing')
+            self.downsize_pair_gzip()
+
