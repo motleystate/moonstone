@@ -77,7 +77,7 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
                 if sym:
                     dic_df[(groups[j], groups[i])] = pval
         pvalue_df = pd.Series(dic_df)
-        pvalue_df.index = pd.MultiIndex.from_tuples(pvalue_df.index, names=['Group', 'Group'])
+        pvalue_df.index = pd.MultiIndex.from_tuples(pvalue_df.index)
         return pvalue_df
 
     tab = [[np.nan] * len(groups) for _ in range(len(groups))]

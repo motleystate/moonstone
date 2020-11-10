@@ -153,6 +153,32 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             **kwargs
         )
 
+    def _run_statistical_test_groups(
+        self, df: pd.DataFrame, group_col: str, stats_test: str, correction_method: str, 
+        sym: bool, output_pvalue: str
+    ):
+        if correction_method is not None:
+            pval = statistical_test_groups_comparison(
+                    df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                    output='series', sym=False
+                )
+            corrected_pval = pd.Series(multipletests(pval, alpha=0.05, method=correction_method)[1])
+            corrected_pval.index = pval.index   # postulate that the order hasn't changed
+
+            # remodelling of p-values output
+            if sym:
+                corrected_pval = pd.concat([corrected_pval, corrected_pval.reorder_levels([1, 0])])
+            if output_pvalue == 'dataframe':
+                corrected_pval = corrected_pval.unstack(level=1)
+            return corrected_pval
+        else:
+            pval = statistical_test_groups_comparison(
+                df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                output=output_pvalue, sym=sym
+            )
+            return pval       
+
+
     def analyse_groups(
         self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
         log_scale: bool = False, colors: dict = None, groups: list = None,
@@ -174,7 +200,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         :param plotting_options: plotly plotting_options
         :param stats_test: {'mann_whitney_u', 'ttest_independence', 'chi2_contingency'} statistical test
         used to calculate the p-values between each groups
-        :param correction_method: {None, 'fdr_bh' (benjamini-hochberg), 'bonferoni'} method used (if any)
+        :param correction_method: {None, 'fdr_bh' (benjamini-hochberg), 'bonferroni'} method used (if any)
         to correct generated p-values
         :param output_pvalue: {'series', 'dataframe'}
         :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
@@ -182,27 +208,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
         df = self._get_grouped_df(filtered_metadata_df[group_col])
 
-        if correction_method is not None:
-            pval = statistical_test_groups_comparison(
-                df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
-                output='series', sym=False
-            )
-            corrected_pval = pd.Series(multipletests(pval, alpha=0.05, method=correction_method)[1])
-            corrected_pval.index = pval.index   # postulate that the order hasn't changed
-            pval = corrected_pval
-
-            # remodelling of p-values output
-            if sym:
-                pval = pd.concat([pval, pval.reorder_levels([1, 0])])
-            if output_pvalue == 'dataframe':
-                pval = pval.unstack(level=1)
-                pval.columns.name = ''
-                pval.index.name = ''
-        else:
-            pval = statistical_test_groups_comparison(
-                df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
-                output=output_pvalue, sym=sym
-            )
+        pval = self._run_statistical_test_groups(df, group_col, stats_test, correction_method, sym, output_pvalue)
 
         if make_graph:
             self._make_graph(
