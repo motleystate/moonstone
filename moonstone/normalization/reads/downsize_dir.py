@@ -2,6 +2,7 @@ import logging
 import os
 import gzip
 import filetype
+import multiprocessing as mp
 from moonstone.normalization.reads.read_downsize import DownsizePair
 
 logger = logging.getLogger(__name__)
@@ -41,7 +42,8 @@ class DownsizeDir:
     Note that removal of data, while useful for diversity assessment, is no longer considered good practice.
     https://doi.org/10.1371/journal.pcbi.1003531
     """
-    def __init__(self, n=1000, seed=62375, in_dir='./', out_dir=''):
+    def __init__(self, n=1000, processes=1, seed=62375, in_dir='./', out_dir=''):
+        logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.in_dir = in_dir
         self.downsize_to = n
         self.seed = seed
@@ -50,8 +52,20 @@ class DownsizeDir:
             self.out_dir = out_dir
         else:
             self.out_dir = in_dir + 'downsized/'
+            logger.info('No output directory specified.\nCreating default: %s ' % self.out_dir)
+        if not os.path.exists(self.out_dir):
+            os.mkdir(self.out_dir)
+        else:
+            logger.info('Looks like %s exists.' % self.out_dir)
 
-        logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
+        if processes > mp.cpu_count():
+            logger.warning('Number of requested processes [%i] is greater that the number of system CPUs [%i]' %
+                           (processes, mp.cpu_count()))
+            self.processes = mp.cpu_count()
+            logger.info('Number of processes set to maximum number of detected CPUs [%i].' % self.processes)
+        else:
+            self.processes = processes
+            logger.info('Number of processes set to %i ' % self.processes)
 
     def detect_seq_reads(self):
         """The provided directory might contain files that are not sequence reads.
@@ -61,57 +75,65 @@ class DownsizeDir:
         logger.info(f'List of Sequencing Files Found:\n{seq_files}')
         return seq_files
 
-    def read_info(self, files):
+    def read_info(self, seq_file):
         """Gather information on the number of reads for each of the sequence reads in the given directory.
         Number of reads can be plotted or reported. Files names and headers are used to match pairs.
         Both compressed and gzipped files are accepted."""
 
         seq_files_info = {}
-        for fh in files:
-            detect_type = None
-            detect_type = filetype.guess(self.in_dir + fh)
-            if not detect_type:
-                logger.info('Assuming uncompressed fastq file for %s' % fh)
-                file = open(self.in_dir + fh, 'r')
-                read_num = sum(1 for _ in open(self.in_dir + fh)) // 4
-                header = file.readline().split(' ')[0]
+        detect_type = filetype.guess(self.in_dir + seq_file)
+        if detect_type:
+            if detect_type.mime == 'application/gzip':
+                logger.info('Detected gzipped file for %s' % seq_file)
+                file = gzip.open(self.in_dir + seq_file, 'r')
+                read_num = sum(1 for _ in gzip.open(self.in_dir + seq_file)) // 4
+                header = file.readline().decode().split(' ')[0]
                 file.seek(0, 0)
-                pair = file.readline().split(' ')[1][0]
+                pair = file.readline().decode().split(' ')[1][0]
                 file.close()
-                seq_files_info[fh] = [header, pair, read_num, 'Uncompressed/FASTQ']
+                seq_files_info[seq_file] = [header, pair, read_num, detect_type.mime]
+                return seq_files_info
 
-            if detect_type:
-                if detect_type.mime == 'application/gzip':
-                    logger.info('Detected gzipped file for %s' % fh)
-                    file = gzip.open(self.in_dir + fh, 'r')
-                    read_num = sum(1 for _ in gzip.open(self.in_dir + fh)) // 4
-                    header = file.readline().decode().split(' ')[0]
-                    file.seek(0, 0)
-                    pair = file.readline().decode().split(' ')[1][0]
-                    file.close()
-                    seq_files_info[fh] = [header, pair, read_num, detect_type.mime]
-
-        return seq_files_info
+        if not detect_type:
+            logger.info('Assuming uncompressed fastq file for %s' % seq_file)
+            file = open(self.in_dir + seq_file, 'r')
+            read_num = sum(1 for _ in open(self.in_dir + seq_file)) // 4
+            header = file.readline().split(' ')[0]
+            file.seek(0, 0)
+            pair = file.readline().split(' ')[1][0]
+            file.close()
+            seq_files_info[seq_file] = [header, pair, read_num, 'Uncompressed/FASTQ']
+            return seq_files_info
 
     def down_dir_pair(self):
         files_to_downsize = self.detect_seq_reads()
-        file_info_dict = self.read_info(files_to_downsize)
-        list_to_downsize = pair_up(file_info_dict)
-        if not os.path.exists(self.out_dir):
-            os.mkdir(self.out_dir)
-        else:
-            logger.info('Looks like %s exists.' % self.out_dir)
-        for k in range(len(list_to_downsize)//2):  # number of files divided by 2: one instance per pair
-            instance = DownsizePair(raw_file_f=list_to_downsize[k * 2],
-                                    raw_file_r=list_to_downsize[k * 2 + 1],
-                                    in_dir=self.in_dir, out_dir=self.out_dir,
-                                    n=self.downsize_to)
-            if file_info_dict[list_to_downsize[k*2]][3] == 'Uncompressed/FASTQ':
-                logger.info(f'{list_to_downsize[k*2]} run uncompressed')
-                instance.downsize_pair()
+        logging.info('Found %i files.' % len(files_to_downsize))
 
-            if file_info_dict[list_to_downsize[k*2]][3] == 'application/gzip':
-                logger.info(f'{list_to_downsize[k*2]} run gzip')
-                instance.downsize_pair_gzip()
+        '''This is a quick but efficient multiprocessing implementation to handle retrieving information from files
+        in the target directory. The Pool is created, the number of workers = the class 'processes' attribute.
+        Results are expected as a dictionary, so the resulting 'list of dictionaries' is converted with handy
+        dict comprehension.
+        '''
+        with mp.Pool(processes=self.processes) as pool:
+            results = pool.map(self.read_info, files_to_downsize, chunksize=1)
+        file_info_dict = {k: v for result in results for k, v in result.items()}
+
+        list_to_downsize = pair_up(file_info_dict)
+
+        worker_parameters = []
+        for k in range(len(list_to_downsize)//2):  # number of files divided by 2: one instance per pair
+            worker_parameters.append({'raw_file_f': list_to_downsize[k * 2],
+                                      'raw_file_r': list_to_downsize[k * 2 + 1],
+                                      'read_info': file_info_dict[list_to_downsize[k * 2]],
+                                      'in_dir': self.in_dir, 'out_dir': self.out_dir, 'n': self.downsize_to
+                                      })
+
+        with mp.Pool(processes=self.processes) as pool:
+            check = pool.map(self.instantiate, worker_parameters, chunksize=1)
 
         logger.info('Done!')
+
+    def instantiate(self, wp):
+        logger.info('Instantiating with parameters: %s' % wp)
+        instance = DownsizePair(**wp)
+        instance.downsize_pair()
