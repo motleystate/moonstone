@@ -58,7 +58,37 @@ class TestShannonIndex(TestCase):
             index=[1, 2]
         )
 
-        output = tested_object_instance.analyse_groups(metadata_df, 'group', make_graph=False)
+        output = tested_object_instance.analyse_groups(metadata_df, 'group', make_graph=False,
+                                                       output_pvalue='dataframe', sym=True)
+        pd.testing.assert_frame_equal(output['pval'], expected_df, check_dtype=False)
+
+    def test_pvalue_correction(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+        metadata_df = pd.DataFrame(
+            [
+                ['F', 2],
+                ['M', 1],
+                ['F', 1],
+                ['M', 3],
+                ['M', 2]
+            ],
+            columns=['sex', 'group'],
+            index=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'],
+        )
+        expected_df = pd.DataFrame(
+            [
+                [np.nan, 1.0, 1.0],
+                [1.0, np.nan, 1.0],
+                [1.0, 1.0, np.nan]
+            ],
+            columns=[1, 2, 3],
+            index=[1, 2, 3]
+        )
+
+        output = tested_object_instance.analyse_groups(metadata_df, 'group', make_graph=False,
+                                                       output_pvalue='dataframe', sym=True,
+                                                       correction_method='fdr_bh'
+                                                       )
         pd.testing.assert_frame_equal(output['pval'], expected_df, check_dtype=False)
 
 

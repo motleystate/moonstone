@@ -5,6 +5,7 @@ from string import capwords
 from typing import Union
 
 import pandas as pd
+from statsmodels.stats.multitest import multipletests
 
 from moonstone.analysis.statistical_test import statistical_test_groups_comparison
 from moonstone.core.module_base import BaseModule, BaseDF
@@ -156,6 +157,37 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             **kwargs
         )
 
+    def _structure_remodelling(self, datastruct: Union[pd.Series, pd.DataFrame], structure: str, sym: bool):
+        if sym:
+            datastruct = pd.concat([datastruct, datastruct.reorder_levels([1, 0])])
+        if structure == 'dataframe':
+            datastruct = datastruct.unstack(level=1)
+            datastruct.index.name = None
+            datastruct.columns.name = None
+        return datastruct
+
+    def _run_statistical_test_groups(
+        self, df: pd.DataFrame, group_col: str, stats_test: str, correction_method: str,
+        structure_pval: str, sym: bool
+    ):
+        if correction_method is not None:
+            pval = statistical_test_groups_comparison(
+                    df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                    output='series', sym=False
+                )
+            corrected_pval = pd.Series(multipletests(pval, alpha=0.05, method=correction_method)[1])
+            corrected_pval.index = pval.index   # postulate that the order hasn't changed
+
+            # remodelling of p-values output
+            corrected_pval = self._structure_remodelling(corrected_pval, structure=structure_pval, sym=sym)
+            return corrected_pval
+        else:
+            pval = statistical_test_groups_comparison(
+                df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                output=structure_pval, sym=sym
+            )
+            return pval
+
     def _visualize_pvalue_matrix(self, pval: pd.DataFrame, output_pval_file: str):
         graph = HeatmapGraph(pval)
         plotting_options = {
@@ -173,8 +205,11 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
         log_scale: bool = False, colors: dict = None, groups: list = None,
         show: bool = True, output_file: str = False, make_graph: bool = True,
+        plotting_options: dict = None,
+        stats_test: str = 'mann_whitney_u', correction_method: str = None,
+        structure_pval: str = 'dataframe', sym: bool = True,
         show_pval: bool = True, output_pval_file: str = False,
-        stats_test: str = "mann_whitney_u", plotting_options: dict = None, **kwargs
+        **kwargs
     ) -> dict:
         """
         :param metadata_df: dataframe containing metadata and information to group the data
@@ -187,12 +222,18 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         :param output_file: file path to output your html graph
         :param make_graph: whether or not to make the graph
         :param plotting_options: plotly plotting_options
+        :param stats_test: {'mann_whitney_u', 'ttest_independence', 'chi2_contingency'} statistical test
+        used to calculate the p-values between each groups
+        :param correction_method: {None, 'fdr_bh' (benjamini-hochberg), 'bonferroni'} method used (if any)
+        to correct generated p-values
+        :param structure_pval: {'series', 'dataframe'}
+        :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
         df = self._get_grouped_df(filtered_metadata_df[group_col])
-        pval = statistical_test_groups_comparison(
-            df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test
-        )
+
+        pval = self._run_statistical_test_groups(df, group_col, stats_test, correction_method, structure_pval, sym)
+        # pval is in the right structure to be returned
 
         if make_graph:
             self._make_graph(
@@ -200,7 +241,11 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 colors, groups, **kwargs
             )
             if show_pval:
-                self._visualize_pvalue_matrix(pval, output_pval_file)
+                if structure_pval != 'dataframe' or not sym:
+                    pval_for_visualization = self._structure_remodelling(pval, 'dataframe', sym=True)
+                    self._visualize_pvalue_matrix(pval_for_visualization, output_pval_file)
+                else:
+                    self._visualize_pvalue_matrix(pval, output_pval_file)
 
         self.last_grouped_df = df
         return {

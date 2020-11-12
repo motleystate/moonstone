@@ -38,7 +38,7 @@ def statistical_test_groups_comparison(series: pd.Series, group_series: pd.Serie
                                        output: str = 'dataframe', sym: str = True, **kwargs):
     """
     :param output: {'series', 'dataframe'}
-    :param mirror: whether generated dataframe (matrix) (or MultiIndexed series) is symetric or half-full
+    :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
 
     In kwargs, you can pass argument for statistical test, like :
     :param equal_var: For ttest_ind, set to True if your samples have the same variance and

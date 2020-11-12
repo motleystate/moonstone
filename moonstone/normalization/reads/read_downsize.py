@@ -183,4 +183,3 @@ class DownsizePair(BaseDownsizing):
         if self.file_type == 'application/gzip':
             logger.info('Running gzip downsizing')
             self.downsize_pair_gzip()
-

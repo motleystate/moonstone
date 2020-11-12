@@ -110,8 +110,8 @@ class DownsizeDir:
         logging.info('Found %i files.' % len(files_to_downsize))
 
         '''This is a quick but efficient multiprocessing implementation to handle retrieving information from files
-        in the target directory. The Pool is created, the number of workers = the class 'processes' attribute. 
-        Results are expected as a dictionary, so the resulting 'list of dictionaries' is converted with handy 
+        in the target directory. The Pool is created, the number of workers = the class 'processes' attribute.
+        Results are expected as a dictionary, so the resulting 'list of dictionaries' is converted with handy
         dict comprehension.
         '''
         with mp.Pool(processes=self.processes) as pool:
