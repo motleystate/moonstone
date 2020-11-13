@@ -3,6 +3,7 @@ import os
 import gzip
 import filetype
 import multiprocessing as mp
+import pandas as pd
 from moonstone.normalization.reads.read_downsize import DownsizePair
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,19 @@ def pair_up(seq_files_info):
 
     logger.info(f'List of Paired Reads Files:\n{paired_list}')
     return paired_list
+
+
+def plot_reads(file_info_dict):
+    logger.info('Generating plot of number of reads')
+    # generate a dataframe from the file information dictionary
+    # to include filename as the index
+    files: list = []
+    reads: list = []
+    for key in file_info_dict:
+        files.append(key)
+        reads.append(file_info_dict[key][2])
+
+    df = pd.DataFrame(index=files, data=reads, columns=['reads'])
 
 
 class DownsizeDir:
@@ -141,3 +155,4 @@ class DownsizeDir:
         logger.info('Instantiating with parameters: %s' % wp)
         instance = DownsizePair(**wp)
         instance.downsize_pair()
+
