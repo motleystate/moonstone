@@ -78,7 +78,11 @@ class DownsizeDir:
     def read_info(self, seq_file):
         """Gather information on the number of reads for each of the sequence reads in the given directory.
         Number of reads can be plotted or reported. Files names and headers are used to match pairs.
-        Both compressed and gzipped files are accepted."""
+        Both compressed and gzipped files are accepted.
+
+        Function returns a dictionary where the filename is the key and the value is a list of information:
+        {file: [header, F/R, Number of reads, format]}
+        # e.g. {'forward.fastq': ['@A00709:44:HYG57DSXX:2:1101:10737:1266', '1', 100257, 'Uncompressed/FASTQ']"""
 
         seq_files_info = {}
         detect_type = filetype.guess(self.in_dir + seq_file)
