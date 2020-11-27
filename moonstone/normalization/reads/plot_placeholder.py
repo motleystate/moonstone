@@ -3,25 +3,48 @@ import numpy as np
 import plotly.graph_objects as go
 
 
-def plotting_info(input_dict):
+def plotting_info(input_dict) -> pd.DataFrame:
+    """Takes info from the file_info_dict dictionary, and constructs a Pandas data frame of filenames
+    and their associated number of reads."""
     files = []
     reads = []
     for key in input_dict:
         files.append(key)
         reads.append(input_dict[key][2])
 
-    df = pd.DataFrame(index=files, data=reads, columns=['reads'])
-    reads = np.array(df['reads'])
-    
-    ds = df.describe(percentiles=[.05, .1, .25, .5, .75])
+    df_info = pd.DataFrame(index=files, data=reads, columns=['reads'])
+    return df_info
+
+
+def get_reads(df_info) -> [list, list]:
+    """Takes the dataframe from plotting_info and returns the filenames and number of reads for each entry."""
+    files = list(df_info.index)
+    reads = np.array(df_info['reads'])
+    return files, reads
+
+
+def make_annotations(df_info) -> str:
+    """Generates a string to be used for annotation the graph. Data is generated from the `describe` function
+    in Pandas, and then parsed from the new dataframe."""
+    ds = df_info.describe(percentiles=[.05, .1, .25, .5, .75])
+
     sample_number = ds.loc['count'][0]
     mean_reads = ds.loc['mean'][0]
     std = ds.loc['std'][0]
     min_reads = ds.loc['min'][0]
     max_reads = ds.loc['max'][0]
+    ninety_five = ds.loc['5%']
+    ninety = ds.loc['10%']
+    seventy_five = ds.loc['25%']
+    fifty = ds.loc['50%']
+    twenty_five = ds.loc['75%']
     annotation = 'Number of Samples = %i<br>Mean Reads = %i<br>Standard Deviation = %i<br>Min Reads = %i<br>' \
-                 'Max Reads = %i' % (sample_number, mean_reads, std, min_reads, max_reads)
-    return reads, annotation
+                 'Max Reads = %i<br><br>95%% of samples have at least %i reads<br>90%% of samples have at least %i' \
+                 'reads<br>75%% of samples have at least %i reads<br>50%% of samples have at least %i reads<br>25%%' \
+                 'of samples have at least %i reads<br>' \
+                 % (sample_number, mean_reads, std, min_reads, max_reads, ninety_five, ninety, seventy_five,
+                    fifty, twenty_five)
+    return annotation
 
 
 class PlotReads:
@@ -29,7 +52,9 @@ class PlotReads:
         self.file_info_dict = file_info_dict
 
     def plot_figure(self):
-        reads, annotation = plotting_info(self.file_info_dict)
+        df_info = plotting_info(self.file_info_dict)
+        files, reads = get_reads(df_info)
+        annotation = make_annotations(df_info)
 
         trace1 = go.Box(
             name='All Samples',
@@ -39,7 +64,7 @@ class PlotReads:
             boxpoints='all',
             notched=False,
             pointpos=0,
-            marker_color='rgb(0, 0, 0)',
+            marker_color="rgb(0, 0, 0)",
             fillcolor='rgba(18,23,59, 0.5)',
             marker=dict(
                 size=7,
@@ -65,8 +90,3 @@ class PlotReads:
 
         fig = go.Figure(data=data, layout=layout)
         fig.show()
-
-
-
-
-
