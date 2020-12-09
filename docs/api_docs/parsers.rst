@@ -37,6 +37,12 @@ Taxonomy Counts
     :special-members: __init__
     :inherited-members:
 
+.. automodule:: moonstone.parsers.counts.taxonomy.metaphlan3
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
+
 .. automodule:: moonstone.parsers.counts.taxonomy.qiime
     :members:
     :undoc-members:
