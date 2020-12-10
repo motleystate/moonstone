@@ -189,8 +189,8 @@ class TestNamesFiltering(TestCase):
             tested_filtering = NamesFiltering(test_df, selected_rows, axis=0, keep=True)
             pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
             self.assertEqual(len(log.output), 1)
-            self.assertIn('WARNING:moonstone.filtering.basics_filtering:1 name was not found in the dataframe.',
-                          log.output)
+            self.assertIn("WARNING:moonstone.filtering.basics_filtering:['specie_5']: \
+1 name(s) not found in the dataframe.", log.output)
 
     def test_selecting_columns_without_names_present(self):
         test_df = pd.DataFrame.from_dict(
@@ -215,8 +215,8 @@ class TestNamesFiltering(TestCase):
             tested_filtering = NamesFiltering(test_df, selected_rows, axis=1, keep=True)
             pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
             self.assertEqual(len(log.output), 1)
-            self.assertIn('WARNING:moonstone.filtering.basics_filtering:2 names were not found in the dataframe.',
-                          log.output)
+            self.assertIn("WARNING:moonstone.filtering.basics_filtering:['5', '6']: \
+2 name(s) not found in the dataframe.", log.output)
 
 
 class TestByPercentageNaNFiltering(TestCase):

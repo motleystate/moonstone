@@ -60,15 +60,16 @@ class NamesFiltering(BothAxisFiltering):
 
     def filter(self) -> pd.DataFrame:
         # intersection of names to remove or keep and index's/columns' names
-        tmp = len(self.names)
+        old_names = self.names
         if self.axis == 0:
             self.names = list(self.df.index.intersection(self.names))
         else:
             self.names = list(self.df.columns.intersection(self.names))
-        if tmp - len(self.names) == 1:
-            logger.warning("1 name was not found in the dataframe.")
-        elif tmp - len(self.names) > 1:
-            logger.warning("%d names were not found in the dataframe.", tmp - len(self.names))
+        if len(old_names) - len(self.names) > 0:
+            list_names_not_found = list(set(old_names).difference(set(self.names)))
+            list_names_not_found.sort()
+            logger.warning(f"{list_names_not_found}: {len(old_names) - len(self.names)} \
+name(s) not found in the dataframe.")
 
         if self.keep:
             return self._select_names()
