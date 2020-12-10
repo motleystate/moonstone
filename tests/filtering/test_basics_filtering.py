@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from moonstone.filtering.basics_filtering import (
     NoCountsFiltering, NamesFiltering, NaNPercentageFiltering,
@@ -168,6 +168,55 @@ class TestNamesFiltering(TestCase):
         selected_rows = ['specie_1', 'specie_2']
         with self.assertRaises(TypeError):
             tested_filtering = NamesFiltering(test_df, selected_rows, axis=1, keep=True)  # noqa
+
+    def test_selecting_rows_without_names_present(self):
+        test_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 2, 1, 0],
+                'specie_2': [25, 6, 3, 9],
+                'specie_3': [0, 7, 5, 0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        test_df.columns.name = 'sample'
+        selected_rows = ['specie_1', 'specie_5']
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 2, 1, 0],
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        expected_df.columns.name = 'sample'
+        with self.assertLogs('moonstone.filtering.basics_filtering', level='WARN') as log:
+            tested_filtering = NamesFiltering(test_df, selected_rows, axis=0, keep=True)
+            pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.filtering.basics_filtering:['specie_5']: \
+1 name(s) not found in the dataframe.", log.output)
+
+    def test_selecting_columns_without_names_present(self):
+        test_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 2, 1, 0],
+                'specie_2': [25, 6, 3, 9],
+                'specie_3': [0, 7, 5, 0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        test_df.columns.name = 'sample'
+        selected_rows = ['1', '5', '6']
+        tested_filtering = NamesFiltering(test_df, selected_rows, axis=1, keep=True)
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3],
+                'specie_2': [25],
+                'specie_3': [0]
+            },
+            orient='index', columns=['1'])
+        expected_df.columns.name = 'sample'
+        with self.assertLogs('moonstone.filtering.basics_filtering', level='WARN') as log:
+            tested_filtering = NamesFiltering(test_df, selected_rows, axis=1, keep=True)
+            pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.filtering.basics_filtering:['5', '6']: \
+2 name(s) not found in the dataframe.", log.output)
 
 
 class TestByPercentageNaNFiltering(TestCase):
