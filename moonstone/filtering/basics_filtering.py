@@ -59,6 +59,17 @@ class NamesFiltering(BothAxisFiltering):
         return self.df.drop(self.names, axis=self.axis)
 
     def filter(self) -> pd.DataFrame:
+        # intersection of names to remove or keep and index's/columns' names
+        tmp = len(self.names)
+        if self.axis == 0:
+            self.names = list(self.df.index.intersection(self.names))
+        else:
+            self.names = list(self.df.columns.intersection(self.names))
+        if tmp - len(self.names) == 1:
+            logger.warning("1 name was not found in the dataframe.")
+        elif tmp - len(self.names) > 1:
+            logger.warning("%d names were not found in the dataframe.", tmp - len(self.names))
+
         if self.keep:
             return self._select_names()
         else:
@@ -80,7 +91,6 @@ class NaNPercentageFiltering(BothAxisFiltering):
 
     def filter(self) -> pd.DataFrame:
         thresh = self.df.shape[1-self.axis] - self.df.shape[1-self.axis] * (self.percentage_of_nan_allowed/100)
-        print(thresh)
         return self.df.dropna(axis=self.axis, thresh=thresh)
 
 
