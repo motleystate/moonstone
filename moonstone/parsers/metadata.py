@@ -95,8 +95,6 @@ class MetadataParser(BaseParser):
                     dimensions=dimensions,
                     line={'color': color, 'colorscale': colorscale},
                     hoverinfo='count',
-                    labelfont={'size': 18, 'family': 'Times'},
-                    tickfont={'size': 16, 'family': 'Times'},
                     arrangement='freeform'
                 )
             ]
