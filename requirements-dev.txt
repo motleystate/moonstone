@@ -4,3 +4,6 @@ pytest
 pytest-cov
 jupyter
 pip-tools
+black
+pydocstyle
+mypy

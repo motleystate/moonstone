@@ -7,27 +7,22 @@ Analysis
 Differential Analysis
 =====================
 
-.. automodule:: moonstone.analysis.differential_analysis
-    :members:
-    :undoc-members:
-    :special-members: __init__
-    :inherited-members:
+.. currentmodule:: moonstone.analysis.differential_analysis
+
+.. autosummary::
+    :toctree: stubs
+
+    DifferentialAnalysis
 
 
-Alpha diversity
-===============
+Diversity
+=========
 
-.. automodule:: moonstone.analysis.diversity.alpha
-    :members:
-    :undoc-members:
-    :special-members: __init__
-    :inherited-members:
+.. currentmodule:: moonstone.analysis.diversity
 
-Beta diversity
-==============
+.. autosummary::
+    :toctree: stubs
 
-.. automodule:: moonstone.analysis.diversity.beta
-    :members:
-    :undoc-members:
-    :special-members: __init__
-    :inherited-members:
+    alpha.ShannonIndex
+    alpha.SimpsonInverseIndex
+    beta.BrayCurtis
