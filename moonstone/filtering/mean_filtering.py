@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.io
 from plotly.subplots import make_subplots
-from typing import Optional
+from typing import Union
 
 from moonstone.analysis.stats import FilteringStats
 from moonstone.filtering.base import CountsFiltering
@@ -23,7 +23,7 @@ class MeanFiltering(CountsFiltering):
         self,
         dataframe,
         threshold: float = None,
-        percentage_to_keep: int = 90,
+        percentage_to_keep: Union[int, float] = 90,
     ):
         """
         :param threshold: mean read count threshold, when not specified the threshold
