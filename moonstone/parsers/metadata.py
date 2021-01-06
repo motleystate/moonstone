@@ -3,7 +3,7 @@ import yaml
 from collections import defaultdict
 from typing import Dict, List
 
-from pandas import DataFrame
+from pandas import DataFrame, Series
 import plotly.graph_objects as go
 
 from moonstone.analysis.columns_statistics import DataframeStatistics
@@ -70,7 +70,7 @@ class MetadataParser(BaseParser):
         """
         return DataframeStatistics(self.dataframe).get_stats()
 
-    def _get_dimensions(self, categories):
+    def _get_dimensions(self, categories) -> List[go.parcats.Dimension]:
         dimensions = []
         for cat in categories:
             dimensions.append(
@@ -82,7 +82,7 @@ class MetadataParser(BaseParser):
             )
         return dimensions
 
-    def _get_color(self, color_by: str):
+    def _get_color(self, color_by: str) -> Series:
         cpt = 1
         color_dict = {}
         for i in self.dataframe[color_by].unique():
