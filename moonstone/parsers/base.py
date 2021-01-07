@@ -1,3 +1,5 @@
+from typing import Union
+
 import pandas as pd
 
 
@@ -14,7 +16,7 @@ class BaseParser:
         """
         self.file_path = file_path
         self.sep = sep
-        self.header = 'infer'
+        self.header: Union[str, None] = 'infer'
         if no_header is True:
             self.header = None
         self.parsing_options = parsing_options
@@ -23,9 +25,7 @@ class BaseParser:
 
     @property
     def dataframe(self) -> pd.DataFrame:
-        """
-        retrieve the pandas dataframe constructed from the input file
-        """
+        """Retrieve the pandas dataframe constructed from the input file."""
         if getattr(self, '_dataframe', None) is None:
             self._dataframe = self.to_dataframe()
         return self._dataframe
