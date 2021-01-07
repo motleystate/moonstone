@@ -4,6 +4,7 @@ from collections import defaultdict
 from typing import Dict, List
 
 from pandas import DataFrame, Series
+import plotly.io
 import plotly.graph_objects as go
 
 from moonstone.analysis.columns_statistics import DataframeStatistics
@@ -47,7 +48,9 @@ class MetadataParser(BaseParser):
             cleaning_operations: cleaning operations to apply to the input table
         """
         self.index_col = index_col
-        self.cleaning_operations = {} if cleaning_operations is None else cleaning_operations
+        self.cleaning_operations = (
+            {} if cleaning_operations is None else cleaning_operations
+        )
         super().__init__(*args, **kwargs)
 
     def to_dataframe(self) -> DataFrame:
@@ -91,7 +94,12 @@ class MetadataParser(BaseParser):
         return self.dataframe[color_by].apply(lambda x: color_dict.get(x, 0))
 
     def visualize_categories(
-        self, categories: list, color_by: str, colorscale: list = None
+        self,
+        categories: list,
+        color_by: str,
+        colorscale: list = None,
+        title: str = "Metadata categories distribution",
+        output_file: str = "",
     ):
         """
         Visualize category metadata with parallel categories diagram.
@@ -114,7 +122,10 @@ class MetadataParser(BaseParser):
                 )
             ]
         )
+        fig.update_layout(title=title)
         fig.show()
+        if output_file:
+            plotly.io.write_html(fig, output_file)
 
 
 class YAMLBasedMetadataParser:
