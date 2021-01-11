@@ -68,7 +68,7 @@ class NamesFiltering(BothAxisFiltering):
         if len(old_names) - len(self.names) > 0:
             list_names_not_found = list(set(old_names).difference(set(self.names)))
             list_names_not_found.sort()
-            logger.warning(f"{list_names_not_found}: {len(old_names) - len(self.names)} \
+            logger.info(f"{list_names_not_found}: {len(old_names) - len(self.names)} \
 name(s) not found in the dataframe.")
 
         if self.keep:
