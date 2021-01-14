@@ -11,6 +11,20 @@ class TaxonomyCountsBase():
     ]
     taxa_column = 'OTU ID'
 
+    @property
+    def rank_level(self):
+        """
+        retrieves rank_level
+        """
+        return self._rank_level
+
+    @rank_level.setter
+    def rank_level(self, value):
+        if isinstance(value, (int, np.int64)) and value <= len(self.taxonomical_names):
+            self._rank_level = value
+        else:
+            raise ValueError("Error : expecting a integer inferior or equal to the number of taxonomical_names.")
+
     def _fill_none(self, taxa_df: pd.DataFrame) -> pd.DataFrame:
         """
         This method is used to obtain a dataframe that fills the None values with the last valid value and
@@ -64,8 +78,11 @@ class TaxonomyCountsBase():
                 return None
 
         taxa_columns = df[self.taxa_column].str.split(sep, expand=True)
-        self._rank_level = len(taxa_columns.columns)
-        taxa_columns.columns = self.taxonomical_names[:self._rank_level]
+
+        if getattr(self, '_rank_level', None) is None:
+            self.rank_level = len(taxa_columns.columns)
+
+        taxa_columns.columns = self.taxonomical_names[:self.rank_level]
         taxa_columns = taxa_columns.applymap(lambda x: remove_taxo_prefix(x))
         if terms_to_remove is not None:
             taxa_columns = taxa_columns.replace(terms_to_remove, np.nan)
