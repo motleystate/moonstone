@@ -17,7 +17,10 @@ class BaseMetaphlanParser(TaxonomyCountsBase, BaseParser):
     def rows_differences(self, dataframe1, dataframe2) -> DataFrame:
         rows_diff = dataframe1 - dataframe2
         rows_diff[rows_diff.isnull()] = dataframe1
-        rows_diff[rows_diff < 0] = 0
+        if self.analysis_type == 'rel_ab':
+            rows_diff[rows_diff < 0.0001] = 0
+        else:
+            rows_diff[rows_diff < 0] = 0
         rows_diff = rows_diff.loc[rows_diff.sum(axis=1)[rows_diff.sum(axis=1) != 0].index]
         return rows_diff
 
@@ -56,13 +59,8 @@ class BaseMetaphlanParser(TaxonomyCountsBase, BaseParser):
             if rows_diff.size != 0:
                 new_df = new_df.append(rows_diff)              # add missing rows to the dataframe of the lower level
 
-                # verification that everything is defined up to the lower_level
-                samples_with_incomp_lowerlevel = new_df.sum()[new_df.sum() < total]
-
-        if samples_with_incomp_lowerlevel.size != 0:      # for rel ab, if < 100 at the kingdom level
-            rows_diff = 100 - new_df.sum()
-            rows_diff.name = 'k__UNKNOWN'
-            new_df = new_df.append(rows_diff)
+            # verification that everything is defined up to the lower_level
+            samples_with_incomp_lowerlevel = new_df.sum()[new_df.sum() < total]
 
         new_df = new_df.reset_index()
         return new_df

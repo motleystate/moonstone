@@ -231,23 +231,23 @@ s__Streptococcus_salivarius', 3.3, 1.2],
         observed_df = self.base_metaphlan_parser.remove_duplicates(tested_df)
         pd.testing.assert_frame_equal(observed_df, expected_df, check_like=True)
 
-    def test_remove_duplicates_rel_ab_with_UNKNOWN(self):
+    def test_remove_duplicates_rel_ab_addition_error_margin(self):
         input_path = os.path.join(os.path.dirname(__file__), 'input.tsv')
         self.base_metaphlan_parser = BaseMetaphlanParser(input_path, analysis_type='rel_ab')
 
         tested_df = pd.DataFrame(
             [
-                ['k__Bacteria', 10.5, 12.3],
-                ['k__Bacteria|p__Firmicutes', 6.3, 2.3],
-                ['k__Bacteria|p__Firmicutes|c__Bacilli', 6.3, 2.3],
-                ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales', 6.3, 2.3],
-                ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae', 6.3, 2.3],
+                ['k__Bacteria', 100.0, 100.0],
+                ['k__Bacteria|p__Firmicutes', 100.0, 100.0],
+                ['k__Bacteria|p__Firmicutes|c__Bacilli', 100.0, 100.0],
+                ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales', 100.0, 100.0],
+                ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae', 100.0, 100.0],
                 ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus',
-                 6.3, 2.3],
+                 100.0, 100.0],
                 ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|\
-s__Streptococcus_thermophilus', 1.7, 0.7],
+s__Streptococcus_thermophilus', 35.95876, 50.0],
                 ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|\
-s__Streptococcus_salivarius', 3.3, 1.2]
+s__Streptococcus_salivarius', 64.04123, 32.8]
             ],
             columns=['OTU ID', 'SAMPLE_1', 'SAMPLE_2']
         )
@@ -255,13 +255,11 @@ s__Streptococcus_salivarius', 3.3, 1.2]
         expected_df = pd.DataFrame(
             [
                 ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|\
-s__Streptococcus_thermophilus', 1.7, 0.7],
+s__Streptococcus_thermophilus', 35.95876, 50.0],
                 ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus|\
-s__Streptococcus_salivarius', 3.3, 1.2],
+s__Streptococcus_salivarius', 64.04123, 32.8],
                 ['k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Streptococcaceae|g__Streptococcus',
-                 1.3, 0.4],
-                ['k__Bacteria', 4.2, 10.0],
-                ['k__UNKNOWN', 89.5, 87.7]
+                 0.0, 17.2]
             ],
             columns=['OTU ID', 'SAMPLE_1', 'SAMPLE_2']
         )
