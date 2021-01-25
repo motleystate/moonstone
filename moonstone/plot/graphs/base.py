@@ -103,6 +103,7 @@ class GroupBaseGraph(BaseGraph):
         self, data_col: str, group_col: str, plotting_options: dict = None,
         show: bool = True, output_file: Union[bool, str] = False,
         colors: dict = None, sort_groups: bool = False, groups: list = None,
+        show_counts: bool = False,
         **kwargs
     ):
         """
@@ -116,12 +117,17 @@ class GroupBaseGraph(BaseGraph):
         if colors is None:
             colors = self._gen_default_color_dict(groups)
         fig = go.Figure()
+        if show_counts:
+            counts = self.data[group_col].value_counts().to_dict()
+            names = {group: f"{group} (n={counts[group]})" for group in groups}
+        else:
+            names = {group: group for group in groups}
 
         for group in groups:
             filtered_df = self.data[self.data[group_col] == group]
             fig.add_trace(self._gen_fig_trace(
                 filtered_df[group_col], filtered_df[data_col],
-                str(group), filtered_df.index, self._get_group_color(group, colors),
+                names[group], filtered_df.index, self._get_group_color(group, colors),
                 **kwargs,
             ))
 
