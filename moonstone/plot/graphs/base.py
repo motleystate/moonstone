@@ -75,7 +75,10 @@ class BaseGraph(ABC):
                     output_file = self.data.name+"_"+self.__class__.__name__+".html"
                 else:
                     output_file = self.__class__.__name__+".html"
-            plotly.io.write_html(fig, output_file)
+            if output_file.split(".")[-1] == "html":
+                plotly.io.write_html(fig, output_file)
+            else:
+                plotly.io.write_image(fig, output_file)
 
 
 class GroupBaseGraph(BaseGraph):
