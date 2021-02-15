@@ -48,7 +48,7 @@ class BetaDiversity(DiversityBase, ABC):
 
     def _get_grouped_df(self, metadata_series):
         df_list = []
-        for group in metadata_series.unique():
+        for group in metadata_series.dropna().unique():
             group_df = self.df.loc[:, metadata_series[metadata_series == group].index]
             beta_div_multi_indexed_df = self.compute_beta_diversity(group_df).to_series().to_frame()
             if beta_div_multi_indexed_df.empty:  # Happens if only one item from the group

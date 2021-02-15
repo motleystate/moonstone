@@ -6,6 +6,21 @@ Changelogs
 
 Summary of developments of moonstone library.
 
+v0.5
+====
+
+v0.5.0
+------
+
+* Visualize metadata cat (https://github.com/motleystate/moonstone/pull/62)
+* parser for metaphlan3 (https://github.com/motleystate/moonstone/pull/60)
+* pvalue correction in analyse groups (https://github.com/motleystate/moonstone/pull/57)
+* add ``HeatmapGraph`` (https://github.com/motleystate/moonstone/pull/56)
+* Statistical tests for group comparison (https://github.com/motleystate/moonstone/pull/53)
+* Mann - Whitney u test in alpha diversity (https://github.com/motleystate/moonstone/pull/50)
+* Feature box plot alpha diversity (https://github.com/motleystate/moonstone/pull/46)
+* More filtering methods : classes ``NaNPercentageFiltering`` and ``NumberOfDifferentValuesFiltering`` (https://github.com/motleystate/moonstone/pull/44)
+
 v0.4
 ====
 

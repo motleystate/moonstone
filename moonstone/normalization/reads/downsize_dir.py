@@ -48,6 +48,7 @@ def plot_reads(file_info_dict):
         reads.append(file_info_dict[key][2])
 
     df = pd.DataFrame(index=files, data=reads, columns=['reads'])
+    return df
 
 
 class DownsizeDir:
@@ -155,4 +156,3 @@ class DownsizeDir:
         logger.info('Instantiating with parameters: %s' % wp)
         instance = DownsizePair(**wp)
         instance.downsize_pair()
-

@@ -32,8 +32,10 @@ author = u'Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
-    'sphinx.ext.autosummary'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -44,6 +46,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+autosummary_generate = True
 
 # -- Options for HTML output -------------------------------------------------
 
