@@ -177,8 +177,8 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 )
 
             # dropping NaN (= comparison that couldn't have been generated due to too few samples in one or both groups)
-            corrected_pval = pd.Series(multipletests(pval.dropna(), alpha=0.05, method=correction_method)[1])   
-            
+            corrected_pval = pd.Series(multipletests(pval.dropna(), alpha=0.05, method=correction_method)[1])
+
             corrected_pval.index = pval.dropna().index   # postulate that the order hasn't changed
             if pval[pval.isnull()].size > 0:
                 corrected_pval = corrected_pval.append(pval[pval.isnull()])
