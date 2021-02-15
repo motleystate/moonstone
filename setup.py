@@ -18,6 +18,7 @@ setup(
         'numpy==1.18.1',
         'scikit-bio',
         'scikit-learn==0.21.3',
+        'hdmedians==0.13',
     ],
     packages=find_packages(),
     entry_points={'console_scripts': ['moonstone=moonstone.main:run']},
