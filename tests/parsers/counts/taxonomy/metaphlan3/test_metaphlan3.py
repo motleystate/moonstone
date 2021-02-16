@@ -26,4 +26,3 @@ class TestMetaphlan2Parser(TestCase):
         )
         expected_df = expected_df.set_index(['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species'])
         pd.testing.assert_frame_equal(self.meta2parser.dataframe, expected_df)
-

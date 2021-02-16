@@ -175,8 +175,13 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                     df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
                     output='series', sym=False
                 )
-            corrected_pval = pd.Series(multipletests(pval, alpha=0.05, method=correction_method)[1])
-            corrected_pval.index = pval.index   # postulate that the order hasn't changed
+
+            # dropping NaN (= comparison that couldn't have been generated due to too few samples in one or both groups)
+            corrected_pval = pd.Series(multipletests(pval.dropna(), alpha=0.05, method=correction_method)[1])
+
+            corrected_pval.index = pval.dropna().index   # postulate that the order hasn't changed
+            if pval[pval.isnull()].size > 0:
+                corrected_pval = corrected_pval.append(pval[pval.isnull()])
 
             # remodelling of p-values output
             corrected_pval = self._structure_remodelling(corrected_pval, structure=structure_pval, sym=sym)
