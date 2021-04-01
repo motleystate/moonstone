@@ -44,3 +44,15 @@ class SimpsonInverseIndex(AlphaDiversity):
         for i in self.df.columns:
             Seriesdic[i] = skbio.diversity.alpha.enspie(self.df[i])
         return pd.Series(Seriesdic)
+
+
+class Chao1Index(AlphaDiversity):
+    """
+    Perform calculation of the Choa1 index for each samples of the dataframe
+    """
+    def compute_diversity(self, bias_corrected: bool = True) -> pd.Series:
+        # steps to compute the index
+        Seriesdic = {}
+        for i in self.df.columns:
+            Seriesdic[i] = skbio.diversity.alpha.chao1(self.df[i], bias_corrected)
+        return pd.Series(Seriesdic)
