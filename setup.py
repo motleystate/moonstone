@@ -17,7 +17,7 @@ setup(
         'pyaml',
         'numpy==1.18.1',
         'scikit-bio',
-        'scikit-learn==0.21.3',
+        'scikit-learn',
         'hdmedians==0.13',
     ],
     packages=find_packages(),
