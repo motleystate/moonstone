@@ -1,10 +1,10 @@
 from pandas import DataFrame
 
-from moonstone.parsers.base import BaseParser
+from moonstone.parsers.counts.taxonomy.base import BaseTaxonomyCountsParser
 from moonstone.utils.taxonomy import TaxonomyCountsBase
 
 
-class Qiime2Parser(TaxonomyCountsBase, BaseParser):
+class Qiime2Parser(BaseTaxonomyCountsParser):
     """
     Parse output csv data obtained by `Qiime2 <https://qiime2.org/>`_.
     """

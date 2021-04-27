@@ -1,10 +1,10 @@
 from pandas import DataFrame
 
-from moonstone.parsers.base import BaseParser
+from moonstone.parsers.counts.taxonomy.base import BaseTaxonomyCountsParser
 from moonstone.utils.taxonomy import TaxonomyCountsBase
 
 
-class SunbeamKraken2Parser(TaxonomyCountsBase, BaseParser):
+class SunbeamKraken2Parser(BaseTaxonomyCountsParser):
     """
     Parse output from `Kraken2 <https://ccb.jhu.edu/software/kraken2/>`_
     merge table from `Sunbeam <https://github.com/sunbeam-labs/sunbeam/>`_ pipeline.
