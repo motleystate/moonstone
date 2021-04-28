@@ -1,7 +1,6 @@
 from pandas import DataFrame
 
 from moonstone.parsers.counts.taxonomy.base import BaseTaxonomyCountsParser
-from moonstone.utils.taxonomy import TaxonomyCountsBase
 
 
 class Qiime2Parser(BaseTaxonomyCountsParser):

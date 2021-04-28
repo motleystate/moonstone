@@ -122,6 +122,7 @@ class TestTaxonomyNamesFiltering(TestCase):
         with self.assertRaises(ValueError):
             tested_filtering = TaxonomyNamesFiltering(test_df, selected_rows, level='phylum', keep=False)  # noqa
 
+
 class TestTaxonomyMeanFiltering(TestCase):
 
     def setUp(self):
