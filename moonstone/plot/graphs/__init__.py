@@ -1,4 +1,4 @@
-from .bargraph import BarGraph  # noqa
+from .bargraph import BarGraph, MatrixBarGraph  # noqa
 from .box import BoxGraph, GroupBoxGraph  # noqa
 from .heatmap import HeatmapGraph  # noqa
 from .histogram import Histogram  # noqa
