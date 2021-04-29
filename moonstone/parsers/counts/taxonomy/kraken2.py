@@ -15,8 +15,8 @@ class SunbeamKraken2Parser(BaseTaxonomyCountsParser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, parsing_options={'skiprows': 1}, **kwargs)
 
-    def to_dataframe(self) -> DataFrame:
-        df = super().to_dataframe()
+    def _load_data(self) -> DataFrame:
+        df = super()._load_data()
         # Rename first column to NCBI_taxonomy_ID
         df.columns = [self.new_otu_id_name] + list(df.columns[1:])
         df = self.split_taxa_fill_none(df, sep="; ", merge_genus_species=True)

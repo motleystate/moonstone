@@ -14,8 +14,8 @@ class Qiime2Parser(BaseTaxonomyCountsParser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, parsing_options={'skiprows': 1}, **kwargs)
 
-    def to_dataframe(self) -> DataFrame:
-        df = super().to_dataframe()
+    def _load_data(self) -> DataFrame:
+        df = super()._load_data()
         df = self.split_taxa_fill_none(df, sep=";", terms_to_remove=self.terms_to_remove)
         df = df.set_index(self.taxonomical_names[:self.rank_level])
         return df

@@ -32,12 +32,12 @@ class BaseParser:
     def dataframe(self) -> pd.DataFrame:
         """Retrieve the pandas dataframe constructed from the input file."""
         if getattr(self, "_dataframe", None) is None:
-            self._dataframe = self.to_dataframe()
+            self._dataframe = self._load_data()
         return self._dataframe
 
-    def to_dataframe(self) -> pd.DataFrame:
+    def _load_data(self) -> pd.DataFrame:
         """
-        method that handles the loading and parsing of your file into a pandas dataframe
+        method that handles the loading and parsing of your file into a pandas dataframe.
         """
         return pd.read_csv(
             self.file_path, sep=self.sep, header=self.header, **self.parsing_options
@@ -47,10 +47,10 @@ class BaseParser:
     def plotter(self):
         """Access to instance dedicated to visualization for this type of data."""
         if getattr(self, "_plotter", None) is None:
-            self._plotter = self.instantiate_plot()
+            self._plotter = self._instantiate_plot()
         return self._plotter
 
-    def instantiate_plot(self) -> pd.DataFrame:
+    def _instantiate_plot(self) -> pd.DataFrame:
         """
         method that handles the loading and parsing of your file into a pandas dataframe
         """

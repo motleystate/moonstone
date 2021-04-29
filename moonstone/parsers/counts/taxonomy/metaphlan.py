@@ -72,8 +72,8 @@ class Metaphlan2Parser(BaseMetaphlanParser):
 
     taxa_column = 'ID'
 
-    def to_dataframe(self) -> DataFrame:
-        df = super().to_dataframe()
+    def _load_data(self) -> DataFrame:
+        df = super()._load_data()
         df = self.remove_duplicates(df)
         df = self.split_taxa_fill_none(df, sep="|")
         df = df.set_index(self.taxonomical_names[:self.rank_level])
@@ -95,8 +95,8 @@ class Metaphlan3Parser(BaseMetaphlanParser):
         """
         super().__init__(*args, analysis_type=analysis_type, parsing_options={'skiprows': 1}, **kwargs)
 
-    def to_dataframe(self) -> DataFrame:
-        df = super().to_dataframe()
+    def _load_data(self) -> DataFrame:
+        df = super()._load_data()
         df = df.drop(self.NCBI_tax_column, axis=1)
         df = self.remove_duplicates(df)
         df = self.split_taxa_fill_none(df, sep="|")

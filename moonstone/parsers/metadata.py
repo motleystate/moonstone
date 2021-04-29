@@ -53,9 +53,9 @@ class MetadataParser(BaseParser):
         )
         super().__init__(*args, **kwargs)
 
-    def to_dataframe(self) -> DataFrame:
+    def _load_data(self) -> DataFrame:
         """Load and return Pandas dataframe."""
-        dataframe = super().to_dataframe()
+        dataframe = super()._load_data()
         df_cleaner = DataFrameCleaner(dataframe)
         for col_name, transformations in self.cleaning_operations.items():
             for transformation in transformations:
