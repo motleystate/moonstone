@@ -1,8 +1,11 @@
 import pandas as pd
 from typing import Optional
 
+from scipy.cluster import hierarchy
+from scipy.spatial import distance
+
 from moonstone.filtering import TaxonomyMeanFiltering
-from moonstone.plot.graphs.bargraph import BarGraph
+from moonstone.plot.graphs.bargraph import BarGraph, MatrixBarGraph
 from moonstone.utils.plot import (
     add_x_to_plotting_options,
     add_default_titles_to_plotting_options,
@@ -78,6 +81,25 @@ class PlotTaxonomyCounts:
     def __init__(self, taxonomy_dataframe: pd.DataFrame):
         self.df = taxonomy_dataframe
 
+    def _compute_top_n_taxa_df(self, data_df: pd.DataFrame, taxa_number: int, taxa_level: str):
+        df = data_df.groupby(taxa_level).sum()
+        top = df[~df.index.str.contains("(", regex=False)].sum(axis=1).sort_values(ascending=False).head(taxa_number)  # Filter out rows not classified to the species level (that contains '(')
+        top_and_other_df = df[df.index.get_level_values(taxa_level).isin(top.index)]
+        top_and_other_df = df.loc[top.index]  # put top species in order from most abundant species across samples to least
+        top_and_other_df.loc["Others"] = 100-top_and_other_df.sum()
+        top_and_other_df = top_and_other_df.transpose()
+        
+        # Determine samples order using hierarchical clustering
+        # What dataframe to use for the hierarchical clustering? Everything (rel_ab_df)? Only top n species +- Others? Only species > x%?
+        Z = hierarchy.linkage(distance.pdist(
+            #top_and_other_df[top_and_other_df.columns[(top_and_other_df>40).any()]].drop('Others', axis=1)),
+            #top_and_other_df.drop('Others', axis=1)),
+            #top_and_other_df),
+            df.transpose()),
+            method='single', metric='euclidean', optimal_ordering=False)
+        order = hierarchy.leaves_list(Z)
+        return top_and_other_df.iloc[order]
+
     def plot_most_abundant_taxa(
         self,
         mean_taxa: float = None,
@@ -85,6 +107,17 @@ class PlotTaxonomyCounts:
         taxa_level: str = "species",
         **kwargs,
     ):
+        """
+        Plot bar chart of most abundant taxa (total sum of abundance).
+
+        The plot represents percentage of sample with the corresponding taxa
+        ordered from most abundant to less abundant.
+
+        Args:
+            mean_taxa: mean threshold to be kept for analysis
+            taxa_number: number of taxa to plot
+            taxa_level: Taxonomy level
+        """
         data_df = self.df
         if mean_taxa is not None:
             data_df = TaxonomyMeanFiltering(data_df, mean_taxa).filtered_df
@@ -118,4 +151,43 @@ class PlotTaxonomyCounts:
             )
         graph.plot_one_graph(
             orientation="h", plotting_options=plotting_options, **kwargs
+        )
+
+    def plot_sample_composition_most_abundant_taxa(
+        self,
+        mean_taxa: float = None,
+        taxa_number: int = 20,
+        taxa_level: str = "species",
+        **kwargs,
+    ):
+        """
+        Plot taxa composition of samples for most abundant taxa.
+
+        Args:
+            mean_taxa: mean threshold to be kept for analysis
+            taxa_number: number of taxa to plot
+            taxa_level: Taxonomy level
+        """
+        data_df = self.df
+        if mean_taxa is not None:
+            data_df = TaxonomyMeanFiltering(data_df, mean_taxa).filtered_df
+        data_df = self._compute_top_n_taxa_df(data_df, taxa_number, taxa_level)
+        df = data_df.T
+        # Make graph
+        graph = MatrixBarGraph(df)
+        # Plotting options
+        default_plotting_options = {
+            "layout": {
+                "title": f"{taxa_level.capitalize()} composition for the top {taxa_number} most abundant species across samples",
+                "xaxis_title": "Samples",
+                "yaxis_title": "Percentage",
+            }
+        }
+        if mean_taxa is not None:
+            default_plotting_options["layout"]["title"] = "{} (mean among samples > {})".format(
+                default_plotting_options["layout"]["title"], mean_taxa
+            )
+        plotting_options = kwargs.get('plotting_options', default_plotting_options)
+        graph.plot_one_graph(
+            plotting_options=plotting_options, **kwargs
         )
