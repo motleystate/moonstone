@@ -3,6 +3,7 @@ from typing import Union
 import plotly.graph_objects as go
 
 from moonstone.plot.graphs.base import BaseGraph
+from moonstone.utils.colors import generate_color_code
 
 
 class BarGraph(BaseGraph):
@@ -11,6 +12,7 @@ class BarGraph(BaseGraph):
         orientation: str = "v",
         ascending: bool = None,
         marker_color: str = "crimson",
+        colors_from_string: bool = False,
         **kwargs
     ) -> go.Bar:
         if ascending is not None:
@@ -19,6 +21,8 @@ class BarGraph(BaseGraph):
             data = self.data
         x = list(data.index)
         y = list(data)
+        if colors_from_string:
+            marker_color = [generate_color_code(name) for name in data.index]
         if orientation == "v":
             return go.Bar(
                 x=x, y=y, orientation=orientation, marker_color=marker_color, **kwargs
@@ -35,6 +39,7 @@ class BarGraph(BaseGraph):
         marker_color: str = "crimson",
         show: bool = True,
         output_file: Union[bool, str] = False,
+        colors_from_string: bool = False,
         **kwargs
     ):
         fig = go.Figure(
@@ -42,6 +47,7 @@ class BarGraph(BaseGraph):
                 orientation=orientation,
                 ascending=ascending,
                 marker_color=marker_color,
+                colors_from_string=colors_from_string,
                 **kwargs
             )
         )
@@ -67,11 +73,13 @@ class MatrixBarGraph(BaseGraph):
         Args:
             colors: Selected colors for a group
         """
-        colors = {} if colors is None else colors
+        final_colors = {name: generate_color_code(name) for name in self.data.index}
+        if colors is not None:
+            final_colors.update(**colors)
         fig = go.Figure()
         for col_name in self.data.index:
             fig.add_trace(
-                go.Bar(name=col_name, x=self.data.columns, y=self.data.loc[col_name], marker_color=colors.get(col_name, None))
+                go.Bar(name=col_name, x=self.data.columns, y=self.data.loc[col_name], marker_color=final_colors.get(col_name, None))
             )
 
         fig.update_layout(barmode="stack")
