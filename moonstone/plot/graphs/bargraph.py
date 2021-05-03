@@ -67,7 +67,7 @@ class MatrixBarGraph(BaseGraph):
         plotting_options: dict = None,
         show: bool = True,
         output_file: Union[bool, str] = False,
-        colors: dict = None
+        colors: dict = None,
     ):
         """
         Args:
@@ -79,7 +79,12 @@ class MatrixBarGraph(BaseGraph):
         fig = go.Figure()
         for col_name in self.data.index:
             fig.add_trace(
-                go.Bar(name=col_name, x=self.data.columns, y=self.data.loc[col_name], marker_color=final_colors.get(col_name, None))
+                go.Bar(
+                    name=col_name,
+                    x=self.data.columns,
+                    y=self.data.loc[col_name],
+                    marker_color=final_colors.get(col_name, None),
+                )
             )
 
         fig.update_layout(barmode="stack")

@@ -1,5 +1,4 @@
 from string import ascii_lowercase, digits
-from typing import Dict, List
 
 from slugify import slugify
 
