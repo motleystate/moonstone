@@ -155,7 +155,7 @@ class PlotTaxonomyCounts:
             "layout": {
                 "title": f"{number_of_taxa} most abundant {taxa_level} - Total sum of abundances",
                 "xaxis_title": "Percentage Sample",
-                "yaxis_title": "Species",
+                "yaxis_title": "Species"
             }
         }
         if mean_taxa is not None:
@@ -195,6 +195,7 @@ class PlotTaxonomyCounts:
                 "title": f"{taxa_level.capitalize()} composition for the top {taxa_number} most abundant species across samples",  # noqa
                 "xaxis_title": "Samples",
                 "yaxis_title": "Percentage",
+                "legend": {'traceorder':'normal'}
             }
         }
         if mean_taxa is not None:
