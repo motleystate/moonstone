@@ -141,7 +141,7 @@ class PlotTaxonomyCounts:
             .mean(axis=1)
             .sort_values(ascending=False)[:taxa_number]
         )
-        make_float_legend = lambda x: " (mean={:,.2f})".format(x)
+        make_float_legend = lambda x: " (mean={:,.2f})".format(x)  # noqa
         top_taxa_mean = top_taxa_mean.apply(make_float_legend)
         number_of_taxa = len(
             top_taxa_mean
@@ -149,7 +149,9 @@ class PlotTaxonomyCounts:
         # Filter for top species
         abundances = data_df.groupby(taxa_level).sum().loc[top_taxa_mean.index]
         percentage_presence = (abundances != 0).sum(axis=1) / abundances.shape[1] * 100
-        percentage_presence.index = percentage_presence.index + top_taxa_mean.astype('str')
+        percentage_presence.index = percentage_presence.index + top_taxa_mean.astype(
+            "str"
+        )
         # Make graph
         graph = BarGraph(percentage_presence.iloc[::-1])
         # Plotting options
@@ -157,11 +159,13 @@ class PlotTaxonomyCounts:
             "layout": {
                 "title": f"{number_of_taxa} most abundant {taxa_level} - Total sum of abundances",
                 "xaxis_title": "Percentage Sample",
-                "yaxis_title": "Species"
+                "yaxis_title": "Species",
             }
         }
         if mean_taxa is not None:
-            default_plotting_options["layout"]["title"] = "{} (mean among samples > {})".format(
+            default_plotting_options["layout"][
+                "title"
+            ] = "{} (mean among samples > {})".format(
                 default_plotting_options["layout"]["title"], mean_taxa
             )
         plotting_options = kwargs.pop("plotting_options", default_plotting_options)
@@ -197,7 +201,7 @@ class PlotTaxonomyCounts:
                 "title": f"{taxa_level.capitalize()} composition for the top {taxa_number} most abundant species across samples",  # noqa
                 "xaxis_title": "Samples",
                 "yaxis_title": "Percentage",
-                "legend": {'traceorder':'normal'}
+                "legend": {"traceorder": "normal"},
             }
         }
         if mean_taxa is not None:
