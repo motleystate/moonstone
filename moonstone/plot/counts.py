@@ -6,6 +6,7 @@ from scipy.spatial import distance
 
 from moonstone.filtering import TaxonomyMeanFiltering
 from moonstone.plot.graphs.bargraph import BarGraph, MatrixBarGraph
+from moonstone.utils.dict_operations import merge_dict
 from moonstone.utils.plot import (
     add_x_to_plotting_options,
     add_default_titles_to_plotting_options,
@@ -168,7 +169,9 @@ class PlotTaxonomyCounts:
             ] = "{} (mean among samples > {})".format(
                 default_plotting_options["layout"]["title"], mean_taxa
             )
-        plotting_options = kwargs.pop("plotting_options", default_plotting_options)
+        plotting_options = merge_dict(
+            kwargs.pop("plotting_options", {}), default_plotting_options
+        )
         graph.plot_one_graph(
             orientation="h", plotting_options=plotting_options, **kwargs
         )
@@ -210,5 +213,7 @@ class PlotTaxonomyCounts:
             ] = "{} (mean among samples > {})".format(
                 default_plotting_options["layout"]["title"], mean_taxa
             )
-        plotting_options = kwargs.pop("plotting_options", default_plotting_options)
+        plotting_options = merge_dict(
+            kwargs.pop("plotting_options", {}), default_plotting_options
+        )
         graph.plot_one_graph(plotting_options=plotting_options, **kwargs)
