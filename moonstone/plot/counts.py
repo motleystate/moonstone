@@ -151,7 +151,7 @@ class PlotTaxonomyCounts:
         # Make graph
         graph = BarGraph(percentage_presence.iloc[::-1])
         # Plotting options
-        plotting_options = {
+        default_plotting_options = {
             "layout": {
                 "title": f"{number_of_taxa} most abundant {taxa_level} - Total sum of abundances",
                 "xaxis_title": "Percentage Sample",
@@ -159,9 +159,10 @@ class PlotTaxonomyCounts:
             }
         }
         if mean_taxa is not None:
-            plotting_options["layout"]["title"] = "{} (mean among samples > {})".format(
-                plotting_options["layout"]["title"], mean_taxa
+            default_plotting_options["layout"]["title"] = "{} (mean among samples > {})".format(
+                default_plotting_options["layout"]["title"], mean_taxa
             )
+        plotting_options = kwargs.pop("plotting_options", default_plotting_options)
         graph.plot_one_graph(
             orientation="h", plotting_options=plotting_options, **kwargs
         )
@@ -202,5 +203,5 @@ class PlotTaxonomyCounts:
             ] = "{} (mean among samples > {})".format(
                 default_plotting_options["layout"]["title"], mean_taxa
             )
-        plotting_options = kwargs.get("plotting_options", default_plotting_options)
+        plotting_options = kwargs.pop("plotting_options", default_plotting_options)
         graph.plot_one_graph(plotting_options=plotting_options, **kwargs)
