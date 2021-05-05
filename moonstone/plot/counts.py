@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Optional
+from typing import Optional, List
 
 from scipy.cluster import hierarchy
 from scipy.spatial import distance
@@ -84,8 +84,15 @@ class PlotTaxonomyCounts:
 
     def _get_percentage_presence(
         self, df: pd.DataFrame, taxa_level: str, taxa_number: int
-    ):
-        """Get percentage presence series for most abundant taxa."""
+    ) -> pd.Series:
+        """
+        Get percentage presence series for most abundant taxa.
+
+        Args:
+            df: Dataframe of abundances
+            taxa_level: Taxonomy level
+            taxa_number: Number of taxa to plot
+        """
         top_taxa_mean = (
             df.groupby(taxa_level)
             .sum()
@@ -116,8 +123,8 @@ class PlotTaxonomyCounts:
         ordered from most abundant to less abundant.
 
         Args:
-            mean_taxa: mean threshold to be kept for analysis
-            taxa_number: number of taxa to plot
+            mean_taxa: Mean threshold to be kept for analysis
+            taxa_number: Number of taxa to plot
             taxa_level: Taxonomy level
         """
         data_df = self.df
@@ -152,8 +159,15 @@ class PlotTaxonomyCounts:
 
     def _compute_abundances_for_n_taxa(
         self, data_df: pd.DataFrame, taxa_number: int, taxa_level: str
-    ):
-        """Compute abundances for n (taxa_number) taxa with the rest grouped in Others."""
+    ) -> pd.DataFrame:
+        """
+        Compute abundances for n (taxa_number) taxa with the rest grouped in Others.
+
+        Args:
+            data_df: Dataframe of abundances
+            taxa_number: Number of taxa to plot
+            taxa_level: Taxonomy level
+        """
         df = data_df.groupby(taxa_level).sum()
         top = (
             df[~df.index.str.contains("(", regex=False)]
@@ -166,28 +180,32 @@ class PlotTaxonomyCounts:
             top.index
         ]  # put top species in order from most abundant species across samples to least
         top_and_other_df.loc["Others"] = 100 - top_and_other_df.sum()
-        top_and_other_df = top_and_other_df.transpose()
+        return top_and_other_df
 
+    def _cluster_samples(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Reorder samples with clustering of given order list.
+
+        Args:
+            df: dataframe to reorder index
+        """
         # Determine samples order using hierarchical clustering
         Z = hierarchy.linkage(
-            distance.pdist(
-                # top_and_other_df[top_and_other_df.columns[(top_and_other_df>40).any()]].drop('Others', axis=1)),
-                # top_and_other_df.drop('Others', axis=1)),
-                # top_and_other_df),
-                df.transpose()
-            ),
+            distance.pdist(df.T),
             method="single",
             metric="euclidean",
             optimal_ordering=False,
         )
         order = hierarchy.leaves_list(Z)
-        return top_and_other_df.iloc[order]
+        return df.iloc[:, order]
 
     def plot_sample_composition_most_abundant_taxa(
         self,
         mean_taxa: float = None,
         taxa_number: int = 20,
         taxa_level: str = "species",
+        cluster_samples: bool = True,
+        samples_order: List[str] = None,
         **kwargs,
     ):
         """
@@ -197,18 +215,23 @@ class PlotTaxonomyCounts:
             mean_taxa: mean threshold to be kept for analysis
             taxa_number: number of taxa to plot
             taxa_level: Taxonomy level
+            cluster_samples: use clustering (skipped by samples_order)
+            samples_order: list of samples to force ordering
         """
         data_df = self.df
         if mean_taxa is not None:
             data_df = TaxonomyMeanFiltering(data_df, mean_taxa).filtered_df
         data_df = self._compute_abundances_for_n_taxa(data_df, taxa_number, taxa_level)
-        df = data_df.T
+        if samples_order is not None:
+            data_df = data_df.loc[:, samples_order]
+        elif cluster_samples:
+            data_df = self._cluster_samples(data_df)
         # Make graph
-        graph = MatrixBarGraph(df)
+        graph = MatrixBarGraph(data_df)
         # Plotting options
         default_plotting_options = {
             "layout": {
-                "title": f"{taxa_level.capitalize()} composition for the top {taxa_number} most abundant species across samples",  # noqa
+                "title": f"{taxa_level.capitalize()} composition for the top {data_df.shape[1]} most abundant species across samples",  # noqa
                 "xaxis_title": "Samples",
                 "yaxis_title": "Percentage",
                 "legend": {"traceorder": "normal"},

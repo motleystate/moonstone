@@ -13,6 +13,11 @@ Counts
     :special-members: __init__
     :inherited-members:
 
+.. autoclass:: moonstone.plot.counts.PlotTaxonomyCounts
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
 
 Metadata
 ========
