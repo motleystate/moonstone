@@ -82,9 +82,78 @@ class PlotTaxonomyCounts:
     def __init__(self, taxonomy_dataframe: pd.DataFrame):
         self.df = taxonomy_dataframe
 
-    def _compute_top_n_taxa_df(
+    def _get_percentage_presence(
+        self, df: pd.DataFrame, taxa_level: str, taxa_number: int
+    ):
+        """Get percentage presence series for most abundant taxa."""
+        top_taxa_mean = (
+            df.groupby(taxa_level)
+            .sum()
+            .mean(axis=1)
+            .sort_values(ascending=False)[:taxa_number]
+        )
+        make_float_legend = lambda x: " (mean={:,.2f})".format(x)  # noqa
+        top_taxa_mean = top_taxa_mean.apply(make_float_legend)
+        # Filter for top species
+        abundances = df.groupby(taxa_level).sum().loc[top_taxa_mean.index]
+        percentage_presence = (abundances != 0).sum(axis=1) / abundances.shape[1] * 100
+        percentage_presence.index = percentage_presence.index + top_taxa_mean.astype(
+            "str"
+        )
+        return percentage_presence
+
+    def plot_most_abundant_taxa(
+        self,
+        mean_taxa: float = None,
+        taxa_number: int = 20,
+        taxa_level: str = "species",
+        **kwargs,
+    ):
+        """
+        Plot bar chart of most abundant taxa (total sum of abundance).
+
+        The plot represents percentage of sample with the corresponding taxa
+        ordered from most abundant to less abundant.
+
+        Args:
+            mean_taxa: mean threshold to be kept for analysis
+            taxa_number: number of taxa to plot
+            taxa_level: Taxonomy level
+        """
+        data_df = self.df
+        if mean_taxa is not None:
+            data_df = TaxonomyMeanFiltering(data_df, mean_taxa).filtered_df
+        percentage_presence = self._get_percentage_presence(
+            data_df, taxa_level, taxa_number
+        )
+        taxa_number = len(percentage_presence)
+        # Make graph
+        graph = BarGraph(percentage_presence.iloc[::-1])
+        # Plotting options
+        default_plotting_options = {
+            "layout": {
+                "title": f"{taxa_number} most abundant {taxa_level} - Total sum of abundances",
+                "xaxis_title": "Percentage Sample",
+                "yaxis_title": "Species",
+            }
+        }
+        if mean_taxa is not None:
+            default_plotting_options["layout"][
+                "title"
+            ] = "{} (mean among samples > {})".format(
+                default_plotting_options["layout"]["title"], mean_taxa
+            )
+        plotting_options = merge_dict(
+            kwargs.pop("plotting_options", {}), default_plotting_options
+        )
+        graph.plot_one_graph(
+            orientation="h", plotting_options=plotting_options, **kwargs
+        )
+
+    def _compute_abundances_for_n_taxa(
         self, data_df: pd.DataFrame, taxa_number: int, taxa_level: str
     ):
+        """Compute abundances for n (taxa_number) taxa with the rest grouped in Others."""
         df = data_df.groupby(taxa_level).sum()
         top = (
             df[~df.index.str.contains("(", regex=False)]
@@ -114,68 +183,6 @@ class PlotTaxonomyCounts:
         order = hierarchy.leaves_list(Z)
         return top_and_other_df.iloc[order]
 
-    def plot_most_abundant_taxa(
-        self,
-        mean_taxa: float = None,
-        taxa_number: int = 20,
-        taxa_level: str = "species",
-        **kwargs,
-    ):
-        """
-        Plot bar chart of most abundant taxa (total sum of abundance).
-
-        The plot represents percentage of sample with the corresponding taxa
-        ordered from most abundant to less abundant.
-
-        Args:
-            mean_taxa: mean threshold to be kept for analysis
-            taxa_number: number of taxa to plot
-            taxa_level: Taxonomy level
-        """
-        data_df = self.df
-        if mean_taxa is not None:
-            data_df = TaxonomyMeanFiltering(data_df, mean_taxa).filtered_df
-        # Select top `taxa_number`
-        top_taxa_mean = (
-            data_df.groupby(taxa_level)
-            .sum()
-            .mean(axis=1)
-            .sort_values(ascending=False)[:taxa_number]
-        )
-        make_float_legend = lambda x: " (mean={:,.2f})".format(x)  # noqa
-        top_taxa_mean = top_taxa_mean.apply(make_float_legend)
-        number_of_taxa = len(
-            top_taxa_mean
-        )  # Can be different than threshold if not enough taxa
-        # Filter for top species
-        abundances = data_df.groupby(taxa_level).sum().loc[top_taxa_mean.index]
-        percentage_presence = (abundances != 0).sum(axis=1) / abundances.shape[1] * 100
-        percentage_presence.index = percentage_presence.index + top_taxa_mean.astype(
-            "str"
-        )
-        # Make graph
-        graph = BarGraph(percentage_presence.iloc[::-1])
-        # Plotting options
-        default_plotting_options = {
-            "layout": {
-                "title": f"{number_of_taxa} most abundant {taxa_level} - Total sum of abundances",
-                "xaxis_title": "Percentage Sample",
-                "yaxis_title": "Species",
-            }
-        }
-        if mean_taxa is not None:
-            default_plotting_options["layout"][
-                "title"
-            ] = "{} (mean among samples > {})".format(
-                default_plotting_options["layout"]["title"], mean_taxa
-            )
-        plotting_options = merge_dict(
-            kwargs.pop("plotting_options", {}), default_plotting_options
-        )
-        graph.plot_one_graph(
-            orientation="h", plotting_options=plotting_options, **kwargs
-        )
-
     def plot_sample_composition_most_abundant_taxa(
         self,
         mean_taxa: float = None,
@@ -194,7 +201,7 @@ class PlotTaxonomyCounts:
         data_df = self.df
         if mean_taxa is not None:
             data_df = TaxonomyMeanFiltering(data_df, mean_taxa).filtered_df
-        data_df = self._compute_top_n_taxa_df(data_df, taxa_number, taxa_level)
+        data_df = self._compute_abundances_for_n_taxa(data_df, taxa_number, taxa_level)
         df = data_df.T
         # Make graph
         graph = MatrixBarGraph(df)
