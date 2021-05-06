@@ -141,7 +141,7 @@ class PlotTaxonomyCounts:
             "layout": {
                 "title": f"{taxa_number} most abundant {taxa_level} - Total sum of abundances",
                 "xaxis_title": "Percentage Sample",
-                "yaxis_title": "Species",
+                "yaxis_title": taxa_level.capitalize(),
             }
         }
         if mean_taxa is not None:
@@ -216,7 +216,7 @@ class PlotTaxonomyCounts:
             taxa_number: number of taxa to plot
             taxa_level: Taxonomy level
             cluster_samples: use clustering (skipped by samples_order)
-            samples_order: list of samples to force ordering
+            samples_order: list of samples to force ordering for visualization
         """
         data_df = self.df
         if mean_taxa is not None:
