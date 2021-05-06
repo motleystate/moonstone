@@ -3,7 +3,7 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from moonstone.filtering.taxonomy_filtering import TaxonomyNamesFiltering
+from moonstone.filtering.taxonomy_filtering import TaxonomyNamesFiltering, TaxonomyMeanFiltering
 
 
 class TestTaxonomyNamesFiltering(TestCase):
@@ -121,3 +121,72 @@ class TestTaxonomyNamesFiltering(TestCase):
         selected_rows = ['genus_1']
         with self.assertRaises(ValueError):
             tested_filtering = TaxonomyNamesFiltering(test_df, selected_rows, level='phylum', keep=False)  # noqa
+
+
+class TestTaxonomyMeanFiltering(TestCase):
+
+    def setUp(self):
+        self.test_df = pd.DataFrame.from_dict(
+            {
+                ('genus_1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
+                ('genus_1', 'specie_3'): {'1': 1, '2': 0, '3': 0, '4': 0},
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9},
+                ('genus_2', 'specie_4'): {'1': 9, '2': 18, '3': 6, '4': 3},
+            },
+            orient='index')
+        self.test_df.columns.name = 'sample'
+        self.test_df.index.set_names(['genus', 'species'], inplace=True)
+
+    def test_mean_value_1_species_level(self):
+        mean_value = 1
+        expected_df = pd.DataFrame.from_dict(
+            {
+                ('genus_1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9},
+                ('genus_2', 'specie_4'): {'1': 9, '2': 18, '3': 6, '4': 3},
+            },
+            orient='index')
+        expected_df.columns.name = 'sample'
+        expected_df.index.set_names(['genus', 'species'], inplace=True)
+        tested_filtering = TaxonomyMeanFiltering(self.test_df, mean_value, level="species")
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
+    def test_mean_value_10_species_level(self):
+        mean_value = 10
+        expected_df = pd.DataFrame.from_dict(
+            {
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9},
+            },
+            orient='index')
+        expected_df.columns.name = 'sample'
+        expected_df.index.set_names(['genus', 'species'], inplace=True)
+        tested_filtering = TaxonomyMeanFiltering(self.test_df, mean_value, level="species")
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
+    def test_mean_value_1_genus_level(self):
+        mean_value = 1
+        expected_df = pd.DataFrame.from_dict(
+            {
+                ('genus_1', 'specie_1'): {'1': 3, '2': 2, '3': 1, '4': 0},
+                ('genus_1', 'specie_3'): {'1': 1, '2': 0, '3': 0, '4': 0},
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9},
+                ('genus_2', 'specie_4'): {'1': 9, '2': 18, '3': 6, '4': 3},
+            },
+            orient='index')
+        expected_df.columns.name = 'sample'
+        expected_df.index.set_names(['genus', 'species'], inplace=True)
+        tested_filtering = TaxonomyMeanFiltering(self.test_df, mean_value, level="genus")
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
+    def test_mean_value_5_genus_level(self):
+        mean_value = 5
+        expected_df = pd.DataFrame.from_dict(
+            {
+                ('genus_2', 'specie_2'): {'1': 25, '2': 6, '3': 3, '4': 9},
+                ('genus_2', 'specie_4'): {'1': 9, '2': 18, '3': 6, '4': 3},
+            },
+            orient='index')
+        expected_df.columns.name = 'sample'
+        expected_df.index.set_names(['genus', 'species'], inplace=True)
+        tested_filtering = TaxonomyMeanFiltering(self.test_df, mean_value, level="genus")
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)

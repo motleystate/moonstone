@@ -148,7 +148,7 @@ class DownsizeDir:
                                       })
 
         with mp.Pool(processes=self.processes) as pool:
-            check = pool.map(self.instantiate, worker_parameters, chunksize=1)
+            check = pool.map(self.instantiate, worker_parameters, chunksize=1)  # noqa
 
         logger.info('Done!')
 

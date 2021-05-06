@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from moonstone.parsers.counts.taxonomy.base_metaphlan import BaseMetaphlanParser
+from moonstone.parsers.counts.taxonomy.metaphlan import BaseMetaphlanParser
 
 
 class TestMetaphlan2Parser(TestCase):

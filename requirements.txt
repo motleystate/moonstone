@@ -23,7 +23,9 @@ decorator==4.4.2
     #   ipython
     #   scikit-bio
 hdmedians==0.13
-    # via scikit-bio
+    # via
+    #   moonstone (setup.py)
+    #   scikit-bio
 idna==2.10
     # via requests
 ipython-genutils==0.2.0
