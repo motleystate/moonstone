@@ -109,7 +109,7 @@ class PlotTaxonomyCounts:
         )
         return percentage_presence
 
-    def plot_most_abundant_taxa(
+    def plot_most_prevalent_taxa(
         self,
         mean_taxa: float = None,
         taxa_number: int = 20,
@@ -117,10 +117,10 @@ class PlotTaxonomyCounts:
         **kwargs,
     ):
         """
-        Plot bar chart of most abundant taxa (total sum of abundance).
+        Plot bar chart of most prevalent taxa (total sum of abundance).
 
         The plot represents percentage of sample with the corresponding taxa
-        ordered from most abundant to less abundant.
+        ordered from most prevalen to less prevalent.
 
         Args:
             mean_taxa: Mean threshold to be kept for analysis
@@ -139,7 +139,7 @@ class PlotTaxonomyCounts:
         # Plotting options
         default_plotting_options = {
             "layout": {
-                "title": f"{taxa_number} most abundant {taxa_level} - Total sum of abundances",
+                "title": f"{taxa_number} most prevalent {taxa_level} - Total sum of abundances",
                 "xaxis_title": "Percentage Sample",
                 "yaxis_title": taxa_level.capitalize(),
             }
@@ -157,8 +157,25 @@ class PlotTaxonomyCounts:
             orientation="h", plotting_options=plotting_options, **kwargs
         )
 
-    def _compute_abundances_for_n_taxa(
-        self, data_df: pd.DataFrame, taxa_number: int, taxa_level: str
+    def _compute_top_n_most_abundant_taxa_list(
+        self, 
+        data_df: pd.DataFrame,
+        taxa_number: int
+        ):
+        return list(
+            data_df[~data_df.index.str.contains("(", regex=False)]
+            .sum(axis=1)
+            .sort_values(ascending=False)
+            .head(taxa_number)
+            .index
+            )  # Filter out rows not classified to the species level (that contains '(')
+
+    def _compute_abundances_taxa_dataframe(
+        self, 
+        data_df: pd.DataFrame, 
+        taxa_level: str,
+        taxa_number: int = 20, 
+        forced_taxa: list = None,
     ) -> pd.DataFrame:
         """
         Compute abundances for n (taxa_number) taxa with the rest grouped in Others.
@@ -169,15 +186,15 @@ class PlotTaxonomyCounts:
             taxa_level: Taxonomy level
         """
         df = data_df.groupby(taxa_level).sum()
-        top = (
-            df[~df.index.str.contains("(", regex=False)]
-            .sum(axis=1)
-            .sort_values(ascending=False)
-            .head(taxa_number)
-        )  # Filter out rows not classified to the species level (that contains '(')
-        top_and_other_df = df[df.index.get_level_values(taxa_level).isin(top.index)]
+
+        if forced_taxa:
+            top = forced_taxa
+        else:
+            top = self._compute_top_n_most_abundant_taxa_list(data_df, taxa_number)
+
+        top_and_other_df = df[df.index.get_level_values(taxa_level).isin(top)]
         top_and_other_df = df.loc[
-            top.index
+            top
         ]  # put top species in order from most abundant species across samples to least
         top_and_other_df.loc["Others"] = 100 - top_and_other_df.sum()
         return top_and_other_df
@@ -198,6 +215,30 @@ class PlotTaxonomyCounts:
         )
         order = hierarchy.leaves_list(Z)
         return df.iloc[:, order]
+
+    def plot_most_abundant_taxa(
+        self,
+        mean_taxa: float = None,
+        taxa_number: int = 20,
+        taxa_level: str = "species",
+        cluster_samples: bool = True,
+        samples_order: List[str] = None,
+        **kwargs,
+    ):
+        """
+        Plot bar chart of most abundant taxa.
+
+        The plot represents percentage of sample with the corresponding taxa
+        ordered from most abundant to less abundant.
+
+        Args:
+            mean_taxa: Mean threshold to be kept for analysis
+            taxa_number: Number of taxa to plot
+            taxa_level: Taxonomy level
+        """
+
+
+
 
     def plot_sample_composition_most_abundant_taxa(
         self,
