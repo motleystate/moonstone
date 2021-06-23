@@ -1,10 +1,12 @@
 from unittest import TestCase
 
+from io import StringIO
 import numpy as np
 import pandas as pd
+from skbio import TreeNode
 
 from moonstone.analysis.diversity.beta import (
-    BrayCurtis
+    BrayCurtis, WeightedUniFrac, UnweightedUniFrac
 )
 
 
@@ -130,5 +132,82 @@ class TestBrayCurtis(TestCase):
 
         pd.testing.assert_series_equal(
             pval, expected_object,
+            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+        )
+
+
+class TestWeightedUniFrac(TestCase):
+
+    def setUp(self):
+        self.tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0],
+                'species2': [1, 0, 2],
+                'species3': [0, 0, 0],
+                'species4': [0, 3, 0]
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3']
+        )
+
+    def test_compute_beta_diversity(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
+        tested_object_instance = WeightedUniFrac(self.tested_object, tree)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample1': [0, 1.285714, 0.400000],
+                'sample2': [1.285714, 0, 1.571429],
+                'sample3': [0.400000, 1.571429, 0],
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3']
+        )
+        pd.testing.assert_frame_equal(
+            tested_object_instance.beta_diversity_df, expected_object,
+            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+        )
+    """
+    def test_compute_beta_diversity_incomplete_tree(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species6:0.5,species5:0.5):1.0)root;'))
+        tested_object_instance = WeightedUniFrac(self.tested_object, tree)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample1': [0, 1.285714, 0.400000],
+                'sample2': [1.285714, 0, 1.571429],
+                'sample3': [0.400000, 1.571429, 0],
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3']
+        )
+        print(tested_object_instance.beta_diversity_df)
+    """
+
+
+class TestUnweightedUniFrac(TestCase):
+
+    def setUp(self):
+        self.tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0],
+                'species2': [1, 0, 2],
+                'species3': [0, 0, 0],
+                'species4': [0, 3, 0]
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3']
+        )
+
+    def test_compute_beta_diversity(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
+        tested_object_instance = UnweightedUniFrac(self.tested_object, tree)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample1': [0, 0.538462, 0.142857],
+                'sample2': [0.538462, 0, 0.615385],
+                'sample3': [0.142857, 0.615385, 0],
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3']
+        )
+        pd.testing.assert_frame_equal(
+            tested_object_instance.beta_diversity_df, expected_object,
             check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )

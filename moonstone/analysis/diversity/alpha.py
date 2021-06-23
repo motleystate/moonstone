@@ -56,3 +56,33 @@ class Chao1Index(AlphaDiversity):
         for i in self.df.columns:
             Seriesdic[i] = skbio.diversity.alpha.chao1(self.df[i], bias_corrected)
         return pd.Series(Seriesdic)
+
+
+class FaithsPhylogeneticDiversity(AlphaDiversity):
+    """
+    Perform calculation of the Faith's PD for each samples of the dataframe
+    """
+    def __init__(
+        self,
+        taxonomy_dataframe: pd.DataFrame,
+        taxonomy_tree: skbio.TreeNode
+    ):
+        super().__init__(taxonomy_dataframe)
+        self.tree = taxonomy_tree
+
+    def compute_diversity(self, validate: bool = True) -> pd.Series:
+        """
+        Args:
+            validate: skbio argument. "If False, validation of the input won’t be performed.
+            This step can be slow, so if validation is run elsewhere it can be disabled here.
+            However, invalid input data can lead to invalid results or error messages that
+            are hard to interpret, so this step should not be bypassed if you’re not certain
+            that your input data are valid. See skbio.diversity for the description of what
+            validation entails so you can determine if you can safely disable validation.
+        """
+        # steps to compute the index
+        Seriesdic = {}
+        otu_ids = self.df.index
+        for i in self.df.columns:
+            Seriesdic[i] = skbio.diversity.alpha.faith_pd(self.df[i], otu_ids, self.tree, validate=validate)
+        return pd.Series(Seriesdic)
