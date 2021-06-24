@@ -55,17 +55,10 @@ class TestStatisticalTestFunction(TestCase):
             index=['sample6', 'sample7'],
         )
 
-        expected_df = pd.DataFrame(
-            [
-                [np.nan, 0],
-                [0, np.nan]
-            ],
-            columns=[1, 2],
-            index=[1, 2]
-        )
-
-        matrix = statistical_test_groups_comparison(self.test_df, metadata_df['group'], stat_test='mann_whitney_u')
-        pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
+        with self.assertRaises(RuntimeError) as cm:
+            matrix = statistical_test_groups_comparison(self.test_df, metadata_df['group'], stat_test='mann_whitney_u')
+        the_exception = cm.exception
+        self.assertEqual(the_exception.__str__(), "All groups have been dropped: not enough observations by group.")
 
     def test_mann_whitney_u_groups_nonsym(self):
         metadata_df = pd.DataFrame(

@@ -81,8 +81,8 @@ class FaithsPhylogeneticDiversity(AlphaDiversity):
             validation entails so you can determine if you can safely disable validation.
         """
         # steps to compute the index
-        Seriesdic = {}
+        seriesdic = {}
         otu_ids = self.df.index
         for i in self.df.columns:
-            Seriesdic[i] = skbio.diversity.alpha.faith_pd(self.df[i], otu_ids, self.tree, validate=validate)
-        return pd.Series(Seriesdic)
+            seriesdic[i] = skbio.diversity.alpha.faith_pd(self.df[i], otu_ids, self.tree, validate=validate)
+        return pd.Series(seriesdic)
