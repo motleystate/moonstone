@@ -88,7 +88,7 @@ class FaithsPhylogeneticDiversity(AlphaDiversity):
         for otu_id in otu_ids:
             try:
                 self.tree.find(otu_id)
-            except:
+            except skbio.tree._exception.MissingNodeError:
                 missing_ids += [otu_id]
         if len(missing_ids) > 0:
             raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")

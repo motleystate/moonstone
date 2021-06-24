@@ -56,7 +56,7 @@ class TestStatisticalTestFunction(TestCase):
         )
 
         with self.assertRaises(RuntimeError) as cm:
-            matrix = statistical_test_groups_comparison(self.test_df, metadata_df['group'], stat_test='mann_whitney_u')
+            statistical_test_groups_comparison(self.test_df, metadata_df['group'], stat_test='mann_whitney_u')
         the_exception = cm.exception
         self.assertEqual(the_exception.__str__(), "All groups have been dropped: not enough observations by group.")
 

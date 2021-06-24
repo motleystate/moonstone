@@ -181,7 +181,6 @@ class TestFaithsPhylogeneticDiversity(TestCase):
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
 
-
     def test_compute_alpha_diversity(self):
         tree = TreeNode.read(StringIO(
             u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
@@ -201,14 +200,6 @@ class TestFaithsPhylogeneticDiversity(TestCase):
         tree = TreeNode.read(StringIO(
             u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species6:0.5,species5:0.5):1.0)root;'))
         tested_object_instance = FaithsPhylogeneticDiversity(self.tested_object, tree)
-        expected_object = pd.DataFrame.from_dict(
-            {
-                'sample1': [0, 1.285714, 0.400000],
-                'sample2': [1.285714, 0, 1.571429],
-                'sample3': [0.400000, 1.571429, 0],
-            },
-            orient='index', columns=['sample1', 'sample2', 'sample3']
-        )
 
         with self.assertRaises(RuntimeError) as cm:
             tested_object_instance.compute_diversity(validate=False)

@@ -165,21 +165,6 @@ class TestWeightedUniFrac(TestCase):
             tested_object_instance.beta_diversity_df, expected_object,
             check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
-    """
-    def test_compute_beta_diversity_incomplete_tree(self):
-        tree = TreeNode.read(StringIO(
-            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species6:0.5,species5:0.5):1.0)root;'))
-        tested_object_instance = WeightedUniFrac(self.tested_object, tree)
-        expected_object = pd.DataFrame.from_dict(
-            {
-                'sample1': [0, 1.285714, 0.400000],
-                'sample2': [1.285714, 0, 1.571429],
-                'sample3': [0.400000, 1.571429, 0],
-            },
-            orient='index', columns=['sample1', 'sample2', 'sample3']
-        )
-        print(tested_object_instance.beta_diversity_df)
-    """
 
 
 class TestUnweightedUniFrac(TestCase):
