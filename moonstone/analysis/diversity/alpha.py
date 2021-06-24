@@ -83,6 +83,16 @@ class FaithsPhylogeneticDiversity(AlphaDiversity):
         # steps to compute the index
         seriesdic = {}
         otu_ids = self.df.index
+
+        missing_ids = []
+        for otu_id in otu_ids:
+            try:
+                self.tree.find(otu_id)
+            except:
+                missing_ids += [otu_id]
+        if len(missing_ids) > 0:
+            raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
+
         for i in self.df.columns:
             seriesdic[i] = skbio.diversity.alpha.faith_pd(self.df[i], otu_ids, self.tree, validate=validate)
         return pd.Series(seriesdic)

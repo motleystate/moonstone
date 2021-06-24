@@ -171,9 +171,8 @@ class TestChao1Index(TestCase):
 
 class TestFaithsPhylogeneticDiversity(TestCase):
 
-    def test_compute_alpha_diversity(self):
-
-        tested_object = pd.DataFrame.from_dict(
+    def setUp(self):
+        self.tested_object = pd.DataFrame.from_dict(
             {
                 'species1': [4, 4, 0, 2, 4],
                 'species2': [1, 0, 2, 0, 5],
@@ -181,9 +180,12 @@ class TestFaithsPhylogeneticDiversity(TestCase):
                 'species4': [0, 3, 0, 0, 4]
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
+
+
+    def test_compute_alpha_diversity(self):
         tree = TreeNode.read(StringIO(
             u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
-        tested_object_instance = FaithsPhylogeneticDiversity(tested_object, tree)
+        tested_object_instance = FaithsPhylogeneticDiversity(self.tested_object, tree)
         expected_object = pd.Series({
             'sample1': 1.75,
             'sample2': 3.00,
@@ -194,6 +196,24 @@ class TestFaithsPhylogeneticDiversity(TestCase):
         pd.testing.assert_series_equal(
             tested_object_instance.compute_diversity(validate=False), expected_object
             )
+
+    def test_compute_alpha_diversity_incomplete_tree(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species6:0.5,species5:0.5):1.0)root;'))
+        tested_object_instance = FaithsPhylogeneticDiversity(self.tested_object, tree)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample1': [0, 1.285714, 0.400000],
+                'sample2': [1.285714, 0, 1.571429],
+                'sample3': [0.400000, 1.571429, 0],
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3']
+        )
+
+        with self.assertRaises(RuntimeError) as cm:
+            tested_object_instance.compute_diversity(validate=False)
+        the_exception = cm.exception
+        self.assertEqual(the_exception.__str__(), "INCOMPLETE TREE: missing ['species4'].")
 
     def test_visualize(self):
         # Not real test but make sure that visualize() runs without errors
