@@ -170,10 +170,10 @@ class PlotTaxonomyCounts:
         """
         df = data_df.groupby(taxa_level).sum()
         top = (
-            df[~df.index.str.contains("(", regex=False)]
-            .sum(axis=1)
-            .sort_values(ascending=False)
-            .head(taxa_number)
+            df[~df.index.str.contains("(", regex=False)].sum(axis=1)[
+                df[~df.index.str.contains("(", regex=False)]
+                .sum(axis=1) > 0
+                ].sort_values(ascending=False).head(taxa_number)
         )  # Filter out rows not classified to the species level (that contains '(')
         top_and_other_df = df[df.index.get_level_values(taxa_level).isin(top.index)]
         top_and_other_df = df.loc[
@@ -231,7 +231,7 @@ class PlotTaxonomyCounts:
         # Plotting options
         default_plotting_options = {
             "layout": {
-                "title": f"{taxa_level.capitalize()} composition for the top {data_df.shape[1]} most abundant species across samples",  # noqa
+                "title": f"{taxa_level.capitalize()} composition for the top {data_df.drop('Others').shape[0]} most abundant species across samples",  # noqa
                 "xaxis_title": "Samples",
                 "yaxis_title": "Percentage",
                 "legend": {"traceorder": "normal"},
