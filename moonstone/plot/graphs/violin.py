@@ -24,7 +24,11 @@ class ViolinGraph(BaseGraph, BaseViolinGraph):
         self, plotting_options: dict = None,
         show: bool = True, output_file: Union[bool, str] = False,
         points: Union[bool, str] = "suspectedoutliers",
+        box: bool = False, color: str = None,
+        line_color: str = None
     ):
+        color = self.DEFAULT_COLOR if color is None else color
+        line_color = self.DEFAULT_COLOR if line_color is None else line_color
         fig = go.Figure(
             [
                 go.Violin(
@@ -32,7 +36,10 @@ class ViolinGraph(BaseGraph, BaseViolinGraph):
                     points=self._valid_points_param(points),
                     meanline_visible=True,
                     text=self.data.index,
-                    name="All"
+                    box_visible=box,
+                    name="All",
+                    fillcolor=color,
+                    line_color=line_color
                 )
             ]
         )
@@ -47,7 +54,7 @@ class GroupViolinGraph(GroupBaseGraph, BaseViolinGraph):
 
     def _gen_fig_trace(
         self, x: list, y: list, name: str, text: list, color: str,
-        points: Union[bool, str] = "suspectedoutliers",
+        points: Union[bool, str] = "suspectedoutliers", box: bool = False
     ):
         return go.Violin(
             x=x,
@@ -55,7 +62,7 @@ class GroupViolinGraph(GroupBaseGraph, BaseViolinGraph):
             name=name,
             text=text,
             line_color=color,
-            box_visible=True,
             points=self._valid_points_param(points),
             meanline_visible=True,
+            box_visible=box,
         )

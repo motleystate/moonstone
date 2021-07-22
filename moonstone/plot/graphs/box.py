@@ -24,7 +24,19 @@ class BoxGraph(BaseGraph, BaseBoxGraph):
         self, plotting_options: dict = None,
         show: bool = True, output_file: Union[bool, str] = False,
         boxpoints: Union[bool, str] = "suspectedoutliers",
+        marker_color: str = None
     ):
+        """
+        Plot box graph.
+
+        Args:
+            plotting_options: options for the layout of the graph
+            show: whether or not to show the graph
+            output_file: path for output file
+            boxpoints: boxpoints param from plotly
+            marker_color: color for the boxplot
+        """
+        marker_color = self.DEFAULT_COLOR if marker_color is None else marker_color
         fig = go.Figure(
             [
                 go.Box(
@@ -32,7 +44,7 @@ class BoxGraph(BaseGraph, BaseBoxGraph):
                     boxpoints=self._valid_boxpoints_param(boxpoints),
                     text=self.data.index,
                     name="All",
-                    marker_color=self.DEFAULT_COLOR,
+                    marker_color=marker_color,
                 )
             ]
         )
