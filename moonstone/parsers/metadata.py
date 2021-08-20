@@ -1,4 +1,5 @@
 """Classes to handle metadata import."""
+import logging
 import yaml
 from collections import defaultdict
 from typing import Dict, List
@@ -11,7 +12,7 @@ from moonstone.analysis.columns_statistics import DataframeStatistics
 from moonstone.parsers.transform.cleaning import DataFrameCleaner
 from .base import BaseParser
 
-
+logger = logging.getLogger(__name__)
 class MetadataParser(BaseParser):
     """Parse metadata file and allows to apply transformations on them (cleaning...)."""
 
@@ -53,6 +54,24 @@ class MetadataParser(BaseParser):
         )
         super().__init__(*args, **kwargs)
 
+    def _validate_index_col(self, dataframe):
+        """Validate sample name columns to be used as pd.DataFrame.index"""
+        if self.index_col in dataframe.columns:
+            pass
+        else:
+            logger.warning('Selected or Default sample column (%s) not found' % self.index_col)
+            sample_col: list = []
+            sample_col.append(next((x for x in [c for c in dataframe.columns] if self.index_col.lower() in x.lower()), None))
+        if sample_col == None:
+            logger.error('Could not find a valid column for sample names!')
+        if len(sample_col) == 1:
+            self.index_col = sample_col[0]
+            logger.warning('Your ass is saved this time, using %s' % self.index_col)
+        else:
+            logger.warning('Found multiple possible alternative for sample name column: %s' % sample_col)
+            self.index_col = sample_col[0]
+            logger.warning('Using %s as alternative index column' % self.index_col)    
+
     def _load_data(self) -> DataFrame:
         """Load and return Pandas dataframe."""
         dataframe = super()._load_data()
@@ -62,6 +81,7 @@ class MetadataParser(BaseParser):
                 transf_name = transformation[0]
                 transf_options = transformation[1]
                 df_cleaner.run_transform(col_name, transf_name, transf_options)
+        self._validate_index_col(df_cleaner.df)
         return df_cleaner.df.set_index(self.index_col)
 
     def get_stats(self) -> List[Dict]:
