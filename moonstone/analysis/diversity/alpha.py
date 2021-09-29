@@ -70,7 +70,16 @@ class FaithsPhylogeneticDiversity(AlphaDiversity):
         super().__init__(taxonomy_dataframe)
         self.tree = taxonomy_tree
 
-    def compute_diversity(self, validate: bool = True) -> pd.Series:
+    def _verification_otu_ids_in_tree(self, otu_ids):
+        missing_ids = []
+        for otu_id in otu_ids:
+            try:
+                self.tree.find(otu_id)
+            except skbio.tree._exception.MissingNodeError:
+                missing_ids += [otu_id]
+        return missing_ids
+
+    def compute_diversity(self, validate: bool = True, force_computation: bool = False) -> pd.Series:
         """
         Args:
             validate: skbio argument. "If False, validation of the input won’t be performed.
@@ -79,20 +88,24 @@ class FaithsPhylogeneticDiversity(AlphaDiversity):
             are hard to interpret, so this step should not be bypassed if you’re not certain
             that your input data are valid. See skbio.diversity for the description of what
             validation entails so you can determine if you can safely disable validation.
+            force_computation: if True, doesn't raise error if OTU IDs are missing and compute
+            the diversity with the OTU IDs that are present in the Tree
         """
         # steps to compute the index
         seriesdic = {}
         otu_ids = self.df.index
 
-        missing_ids = []
-        for otu_id in otu_ids:
-            try:
-                self.tree.find(otu_id)
-            except skbio.tree._exception.MissingNodeError:
-                missing_ids += [otu_id]
+        missing_ids = self._verification_otu_ids_in_tree(otu_ids)
         if len(missing_ids) > 0:
-            raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
+            if not force_computation:
+                raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
+            else:
+                logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\
+Computation of the Faith's diversity using only the OTU IDs present in the Tree.")
+                otu_ids = list(set(otu_ids) - set(missing_ids))
 
         for i in self.df.columns:
-            seriesdic[i] = skbio.diversity.alpha.faith_pd(self.df[i], otu_ids, self.tree, validate=validate)
+            seriesdic[i] = skbio.diversity.alpha.faith_pd(
+                self.df[i].loc[otu_ids], otu_ids, self.tree, validate=validate
+                )
         return pd.Series(seriesdic)

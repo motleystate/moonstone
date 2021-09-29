@@ -206,6 +206,34 @@ class TestFaithsPhylogeneticDiversity(TestCase):
         the_exception = cm.exception
         self.assertEqual(the_exception.__str__(), "INCOMPLETE TREE: missing ['species4'].")
 
+    def test_compute_alpha_diversity_force_computation(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0, 2, 4],
+                'species2': [1, 0, 2, 0, 5],
+                'species3': [0, 0, 0, 1, 4],
+                'species4': [0, 3, 0, 0, 4],
+                'species6': [3, 5, 2, 2, 4]
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
+        tested_object_instance = FaithsPhylogeneticDiversity(tested_object, tree)
+        expected_object = pd.Series({
+            'sample1': 1.75,
+            'sample2': 3.00,
+            'sample3': 1.50,
+            'sample4': 2.50,
+            'sample5': 4.25
+        })
+
+        with self.assertLogs('moonstone.analysis.diversity.alpha', level='WARNING') as log:
+            tested_results = tested_object_instance.compute_diversity(validate=False, force_computation=True)
+            pd.testing.assert_series_equal(tested_results, expected_object)
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.analysis.diversity.alpha:INCOMPLETE TREE: missing ['species6'].\n\
+Computation of the Faith's diversity using only the OTU IDs present in the Tree.", log.output)
+
     def test_visualize(self):
         # Not real test but make sure that visualize() runs without errors
         tested_object = pd.DataFrame.from_dict(
