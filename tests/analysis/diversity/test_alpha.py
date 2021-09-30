@@ -218,7 +218,7 @@ class TestFaithsPhylogeneticDiversity(TestCase):
                 'species6': [3, 5, 2, 2, 4]
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
-        tested_object_instance = FaithsPhylogeneticDiversity(tested_object, tree)
+        tested_object_instance = FaithsPhylogeneticDiversity(tested_object, tree, force_computation=True)
         expected_object = pd.Series({
             'sample1': 1.75,
             'sample2': 3.00,
@@ -228,7 +228,7 @@ class TestFaithsPhylogeneticDiversity(TestCase):
         })
 
         with self.assertLogs('moonstone.analysis.diversity.alpha', level='WARNING') as log:
-            tested_results = tested_object_instance.compute_diversity(validate=False, force_computation=True)
+            tested_results = tested_object_instance.compute_diversity()
             pd.testing.assert_series_equal(tested_results, expected_object)
             self.assertEqual(len(log.output), 1)
             self.assertIn("WARNING:moonstone.analysis.diversity.alpha:INCOMPLETE TREE: missing ['species6'].\n\

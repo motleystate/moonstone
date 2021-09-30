@@ -113,7 +113,7 @@ class BrayCurtis(BetaDiversity):
     """
     Perform calculation of the Bray Curtis for each pairs of samples from the dataframe
     """
-    def compute_beta_diversity(self, df):    # compute_bray_curtis_diversity
+    def compute_beta_diversity(self, df, **kwargs):    # compute_bray_curtis_diversity
         """
         :param base: logarithm base chosen (NB : for ln, base=math.exp(1))
         """
@@ -128,7 +128,6 @@ class WeightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
     def compute_beta_diversity(
         self, df,
         validate: bool = True,
-        force_computation: bool = False,
         **kwargs
     ) -> skbio.stats.distance._base.DistanceMatrix:
         """
@@ -145,7 +144,7 @@ class WeightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
 
         missing_ids = self._verification_otu_ids_in_tree(otu_ids)
         if len(missing_ids) > 0:
-            if not force_computation:
+            if not self.force_computation:
                 raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
             else:
                 logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\
@@ -166,7 +165,6 @@ class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
     def compute_beta_diversity(
         self, df,
         validate: bool = True,
-        force_computation: bool = False,
         **kwargs
     ) -> skbio.stats.distance._base.DistanceMatrix:
         # steps to compute the index
@@ -174,7 +172,7 @@ class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
 
         missing_ids = self._verification_otu_ids_in_tree(otu_ids)
         if len(missing_ids) > 0:
-            if not force_computation:
+            if not self.force_computation:
                 raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
             else:
                 logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\

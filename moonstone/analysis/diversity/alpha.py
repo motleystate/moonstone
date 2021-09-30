@@ -64,7 +64,7 @@ class FaithsPhylogeneticDiversity(AlphaDiversity, PhylogeneticDiversityBase):
     """
     Perform calculation of the Faith's PD for each samples of the dataframe
     """
-    def compute_diversity(self, validate: bool = True, force_computation: bool = False) -> pd.Series:
+    def compute_diversity(self, validate: bool = True) -> pd.Series:
         """
         Args:
             validate: skbio argument. "If False, validation of the input won’t be performed.
@@ -82,7 +82,7 @@ class FaithsPhylogeneticDiversity(AlphaDiversity, PhylogeneticDiversityBase):
 
         missing_ids = self._verification_otu_ids_in_tree(otu_ids)
         if len(missing_ids) > 0:
-            if not force_computation:
+            if not self.force_computation:
                 raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
             else:
                 logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\

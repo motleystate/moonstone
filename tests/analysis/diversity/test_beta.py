@@ -178,16 +178,14 @@ class TestWeightedUniFrac(TestCase):
                 'species6': [3, 5, 2, 2, 4]
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
-        tested_object_instance = WeightedUniFrac(tested_object, tree)
+        tested_object_instance = WeightedUniFrac(tested_object, tree, force_computation=True)
 
         expected_object_instance = WeightedUniFrac(tested_object.iloc[:4], tree)
-        expected_object = expected_object_instance.compute_beta_diversity(expected_object_instance.df)
+        expected_object = expected_object_instance.beta_diversity_df
 
         with self.assertLogs('moonstone.analysis.diversity.beta', level='WARNING') as log:
-            tested_results = tested_object_instance.compute_beta_diversity(
-                tested_object_instance.df, validate=False, force_computation=True
-            )
-            self.assertEqual(tested_results, expected_object)
+            tested_object = tested_object_instance.beta_diversity_df
+            pd.testing.assert_frame_equal(tested_object, expected_object)
 
             self.assertEqual(len(log.output), 1)
             self.assertIn("WARNING:moonstone.analysis.diversity.beta:INCOMPLETE TREE: missing ['species6'].\n\
@@ -236,16 +234,14 @@ class TestUnweightedUniFrac(TestCase):
                 'species6': [3, 5, 2, 2, 4]
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
-        tested_object_instance = UnweightedUniFrac(tested_object, tree)
+        tested_object_instance = UnweightedUniFrac(tested_object, tree, force_computation=True)
 
         expected_object_instance = UnweightedUniFrac(tested_object.iloc[:4], tree)
-        expected_object = expected_object_instance.compute_beta_diversity(expected_object_instance.df)
+        expected_object = expected_object_instance.beta_diversity_df
 
         with self.assertLogs('moonstone.analysis.diversity.beta', level='WARNING') as log:
-            tested_results = tested_object_instance.compute_beta_diversity(
-                tested_object_instance.df, validate=False, force_computation=True
-            )
-            self.assertEqual(tested_results, expected_object)
+            tested_results = tested_object_instance.beta_diversity_df
+            pd.testing.assert_frame_equal(tested_results, expected_object)
 
             self.assertEqual(len(log.output), 1)
             self.assertIn("WARNING:moonstone.analysis.diversity.beta:INCOMPLETE TREE: missing ['species6'].\n\
