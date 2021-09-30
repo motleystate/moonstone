@@ -273,7 +273,10 @@ class PhylogeneticDiversityBase(DiversityBase):
         taxonomy_tree: skbio.TreeNode
     ):
         super().__init__(taxonomy_dataframe)
-        self.tree = taxonomy_tree
+        if type(taxonomy_tree) == skbio.tree._tree.TreeNode:
+            self.tree = taxonomy_tree
+        else:
+            raise RuntimeError("taxonomy_tree should be a skbio.TreeNode.")
 
     def _verification_otu_ids_in_tree(self, otu_ids):
         missing_ids = []
