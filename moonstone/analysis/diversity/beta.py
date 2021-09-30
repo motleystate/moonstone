@@ -180,7 +180,7 @@ class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
                 logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\
 Computation of the Unweighted UniFrac diversity using only the OTU IDs present in the Tree.")
                 otu_ids = list(set(otu_ids) - set(missing_ids))
-        
+
         return skbio.diversity.beta_diversity(
             "unweighted_unifrac", df.loc[otu_ids].transpose(), df.columns,
             validate=validate, otu_ids=otu_ids, tree=self.tree,

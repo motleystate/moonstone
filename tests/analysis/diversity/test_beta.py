@@ -4,7 +4,6 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 from skbio import TreeNode
-from skbio.stats.distance import DistanceMatrix
 
 from moonstone.analysis.diversity.beta import (
     BrayCurtis, WeightedUniFrac, UnweightedUniFrac
@@ -185,7 +184,9 @@ class TestWeightedUniFrac(TestCase):
         expected_object = expected_object_instance.compute_beta_diversity(expected_object_instance.df)
 
         with self.assertLogs('moonstone.analysis.diversity.beta', level='WARNING') as log:
-            tested_results = tested_object_instance.compute_beta_diversity(tested_object_instance.df, validate=False, force_computation=True)         
+            tested_results = tested_object_instance.compute_beta_diversity(
+                tested_object_instance.df, validate=False, force_computation=True
+            )
             self.assertEqual(tested_results, expected_object)
 
             self.assertEqual(len(log.output), 1)
@@ -241,7 +242,9 @@ class TestUnweightedUniFrac(TestCase):
         expected_object = expected_object_instance.compute_beta_diversity(expected_object_instance.df)
 
         with self.assertLogs('moonstone.analysis.diversity.beta', level='WARNING') as log:
-            tested_results = tested_object_instance.compute_beta_diversity(tested_object_instance.df, validate=False, force_computation=True)         
+            tested_results = tested_object_instance.compute_beta_diversity(
+                tested_object_instance.df, validate=False, force_computation=True
+            )
             self.assertEqual(tested_results, expected_object)
 
             self.assertEqual(len(log.output), 1)
