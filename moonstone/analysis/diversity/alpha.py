@@ -5,7 +5,9 @@ from typing import Union
 import pandas as pd
 import skbio
 
-from moonstone.analysis.diversity.base import DiversityBase
+from moonstone.analysis.diversity.base import (
+    DiversityBase, PhylogeneticDiversityBase
+)
 
 logger = logging.getLogger(__name__)
 
@@ -58,27 +60,10 @@ class Chao1Index(AlphaDiversity):
         return pd.Series(Seriesdic)
 
 
-class FaithsPhylogeneticDiversity(AlphaDiversity):
+class FaithsPhylogeneticDiversity(AlphaDiversity, PhylogeneticDiversityBase):
     """
     Perform calculation of the Faith's PD for each samples of the dataframe
     """
-    def __init__(
-        self,
-        taxonomy_dataframe: pd.DataFrame,
-        taxonomy_tree: skbio.TreeNode
-    ):
-        super().__init__(taxonomy_dataframe)
-        self.tree = taxonomy_tree
-
-    def _verification_otu_ids_in_tree(self, otu_ids):
-        missing_ids = []
-        for otu_id in otu_ids:
-            try:
-                self.tree.find(otu_id)
-            except skbio.tree._exception.MissingNodeError:
-                missing_ids += [otu_id]
-        return missing_ids
-
     def compute_diversity(self, validate: bool = True, force_computation: bool = False) -> pd.Series:
         """
         Args:

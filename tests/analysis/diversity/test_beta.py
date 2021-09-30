@@ -4,6 +4,7 @@ from io import StringIO
 import numpy as np
 import pandas as pd
 from skbio import TreeNode
+from skbio.stats.distance import DistanceMatrix
 
 from moonstone.analysis.diversity.beta import (
     BrayCurtis, WeightedUniFrac, UnweightedUniFrac
@@ -166,6 +167,31 @@ class TestWeightedUniFrac(TestCase):
             check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
+    def test_compute_beta_diversity_force_computation(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0, 2, 4],
+                'species2': [1, 0, 2, 0, 5],
+                'species3': [0, 0, 0, 1, 4],
+                'species4': [0, 3, 0, 0, 4],
+                'species6': [3, 5, 2, 2, 4]
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
+        tested_object_instance = WeightedUniFrac(tested_object, tree)
+
+        expected_object_instance = WeightedUniFrac(tested_object.iloc[:4], tree)
+        expected_object = expected_object_instance.compute_beta_diversity(expected_object_instance.df)
+
+        with self.assertLogs('moonstone.analysis.diversity.beta', level='WARNING') as log:
+            tested_results = tested_object_instance.compute_beta_diversity(tested_object_instance.df, validate=False, force_computation=True)         
+            self.assertEqual(tested_results, expected_object)
+
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.analysis.diversity.beta:INCOMPLETE TREE: missing ['species6'].\n\
+Computation of the Weighted UniFrac diversity using only the OTU IDs present in the Tree.", log.output)
+
 
 class TestUnweightedUniFrac(TestCase):
 
@@ -196,3 +222,28 @@ class TestUnweightedUniFrac(TestCase):
             tested_object_instance.beta_diversity_df, expected_object,
             check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
+
+    def test_compute_beta_diversity_force_computation(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0, 2, 4],
+                'species2': [1, 0, 2, 0, 5],
+                'species3': [0, 0, 0, 1, 4],
+                'species4': [0, 3, 0, 0, 4],
+                'species6': [3, 5, 2, 2, 4]
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
+        tested_object_instance = UnweightedUniFrac(tested_object, tree)
+
+        expected_object_instance = UnweightedUniFrac(tested_object.iloc[:4], tree)
+        expected_object = expected_object_instance.compute_beta_diversity(expected_object_instance.df)
+
+        with self.assertLogs('moonstone.analysis.diversity.beta', level='WARNING') as log:
+            tested_results = tested_object_instance.compute_beta_diversity(tested_object_instance.df, validate=False, force_computation=True)         
+            self.assertEqual(tested_results, expected_object)
+
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.analysis.diversity.beta:INCOMPLETE TREE: missing ['species6'].\n\
+Computation of the Unweighted UniFrac diversity using only the OTU IDs present in the Tree.", log.output)

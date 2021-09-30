@@ -1,6 +1,7 @@
 import logging
 import re
 from abc import ABC, abstractmethod
+import skbio
 from string import capwords
 from typing import Union
 
@@ -260,3 +261,25 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 'stats_test': stats_test
             }
         }
+
+
+class PhylogeneticDiversityBase(DiversityBase):
+    """
+    Class for Phylogenetic Diversities that use a taxonomy tree to compute the diversity.
+    """
+    def __init__(
+        self,
+        taxonomy_dataframe: pd.DataFrame,
+        taxonomy_tree: skbio.TreeNode
+    ):
+        super().__init__(taxonomy_dataframe)
+        self.tree = taxonomy_tree
+
+    def _verification_otu_ids_in_tree(self, otu_ids):
+        missing_ids = []
+        for otu_id in otu_ids:
+            try:
+                self.tree.find(otu_id)
+            except skbio.tree._exception.MissingNodeError:
+                missing_ids += [otu_id]
+        return missing_ids
