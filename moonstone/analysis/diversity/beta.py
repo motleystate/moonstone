@@ -113,7 +113,7 @@ class BrayCurtis(BetaDiversity):
     """
     Perform calculation of the Bray Curtis for each pairs of samples from the dataframe
     """
-    def compute_beta_diversity(self, df, **kwargs):    # compute_bray_curtis_diversity
+    def compute_beta_diversity(self, df):    # compute_bray_curtis_diversity
         """
         :param base: logarithm base chosen (NB : for ln, base=math.exp(1))
         """
@@ -125,20 +125,7 @@ class WeightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
     """
     Perform calculation of the weighted UniFrac for each pairs of samples from the dataframe
     """
-    def compute_beta_diversity(
-        self, df,
-        validate: bool = True,
-        **kwargs
-    ) -> skbio.stats.distance._base.DistanceMatrix:
-        """
-        Args:
-            validate: skbio argument. "If False, validation of the input won’t be performed.
-            This step can be slow, so if validation is run elsewhere it can be disabled here.
-            However, invalid input data can lead to invalid results or error messages that
-            are hard to interpret, so this step should not be bypassed if you’re not certain
-            that your input data are valid. See skbio.diversity for the description of what
-            validation entails so you can determine if you can safely disable validation.
-        """
+    def compute_beta_diversity(self, df) -> skbio.stats.distance._base.DistanceMatrix:
         # steps to compute the index
         otu_ids = df.index
 
@@ -153,8 +140,7 @@ Computation of the Weighted UniFrac diversity using only the OTU IDs present in 
 
         return skbio.diversity.beta_diversity(
             "weighted_unifrac", df.loc[otu_ids].transpose(), df.columns,
-            validate=validate, otu_ids=otu_ids, tree=self.tree,
-            **kwargs
+            validate=self.validate, otu_ids=otu_ids, tree=self.tree,
             )
 
 
@@ -162,11 +148,7 @@ class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
     """
     Perform calculation of the unweighted UniFrac for each pairs of samples from the dataframe
     """
-    def compute_beta_diversity(
-        self, df,
-        validate: bool = True,
-        **kwargs
-    ) -> skbio.stats.distance._base.DistanceMatrix:
+    def compute_beta_diversity(self, df) -> skbio.stats.distance._base.DistanceMatrix:
         # steps to compute the index
         otu_ids = df.index
 
@@ -181,6 +163,5 @@ Computation of the Unweighted UniFrac diversity using only the OTU IDs present i
 
         return skbio.diversity.beta_diversity(
             "unweighted_unifrac", df.loc[otu_ids].transpose(), df.columns,
-            validate=validate, otu_ids=otu_ids, tree=self.tree,
-            **kwargs
+            validate=self.validate, otu_ids=otu_ids, tree=self.tree,
             )

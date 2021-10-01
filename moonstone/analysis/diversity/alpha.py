@@ -25,14 +25,18 @@ class ShannonIndex(AlphaDiversity):
     """
     Perform calculation of the shannon index for each samples of the dataframe
     """
-    def compute_diversity(self, base: Union[int, float] = 2) -> pd.Series:    # compute_shannon_diversity
+    def __init__(self, dataframe: Union[pd.Series, pd.DataFrame], base: Union[int, float] = 2):
         """
         :param base: logarithm base chosen (NB : for ln, base=math.exp(1))
         """
+        super().__init__(dataframe)
+        self.base = base
+
+    def compute_diversity(self) -> pd.Series:    # compute_shannon_diversity
         # steps to compute the index
         Seriesdic = {}
         for i in self.df.columns:
-            Seriesdic[i] = skbio.diversity.alpha.shannon(self.df[i], base)
+            Seriesdic[i] = skbio.diversity.alpha.shannon(self.df[i], self.base)
         return pd.Series(Seriesdic)
 
 
@@ -52,11 +56,18 @@ class Chao1Index(AlphaDiversity):
     """
     Perform calculation of the Choa1 index for each samples of the dataframe
     """
-    def compute_diversity(self, bias_corrected: bool = True) -> pd.Series:
+    def __init__(self, dataframe: Union[pd.Series, pd.DataFrame], bias_corrected: bool = True):
+        """
+        :param bias_corrected
+        """
+        super().__init__(dataframe)
+        self.bias_corrected = bias_corrected
+
+    def compute_diversity(self) -> pd.Series:
         # steps to compute the index
         Seriesdic = {}
         for i in self.df.columns:
-            Seriesdic[i] = skbio.diversity.alpha.chao1(self.df[i], bias_corrected)
+            Seriesdic[i] = skbio.diversity.alpha.chao1(self.df[i], self.bias_corrected)
         return pd.Series(Seriesdic)
 
 
@@ -64,18 +75,7 @@ class FaithsPhylogeneticDiversity(AlphaDiversity, PhylogeneticDiversityBase):
     """
     Perform calculation of the Faith's PD for each samples of the dataframe
     """
-    def compute_diversity(self, validate: bool = True) -> pd.Series:
-        """
-        Args:
-            validate: skbio argument. "If False, validation of the input won’t be performed.
-            This step can be slow, so if validation is run elsewhere it can be disabled here.
-            However, invalid input data can lead to invalid results or error messages that
-            are hard to interpret, so this step should not be bypassed if you’re not certain
-            that your input data are valid. See skbio.diversity for the description of what
-            validation entails so you can determine if you can safely disable validation.
-            force_computation: if True, doesn't raise error if OTU IDs are missing and compute
-            the diversity with the OTU IDs that are present in the Tree
-        """
+    def compute_diversity(self) -> pd.Series:
         # steps to compute the index
         seriesdic = {}
         otu_ids = self.df.index
@@ -91,6 +91,6 @@ Computation of the Faith's diversity using only the OTU IDs present in the Tree.
 
         for i in self.df.columns:
             seriesdic[i] = skbio.diversity.alpha.faith_pd(
-                self.df[i].loc[otu_ids], otu_ids, self.tree, validate=validate
+                self.df[i].loc[otu_ids], otu_ids, self.tree, validate=self.validate
                 )
         return pd.Series(seriesdic)

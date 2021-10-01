@@ -143,7 +143,7 @@ class TestChao1Index(TestCase):
                 'species4': [0, 3, 0, 0, 4]
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
-        tested_object_instance = Chao1Index(tested_object)
+        tested_object_instance = Chao1Index(tested_object, bias_corrected=False)
         expected_object = pd.Series({
             'sample1': 2.0,
             'sample2': 2.0,
@@ -152,7 +152,7 @@ class TestChao1Index(TestCase):
             'sample5': 4.0
         })
         pd.testing.assert_series_equal(
-            tested_object_instance.compute_diversity(bias_corrected=False), expected_object
+            tested_object_instance.compute_diversity(), expected_object
             )
 
     def test_visualize(self):
@@ -184,7 +184,7 @@ class TestFaithsPhylogeneticDiversity(TestCase):
     def test_compute_alpha_diversity(self):
         tree = TreeNode.read(StringIO(
             u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
-        tested_object_instance = FaithsPhylogeneticDiversity(self.tested_object, tree)
+        tested_object_instance = FaithsPhylogeneticDiversity(self.tested_object, tree, validate=False)
         expected_object = pd.Series({
             'sample1': 1.75,
             'sample2': 3.00,
@@ -193,16 +193,16 @@ class TestFaithsPhylogeneticDiversity(TestCase):
             'sample5': 4.25
         })
         pd.testing.assert_series_equal(
-            tested_object_instance.compute_diversity(validate=False), expected_object
+            tested_object_instance.compute_diversity(), expected_object
             )
 
     def test_compute_alpha_diversity_incomplete_tree(self):
         tree = TreeNode.read(StringIO(
             u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species6:0.5,species5:0.5):1.0)root;'))
-        tested_object_instance = FaithsPhylogeneticDiversity(self.tested_object, tree)
+        tested_object_instance = FaithsPhylogeneticDiversity(self.tested_object, tree, validate=False)
 
         with self.assertRaises(RuntimeError) as cm:
-            tested_object_instance.compute_diversity(validate=False)
+            tested_object_instance.compute_diversity()
         the_exception = cm.exception
         self.assertEqual(the_exception.__str__(), "INCOMPLETE TREE: missing ['species4'].")
 
