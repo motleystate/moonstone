@@ -36,7 +36,7 @@ class ShannonIndex(AlphaDiversity):
         # steps to compute the index
         Seriesdic = {}
         for i in self.df.columns:
-            Seriesdic[i] = skbio.diversity.alpha.shannon(self.df[i], self.base)
+            Seriesdic[i] = skbio.diversity.alpha.shannon(self.df[i], base=self.base)
         return pd.Series(Seriesdic)
 
 
@@ -67,7 +67,7 @@ class Chao1Index(AlphaDiversity):
         # steps to compute the index
         Seriesdic = {}
         for i in self.df.columns:
-            Seriesdic[i] = skbio.diversity.alpha.chao1(self.df[i], self.bias_corrected)
+            Seriesdic[i] = skbio.diversity.alpha.chao1(self.df[i], bias_corrected=self.bias_corrected)
         return pd.Series(Seriesdic)
 
 
