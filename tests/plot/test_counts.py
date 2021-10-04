@@ -118,8 +118,8 @@ class TestPlotTaxonomyCounts(TestCase):
         expected_df.columns.name = "sample"
         expected_df.index.name = taxa_level
         pd.testing.assert_frame_equal(
-            self.tested_instance._compute_abundances_for_n_taxa(
-                self.tested_object, 2, taxa_level
+            self.tested_instance._compute_abundances_taxa_dataframe(
+                self.tested_object, taxa_level, 2, 
             ),
             expected_df,
         )
@@ -230,8 +230,8 @@ class TestPlotTaxonomyCounts(TestCase):
         expected_df.columns.name = "sample"
         expected_df.index.name = taxa_level
         pd.testing.assert_frame_equal(
-            self.tested_instance._compute_abundances_for_n_taxa(
-                tested_object, 2, taxa_level
+            self.tested_instance._compute_abundances_taxa_dataframe(
+                tested_object, taxa_level, 2, 
             ),
             expected_df,
         )
