@@ -6,6 +6,17 @@ Changelogs
 
 Summary of developments of moonstone library.
 
+v0.6
+====
+
+v0.6.0
+------
+
+* https://github.com/motleystate/moonstone/pull/66
+* https://github.com/motleystate/moonstone/pull/69
+* Build in visualization for taxonomy counts https://github.com/motleystate/moonstone/pull/72
+* Faith's PD and UniFrac https://github.com/motleystate/moonstone/pull/75
+
 v0.5
 ====
 

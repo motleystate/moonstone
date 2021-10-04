@@ -130,7 +130,7 @@ class GroupBaseGraph(BaseGraph):
             filtered_df = self.data[self.data[group_col] == group]
             fig.add_trace(self._gen_fig_trace(
                 filtered_df[group_col], filtered_df[data_col],
-                names[group], filtered_df.index, self._get_group_color(group, colors),
+                str(names[group]), filtered_df.index, self._get_group_color(group, colors),
                 **kwargs,
             ))
 

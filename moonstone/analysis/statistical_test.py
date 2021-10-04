@@ -21,7 +21,11 @@ def _preprocess_groups_comparison(
     new_groups = []
     for i in groups:
         groupi = series[group_series[group_series == i].index].dropna()
-        if groupi.size < 20 and stat_test == "mann_whitney_u":
+        if groupi.size < 1:
+            logger.warning(
+                f"No observations for group {i} in data. Group dropped."
+            )
+        elif groupi.size < 20 and stat_test == "mann_whitney_u":
             logger.warning(f"Less than 20 observations for group {i} in data.")
             list_of_series += [groupi]
             new_groups += [i]
@@ -34,7 +38,7 @@ def _preprocess_groups_comparison(
             new_groups += [i]
 
     if len(new_groups) == 0:
-        raise RuntimeError("All groups have been dropped.")
+        raise RuntimeError("All groups have been dropped: not enough observations by group.")
 
     return new_groups, list_of_series
 

@@ -297,7 +297,7 @@ class PlotTaxonomyCounts:
         # Plotting options
         default_plotting_options = {
             "layout": {
-                "title": f"{taxa_level.capitalize()} composition for the top {data_df.shape[1]} most abundant species across samples",  # noqa
+                "title": f"{taxa_level.capitalize()} composition for the top {data_df.drop('Others').shape[0]} most abundant species across samples",  # noqa
                 "xaxis_title": "Samples",
                 "yaxis_title": "Percentage",
                 "legend": {"traceorder": "normal"},

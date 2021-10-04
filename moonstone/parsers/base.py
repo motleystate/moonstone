@@ -35,6 +35,11 @@ class BaseParser:
             self._dataframe = self._load_data()
         return self._dataframe
 
+    @dataframe.setter
+    def dataframe(self, df: pd.DataFrame):
+        """Manually set dataframe."""
+        self._dataframe = df
+
     def _load_data(self) -> pd.DataFrame:
         """
         method that handles the loading and parsing of your file into a pandas dataframe.
