@@ -120,7 +120,7 @@ class PlotTaxonomyCounts:
         Plot bar chart of most prevalent taxa (total sum of abundance).
 
         The plot represents percentage of sample with the corresponding taxa
-        ordered from most prevalen to less prevalent.
+        ordered from most prevalent to less prevalent.
 
         Args:
             mean_taxa: Mean threshold to be kept for analysis
@@ -190,7 +190,7 @@ class PlotTaxonomyCounts:
         if forced_taxa:
             top = forced_taxa
         else:
-            top = self._compute_top_n_most_abundant_taxa_list(data_df, taxa_number)
+            top = self._compute_top_n_most_abundant_taxa_list(df, taxa_number)
 
         top_and_other_df = df[df.index.get_level_values(taxa_level).isin(top)]
         top_and_other_df = df.loc[
@@ -221,8 +221,6 @@ class PlotTaxonomyCounts:
         mean_taxa: float = None,
         taxa_number: int = 20,
         taxa_level: str = "species",
-        cluster_samples: bool = True,
-        samples_order: List[str] = None,
         **kwargs,
     ):
         """
@@ -236,9 +234,36 @@ class PlotTaxonomyCounts:
             taxa_number: Number of taxa to plot
             taxa_level: Taxonomy level
         """
+        data_df = self.df
+        if mean_taxa is not None:
+            data_df = TaxonomyMeanFiltering(data_df, mean_taxa).filtered_df
 
+        abundance_per_samples_df = self._compute_abundances_taxa_dataframe(data_df, taxa_level, taxa_number=taxa_number)
+        average_abundance_df = abundance_per_samples_df.transpose().drop('Others', axis=1).mean()
 
-
+        taxa_number = len(average_abundance_df)
+        # Make graph
+        graph = BarGraph(average_abundance_df)
+        # Plotting options
+        default_plotting_options = {
+            "layout": {
+                "title": f"{taxa_number} most abundant {taxa_level}",
+                "xaxis_title": "Average relative abundance",
+                "yaxis_title": taxa_level.capitalize(),
+            }
+        }
+        if mean_taxa is not None:
+            default_plotting_options["layout"][
+                "title"
+            ] = "{} (mean among samples > {})".format(
+                default_plotting_options["layout"]["title"], mean_taxa
+            )
+        plotting_options = merge_dict(
+            kwargs.pop("plotting_options", {}), default_plotting_options
+        )
+        graph.plot_one_graph(
+            orientation="h", plotting_options=plotting_options, **kwargs
+        )
 
     def plot_sample_composition_most_abundant_taxa(
         self,
@@ -262,7 +287,7 @@ class PlotTaxonomyCounts:
         data_df = self.df
         if mean_taxa is not None:
             data_df = TaxonomyMeanFiltering(data_df, mean_taxa).filtered_df
-        data_df = self._compute_abundances_for_n_taxa(data_df, taxa_number, taxa_level)
+        data_df = self._compute_abundances_taxa_dataframe(data_df, taxa_level, taxa_number=taxa_number)
         if samples_order is not None:
             data_df = data_df.loc[:, samples_order]
         elif cluster_samples:
