@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from typing import Optional, List
 
@@ -216,6 +217,79 @@ class PlotTaxonomyCounts:
         order = hierarchy.leaves_list(Z)
         return df.iloc[:, order]
 
+    def _divide_samples_into_subgroups_and_reorder(
+        self,
+        top_and_other_df, 
+        sep_series,
+        cluster_samples: bool = True
+    ):        
+        ordered_col = []
+        x_coor = []
+        prec = -0.5
+        subgps = sep_series.unique()
+        for subgp in subgps:
+            if type(subgp) != str and np.isnan(subgp):
+                df_gp = top_and_other_df[
+                    sep_series[sep_series.isna()].index.intersection(top_and_other_df.columns)]
+            else:
+                df_gp = top_and_other_df[
+                    sep_series[sep_series == subgp].index.intersection(top_and_other_df.columns)]
+
+            if cluster_samples: 
+                tmp = list(self._cluster_samples(df_gp).columns)
+                ordered_col += tmp
+            else:
+                ordered_col += list(df_gp.columns)
+            
+            med = len(tmp)/2
+            x_coor += [(prec, prec+med, prec+len(tmp))]
+            prec += len(tmp)
+        top_and_other_df = top_and_other_df[ordered_col]
+        return top_and_other_df, x_coor, subgps
+
+    def _subgroups_annotations(
+        self, fig, x_coor, gps
+    ):
+        i = 0
+        color_bg = ["#FFFFFF", "#a7bcdb"]
+        while i < len(gps):
+            # adding background color
+            fig.add_shape(
+                type="rect", 
+                x0=x_coor[i][0], y0=100, 
+                x1=x_coor[i][2], y1=104,
+                line=dict(
+                    width=0,
+                ),
+                fillcolor=color_bg[i%2],
+            )
+            # adding text annotation (group name)
+            fig.add_annotation(
+                x=x_coor[i][1], y=102,
+                xref="x", yref="y",
+                text=gps[i],
+                showarrow=False,
+                font=dict(
+                    family="Arial",
+                    size=14
+                    ),
+            )
+            if i < (len(gps) - 1):
+                # adding line separating groups
+                fig.add_shape(
+                    type="line",
+                    x0=x_coor[i][2], y0=100, 
+                    x1=x_coor[i][2], y1=0,
+                    line=dict(
+                        width=1,
+                        dash="solid",
+                        color="white"
+                    )
+                )
+            i +=1
+        return fig
+
+
     def plot_most_abundant_taxa(
         self,
         mean_taxa: float = None,
@@ -272,6 +346,9 @@ class PlotTaxonomyCounts:
         taxa_level: str = "species",
         cluster_samples: bool = True,
         samples_order: List[str] = None,
+        color_df: pd.DataFrame = None,
+        sep_series: pd.Series = None,
+        sep_how: str = None,
         **kwargs,
     ):
         """
@@ -283,6 +360,9 @@ class PlotTaxonomyCounts:
             taxa_level: Taxonomy level
             cluster_samples: use clustering (skipped by samples_order)
             samples_order: list of samples to force ordering for visualization
+            color_df: metadata to put as legend on the bottom of the graph
+            sep_col: metadata used to order samples into subgroups (skipped by samples_order)
+            sep_how: { None, 'color', 'labels' } Only if sep_col used, graphical way of showing the separation of the different subgroups
         """
         data_df = self.df
         if mean_taxa is not None:
@@ -290,8 +370,16 @@ class PlotTaxonomyCounts:
         data_df = self._compute_abundances_taxa_dataframe(data_df, taxa_level, taxa_number=taxa_number)
         if samples_order is not None:
             data_df = data_df.loc[:, samples_order]
+        elif sep_series is not None:     # organize samples inside subgroups and concatenate subgroups one after another
+            data_df, x_coor, subgps = self._divide_samples_into_subgroups_and_reorder(data_df, sep_series, cluster_samples=cluster_samples)
+            if sep_how == 'color':
+                if color_df is None:
+                    color_df = pd.DataFrame(sep_series)
+                elif sep_series.name not in color_df.columns:
+                    color_df = color_df.merge(pd.DataFrame(sep_series), right_index=True, left_index=True)
         elif cluster_samples:
             data_df = self._cluster_samples(data_df)
+
         # Make graph
         graph = MatrixBarGraph(data_df)
         # Plotting options
@@ -312,4 +400,18 @@ class PlotTaxonomyCounts:
         plotting_options = merge_dict(
             kwargs.pop("plotting_options", {}), default_plotting_options
         )
-        graph.plot_one_graph(plotting_options=plotting_options, **kwargs)
+
+        if sep_series is not None and sep_how == "labels":
+            show = kwargs.pop("show", True)
+            output_file = kwargs.pop("output_file", False)
+            if color_df is None:
+                fig = graph.plot_one_graph(plotting_options=plotting_options, **kwargs, show=False)
+            else:
+                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, **kwargs, show=False)
+            fig = self._subgroups_annotations(fig, x_coor, subgps)
+            graph._handle_output_plotly(fig, show, output_file)            
+        else:
+            if color_df is None:
+                fig = graph.plot_one_graph(plotting_options=plotting_options, **kwargs)
+            else:
+                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, **kwargs)
