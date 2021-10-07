@@ -76,7 +76,7 @@ class MatrixBarGraph(BaseGraph):
                     x=self.data.columns,
                     y=self.data.loc[col_name],
                     marker_color=final_colors.get(col_name, None),
-                    legendgroup = '1'                               # useful to separate legends of the different subplots
+                    legendgroup='1'  # useful to separate legends of the different subplots
                 )
             )
         return fig
@@ -92,7 +92,8 @@ class MatrixBarGraph(BaseGraph):
         all_gp = []
         for cc in metadata.columns:
             all_gp += list(metadata[cc].unique())
-        all_gp = list(set(all_gp))   # doesn't remove all different nan -> can't do it manually because then some nan don't correspond to the one manually added
+        all_gp = list(set(all_gp))  # doesn't remove all different nan
+# we can't do it manually because then some nan don't correspond to the one manually added
         if len(all_gp) <= 10:
             final_colors = dict(zip(all_gp, px.colors.qualitative.Plotly))
         elif len(all_gp) <= 26:
@@ -101,7 +102,7 @@ class MatrixBarGraph(BaseGraph):
             c = px.colors.qualitative.Alphabet+px.colors.qualitative.Set3
             final_colors = dict(zip(all_gp, c*(int(len(all_gp)/len(c))+1)))
         if colors is not None:
-            final_colors.update(**colors)        
+            final_colors.update(**colors)
         return final_colors
 
     def plot_one_graph(
@@ -157,36 +158,34 @@ class MatrixBarGraph(BaseGraph):
         for cc in metadata.columns:
             for lbl in metadata[cc].unique():
                 if type(lbl) != str and np.isnan(lbl):
-                    
                     dfp = metadata.loc[self.data.columns][metadata.loc[self.data.columns][cc].isna()]
                 else:
                     dfp = metadata.loc[self.data.columns][metadata.loc[self.data.columns][cc] == lbl]
                 dfp['y'] = 1
                 fig.add_trace(
-                    go.Bar(x=dfp.index, 
+                    go.Bar(x=dfp.index,
                            y=dfp['y'],
                            name=lbl,
-                           marker = dict(
+                           marker=dict(
                                color=final_colors_metadata[lbl]
                            ),
-                           legendgroup = '2'
-                    ),
+                           legendgroup='2'
+                           ),
                     row=2, col=1)
-        
+
         if 'layout' in plotting_options.keys():
             xaxis_title = plotting_options['layout'].pop("xaxis_title", "Samples")
             if 'legend' in plotting_options['layout'].keys():
                 plotting_options['layout']['legend'].pop("traceorder", None)
-            
 
         fig.update_layout(
             xaxis2=dict(                             # xaxis of the 2nd subplot (to not have "samples" * 2)
-                title_text = xaxis_title,
+                title_text=xaxis_title,
             ),
             yaxis2=dict(                             # yaxis of the 2nd subplot
                 showticklabels=False
             ),
-            legend_tracegroupgap = 50,
+            legend_tracegroupgap=50,
             barmode="stack"
         )
 
