@@ -164,8 +164,7 @@ class PlotTaxonomyCounts:
         taxa_number: int
     ):
         return list(
-            data_df[~data_df.index.str.contains("(", regex=False)]
-            .sum(axis=1)
+            data_df.sum(axis=1)
             .sort_values(ascending=False)
             .head(taxa_number)
             .index
@@ -191,7 +190,14 @@ class PlotTaxonomyCounts:
         if forced_taxa:
             top = forced_taxa
         else:
-            top = self._compute_top_n_most_abundant_taxa_list(df, taxa_number)
+            if taxa_level[-5:] == "-only":
+                top = self._compute_top_n_most_abundant_taxa_list(
+                    df[~df.index.str.contains("(", regex=False)], taxa_number
+                    )
+            else:
+                top = self._compute_top_n_most_abundant_taxa_list(
+                    df, taxa_number
+                    )
 
         top_and_other_df = df[df.index.get_level_values(taxa_level).isin(top)]
         top_and_other_df = df.loc[
@@ -356,7 +362,8 @@ class PlotTaxonomyCounts:
         Args:
             mean_taxa: mean threshold to be kept for analysis
             taxa_number: number of taxa to plot
-            taxa_level: Taxonomy level
+            taxa_level: Taxonomy level. Add "-only" after the taxonomy level if you do not want OTU only defined
+            at a higher level to appear in the top. They will still appear in "Others"
             cluster_samples: use clustering (skipped by samples_order)
             samples_order: list of samples to force ordering for visualization
             color_df: metadata to put as legend on the bottom of the graph
@@ -368,7 +375,10 @@ class PlotTaxonomyCounts:
         if mean_taxa is not None:
             data_df = TaxonomyMeanFiltering(data_df, mean_taxa).filtered_df
         data_df = self._compute_abundances_taxa_dataframe(data_df, taxa_level, taxa_number=taxa_number)
-        if samples_order is not None:
+
+        if data_df.shape[1] <= 1:        # only 1 sample, no need for ordering
+            sep_series = None
+        elif samples_order is not None:
             data_df = data_df.loc[:, samples_order]
         elif sep_series is not None:     # organize samples inside subgroups and concatenate subgroups one after another
             data_df, x_coor, subgps = self._divide_samples_into_subgroups_and_reorder(
@@ -391,6 +401,7 @@ class PlotTaxonomyCounts:
                 "xaxis_title": "Samples",
                 "yaxis_title": "Percentage",
                 "legend": {"traceorder": "normal"},
+                "legend_title_text": "species",
             }
         }
         if mean_taxa is not None:

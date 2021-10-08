@@ -75,8 +75,7 @@ class MatrixBarGraph(BaseGraph):
                     name=col_name,
                     x=self.data.columns,
                     y=self.data.loc[col_name],
-                    marker_color=final_colors.get(col_name, None),
-                    legendgroup='1'  # useful to separate legends of the different subplots
+                    marker_color=final_colors.get(col_name, None)
                 )
             )
         return fig
@@ -169,7 +168,8 @@ class MatrixBarGraph(BaseGraph):
                            marker=dict(
                                color=final_colors_metadata[lbl]
                            ),
-                           legendgroup='2'
+                           legendgroup=cc,
+                           legendgrouptitle_text=cc,
                            ),
                     row=2, col=1)
 
@@ -185,7 +185,6 @@ class MatrixBarGraph(BaseGraph):
             yaxis2=dict(                             # yaxis of the 2nd subplot
                 showticklabels=False
             ),
-            legend_tracegroupgap=50,
             barmode="stack"
         )
 
