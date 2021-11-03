@@ -1,6 +1,7 @@
 import logging
 import re
 from abc import ABC, abstractmethod
+import skbio
 from string import capwords
 from typing import Union
 
@@ -260,3 +261,43 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 'stats_test': stats_test
             }
         }
+
+
+class PhylogeneticDiversityBase(DiversityBase):
+    """
+    Class for Phylogenetic Diversities that use a taxonomy tree to compute the diversity.
+    """
+    def __init__(
+        self,
+        taxonomy_dataframe: pd.DataFrame,
+        taxonomy_tree: skbio.TreeNode,
+        validate: bool = True,
+        force_computation: bool = False
+    ):
+        """
+        Args:
+            validate: skbio argument. "If False, validation of the input won’t be performed.
+            This step can be slow, so if validation is run elsewhere it can be disabled here.
+            However, invalid input data can lead to invalid results or error messages that
+            are hard to interpret, so this step should not be bypassed if you’re not certain
+            that your input data are valid. See skbio.diversity for the description of what
+            validation entails so you can determine if you can safely disable validation.
+            force_computation: if True, doesn't raise error if OTU IDs are missing and compute
+            the diversity with the OTU IDs that are present in the Tree
+        """
+        super().__init__(taxonomy_dataframe)
+        if type(taxonomy_tree) == skbio.tree._tree.TreeNode:
+            self.tree = taxonomy_tree
+        else:
+            raise RuntimeError("taxonomy_tree should be a skbio.TreeNode.")
+        self.force_computation = force_computation
+        self.validate = validate
+
+    def _verification_otu_ids_in_tree(self, otu_ids):
+        missing_ids = []
+        for otu_id in otu_ids:
+            try:
+                self.tree.find(otu_id)
+            except skbio.tree._exception.MissingNodeError:
+                missing_ids += [otu_id]
+        return missing_ids

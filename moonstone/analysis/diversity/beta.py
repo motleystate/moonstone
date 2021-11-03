@@ -7,7 +7,9 @@ import skbio.diversity
 from skbio.stats.distance import DistanceMatrix
 from skbio.stats.ordination import pcoa
 
-from moonstone.analysis.diversity.base import DiversityBase
+from moonstone.analysis.diversity.base import (
+    DiversityBase, PhylogeneticDiversityBase
+)
 from moonstone.plot.graphs.scatter import GroupScatterGraph, GroupScatter3DGraph
 
 logger = logging.getLogger(__name__)
@@ -111,7 +113,7 @@ class BrayCurtis(BetaDiversity):
     """
     Perform calculation of the Bray Curtis for each pairs of samples from the dataframe
     """
-    def compute_beta_diversity(self, df):    # compute_shannon_diversity
+    def compute_beta_diversity(self, df):    # compute_bray_curtis_diversity
         """
         :param base: logarithm base chosen (NB : for ln, base=math.exp(1))
         """
@@ -119,57 +121,47 @@ class BrayCurtis(BetaDiversity):
         return skbio.diversity.beta_diversity("braycurtis", df.transpose(), df.columns)
 
 
-class UniFracBase(BetaDiversity):
-
-    def __init__(
-        self,
-        taxonomy_dataframe: pd.DataFrame,
-        taxonomy_tree: skbio.TreeNode
-    ):
-        super().__init__(taxonomy_dataframe)
-        self.tree = taxonomy_tree
-
-
-class WeightedUniFrac(UniFracBase):
+class WeightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
     """
     Perform calculation of the weighted UniFrac for each pairs of samples from the dataframe
     """
-    def compute_beta_diversity(
-        self, df,
-        validate: bool = True,
-        **kwargs
-    ) -> skbio.stats.distance._base.DistanceMatrix:
-        """
-        Args:
-            validate: skbio argument. "If False, validation of the input won’t be performed.
-            This step can be slow, so if validation is run elsewhere it can be disabled here.
-            However, invalid input data can lead to invalid results or error messages that
-            are hard to interpret, so this step should not be bypassed if you’re not certain
-            that your input data are valid. See skbio.diversity for the description of what
-            validation entails so you can determine if you can safely disable validation.
-        """
+    def compute_beta_diversity(self, df) -> skbio.stats.distance._base.DistanceMatrix:
         # steps to compute the index
         otu_ids = df.index
+
+        missing_ids = self._verification_otu_ids_in_tree(otu_ids)
+        if len(missing_ids) > 0:
+            if not self.force_computation:
+                raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
+            else:
+                logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\
+Computation of the Weighted UniFrac diversity using only the OTU IDs present in the Tree.")
+                otu_ids = list(set(otu_ids) - set(missing_ids))
+
         return skbio.diversity.beta_diversity(
-            "weighted_unifrac", df.transpose(), df.columns,
-            validate=validate, otu_ids=otu_ids, tree=self.tree,
-            **kwargs
+            "weighted_unifrac", df.loc[otu_ids].transpose(), df.columns,
+            validate=self.validate, otu_ids=otu_ids, tree=self.tree,
             )
 
 
-class UnweightedUniFrac(UniFracBase):
+class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
     """
     Perform calculation of the unweighted UniFrac for each pairs of samples from the dataframe
     """
-    def compute_beta_diversity(
-        self, df,
-        validate: bool = True,
-        **kwargs
-    ) -> skbio.stats.distance._base.DistanceMatrix:
+    def compute_beta_diversity(self, df) -> skbio.stats.distance._base.DistanceMatrix:
         # steps to compute the index
         otu_ids = df.index
+
+        missing_ids = self._verification_otu_ids_in_tree(otu_ids)
+        if len(missing_ids) > 0:
+            if not self.force_computation:
+                raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
+            else:
+                logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\
+Computation of the Unweighted UniFrac diversity using only the OTU IDs present in the Tree.")
+                otu_ids = list(set(otu_ids) - set(missing_ids))
+
         return skbio.diversity.beta_diversity(
-            "unweighted_unifrac", df.transpose(), df.columns,
-            validate=validate, otu_ids=otu_ids, tree=self.tree,
-            **kwargs
+            "unweighted_unifrac", df.loc[otu_ids].transpose(), df.columns,
+            validate=self.validate, otu_ids=otu_ids, tree=self.tree,
             )
