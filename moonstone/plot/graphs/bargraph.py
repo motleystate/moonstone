@@ -120,7 +120,9 @@ class MatrixBarGraph(BaseGraph):
         fig = go.Figure()
         fig = self._add_chart(fig, final_colors)
 
-        fig.update_layout(barmode="stack")
+        fig.update_layout(
+            barmode="stack", legend_traceorder="reversed"
+        )
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
 

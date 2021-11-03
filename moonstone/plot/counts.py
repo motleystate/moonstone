@@ -241,15 +241,17 @@ class PlotTaxonomyCounts:
                 df_gp = top_and_other_df[
                     sep_series[sep_series == subgp].index.intersection(top_and_other_df.columns)]
 
-            if cluster_samples:
+            if cluster_samples and len(df_gp.columns) > 1:
                 tmp = list(self._cluster_samples(df_gp).columns)
                 ordered_col += tmp
             else:
                 ordered_col += list(df_gp.columns)
 
-            med = len(tmp)/2
-            x_coor += [(prec, prec+med, prec+len(tmp))]
-            prec += len(tmp)
+            nb = len(df_gp.columns)
+
+            med = nb/2
+            x_coor += [(prec, prec+med, prec+nb)]
+            prec += nb
         top_and_other_df = top_and_other_df[ordered_col]
         return top_and_other_df, x_coor, subgps
 
