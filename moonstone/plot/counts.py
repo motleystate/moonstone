@@ -168,7 +168,7 @@ class PlotTaxonomyCounts:
             .sort_values(ascending=False)
             .head(taxa_number)
             .index
-            )  # Filter out rows not classified to the species level (that contains '(')
+            )
 
     def _compute_abundances_taxa_dataframe(
         self,
@@ -185,15 +185,20 @@ class PlotTaxonomyCounts:
             taxa_number: Number of taxa to plot
             taxa_level: Taxonomy level
         """
+        only = False
+        if taxa_level[-5:] == "-only":
+            taxa_level = taxa_level[:-5]
+            only = True
+
         df = data_df.groupby(taxa_level).sum()
 
         if forced_taxa:
             top = forced_taxa
         else:
-            if taxa_level[-5:] == "-only":
+            if only:
                 top = self._compute_top_n_most_abundant_taxa_list(
                     df[~df.index.str.contains("(", regex=False)], taxa_number
-                    )
+                    )  # Filter out rows not classified to the species level (that contains '(')
             else:
                 top = self._compute_top_n_most_abundant_taxa_list(
                     df, taxa_number
@@ -250,7 +255,11 @@ class PlotTaxonomyCounts:
             nb = len(df_gp.columns)
 
             med = nb/2
+            
             x_coor += [(prec, prec+med, prec+nb)]
+            # (x of the start of the subgroup annotation square, 
+            # x of the annotation text, 
+            # x of the end of the subgroup annotation square)
             prec += nb
         top_and_other_df = top_and_other_df[ordered_col]
         return top_and_other_df, x_coor, subgps
