@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Union
 
+import copy
 import pandas as pd
 import plotly.io
 import plotly.graph_objects as go
@@ -102,37 +103,79 @@ class GroupBaseGraph(BaseGraph):
     def _gen_fig_trace(self, x: list, y: list, name: str, text: list, color: str):
         pass
 
-    def plot_one_graph(
-        self, data_col: str, group_col: str, plotting_options: dict = None,
-        show: bool = True, output_file: Union[bool, str] = False,
-        colors: dict = None, sort_groups: bool = False, groups: list = None,
-        show_counts: bool = False,
-        **kwargs
+    def _prep_for_plot_one_graph(
+        self, group_col: str, groups: list, colors: dict,
+        show_counts: bool, sort_groups: bool
     ):
-        """
-        :param data_col: column with data to visualize
-        :param group_col: column used to group data
-        """
         if groups is None:
             groups = list(self.data[group_col].unique())
         if sort_groups:
             groups.sort()
         if colors is None:
             colors = self._gen_default_color_dict(groups)
-        fig = go.Figure()
+
         if show_counts:
             counts = self.data[group_col].value_counts().to_dict()
             names = {group: f"{group} (n={counts[group]})" for group in groups}
         else:
             names = {group: group for group in groups}
+        return groups, colors, names
 
-        for group in groups:
-            filtered_df = self.data[self.data[group_col] == group]
-            fig.add_trace(self._gen_fig_trace(
-                filtered_df[group_col], filtered_df[data_col],
-                str(names[group]), filtered_df.index, self._get_group_color(group, colors),
-                **kwargs,
-            ))
+    def plot_one_graph(
+        self, data_col: str, group_col: str, group_col2: str,
+        groups: list = None, groups2: list = None,
+        sort_groups: bool = False, colors: dict = None,
+        plotting_options: dict = None, show_counts: bool = False,
+        show: bool = True, output_file: Union[bool, str] = False,
+        **kwargs
+    ):
+        """
+        :param data_col: column with data to visualize
+        :param group_col: column used to group data
+        :param colors: dictionnary with group_col2 (or group_col if no group_col2) values as keys
+        and their associated color as values
+        """
+        if group_col2:
+            groups2, colors, names = self._prep_for_plot_one_graph(
+                group_col2, groups2, colors, show_counts, sort_groups
+            )
+            if sort_groups and groups:
+                groups.sort()
+
+            fig = go.Figure()
+
+            if groups:
+                filtered_df = self.data[self.data[group_col].isin(groups)]
+                filtered_df[group_col] = filtered_df[group_col].astype("category")
+                filtered_df[group_col].cat.set_categories(groups, inplace=True)
+                filtered_df = filtered_df.sort_values([group_col])
+            else:
+                filtered_df = copy.deepcopy(self.data)
+
+            for group in groups2:
+                filtered_df2 = filtered_df[filtered_df[group_col2] == group]
+
+                fig.add_trace(self._gen_fig_trace(
+                    filtered_df2[group_col], filtered_df2[data_col],
+                    str(names[group]), filtered_df.index, self._get_group_color(group, colors),
+                    **kwargs,
+                ))
+            fig.update_layout(
+                boxmode='group', legend_title_text=group_col2
+            )
+        else:
+            groups, colors, names = self._prep_for_plot_one_graph(
+                group_col, groups, colors, show_counts, sort_groups
+            )
+
+            fig = go.Figure()
+            for group in groups:
+                filtered_df = self.data[self.data[group_col] == group]
+                fig.add_trace(self._gen_fig_trace(
+                    filtered_df[group_col], filtered_df[data_col],
+                    str(names[group]), filtered_df.index, self._get_group_color(group, colors),
+                    **kwargs,
+                ))
 
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)

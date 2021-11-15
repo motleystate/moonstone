@@ -120,7 +120,8 @@ def statistical_test_groups_comparison(
                     list_of_series[i], list_of_series[j], **kwargs
                 )[1]
             if stat_test == "chi2_contingency":
-                pval = chi2_contingency(list_of_series[i], list_of_series[j], **kwargs
+                pval = chi2_contingency(
+                    list_of_series[i], list_of_series[j], **kwargs
                 )[1]
 
             tab[i][j] = pval

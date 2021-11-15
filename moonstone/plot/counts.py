@@ -255,10 +255,10 @@ class PlotTaxonomyCounts:
             nb = len(df_gp.columns)
 
             med = nb/2
-            
+
             x_coor += [(prec, prec+med, prec+nb)]
-            # (x of the start of the subgroup annotation square, 
-            # x of the annotation text, 
+            # (x of the start of the subgroup annotation square,
+            # x of the annotation text,
             # x of the end of the subgroup annotation square)
             prec += nb
         top_and_other_df = top_and_other_df[ordered_col]

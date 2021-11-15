@@ -5,6 +5,7 @@ import skbio
 from string import capwords
 from typing import Union
 
+import numpy as np
 import pandas as pd
 from statsmodels.stats.multitest import multipletests
 
@@ -124,15 +125,15 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         elif mode == "boxplot":
             self._visualize_boxplot(plotting_options, show, output_file, log_scale, **kwargs)
 
-    def _get_grouped_df(self, metadata_series):
-        return pd.concat([metadata_series, self.diversity_indexes], axis=1).dropna()
+    def _get_grouped_df(self, metadata_df):
+        return pd.concat([metadata_df, self.diversity_indexes], axis=1).dropna()
 
     def _get_filtered_df_from_metadata(self, metadata_df):
         return NamesFiltering(metadata_df, list(self.df.columns)).filtered_df
 
     def _make_graph(
-        self, df, mode: str, group_col: str, plotting_options: dict, log_scale: bool,
-        show: bool, output_file: str, colors: dict, groups: list, **kwargs
+        self, df, mode: str, group_col: str, group_col2: str, plotting_options: dict, log_scale: bool,
+        show: bool, output_file: str, colors: dict, groups: list, groups2: list, **kwargs
     ):
         if mode not in self.AVAILABLE_GROUP_VIZ:
             logger.warning("%s not a available mode, set to default (histogram)", mode)
@@ -150,11 +151,13 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             graph = GroupBoxGraph(df)
         graph.plot_one_graph(
             self.DIVERSITY_INDEXES_NAME, group_col,
+            group_col2=group_col2,
             plotting_options=plotting_options,
             show=show,
             output_file=output_file,
             colors=colors,
             groups=groups,
+            groups2=groups2,
             **kwargs
         )
 
@@ -176,6 +179,12 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                     df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
                     output='series', sym=False
                 )
+
+            if pval.dropna().shape[0] == 0:
+                logger.warning(
+                    "Only NaN in the p-value dataframe: Meaning there are too few samples in all groups."
+                )
+                return np.nan
 
             # dropping NaN (= comparison that couldn't have been generated due to too few samples in one or both groups)
             corrected_pval = pd.Series(multipletests(pval.dropna(), alpha=0.05, method=correction_method)[1])
@@ -208,21 +217,26 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         )
 
     def analyse_groups(
-        self, metadata_df: pd.DataFrame, group_col: str,  mode: str = 'boxplot',
-        log_scale: bool = False, colors: dict = None, groups: list = None,
+        self, metadata_df: pd.DataFrame, group_col: str, group_col2: str = None,
+        mode: str = 'boxplot',
+        log_scale: bool = False, colors: dict = None,
+        groups: list = None, groups2: list = None,
         show: bool = True, output_file: str = False, make_graph: bool = True,
         plotting_options: dict = None,
         stats_test: str = 'mann_whitney_u', correction_method: str = None,
         structure_pval: str = 'dataframe', sym: bool = True,
+        pval_inside_group_col_groups: bool = True,
         show_pval: bool = True, output_pval_file: str = False,
         **kwargs
     ) -> dict:
         """
         :param metadata_df: dataframe containing metadata and information to group the data
         :param group_col: column from metadata_df used to group the data
+        :param group_col2: (optional) column from metadata_df used to further divide the data
         :param mode: how to display (boxplot, or violin)
         :param colors: overides color for groups. format {group_id: color}
         :param groups: specifically select groups to display among group_col
+        :param groups2: specifically select groups to display among group_col2
         :param show: also visualize
         :param show_pval: visualize p-values
         :param output_file: file path to output your html graph
@@ -234,17 +248,52 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         to correct generated p-values
         :param structure_pval: {'series', 'dataframe'}
         :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
+        :param pval_inside_group_col_groups: if group_col2 used, problems of memory or
+        in maximum recursion depth. Only p-values between the group_col2 groups inside group_col groups
+        are computed. pval output is in this case a dictionnary with group name from group_col as keys
+        and dataframe or series as values
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
-        df = self._get_grouped_df(filtered_metadata_df[group_col])
 
-        pval = self._run_statistical_test_groups(df, group_col, stats_test, correction_method, structure_pval, sym)
-        # pval is in the right structure to be returned
+        if group_col2:
+            final_group_col = group_col+"_"+group_col2
+            filtered_metadata_df[final_group_col] = np.where(
+                np.logical_or(
+                    filtered_metadata_df[group_col].isnull() is True, filtered_metadata_df[group_col2].isnull() is True
+                ), np.nan,
+                filtered_metadata_df[group_col].astype(str) + " - " +
+                filtered_metadata_df[group_col2].astype(str)
+            )
+            df = self._get_grouped_df(filtered_metadata_df[[group_col, group_col2, final_group_col]])
+            if pval_inside_group_col_groups:
+                pval = {}
+                for g in df[group_col].dropna().unique():
+                    df_gp = df[df[group_col] == g]
+                    if df_gp.shape[0] < 2:
+                        logger.warning(
+                            f"Less than 2 samples in dataframe group {g} in data. P-val can't be computed."
+                        )
+                        pval[g] = np.nan
+                    else:
+                        pval[g] = self._run_statistical_test_groups(
+                            df_gp, final_group_col, stats_test,
+                            correction_method, structure_pval, sym
+                        )
+            else:
+                pval = self._run_statistical_test_groups(
+                    df, final_group_col, stats_test, correction_method, structure_pval, sym
+                )
+        else:
+            df = self._get_grouped_df(filtered_metadata_df[group_col])
+            pval = self._run_statistical_test_groups(
+                df, group_col, stats_test, correction_method, structure_pval, sym
+                )
+            # pval is in the right structure to be returned
 
         if make_graph:
             self._make_graph(
-                df, mode, group_col, plotting_options, log_scale, show, output_file,
-                colors, groups, **kwargs
+                df, mode, group_col, group_col2, plotting_options, log_scale, show, output_file,
+                colors, groups, groups2, **kwargs
             )
             if show_pval:
                 if structure_pval != 'dataframe' or not sym:
