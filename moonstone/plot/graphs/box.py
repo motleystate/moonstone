@@ -59,11 +59,21 @@ class GroupBoxGraph(GroupBaseGraph, BaseBoxGraph):
 
     def _gen_fig_trace(
         self, x: list, y: list, name: str, text: list, color: str,
+        orientation: str = "v",
         boxpoints: Union[bool, str] = "suspectedoutliers",
     ):
+        if orientation == "v":
+            return go.Box(
+                x=x,
+                y=y,
+                name=name,
+                text=text,
+                marker_color=color,
+                boxpoints=self._valid_boxpoints_param(boxpoints),
+            )
         return go.Box(
-            x=x,
-            y=y,
+            x=y,
+            y=x,
             name=name,
             text=text,
             marker_color=color,

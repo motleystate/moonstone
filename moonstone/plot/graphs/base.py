@@ -122,10 +122,11 @@ class GroupBaseGraph(BaseGraph):
         return groups, colors, names
 
     def plot_one_graph(
-        self, data_col: str, group_col: str, group_col2: str,
+        self, data_col: str, group_col: str, group_col2: str = None,
         groups: list = None, groups2: list = None,
         sort_groups: bool = False, colors: dict = None,
-        plotting_options: dict = None, show_counts: bool = False,
+        plotting_options: dict = None, orientation: str = "v",
+        show_counts: bool = False,
         show: bool = True, output_file: Union[bool, str] = False,
         **kwargs
     ):
@@ -158,6 +159,7 @@ class GroupBaseGraph(BaseGraph):
                 fig.add_trace(self._gen_fig_trace(
                     filtered_df2[group_col], filtered_df2[data_col],
                     str(names[group]), filtered_df.index, self._get_group_color(group, colors),
+                    orientation=orientation,
                     **kwargs,
                 ))
             fig.update_layout(
@@ -174,6 +176,7 @@ class GroupBaseGraph(BaseGraph):
                 fig.add_trace(self._gen_fig_trace(
                     filtered_df[group_col], filtered_df[data_col],
                     str(names[group]), filtered_df.index, self._get_group_color(group, colors),
+                    orientation=orientation,
                     **kwargs,
                 ))
 
