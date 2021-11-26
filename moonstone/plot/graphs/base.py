@@ -180,6 +180,9 @@ class GroupBaseGraph(BaseGraph):
                     **kwargs,
                 ))
 
+        if orientation == "h":
+            fig.update_traces(orientation="h")
+
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
 
