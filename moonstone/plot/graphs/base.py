@@ -168,6 +168,7 @@ class GroupBaseGraph(BaseGraph):
         :param data_col: column with data to visualize
         :param group_col: column used to group data
         :param colors: dictionnary with group_col2 (or group_col if no group_col2) values as keys
+        :param orientation: orientation of the graph. {"v" (or "vertical")(default), "h" (or "horizontal")}
         and their associated color as values
         """
 
