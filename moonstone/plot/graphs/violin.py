@@ -54,26 +54,14 @@ class GroupViolinGraph(GroupBaseGraph, BaseViolinGraph):
 
     def _gen_fig_trace(
         self, x: list, y: list, name: str, text: list, color: str,
-        orientation: str = "v",
         points: Union[bool, str] = "suspectedoutliers", box: bool = False
     ):
-        if orientation == "v":
-            return go.Violin(
-                x=x,
-                y=y,
-                name=name,
-                text=text,
-                line_color=color,
-                points=self._valid_points_param(points),
-                meanline_visible=True,
-                box_visible=box,
-            )
         return go.Violin(
-            x=y,
-            y=x,
+            x=x,
+            y=y,
             name=name,
             text=text,
-            marker_color=color,
+            line_color=color,
             points=self._valid_points_param(points),
             meanline_visible=True,
             box_visible=box,

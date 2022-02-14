@@ -31,6 +31,14 @@ class BaseGraph(ABC):
         """
         pass
 
+    def _valid_orientation_param(self, orientation):
+        if orientation == "v" or orientation == "vertical":
+            return "v"
+        elif orientation == "h" or orientation == "horizontal":
+            return "h"
+        logger.warning("orientation=%s not valid, set to default (v)", orientation)
+        return "v"
+
     def _handle_plotting_options_plotly(self, fig, plotting_options: dict):
         """
         :param plotting_options: dictionary of dictionaries where the keys are the level to update
@@ -103,6 +111,28 @@ class GroupBaseGraph(BaseGraph):
     def _gen_fig_trace(self, x: list, y: list, name: str, text: list, color: str):
         pass
 
+    def _gen_fig_traces(
+        self, fig, dataframe: pd.DataFrame, 
+        data_col: str, group_col: str, groups: list,
+        orientation: str, colors: dict
+        ):
+        for group in groups:
+            filtered_df = dataframe[dataframe[group_col] == group]
+            if orientation == "h":
+                fig.add_trace(self._gen_fig_trace(
+                    filtered_df[data_col], filtered_df[group_col],
+                    str(names[group]), filtered_df.index, self._get_group_color(group, colors),
+                    **kwargs,
+                ))
+            else:    # default "v"
+                fig.add_trace(self._gen_fig_trace(
+                    filtered_df[group_col], filtered_df[data_col],
+                    str(names[group]), filtered_df.index, self._get_group_color(group, colors),
+                    **kwargs,
+                ))
+        return fig
+        
+
     def _prep_for_plot_one_graph(
         self, group_col: str, groups: list, colors: dict,
         show_counts: bool, sort_groups: bool
@@ -136,6 +166,11 @@ class GroupBaseGraph(BaseGraph):
         :param colors: dictionnary with group_col2 (or group_col if no group_col2) values as keys
         and their associated color as values
         """
+
+        orientation=self._valid_orientation_param(orientation)
+        
+        fig = go.Figure()
+
         if group_col2:
             groups2, colors, names = self._prep_for_plot_one_graph(
                 group_col2, groups2, colors, show_counts, sort_groups
@@ -153,15 +188,22 @@ class GroupBaseGraph(BaseGraph):
             else:
                 filtered_df = copy.deepcopy(self.data)
 
+            fig = self._gen_fig_traces(fig, filtered_df, data_col, group_col2, groups2, orientation, colors)
             for group in groups2:
                 filtered_df2 = filtered_df[filtered_df[group_col2] == group]
 
-                fig.add_trace(self._gen_fig_trace(
-                    filtered_df2[group_col], filtered_df2[data_col],
-                    str(names[group]), filtered_df.index, self._get_group_color(group, colors),
-                    orientation=orientation,
-                    **kwargs,
-                ))
+                if orientation == "h":
+                    fig.add_trace(self._gen_fig_trace(
+                        filtered_df2[data_col], filtered_df2[group_col],
+                        str(names[group]), filtered_df.index, self._get_group_color(group, colors),
+                        **kwargs,
+                    ))
+                else:    # default "v"
+                    fig.add_trace(self._gen_fig_trace(
+                        filtered_df2[group_col], filtered_df2[data_col],
+                        str(names[group]), filtered_df.index, self._get_group_color(group, colors),
+                        **kwargs,
+                    ))
             fig.update_layout(
                 boxmode='group', legend_title_text=group_col2
             )
@@ -169,16 +211,7 @@ class GroupBaseGraph(BaseGraph):
             groups, colors, names = self._prep_for_plot_one_graph(
                 group_col, groups, colors, show_counts, sort_groups
             )
-
-            fig = go.Figure()
-            for group in groups:
-                filtered_df = self.data[self.data[group_col] == group]
-                fig.add_trace(self._gen_fig_trace(
-                    filtered_df[group_col], filtered_df[data_col],
-                    str(names[group]), filtered_df.index, self._get_group_color(group, colors),
-                    orientation=orientation,
-                    **kwargs,
-                ))
+            fig = self._gen_fig_traces(fig, self.data, data_col, group_col, groups, orientation, colors)
 
         if orientation == "h":
             fig.update_traces(orientation="h")

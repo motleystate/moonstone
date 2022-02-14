@@ -47,7 +47,7 @@ class BarGraph(BaseGraph):
     ):
         fig = go.Figure(
             self._get_chart(
-                orientation=orientation,
+                orientation=self._valid_orientation_param(orientation),
                 ascending=ascending,
                 marker_color=marker_color,
                 colors_from_string=colors_from_string,
