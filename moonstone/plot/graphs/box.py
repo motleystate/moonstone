@@ -54,6 +54,8 @@ class BoxGraph(BaseGraph, BaseBoxGraph):
 
         self._handle_output_plotly(fig, show, output_file)
 
+        return fig
+
 
 class GroupBoxGraph(GroupBaseGraph, BaseBoxGraph):
 

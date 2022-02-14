@@ -28,3 +28,5 @@ class HeatmapGraph(BaseGraph):
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
 
         self._handle_output_plotly(fig, show, output_file)
+
+        return fig
