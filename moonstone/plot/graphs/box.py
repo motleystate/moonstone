@@ -69,4 +69,3 @@ class GroupBoxGraph(GroupBaseGraph, BaseBoxGraph):
             marker_color=color,
             boxpoints=self._valid_boxpoints_param(boxpoints),
         )
-            

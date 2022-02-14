@@ -6,6 +6,10 @@ import pandas as pd
 import plotly.io
 import plotly.graph_objects as go
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class BaseGraph(ABC):
     DEFAULT_COLOR = "#666666"
@@ -112,11 +116,11 @@ class GroupBaseGraph(BaseGraph):
         pass
 
     def _gen_fig_traces(
-        self, fig, dataframe: pd.DataFrame, 
+        self, fig, dataframe: pd.DataFrame,
         data_col: str, group_col: str, groups: list,
         names: dict, orientation: str, colors: dict,
         **kwargs
-        ):
+    ):
         for group in groups:
             filtered_df = dataframe[dataframe[group_col] == group]
             if orientation == "h":
@@ -132,7 +136,6 @@ class GroupBaseGraph(BaseGraph):
                     **kwargs,
                 ))
         return fig
-        
 
     def _prep_for_plot_one_graph(
         self, group_col: str, groups: list, colors: dict,
@@ -168,8 +171,8 @@ class GroupBaseGraph(BaseGraph):
         and their associated color as values
         """
 
-        orientation=self._valid_orientation_param(orientation)
-        
+        orientation = self._valid_orientation_param(orientation)
+
         fig = go.Figure()
 
         if group_col2:
@@ -190,7 +193,7 @@ class GroupBaseGraph(BaseGraph):
                 filtered_df = copy.deepcopy(self.data)
 
             fig = self._gen_fig_traces(
-                fig, filtered_df, data_col, group_col2, groups2, names, orientation, colors, 
+                fig, filtered_df, data_col, group_col2, groups2, names, orientation, colors,
                 **kwargs
                 )
             for group in groups2:

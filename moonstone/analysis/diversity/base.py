@@ -220,7 +220,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         choices = [
             "all", "same group_col or group_col2 values", "same group_col values", None
         ]
-            
+
         if pval_to_compute not in choices:
             logger.warning("pval_to_compute='%s' not valid, set to default (all)", pval_to_compute)
             pval_to_compute = "all"
@@ -235,7 +235,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         return correction_method
 
     def _compute_pval_inside_subgroup(
-        self, diversity_index_dataframe: pd.DataFrame, group_col: str, final_group_col: str, 
+        self, diversity_index_dataframe: pd.DataFrame, group_col: str, final_group_col: str,
         stats_test: str, correction_method: str, structure_pval: str, sym: bool
     ):
         pval = pd.Series([])
@@ -247,7 +247,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 )
             else:
                 pval = pval.append(self._run_statistical_test_groups(
-                    df_gp, final_group_col, stats_test, 
+                    df_gp, final_group_col, stats_test,
                     correction_method, structure_pval, sym
                 ))
         pval.index = pd.MultiIndex.from_tuples(pval.index, names=('Group1', 'Group2'))
@@ -289,15 +289,15 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         in maximum recursion depth. Only p-values between the group_col2 groups inside group_col groups
         are computed. pval output is in this case a dictionnary with group name from group_col as keys
         and dataframe or series as values
-        :param pval_to_compute: if group_col2 used, problems of memory or in maximum recursion depth 
-        may occur. In this case, you may want to compute only p-values of specific comparisons. 
+        :param pval_to_compute: if group_col2 used, problems of memory or in maximum recursion depth
+        may occur. In this case, you may want to compute only p-values of specific comparisons.
         {"all" (default), None, "same group_col values", "same group_col or group_col2 values"}
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
 
         pval_to_compute = self._valid_pval_param(pval_to_compute)
         correction_method = self._valid_correction_method_param(correction_method)
-        
+
         if group_col2:
             final_group_col = group_col+"_"+group_col2
             filtered_metadata_df[final_group_col] = np.where(
@@ -312,8 +312,8 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             if pval_to_compute == "all":
                 pval = self._run_statistical_test_groups(
                     df, final_group_col, stats_test, correction_method, structure_pval, sym
-                )                                    
-            elif (pval_to_compute == "same group_col values" or 
+                )
+            elif (pval_to_compute == "same group_col values" or
                   pval_to_compute == "same group_col or group_col2 values"):
                 pval = self._compute_pval_inside_subgroup(
                     df, group_col, final_group_col, stats_test, correction_method, structure_pval, sym
@@ -321,7 +321,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 if pval_to_compute == "same group_col or group_col2 values":
                     pval = pval.append(
                         self._compute_pval_inside_subgroup(
-                            df, group_col2, final_group_col, 
+                            df, group_col2, final_group_col,
                             stats_test, correction_method, structure_pval, sym
                         )
                     )
