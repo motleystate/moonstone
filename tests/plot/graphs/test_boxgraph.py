@@ -122,7 +122,7 @@ class TestGroupBoxGraph(TestCase):
         expected_y_gpB = [3.0, 6.0, 2.0, 6.0]
         plot = GroupBoxGraph(tested_df)
         tested_graph = plot.plot_one_graph(
-            data_col="data", group_col="sex", group_col2="group", 
+            data_col="data", group_col="sex", group_col2="group",
             groups=groups, groups2=groups2,
             show=False,
             )
@@ -161,7 +161,7 @@ class TestGroupBoxGraph(TestCase):
         expected_y_gpC = [5., 8., 7.]
         plot = GroupBoxGraph(tested_df)
         tested_graph = plot.plot_one_graph(
-            data_col="data", group_col="sex", group_col2="group", 
+            data_col="data", group_col="sex", group_col2="group",
             sort_groups=True,
             show=True,
             )
