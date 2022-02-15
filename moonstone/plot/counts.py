@@ -255,10 +255,10 @@ class PlotTaxonomyCounts:
             nb = len(df_gp.columns)
 
             med = nb/2
-            
+
             x_coor += [(prec, prec+med, prec+nb)]
-            # (x of the start of the subgroup annotation square, 
-            # x of the annotation text, 
+            # (x of the start of the subgroup annotation square,
+            # x of the annotation text,
             # x of the end of the subgroup annotation square)
             prec += nb
         top_and_other_df = top_and_other_df[ordered_col]
@@ -374,13 +374,13 @@ class PlotTaxonomyCounts:
             mean_taxa: mean threshold to be kept for analysis
             taxa_number: number of taxa to plot
             taxa_level: Taxonomy level. Add "-only" after the taxonomy level if you do not want OTU only defined
-            at a higher level to appear in the top. They will still appear in "Others"
+at a higher level to appear in the top. They will still appear in "Others"
             cluster_samples: use clustering (skipped by samples_order)
             samples_order: list of samples to force ordering for visualization
             color_df: metadata to put as legend on the bottom of the graph
             sep_series: metadata used to order samples into subgroups (skipped by samples_order)
             sep_how: { None, 'color', 'labels' } Graphical way of showing the separation of the different subgroups
-            (skipped if sep_series is empty/None)
+(skipped if sep_series is empty/None)
         """
         data_df = self.df
         if mean_taxa is not None:

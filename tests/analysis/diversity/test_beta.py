@@ -61,29 +61,6 @@ class TestBrayCurtis(TestCase):
             check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
-    def test_analyse_grouped_df(self):
-        metadata_df = pd.DataFrame.from_dict(
-            {
-                'sample1': ['M'],
-                'sample2': ['F'],
-                'sample3': ['F'],
-            },
-            orient='index', columns=['sex']
-        )
-        tested_object_instance = BrayCurtis(self.tested_object)
-
-        expected_object = pd.DataFrame.from_dict(
-            {
-                'sample2-sample3': [1.0, 'F'],
-            },
-            orient='index', columns=['beta_index', 'sex']
-        )
-        output = tested_object_instance.analyse_groups(metadata_df, 'sex', show=False, show_pval=False)
-        pd.testing.assert_frame_equal(
-            output['data'], expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
-        )
-
     def test_run_statistical_test_groups_with_NaN(self):
         tested_object_instance = BrayCurtis(self.tested_object)
 
@@ -123,7 +100,7 @@ class TestBrayCurtis(TestCase):
                 ('C', 'D'): np.nan
             }
         )
-        expected_object.index.names = ["Group", "Group"]
+        expected_object.index.names = ["Group1", "Group2"]
 
         pval = tested_object_instance._run_statistical_test_groups(
             tested_df, 'Group', stats_test='ttest_independence', correction_method='fdr_bh',
@@ -132,6 +109,135 @@ class TestBrayCurtis(TestCase):
 
         pd.testing.assert_series_equal(
             pval, expected_object,
+            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+        )
+
+    def test_get_grouped_df_series(self):
+        metadata_ser = pd.Series(
+            {
+                'sample1': 'M',
+                'sample2': 'F',
+                'sample3': 'F',
+            },
+            name='sex'
+        )
+        tested_object_instance = BrayCurtis(self.tested_object)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample2-sample3': [1.0, 'F'],
+            },
+            orient='index', columns=['beta_index', 'sex']
+        )
+        output = tested_object_instance._get_grouped_df_series(metadata_ser)
+        pd.testing.assert_frame_equal(
+            output, expected_object,
+            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+        )
+
+    def test_get_grouped_df_dataframe(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0, 5, 3, 1, 0],
+                'species2': [1, 0, 2, 2, 1, 2, 2],
+                'species3': [0, 0, 0, 0, 1, 0, 0],
+                'species4': [0, 3, 0, 0, 2, 4, 1]
+            },
+            orient='index',
+            columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7']
+        )
+
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M', 'A', 'M - A'],
+                'sample2': ['F', 'B', 'F - B'],
+                'sample3': ['F', 'B', 'F - B'],
+                'sample4': ['F', 'A', 'F - A'],
+                'sample5': ['M', 'B', 'M - B'],
+                'sample6': ['M', 'A', 'M - A'],
+                'sample7': ['F', 'A', 'F - A']
+            },
+            orient='index', columns=['sex', 'Group', 'sex_Group']
+        )
+        tested_object_instance = BrayCurtis(tested_object)
+
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample1-sample6': [2/3, 'M - A', 'M', 'A'],
+                'sample2-sample3': [1.0, 'F - B', 'F', 'B'],
+                'sample4-sample7': [0.6, 'F - A', 'F', 'A']
+            },
+            orient='index', columns=['beta_index', 'sex_Group', 'sex', 'Group']
+        )
+
+        output = tested_object_instance._get_grouped_df_dataframe(metadata_df)
+        pd.testing.assert_frame_equal(
+            output, expected_object,
+            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+        )
+
+    def test_analyse_grouped_df(self):
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M'],
+                'sample2': ['F'],
+                'sample3': ['F'],
+            },
+            orient='index', columns=['sex']
+        )
+        tested_object_instance = BrayCurtis(self.tested_object)
+
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample2-sample3': [1.0, 'F'],
+            },
+            orient='index', columns=['beta_index', 'sex']
+        )
+        output = tested_object_instance.analyse_groups(metadata_df, 'sex', show=False, show_pval=False)
+        pd.testing.assert_frame_equal(
+            output['data'], expected_object,
+            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+        )
+
+    def test_analyse_grouped_df_with_group_col2(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0, 5, 3, 1, 0],
+                'species2': [1, 0, 2, 2, 1, 2, 2],
+                'species3': [0, 0, 0, 0, 1, 0, 0],
+                'species4': [0, 3, 0, 0, 2, 4, 1]
+            },
+            orient='index',
+            columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7']
+        )
+
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M', 'A'],
+                'sample2': ['F', 'B'],
+                'sample3': ['F', 'B'],
+                'sample4': ['F', 'A'],
+                'sample5': ['M', 'B'],
+                'sample6': ['M', 'A'],
+                'sample7': ['F', 'A']
+            },
+            orient='index', columns=['sex', 'Group']
+        )
+        tested_object_instance = BrayCurtis(tested_object)
+
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample1-sample6': [2/3, 'M - A', 'M', 'A'],
+                'sample2-sample3': [1.0, 'F - B', 'F', 'B'],
+                'sample4-sample7': [0.6, 'F - A', 'F', 'A']
+            },
+            orient='index', columns=['beta_index', 'sex_Group', 'sex', 'Group']
+        )
+
+        output = tested_object_instance.analyse_groups(
+            metadata_df, group_col='sex', group_col2='Group', show=False, show_pval=False
+            )
+        pd.testing.assert_frame_equal(
+            output["data"], expected_object,
             check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 

@@ -49,6 +49,8 @@ class ViolinGraph(BaseGraph, BaseViolinGraph):
 
         self._handle_output_plotly(fig, show, output_file)
 
+        return fig
+
 
 class GroupViolinGraph(GroupBaseGraph, BaseViolinGraph):
 

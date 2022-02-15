@@ -86,7 +86,6 @@ def statistical_test_groups_comparison(
         dic_df = {}
         for i in range(len(groups)):
             for j in range(i + 1, len(groups)):
-
                 if stat_test == "mann_whitney_u":
                     pval = mann_whitney_u(
                         list_of_series[i], list_of_series[j], **kwargs
@@ -105,7 +104,7 @@ def statistical_test_groups_comparison(
                     dic_df[(groups[j], groups[i])] = pval
         pvalue_df = pd.Series(dic_df)
         pvalue_df.index = pd.MultiIndex.from_tuples(
-            pvalue_df.index, names=["Group", "Group"]
+            pvalue_df.index, names=["Group1", "Group2"]
         )
         return pvalue_df
 
@@ -120,7 +119,8 @@ def statistical_test_groups_comparison(
                     list_of_series[i], list_of_series[j], **kwargs
                 )[1]
             if stat_test == "chi2_contingency":
-                pval = chi2_contingency(list_of_series[i], list_of_series[j], **kwargs
+                pval = chi2_contingency(
+                    list_of_series[i], list_of_series[j], **kwargs
                 )[1]
 
             tab[i][j] = pval

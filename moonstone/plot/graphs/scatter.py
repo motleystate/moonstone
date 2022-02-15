@@ -34,6 +34,8 @@ class ScatterGraph(BaseGraph):
 
         self._handle_output_plotly(fig, show, output_file)
 
+        return fig
+
 
 class GroupScatterGraph(GroupBaseGraph):
 
@@ -79,6 +81,8 @@ class GroupScatterGraph(GroupBaseGraph):
 
         self._handle_output_plotly(fig, show, output_file)
 
+        return fig
+
 
 class Scatter3DGraph(BaseGraph):
 
@@ -107,6 +111,8 @@ class Scatter3DGraph(BaseGraph):
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
 
         self._handle_output_plotly(fig, show, output_file)
+
+        return fig
 
 
 class GroupScatter3DGraph(GroupBaseGraph):
@@ -154,3 +160,5 @@ class GroupScatter3DGraph(GroupBaseGraph):
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
 
         self._handle_output_plotly(fig, show, output_file)
+
+        return fig

@@ -239,7 +239,7 @@ class TestPlotTaxonomyCounts(TestCase):
 
     def test_compute_abundances_taxa_dataframe_speciesonly(self):
         # testing the suffix '-only' in taxa_level
-        # that suffix is used when you don't want to take into account reads 
+        # that suffix is used when you don't want to take into account reads
         # defined only at an higher taxa level
         taxa_level = "species-only"
         expected_df = pd.DataFrame(
@@ -344,10 +344,12 @@ class TestPlotTaxonomyCounts(TestCase):
         expected_x_coor = [(-0.5, 0.5, 1.5), (1.5, 3.0, 4.5)]
         expected_subgps = np.array(['A', 'B'], dtype=object)
 
-        reordered_df, x_coor, subgps = self.tested_instance._divide_samples_into_subgroups_and_reorder(origin_df, sep_series)
+        reordered_df, x_coor, subgps = self.tested_instance._divide_samples_into_subgroups_and_reorder(
+            origin_df, sep_series
+        )
         pd.testing.assert_frame_equal(
             reordered_df,
             expected_df,
         )
         np.testing.assert_array_equal(subgps, expected_subgps)
-        self.assertListEqual (x_coor, expected_x_coor)
+        self.assertListEqual(x_coor, expected_x_coor)

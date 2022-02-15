@@ -99,7 +99,7 @@ class TestStatisticalTestFunction(TestCase):
         )
 
         expected_df = pd.Series({(1, 2): 0.3742593192802244, (2, 1): 0.3742593192802244})
-        expected_df.index.names = ['Group', 'Group']
+        expected_df.index.names = ['Group1', 'Group2']
 
         matrix = statistical_test_groups_comparison(self.test_df, metadata_df['group'], stat_test='mann_whitney_u',
                                                     output='series', sym=True)
@@ -119,7 +119,7 @@ class TestStatisticalTestFunction(TestCase):
         )
 
         expected_df = pd.Series({(1, 2): 0.3742593192802244})
-        expected_df.index.names = ['Group', 'Group']
+        expected_df.index.names = ['Group1', 'Group2']
 
         matrix = statistical_test_groups_comparison(self.test_df, metadata_df['group'], stat_test='mann_whitney_u',
                                                     output='series', sym=False)

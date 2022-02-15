@@ -1,9 +1,14 @@
 from abc import ABC, abstractmethod
 from typing import Union
 
+import copy
 import pandas as pd
 import plotly.io
 import plotly.graph_objects as go
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class BaseGraph(ABC):
@@ -29,6 +34,14 @@ class BaseGraph(ABC):
         needs to be defined in every child class
         """
         pass
+
+    def _valid_orientation_param(self, orientation):
+        if orientation == "v" or orientation == "vertical":
+            return "v"
+        elif orientation == "h" or orientation == "horizontal":
+            return "h"
+        logger.warning("orientation=%s not valid, set to default (v).", orientation)
+        return "v"
 
     def _handle_plotting_options_plotly(self, fig, plotting_options: dict):
         """
@@ -102,39 +115,117 @@ class GroupBaseGraph(BaseGraph):
     def _gen_fig_trace(self, x: list, y: list, name: str, text: list, color: str):
         pass
 
-    def plot_one_graph(
-        self, data_col: str, group_col: str, plotting_options: dict = None,
-        show: bool = True, output_file: Union[bool, str] = False,
-        colors: dict = None, sort_groups: bool = False, groups: list = None,
-        show_counts: bool = False,
+    def _gen_oriented_fig_trace(
+        self, fig, axis1: pd.Series, axis2: pd.Series,
+        name: str, text: str, color: str,
+        orientation: str,
         **kwargs
     ):
-        """
-        :param data_col: column with data to visualize
-        :param group_col: column used to group data
-        """
+        if orientation == "h":
+            fig.add_trace(self._gen_fig_trace(
+                axis2, axis1,
+                name, text, color,
+                **kwargs,
+            ))
+        else:    # default "v"
+            fig.add_trace(self._gen_fig_trace(
+                axis1, axis2,
+                name, text, color,
+                **kwargs,
+            ))
+        return fig
+
+    def _prep_for_plot_one_graph(
+        self, group_col: str, groups: list, colors: dict,
+        show_counts: bool, sort_groups: bool
+    ):
         if groups is None:
             groups = list(self.data[group_col].unique())
         if sort_groups:
             groups.sort()
         if colors is None:
             colors = self._gen_default_color_dict(groups)
-        fig = go.Figure()
+
         if show_counts:
             counts = self.data[group_col].value_counts().to_dict()
             names = {group: f"{group} (n={counts[group]})" for group in groups}
         else:
             names = {group: group for group in groups}
+        return groups, colors, names
 
-        for group in groups:
-            filtered_df = self.data[self.data[group_col] == group]
-            fig.add_trace(self._gen_fig_trace(
-                filtered_df[group_col], filtered_df[data_col],
-                str(names[group]), filtered_df.index, self._get_group_color(group, colors),
-                **kwargs,
-            ))
+    def plot_one_graph(
+        self, data_col: str, group_col: str, group_col2: str = None,
+        groups: list = None, groups2: list = None,
+        sort_groups: bool = False, colors: dict = None,
+        plotting_options: dict = None, orientation: str = "v",
+        show_counts: bool = False,
+        show: bool = True, output_file: Union[bool, str] = False,
+        **kwargs
+    ):
+        """
+        :param data_col: column with data to visualize
+        :param group_col: column used to group data
+        :param group_col2: (optional) second column used to group data
+        :param groups: specifically select groups to display among group_col
+        :param groups2: specifically select groups to display among group_col2
+        :param sort_groups: whether to sort groups to display or not
+        :param colors: dictionnary with group_col2 (or group_col if no group_col2) values as keys
+        :param orientation: orientation of the graph. {"v" (or "vertical")(default), "h" (or "horizontal")}
+        and their associated color as values
+        """
+
+        orientation = self._valid_orientation_param(orientation)
+
+        fig = go.Figure()
+
+        if group_col2:
+            groups2, colors, names = self._prep_for_plot_one_graph(
+                group_col2, groups2, colors, show_counts, sort_groups
+            )
+
+            if sort_groups and not groups:
+                groups = list(self.data[group_col].unique())
+                groups.sort()
+
+            if groups:
+                filtered_df = self.data[self.data[group_col].isin(groups)]
+                filtered_df[group_col] = filtered_df[group_col].astype("category")
+                filtered_df[group_col].cat.set_categories(groups, inplace=True)
+                filtered_df = filtered_df.sort_values([group_col])
+            else:
+                filtered_df = copy.deepcopy(self.data)
+
+            for group in groups2:
+                filtered_df2 = filtered_df[filtered_df[group_col2] == group]
+                fig = self._gen_oriented_fig_trace(
+                    fig, filtered_df2[group_col], filtered_df2[data_col],
+                    names[group], filtered_df.index, self._get_group_color(group, colors),
+                    orientation,
+                    **kwargs
+                    )
+
+            fig.update_layout(
+                boxmode='group', legend_title_text=group_col2
+            )
+        else:
+            groups, colors, names = self._prep_for_plot_one_graph(
+                group_col, groups, colors, show_counts, sort_groups
+            )
+            for group in groups:
+                filtered_df = self.data[self.data[group_col] == group]
+                fig = self._gen_oriented_fig_trace(
+                    fig, filtered_df[group_col], filtered_df[data_col],
+                    names[group], filtered_df.index, self._get_group_color(group, colors),
+                    orientation,
+                    **kwargs
+                    )
+
+        if orientation == "h":
+            fig.update_traces(orientation="h")
 
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
 
         self._handle_output_plotly(fig, show, output_file)
+
+        return fig

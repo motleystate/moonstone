@@ -48,10 +48,11 @@ class BetaDiversity(DiversityBase, ABC):
     def beta_diversity_df(self):
         return self.beta_diversity.to_data_frame()
 
-    def _get_grouped_df(self, metadata_series):
+    def _get_grouped_df_series(self, metadata_series):
         df_list = []
         for group in metadata_series.dropna().unique():
             group_df = self.df.loc[:, metadata_series[metadata_series == group].index]
+            # computing beta diversities only between samples from the same group
             beta_div_multi_indexed_df = self.compute_beta_diversity(group_df).to_series().to_frame()
             if beta_div_multi_indexed_df.empty:  # Happens if only one item from the group
                 continue
@@ -66,6 +67,37 @@ class BetaDiversity(DiversityBase, ABC):
             beta_div_solo_indexed_df[metadata_series.name] = group
             df_list.append(beta_div_solo_indexed_df)
         return pd.concat(df_list).dropna()
+
+    def _get_grouped_df_dataframe(self, metadata_dataframe):
+        df_list = []
+        final_group_col = metadata_dataframe.columns[-1]
+        group_col = metadata_dataframe.columns[0]
+        group_col2 = metadata_dataframe.columns[1]
+        for group in metadata_dataframe[final_group_col].dropna().unique():
+            group_df = self.df.loc[:, metadata_dataframe[metadata_dataframe[final_group_col] == group].index]
+            # computing beta diversities only between samples from the same group
+            beta_div_multi_indexed_df = self.compute_beta_diversity(group_df).to_series().to_frame()
+            if beta_div_multi_indexed_df.empty:  # Happens if only one item from the group
+                continue
+            # Make unique index from multi index
+            beta_div_not_indexed_df = beta_div_multi_indexed_df.reset_index()
+            index_col_names = ["level_0", "level_1"]
+            beta_div_solo_indexed_df = beta_div_not_indexed_df.set_index(
+                beta_div_not_indexed_df[index_col_names].agg('-'.join, axis=1)
+            ).drop(index_col_names, axis=1)
+            beta_div_solo_indexed_df.columns = [self.DIVERSITY_INDEXES_NAME]
+            # Add corresponding group name
+            beta_div_solo_indexed_df[final_group_col] = group
+            beta_div_solo_indexed_df[group_col] = group.split(" - ")[0]
+            beta_div_solo_indexed_df[group_col2] = group.split(" - ")[1]
+            df_list.append(beta_div_solo_indexed_df)
+        return pd.concat(df_list).dropna()
+
+    def _get_grouped_df(self, metadata_df):
+        if type(metadata_df) == pd.core.series.Series:
+            return self._get_grouped_df_series(metadata_df)
+        else:
+            return self._get_grouped_df_dataframe(metadata_df)
 
     @property
     def pcoa(self):
