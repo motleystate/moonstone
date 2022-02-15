@@ -165,6 +165,10 @@ class GroupBaseGraph(BaseGraph):
         """
         :param data_col: column with data to visualize
         :param group_col: column used to group data
+        :param group_col2: (optional) second column used to group data
+        :param groups: specifically select groups to display among group_col
+        :param groups2: specifically select groups to display among group_col2
+        :param sort_groups: whether to sort groups to display or not
         :param colors: dictionnary with group_col2 (or group_col if no group_col2) values as keys
         :param orientation: orientation of the graph. {"v" (or "vertical")(default), "h" (or "horizontal")}
         and their associated color as values
@@ -178,10 +182,10 @@ class GroupBaseGraph(BaseGraph):
             groups2, colors, names = self._prep_for_plot_one_graph(
                 group_col2, groups2, colors, show_counts, sort_groups
             )
-            if sort_groups and groups:
-                groups.sort()
 
-            fig = go.Figure()
+            if sort_groups and not groups:
+                groups = list(self.data[group_col].unique())
+                groups.sort()
 
             if groups:
                 filtered_df = self.data[self.data[group_col].isin(groups)]
