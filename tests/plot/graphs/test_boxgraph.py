@@ -61,6 +61,36 @@ class TestGroupBoxGraph(TestCase):
         np.testing.assert_array_equal(tested_graph.data[1].x, expected_x_gpF)
         np.testing.assert_array_equal(tested_graph.data[1].y, expected_y_gpF)
 
+    def test_invalid_orientation(self):
+        tested_df = pd.DataFrame(
+            [
+                [1.0, "M"],
+                [3.0, "F"],
+                [9.0, "M"],
+                [6.0, "M"],
+                [2.0, "F"]
+            ],
+            index=["sample1", "sample2", "sample3", "sample4", "sample5"],
+            columns=["data", "sex"],
+        )
+        expected_x_gpM = ['M', 'M', 'M']
+        expected_y_gpM = [1.0, 9.0, 6.0]
+        expected_x_gpF = ['F', 'F']
+        expected_y_gpF = [3.0, 2.0]
+        plot = GroupBoxGraph(tested_df)
+        with self.assertLogs('moonstone.plot.graphs.base', level='WARNING') as log:
+            tested_graph = plot.plot_one_graph(
+                data_col="data", group_col="sex", show=False,
+                orientation="diagonal"
+            )
+            np.testing.assert_array_equal(tested_graph.data[0].x, expected_x_gpM)
+            np.testing.assert_array_equal(tested_graph.data[0].y, expected_y_gpM)
+            np.testing.assert_array_equal(tested_graph.data[1].x, expected_x_gpF)
+            np.testing.assert_array_equal(tested_graph.data[1].y, expected_y_gpF)
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.plot.graphs.base:orientation=diagonal not valid, \
+set to default (v).", log.output)
+
     def test_with_group_col2_without_groups(self):
         tested_df = pd.DataFrame(
             [
@@ -163,7 +193,7 @@ class TestGroupBoxGraph(TestCase):
         tested_graph = plot.plot_one_graph(
             data_col="data", group_col="sex", group_col2="group",
             sort_groups=True,
-            show=True,
+            show=False,
             )
         np.testing.assert_array_equal(tested_graph.data[0].x, expected_x_gpA)
         np.testing.assert_array_equal(tested_graph.data[0].y, expected_y_gpA)

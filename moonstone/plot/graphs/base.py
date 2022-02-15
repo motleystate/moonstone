@@ -40,7 +40,7 @@ class BaseGraph(ABC):
             return "v"
         elif orientation == "h" or orientation == "horizontal":
             return "h"
-        logger.warning("orientation=%s not valid, set to default (v)", orientation)
+        logger.warning("orientation=%s not valid, set to default (v).", orientation)
         return "v"
 
     def _handle_plotting_options_plotly(self, fig, plotting_options: dict):
