@@ -2,7 +2,9 @@ from unittest import TestCase
 
 from io import StringIO
 import numpy as np
+from packaging import version
 import pandas as pd
+import scipy
 from skbio import TreeNode
 
 from moonstone.analysis.diversity.alpha import (
@@ -112,19 +114,33 @@ set to default (all).", log.output)
 
     def test_analyse_groups_pval_to_compute_all(self):
         tested_object_instance = ShannonIndex(self.tested_object)
-        expected_ser = pd.Series({
-            ('1 - F', '1 - M'): 1.0,
-            ('1 - F', '2 - F'): 1.0,
-            ('1 - F', '2 - M'): 1.0,
-            ('1 - M', '2 - F'): 0.5402913746074199,    # 1.0 for scipy version 1.7.1*
-            ('1 - M', '2 - M'): 0.5402913746074199,    # 0.66.. for scipy version 1.7.1*
-            ('2 - F', '2 - M'): 1.0
-            },
-        )
-        # * here, scipy 1.5.3 = no `method` argument -> uses "asymptotic" method
-        # in  scipy version 1.7.1 = `method` argument; default being 'auto', which chooses 'exact' when the size
-        # of one of the samples is less than 8 and there are no ties; chooses 'asymptotic' otherwise.
-        # so here, uses "exact"
+
+        if version.parse(scipy.__version__) > version.parse("1.5.3"):
+            expected_ser = pd.Series({
+                ('1 - F', '1 - M'): 1.0,
+                ('1 - F', '2 - F'): 1.0,
+                ('1 - F', '2 - M'): 1.0,
+                ('1 - M', '2 - F'): 1.0,
+                ('1 - M', '2 - M'): 0.6666666666666666,
+                ('2 - F', '2 - M'): 1.0
+                },
+            )
+        else:
+            expected_ser = pd.Series({
+                ('1 - F', '1 - M'): 1.0,
+                ('1 - F', '2 - F'): 1.0,
+                ('1 - F', '2 - M'): 1.0,
+                ('1 - M', '2 - F'): 0.5402913746074199,
+                ('1 - M', '2 - M'): 0.5402913746074199,
+                ('2 - F', '2 - M'): 1.0
+                },
+            )
+        # if scipy 1.5.3 = no `method` argument -> uses "asymptotic" method
+        # if scipy > 1.5.3 (ex: 1.7.1) = `method` argument; default being 'auto',
+        # which chooses 'exact' when the size of one of the samples is less than 8 and there are no ties;
+        # chooses 'asymptotic' otherwise.
+        # -> so here, uses "exact"
+
         expected_ser.index.names = ["Group1", "Group2"]
 
         output = tested_object_instance.analyse_groups(
@@ -153,17 +169,27 @@ set to default (all).", log.output)
 
     def test_analyse_groups_pval_to_compute_same_group_col_or_group_col2_values(self):
         tested_object_instance = ShannonIndex(self.tested_object)
-        expected_ser = pd.Series({
-            ('2 - F', '2 - M'): 1.0,
-            ('1 - F', '1 - M'): 1.0,
-            ('1 - F', '2 - F'): 1.0,
-            ('1 - M', '2 - M'): 0.5402913746074199    # 0.66.. for scipy version 1.7.1*
-            },
-        )
-        # * here, scipy 1.5.3 = no `method` argument -> uses "asymptotic" method
-        # in  scipy version 1.7.1 = `method` argument; default being 'auto', which chooses 'exact' when the size
-        # of one of the samples is less than 8 and there are no ties; chooses 'asymptotic' otherwise.
-        # so here, uses "exact"
+        if version.parse(scipy.__version__) > version.parse("1.5.3"):
+            expected_ser = pd.Series({
+                ('2 - F', '2 - M'): 1.0,
+                ('1 - F', '1 - M'): 1.0,
+                ('1 - F', '2 - F'): 1.0,
+                ('1 - M', '2 - M'): 0.666666666666666
+                },
+            )
+        else:
+            expected_ser = pd.Series({
+                ('2 - F', '2 - M'): 1.0,
+                ('1 - F', '1 - M'): 1.0,
+                ('1 - F', '2 - F'): 1.0,
+                ('1 - M', '2 - M'): 0.5402913746074199
+                },
+            )
+        # if scipy 1.5.3 = no `method` argument -> uses "asymptotic" method
+        # if scipy > 1.5.3 (ex: 1.7.1) = `method` argument; default being 'auto',
+        # which chooses 'exact' when the size of one of the samples is less than 8 and there are no ties;
+        # chooses 'asymptotic' otherwise.
+        # -> so here, uses "exact"
         expected_ser.index.names = ["Group1", "Group2"]
 
         output = tested_object_instance.analyse_groups(
