@@ -115,7 +115,7 @@ set to default (all).", log.output)
     def test_analyse_groups_pval_to_compute_all(self):
         tested_object_instance = ShannonIndex(self.tested_object)
 
-        if version.parse(scipy.__version__) > version.parse("1.5.3"):
+        if version.parse(scipy.__version__) > version.parse("1.6.3"):
             expected_ser = pd.Series({
                 ('1 - F', '1 - M'): 1.0,
                 ('1 - F', '2 - F'): 1.0,
@@ -169,7 +169,7 @@ set to default (all).", log.output)
 
     def test_analyse_groups_pval_to_compute_same_group_col_or_group_col2_values(self):
         tested_object_instance = ShannonIndex(self.tested_object)
-        if version.parse(scipy.__version__) > version.parse("1.5.3"):
+        if version.parse(scipy.__version__) > version.parse("1.6.3"):
             expected_ser = pd.Series({
                 ('2 - F', '2 - M'): 1.0,
                 ('1 - F', '1 - M'): 1.0,
