@@ -220,9 +220,8 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         choices = [
             "all", "same group_col or group_col2 values", "same group_col values", None
         ]
-
         if pval_to_compute not in choices:
-            logger.warning("pval_to_compute='%s' not valid, set to default (all)", pval_to_compute)
+            logger.warning("pval_to_compute='%s' not valid, set to default (all).", pval_to_compute)
             pval_to_compute = "all"
         return pval_to_compute
 
@@ -230,11 +229,11 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         if correction_method == "uncorrected":
             return None
         if correction_method not in [None, 'fdr_bh', 'bonferroni']:
-            logger.warning("correction_method='%s' not valid, set to default (None)", correction_method)
+            logger.warning("correction_method='%s' not valid, set to default (None).", correction_method)
             return None
         return correction_method
 
-    def _compute_pval_inside_subgroup(
+    def _compute_pval_inside_subgroups(
         self, diversity_index_dataframe: pd.DataFrame, group_col: str, final_group_col: str,
         stats_test: str, correction_method: str, structure_pval: str, sym: bool
     ):
@@ -315,12 +314,12 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 )
             elif (pval_to_compute == "same group_col values" or
                   pval_to_compute == "same group_col or group_col2 values"):
-                pval = self._compute_pval_inside_subgroup(
+                pval = self._compute_pval_inside_subgroups(
                     df, group_col, final_group_col, stats_test, correction_method, structure_pval, sym
                 )
                 if pval_to_compute == "same group_col or group_col2 values":
                     pval = pval.append(
-                        self._compute_pval_inside_subgroup(
+                        self._compute_pval_inside_subgroups(
                             df, group_col2, final_group_col,
                             stats_test, correction_method, structure_pval, sym
                         )

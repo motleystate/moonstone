@@ -22,6 +22,17 @@ class TestShannonIndex(TestCase):
                 'species4': [0, 3, 0, 0, 4]
             },
             orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'])
+        self.metadata_df = pd.DataFrame(
+            [
+                ['F', 2],
+                ['M', 1],
+                ['F', 1],
+                ['M', 1],
+                ['M', 2]
+            ],
+            columns=['sex', 'group'],
+            index=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'],
+        )
 
     def test_compute_alpha_diversity(self):
         expected_object = pd.Series({
@@ -41,17 +52,6 @@ class TestShannonIndex(TestCase):
 
     def test_analyse_groups(self):
         tested_object_instance = ShannonIndex(self.tested_object)
-        metadata_df = pd.DataFrame(
-            [
-                ['F', 2],
-                ['M', 1],
-                ['F', 1],
-                ['M', 1],
-                ['M', 2]
-            ],
-            columns=['sex', 'group'],
-            index=['sample1', 'sample2', 'sample3', 'sample4', 'sample5'],
-        )
         expected_df = pd.DataFrame(
             [
                 [np.nan, 0.374259],
@@ -61,8 +61,8 @@ class TestShannonIndex(TestCase):
             index=[1, 2]
         )
 
-        output = tested_object_instance.analyse_groups(metadata_df, 'group', make_graph=False,
-                                                       output_pvalue='dataframe', sym=True)
+        output = tested_object_instance.analyse_groups(self.metadata_df, 'group', make_graph=False,
+                                                       structure_pval='dataframe', sym=True)
         pd.testing.assert_frame_equal(output['pval'], expected_df, check_dtype=False)
 
     def test_pvalue_correction(self):
@@ -89,10 +89,89 @@ class TestShannonIndex(TestCase):
         )
 
         output = tested_object_instance.analyse_groups(metadata_df, 'group', make_graph=False,
-                                                       output_pvalue='dataframe', sym=True,
+                                                       structure_pval='dataframe', sym=True,
                                                        correction_method='fdr_bh'
                                                        )
         pd.testing.assert_frame_equal(output['pval'], expected_df, check_dtype=False)
+
+    def test_invalid_correction_method_param(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+        with self.assertLogs('moonstone.analysis.diversity.base', level='WARNING') as log:
+            tested_object_instance._valid_correction_method_param("lalala")
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.analysis.diversity.base:correction_method='lalala' not valid, \
+set to default (None).", log.output)
+
+    def test_invalid_pval_param(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+        with self.assertLogs('moonstone.analysis.diversity.base', level='WARNING') as log:
+            tested_object_instance._valid_pval_param("lalala")
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.analysis.diversity.base:pval_to_compute='lalala' not valid, \
+set to default (all).", log.output)
+
+    def test_analyse_groups_pval_to_compute_all(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+        expected_ser = pd.Series({
+            ('1 - F', '1 - M'): 1.0,
+            ('1 - F', '2 - F'): 1.0,
+            ('1 - F', '2 - M'): 1.0,
+            ('1 - M', '2 - F'): 0.5402913746074199,    # 1.0 for scipy version 1.7.1*
+            ('1 - M', '2 - M'): 0.5402913746074199,    # 0.66.. for scipy version 1.7.1*
+            ('2 - F', '2 - M'): 1.0
+            },
+        )
+        # * here, scipy 1.5.3 = no `method` argument -> uses "asymptotic" method
+        # in  scipy version 1.7.1 = `method` argument; default being 'auto', which chooses 'exact' when the size
+        # of one of the samples is less than 8 and there are no ties; chooses 'asymptotic' otherwise.
+        # so here, uses "exact"
+        expected_ser.index.names = ["Group1", "Group2"]
+
+        output = tested_object_instance.analyse_groups(
+            self.metadata_df, group_col='group', group_col2='sex',
+            make_graph=False, structure_pval='series', sym=False,
+            correction_method="uncorrected",
+            pval_to_compute="all"
+        )
+        pd.testing.assert_series_equal(output['pval'], expected_ser, check_dtype=False)
+
+    def test_analyse_groups_pval_to_compute_same_group_col_values(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+        expected_ser = pd.Series({
+            ('2 - F', '2 - M'): 1.0,
+            ('1 - F', '1 - M'): 1.0
+            },
+        )
+        expected_ser.index.names = ["Group1", "Group2"]
+
+        output = tested_object_instance.analyse_groups(
+            self.metadata_df, group_col='group', group_col2='sex',
+            make_graph=False, structure_pval='series', sym=False,
+            pval_to_compute="same group_col values"
+        )
+        pd.testing.assert_series_equal(output['pval'], expected_ser, check_dtype=False)
+
+    def test_analyse_groups_pval_to_compute_same_group_col_or_group_col2_values(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+        expected_ser = pd.Series({
+            ('2 - F', '2 - M'): 1.0,
+            ('1 - F', '1 - M'): 1.0,
+            ('1 - F', '2 - F'): 1.0,
+            ('1 - M', '2 - M'): 0.5402913746074199    # 0.66.. for scipy version 1.7.1*
+            },
+        )
+        # * here, scipy 1.5.3 = no `method` argument -> uses "asymptotic" method
+        # in  scipy version 1.7.1 = `method` argument; default being 'auto', which chooses 'exact' when the size
+        # of one of the samples is less than 8 and there are no ties; chooses 'asymptotic' otherwise.
+        # so here, uses "exact"
+        expected_ser.index.names = ["Group1", "Group2"]
+
+        output = tested_object_instance.analyse_groups(
+            self.metadata_df, group_col='group', group_col2='sex',
+            make_graph=False, structure_pval='series', sym=False,
+            pval_to_compute="same group_col or group_col2 values"
+        )
+        pd.testing.assert_series_equal(output['pval'], expected_ser, check_dtype=False)
 
 
 class TestSimpsonInverseIndex(TestCase):

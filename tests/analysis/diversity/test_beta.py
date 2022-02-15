@@ -100,7 +100,7 @@ class TestBrayCurtis(TestCase):
                 ('C', 'D'): np.nan
             }
         )
-        expected_object.index.names = ["Group", "Group"]
+        expected_object.index.names = ["Group1", "Group2"]
 
         pval = tested_object_instance._run_statistical_test_groups(
             tested_df, 'Group', stats_test='ttest_independence', correction_method='fdr_bh',
