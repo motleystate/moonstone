@@ -135,8 +135,8 @@ set to default (all).", log.output)
                 ('2 - F', '2 - M'): 1.0
                 },
             )
-        # if scipy 1.5.3 = no `method` argument -> uses "asymptotic" method
-        # if scipy > 1.5.3 (ex: 1.7.1) = `method` argument; default being 'auto',
+        # if scipy 1.6.3 = no `method` argument -> uses "asymptotic" method
+        # if scipy > 1.6.3 = `method` argument; default being 'auto',
         # which chooses 'exact' when the size of one of the samples is less than 8 and there are no ties;
         # chooses 'asymptotic' otherwise.
         # -> so here, uses "exact"
@@ -185,8 +185,8 @@ set to default (all).", log.output)
                 ('1 - M', '2 - M'): 0.5402913746074199
                 },
             )
-        # if scipy 1.5.3 = no `method` argument -> uses "asymptotic" method
-        # if scipy > 1.5.3 (ex: 1.7.1) = `method` argument; default being 'auto',
+        # if scipy 1.6.3 = no `method` argument -> uses "asymptotic" method
+        # if scipy > 1.6.3 = `method` argument; default being 'auto',
         # which chooses 'exact' when the size of one of the samples is less than 8 and there are no ties;
         # chooses 'asymptotic' otherwise.
         # -> so here, uses "exact"

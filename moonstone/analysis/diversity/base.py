@@ -284,10 +284,6 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         to correct generated p-values
         :param structure_pval: {'series', 'dataframe'}
         :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
-        :param pval_inside_group_col_groups: if group_col2 used, problems of memory or
-        in maximum recursion depth. Only p-values between the group_col2 groups inside group_col groups
-        are computed. pval output is in this case a dictionnary with group name from group_col as keys
-        and dataframe or series as values
         :param pval_to_compute: if group_col2 used, problems of memory or in maximum recursion depth
         may occur. In this case, you may want to compute only p-values of specific comparisons.
         {"all" (default), None, "same group_col values", "same group_col or group_col2 values"}
@@ -332,11 +328,23 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 )
             # pval is in the right structure to be returned
 
+        self.last_grouped_df = df
+        report_dictionary = {
+            'data': df,
+            'pval': pval,
+            'meta': {
+                'pval_to_compute': pval_to_compute,
+                'stats_test': stats_test,
+                'correction_method': correction_method,
+            }
+        }
+
         if make_graph:
-            self._make_graph(
+            fig = self._make_graph(
                 df, mode, group_col, group_col2, plotting_options, log_scale, show, output_file,
                 colors, groups, groups2, **kwargs
             )
+            report_dictionary['fig'] = fig
             if show_pval:
                 if structure_pval != 'dataframe' or not sym:
                     pval_for_visualization = self._structure_remodelling(pval, 'dataframe', sym=True)
@@ -344,14 +352,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 else:
                     self._visualize_pvalue_matrix(pval, output_pval_file)
 
-        self.last_grouped_df = df
-        return {
-            'data': df,
-            'pval': pval,
-            'meta': {
-                'stats_test': stats_test
-            }
-        }
+        return report_dictionary
 
 
 class PhylogeneticDiversityBase(DiversityBase):
