@@ -279,14 +279,14 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         :param make_graph: whether or not to make the graph
         :param plotting_options: plotly plotting_options
         :param stats_test: {'mann_whitney_u', 'ttest_independence', 'chi2_contingency'} statistical test
-        used to calculate the p-values between each groups
+          used to calculate the p-values between each groups
         :param correction_method: {None, 'fdr_bh' (benjamini-hochberg), 'bonferroni'} method used (if any)
-        to correct generated p-values
+          to correct generated p-values
         :param structure_pval: {'series', 'dataframe'}
         :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
         :param pval_to_compute: if group_col2 used, problems of memory or in maximum recursion depth
-        may occur. In this case, you may want to compute only p-values of specific comparisons.
-        {"all" (default), None, "same group_col values", "same group_col or group_col2 values"}
+          may occur. In this case, you may want to compute only p-values of specific comparisons.
+          {"all" (default), None, "same group_col values", "same group_col or group_col2 values"}
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
 
@@ -329,13 +329,14 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             # pval is in the right structure to be returned
 
         self.last_grouped_df = df
-        report_dictionary = {
-            'data': df,
+        self.report_data['analyse_groups'] = {
             'pval': pval,
-            'meta': {
+            'param': {
                 'pval_to_compute': pval_to_compute,
                 'stats_test': stats_test,
                 'correction_method': correction_method,
+                'group_col': group_col,
+                'group_col2': group_col2
             }
         }
 
@@ -344,7 +345,6 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 df, mode, group_col, group_col2, plotting_options, log_scale, show, output_file,
                 colors, groups, groups2, **kwargs
             )
-            report_dictionary['fig'] = fig
             if show_pval:
                 if structure_pval != 'dataframe' or not sym:
                     pval_for_visualization = self._structure_remodelling(pval, 'dataframe', sym=True)
@@ -352,7 +352,18 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 else:
                     self._visualize_pvalue_matrix(pval, output_pval_file)
 
-        return report_dictionary
+            return {**{'data': df, 'fig': fig}, **self.report_data['analyse_groups']}
+
+        # 'data' different from 'diversity indexes' in the fact that it has been filtered on metadata, meaning that
+        # samples without metadata for group_col (or group_col2) have been dropped
+        return{**{'data': df}, **self.report_data['analyse_groups']}
+
+    def generate_report_data(self) -> dict:
+        """
+        method that generates a report summurazing the diversity computed
+        (parameters, results)
+        """
+        return {"title": self.index_name+" diversity", "diversity indexes": self.diversity_indexes}
 
 
 class PhylogeneticDiversityBase(DiversityBase):
@@ -369,13 +380,14 @@ class PhylogeneticDiversityBase(DiversityBase):
         """
         Args:
             validate: skbio argument. "If False, validation of the input won’t be performed.
-            This step can be slow, so if validation is run elsewhere it can be disabled here.
-            However, invalid input data can lead to invalid results or error messages that
-            are hard to interpret, so this step should not be bypassed if you’re not certain
-            that your input data are valid. See skbio.diversity for the description of what
-            validation entails so you can determine if you can safely disable validation.
+              This step can be slow, so if validation is run elsewhere it can be disabled here.
+              However, invalid input data can lead to invalid results or error messages that
+              are hard to interpret, so this step should not be bypassed if you’re not certain
+              that your input data are valid. See
+              `skbio.diversity <https://http://scikit-bio.org/docs/latest/diversity.html#module-skbio.diversity/>`_
+              for the description of what validation entails so you can determine if you can safely disable validation."
             force_computation: if True, doesn't raise error if OTU IDs are missing and compute
-            the diversity with the OTU IDs that are present in the Tree
+              the diversity with the OTU IDs that are present in the Tree
         """
         super().__init__(taxonomy_dataframe)
         if type(taxonomy_tree) == skbio.tree._tree.TreeNode:

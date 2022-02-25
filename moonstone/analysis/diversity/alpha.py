@@ -39,6 +39,13 @@ class ShannonIndex(AlphaDiversity):
             Seriesdic[i] = skbio.diversity.alpha.shannon(self.df[i], base=self.base)
         return pd.Series(Seriesdic)
 
+    def generate_report_data(self) -> dict:
+        """
+        method that generates a report summurazing the diversity computed
+        (parameters, results)
+        """
+        return {**{"param": {"base": self.base}, **super().generate_report_data()}}
+
 
 class SimpsonInverseIndex(AlphaDiversity):
     """
@@ -69,6 +76,13 @@ class Chao1Index(AlphaDiversity):
         for i in self.df.columns:
             Seriesdic[i] = skbio.diversity.alpha.chao1(self.df[i], bias_corrected=self.bias_corrected)
         return pd.Series(Seriesdic)
+
+    def generate_report_data(self) -> dict:
+        """
+        method that generates a report summurazing the diversity computed
+        (parameters, results)
+        """
+        return {**{"param": {"bias_corrected": self.bias_corrected}, **super().generate_report_data()}}
 
 
 class FaithsPhylogeneticDiversity(AlphaDiversity, PhylogeneticDiversityBase):
