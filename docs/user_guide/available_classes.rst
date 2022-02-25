@@ -176,7 +176,11 @@ List
    differential_analysis.DifferentialAnalysis
    diversity.alpha.ShannonIndex
    diversity.alpha.SimpsonInverseIndex
+   diversity.alpha.Chao1Index
+   diversity.alpha.FaithsPhylogeneticDiversity
    diversity.beta.BrayCurtis
+   diversity.beta.WeightedUniFrac
+   diversity.beta.UnweightedUniFrac
 
 .. Note::
     More details on API documentation for :ref:`api_plot`.
