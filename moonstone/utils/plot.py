@@ -31,3 +31,49 @@ def add_default_titles_to_plotting_options(plotting_options: dict, title: str, x
     plotting_options = add_x_to_plotting_options(plotting_options, 'xaxes', 'title_text', xlabel)
     plotting_options = add_x_to_plotting_options(plotting_options, 'yaxes', 'title_text', ylabel)
     return plotting_options
+
+
+def add_groups_annotations(fig, x_coor: list, groups: list):
+    """
+    Args
+        x_coor: List of x coordinates triplet [(x start of background, x of text annotation, x end of background)]
+        groups: List of groups' name, should be in the same order as x_coor
+    """
+    i = 0
+    color_bg = ["#FFFFFF", "#a7bcdb"]
+    while i < len(groups):
+        # adding background color
+        fig.add_shape(
+            type="rect",
+            x0=x_coor[i][0], y0=100,
+            x1=x_coor[i][2], y1=104,
+            line=dict(
+                width=0,
+            ),
+            fillcolor=color_bg[i % 2],
+        )
+        # adding text annotation (group name)
+        fig.add_annotation(
+            x=x_coor[i][1], y=102,
+            xref="x", yref="y",
+            text=groups[i],
+            showarrow=False,
+            font=dict(
+                family="Arial",
+                size=14
+            ),
+        )
+        if i < (len(groups) - 1):
+            # adding line separating groups
+            fig.add_shape(
+                type="line",
+                x0=x_coor[i][2], y0=100,
+                x1=x_coor[i][2], y1=0,
+                line=dict(
+                    width=1,
+                    dash="solid",
+                    color="white"
+                )
+            )
+        i += 1
+    return fig
