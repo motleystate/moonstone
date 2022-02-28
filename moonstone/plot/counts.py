@@ -182,7 +182,7 @@ class PlotTaxonomyCounts:
         """
         # Determine samples order using hierarchical clustering
         Z = hierarchy.linkage(
-            distance.pdist(df.T),
+            distance.pdist(df.drop(["Others"]).T),
             method="single",
             metric="euclidean",
             optimal_ordering=False,
@@ -321,7 +321,7 @@ class PlotTaxonomyCounts:
         )
 
         fig = graph.plot_one_graph(
-            orientation="h", plotting_options=plotting_options,  # **kwargs
+            orientation="h", plotting_options=plotting_options, **kwargs
         )
 
         return fig
