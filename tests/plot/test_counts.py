@@ -487,7 +487,8 @@ class TestPlotTaxonomyCounts(TestCase):
             show=False
         )
         expected_x = (11.04623470477129, 20.14751170238975, 54.889836124066576)
-        expected_y = ("Streptococcus (genus)", "Streptococcus_salivarius", "Lactobacillus (genus)")
+        expected_y = ("<i>Streptococcus</i> (genus)", "<i>Streptococcus salivarius</i>", 
+                      "<i>Lactobacillus</i> (genus)")
 
         self.assertTupleEqual(fig['data'][0]['x'], expected_x)
         self.assertTupleEqual(fig['data'][0]['y'], expected_y)
@@ -501,7 +502,8 @@ class TestPlotTaxonomyCounts(TestCase):
             show=False
         )
         expected_x = (54.889836124066576, 20.14751170238975, 11.04623470477129)
-        expected_y = ("Lactobacillus (genus)", "Streptococcus_salivarius", "Streptococcus (genus)")
+        expected_y = ("<i>Lactobacillus</i> (genus)", "<i>Streptococcus salivarius</i>", 
+                      "<i>Streptococcus</i> (genus)")
 
         self.assertTupleEqual(fig['data'][0]['x'], expected_x)
         self.assertTupleEqual(fig['data'][0]['y'], expected_y)
@@ -513,7 +515,7 @@ class TestPlotTaxonomyCounts(TestCase):
             show=False
         )
         expected_x = tuple([6.0949097082402375])
-        expected_y = tuple(["Streptococcus_thermophilus"])
+        expected_y = tuple(["<i>Streptococcus thermophilus</i>"])
 
         self.assertTupleEqual(fig['data'][0]['x'], expected_x)
         self.assertTupleEqual(fig['data'][0]['y'], expected_y)
@@ -572,7 +574,7 @@ of the cohort'
 of the cohort (present in at least 80% of samples)'
             )
 
-    def test_plot_most_prevalent_taxa_mean_threshold_mean_info(self):
+    def test_plot_most_prevalent_taxa_boxplot_mean_threshold_mean_info(self):
         fig = self.tested_instance._plot_most_what_taxa_boxplot_or_violin(
             "prevalent", "boxplot",
             taxa_number=2,
@@ -595,4 +597,126 @@ of the cohort (present in at least 80% of samples)'
             fig['layout']['title']['text'],
             'Relative abundance of the 1 most prevalent microbial genomes among individuals \
 of the cohort (with mean among samples > 2.0)'
+            )
+
+    def test_plot_most_prevalent_taxa_bargraph_mean_threshold_mean_info(self):
+        fig = self.tested_instance._plot_most_prevalent_taxa_bargraph(
+            taxa_number=2,
+            mean_threshold=2.0,
+            mean_info=True,
+            show=False
+        )
+        
+        expected_x = [75.0]
+        expected_y = [
+            '<i>Lactobacillus</i> (genus) (mean=8.25)'
+            ]
+
+        np.testing.assert_allclose(fig['data'][0]['x'], expected_x)
+        np.testing.assert_array_equal(fig['data'][0]['y'], expected_y)
+        self.assertEqual(
+            fig['layout']['title']['text'],
+            '1 most prevalent species (with mean among samples > 2.0)'
+            )
+
+    def test_plot_most_prevalent_taxa_modebargraph_plotting_options(self):
+        fig = self.tested_instance.plot_most_prevalent_taxa(
+            taxa_number=2,
+            show=False,
+            mode="bar",                 # self._valid_mode_param accepts it as "bargraph"
+            plotting_options={
+                'xaxes': {'type': 'log'}
+            }
+        )
+        
+        expected_x = [75.0, 100.0]
+        expected_y = [
+            '<i>Streptococcus salivarius</i>', '<i>Streptococcus thermophilus</i>'
+            ]
+
+        np.testing.assert_allclose(fig['data'][0]['x'], expected_x)
+        np.testing.assert_array_equal(fig['data'][0]['y'], expected_y)
+        self.assertEqual(
+            fig['layout']['title']['text'],
+            '2 most prevalent species'
+            )
+        self.assertEqual(
+            fig['layout']['xaxis']['type'],
+            'log'
+            )
+
+    def test_plot_most_prevalent_taxa_modeboxplot_warning(self):
+        with self.assertLogs('moonstone.plot.counts', level='WARNING') as log:
+            fig = self.tested_instance.plot_most_prevalent_taxa(
+                taxa_number=2,
+                mean_threshold=50.0,
+                show=False,
+                mode="box",                 # self._valid_mode_param accepts it as "boxplot"
+            )
+            self.assertEqual(
+                fig['layout']['title']['text'],
+                'Relative abundance of the 0 most prevalent microbial genomes among individuals \
+of the cohort (with mean among samples > 50.0)'
+                )
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.plot.counts:No species abide by the threshold(s) given. \
+You may want to try to lower your threshold(s).", log.output)
+
+    def test_plot_most_abundant_taxa_invalidmode(self):
+        # If the mode is invalid, the graph will be plotted as a bargraph, which is the default mode
+        expected_x = [20.14751170238975, 7.8215077605321515]
+        expected_y = [
+            '<i>Streptococcus salivarius</i>', '<i>Actinobaculum massiliense</i>'
+            ]
+
+        with self.assertLogs('moonstone.plot.counts', level='WARNING') as log:
+            fig = self.tested_instance.plot_most_abundant_taxa(
+                taxa_number=2,
+                higher_classification=False,
+                ascending=True,
+                show=False,
+                mode="invalidmode",
+            )
+            np.testing.assert_allclose(fig['data'][0]['x'], expected_x)
+            np.testing.assert_array_equal(fig['data'][0]['y'], expected_y)
+            self.assertEqual(
+                fig['layout']['title']['text'],
+                '2 most abundant species'
+                )
+            self.assertEqual(len(log.output), 1)
+            self.assertIn(
+                "WARNING:moonstone.plot.counts:mode='invalidmode' not valid, set to default (bargraph).", 
+                log.output
+                )
+
+    def test_plot_most_abundant_taxa_modeviolin(self):
+        fig = self.tested_instance.plot_most_abundant_taxa(
+            taxa_level="genus",
+            taxa_number=2,
+            show=False,
+            ascending=True,
+            mode="violingraph",           # self._valid_mode_param accepts it as "violin"
+            plotting_options={
+                'xaxes':{'type': 'linear'}
+            }
+        )
+
+        expected_x_L = [0.0 , 72.72727273, 91.95402299, 54.87804878]
+        expected_y_L = ['<i>Lactobacillus</i>', '<i>Lactobacillus</i>', '<i>Lactobacillus</i>',
+                        '<i>Lactobacillus</i>']
+        expected_x_S = [100.0 , 8.18181818, 8.04597701, 32.92682927]
+        expected_y_S = ['<i>Streptococcus</i>', '<i>Streptococcus</i>', '<i>Streptococcus</i>',
+                        '<i>Streptococcus</i>']
+        np.testing.assert_allclose(fig['data'][0]['x'], expected_x_L)
+        np.testing.assert_array_equal(fig['data'][0]['y'], expected_y_L)
+        np.testing.assert_allclose(fig['data'][1]['x'], expected_x_S)
+        np.testing.assert_array_equal(fig['data'][1]['y'], expected_y_S)
+        self.assertEqual(
+            fig['layout']['title']['text'],
+            'Relative abundance of the 2 most abundant microbial genomes among individuals \
+of the cohort'
+            )
+        self.assertEqual(
+            fig['layout']['xaxis']['type'],
+            'linear'
             )

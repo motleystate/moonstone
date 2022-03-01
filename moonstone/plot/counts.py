@@ -301,6 +301,7 @@ class PlotTaxonomyCounts:
             higher_classification=higher_classification, prevalence_threshold=prevalence_threshold,
             ascending=bool(1 - ascending)
             )[1:]
+        average_abundance_ser.index = average_abundance_ser.index.map(self._italicize_taxa_name)
 
         # Make graph
         graph = BarGraph(average_abundance_ser)
@@ -439,7 +440,7 @@ of the cohort"+title,
 
         return fig
 
-    def _plot_most_prevalent_bargraph(
+    def _plot_most_prevalent_taxa_bargraph(
         self,
         taxa_level: str = "species",
         taxa_number: int = 20,
@@ -483,6 +484,7 @@ of the cohort"+title,
         if mean_info:
             # adding mean information
             prev_ser_taxa = self._add_mean_info_to_index(prev_ser_taxa, mean_counts_ser_taxa)
+        prev_ser_taxa.index = prev_ser_taxa.index.map(self._italicize_taxa_name)
 
         if mean_threshold:
             title = f" (with mean among samples > {mean_threshold})"
@@ -547,7 +549,7 @@ of the cohort"+title,
         plotting_options = kwargs.pop("plotting_options", {})
         mode = self._valid_mode_param(mode)
         if mode == "bargraph":
-            fig = self._plot_most_prevalent_bargraph(
+            fig = self._plot_most_prevalent_taxa_bargraph(
                 taxa_level=taxa_level,
                 taxa_number=taxa_number,
                 prevalence_threshold=prevalence_threshold,
