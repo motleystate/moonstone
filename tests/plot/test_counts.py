@@ -487,7 +487,7 @@ class TestPlotTaxonomyCounts(TestCase):
             show=False
         )
         expected_x = (11.04623470477129, 20.14751170238975, 54.889836124066576)
-        expected_y = ("<i>Streptococcus</i> (genus)", "<i>Streptococcus salivarius</i>", 
+        expected_y = ("<i>Streptococcus</i> (genus)", "<i>Streptococcus salivarius</i>",
                       "<i>Lactobacillus</i> (genus)")
 
         self.assertTupleEqual(fig['data'][0]['x'], expected_x)
@@ -502,7 +502,7 @@ class TestPlotTaxonomyCounts(TestCase):
             show=False
         )
         expected_x = (54.889836124066576, 20.14751170238975, 11.04623470477129)
-        expected_y = ("<i>Lactobacillus</i> (genus)", "<i>Streptococcus salivarius</i>", 
+        expected_y = ("<i>Lactobacillus</i> (genus)", "<i>Streptococcus salivarius</i>",
                       "<i>Streptococcus</i> (genus)")
 
         self.assertTupleEqual(fig['data'][0]['x'], expected_x)
@@ -606,7 +606,7 @@ of the cohort (with mean among samples > 2.0)'
             mean_info=True,
             show=False
         )
-        
+
         expected_x = [75.0]
         expected_y = [
             '<i>Lactobacillus</i> (genus) (mean=8.25)'
@@ -628,7 +628,7 @@ of the cohort (with mean among samples > 2.0)'
                 'xaxes': {'type': 'log'}
             }
         )
-        
+
         expected_x = [75.0, 100.0]
         expected_y = [
             '<i>Streptococcus salivarius</i>', '<i>Streptococcus thermophilus</i>'
@@ -685,7 +685,7 @@ You may want to try to lower your threshold(s).", log.output)
                 )
             self.assertEqual(len(log.output), 1)
             self.assertIn(
-                "WARNING:moonstone.plot.counts:mode='invalidmode' not valid, set to default (bargraph).", 
+                "WARNING:moonstone.plot.counts:mode='invalidmode' not valid, set to default (bargraph).",
                 log.output
                 )
 
@@ -697,14 +697,14 @@ You may want to try to lower your threshold(s).", log.output)
             ascending=True,
             mode="violingraph",           # self._valid_mode_param accepts it as "violin"
             plotting_options={
-                'xaxes':{'type': 'linear'}
+                'xaxes': {'type': 'linear'}
             }
         )
 
-        expected_x_L = [0.0 , 72.72727273, 91.95402299, 54.87804878]
+        expected_x_L = [0.0, 72.72727273, 91.95402299, 54.87804878]
         expected_y_L = ['<i>Lactobacillus</i>', '<i>Lactobacillus</i>', '<i>Lactobacillus</i>',
                         '<i>Lactobacillus</i>']
-        expected_x_S = [100.0 , 8.18181818, 8.04597701, 32.92682927]
+        expected_x_S = [100.0, 8.18181818, 8.04597701, 32.92682927]
         expected_y_S = ['<i>Streptococcus</i>', '<i>Streptococcus</i>', '<i>Streptococcus</i>',
                         '<i>Streptococcus</i>']
         np.testing.assert_allclose(fig['data'][0]['x'], expected_x_L)
