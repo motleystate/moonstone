@@ -195,7 +195,7 @@ class PlotTaxonomyCounts:
         top_and_other_df,
         sep_series,
         cluster_samples: bool = True
-    ):
+    ) -> tuple:
         ordered_col = []
         x_coor = []
         prec = -0.5

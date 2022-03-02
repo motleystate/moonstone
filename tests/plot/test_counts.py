@@ -133,6 +133,98 @@ class TestPlotTaxonomyCounts(TestCase):
             'Streptococcus_thermophilus': 100.0
             })
         self.prev_ser_species.index.names = ["species"]
+        # -------------
+        self.test_samples_compo_df = pd.DataFrame(
+            [
+                [
+                    "Bacteria",
+                    "Actinobacteria",
+                    "Actinobacteria",
+                    "Actinomycetales",
+                    "Actinomycetaceae",
+                    "Actinobaculum",
+                    "Actinobaculum_massiliense",
+                    0.0,
+                    4.2,
+                    0.0,
+                    2.0
+                ],
+                [
+                    "Bacteria",
+                    "Firmicutes",
+                    "Bacilli",
+                    "Lactobacillales",
+                    "Lactobacillaceae",
+                    "Lactobacillus",
+                    "Lactobacillus (genus)",
+                    0.0,
+                    16.0,
+                    8.0,
+                    9.0
+                ],
+                [
+                    "Bacteria",
+                    "Firmicutes",
+                    "Bacilli",
+                    "Lactobacillales",
+                    "Streptococcaceae",
+                    "Streptococcus",
+                    "Streptococcus (genus)",
+                    1.3,
+                    0.4,
+                    0.0,
+                    3.0
+                ],
+                [
+                    "Bacteria",
+                    "Firmicutes",
+                    "Bacilli",
+                    "Lactobacillales",
+                    "Streptococcaceae",
+                    "Streptococcus",
+                    "Streptococcus_thermophilus",
+                    0.8,
+                    0.2,
+                    0.7,
+                    0.1
+                ],
+                [
+                    "Bacteria",
+                    "Firmicutes",
+                    "Bacilli",
+                    "Lactobacillales",
+                    "Streptococcaceae",
+                    "Streptococcus",
+                    "Streptococcus_salivarius",
+                    3.3,
+                    1.2,
+                    0.0,
+                    2.3
+                ],
+            ],
+            columns=[
+                "kingdom",
+                "phylum",
+                "class",
+                "order",
+                "family",
+                "genus",
+                "species",
+                "SAMPLE_1",
+                "SAMPLE_2",
+                "SAMPLE_3",
+                "SAMPLE_4"
+            ],
+        )
+        self.tested_object = self.tested_object.set_index(
+            ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
+        )
+        self.tested_object.columns.name = "sample"
+        self.tested_instance = PlotTaxonomyCounts(self.tested_object)
+        self.metadata = pd.DataFrame.from_dict({
+            'SMOKER': {'SAMPLE_1': 'yes', 'SAMPLE_2': 'yes', 'SAMPLE_3': 'no', 'SAMPLE_4': 'no'},
+            'GROUP': {'SAMPLE_1': 'A', 'SAMPLE_2': 'C', 'SAMPLE_3': 'A', 'SAMPLE_4': 'B'}
+            })
 
     def test_relative_abundance_dataframe(self):
         expected_df = pd.DataFrame(
@@ -720,3 +812,25 @@ of the cohort'
             fig['layout']['xaxis']['type'],
             'linear'
             )
+
+    def test_plot_sample_composition_most_abundant_taxa_sep_series_and_clustering(self):
+        fig = self.tested_instance.plot_sample_composition_most_abundant_taxa(
+            taxa_number=2,
+            cluster_samples=True,
+            sep_series = self.metadata['SMOKER'],
+            sep_how='labels')
+
+        print(fig)
+
+
+    def test_plot_sample_composition_most_abundant_taxa_only_one_sample(self):
+        pass
+
+    def test_plot_sample_composition_most_abundant_taxa_sep_series_and_clustering(self):
+        fig = self.tested_instance.plot_sample_composition_most_abundant_taxa(
+            taxa_number=2,
+            cluster_samples=True,
+            sep_series = self.metadata['SMOKER'],
+            sep_how='labels')
+
+        print(fig)
