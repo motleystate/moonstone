@@ -11,7 +11,7 @@ setup(
     install_requires=[
         'pandas==1.0.1',
         'matplotlib==3.3.0',
-        'plotly==4.9.0',
+        'plotly==5.6.0',
         'statsmodels==0.11.1',
         'python-slugify==4.0.1',
         'pyaml==20.4.0',
