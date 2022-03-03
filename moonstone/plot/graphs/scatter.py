@@ -9,11 +9,14 @@ logger = logging.getLogger(__name__)
 
 
 class ScatterGraph(BaseGraph):
-
     def plot_one_graph(
-        self, first_col: str, second_col: str, plotting_options: dict = None,
-        show: bool = True, output_file: Union[bool, str] = False,
-    ):
+        self,
+        first_col: str,
+        second_col: str,
+        plotting_options: dict = None,
+        show: bool = True,
+        output_file: Union[bool, str] = False,
+    ) -> go.Figure:
         """
         :param first_col: col name for x data
         :param second_col: col name for y data
@@ -24,7 +27,7 @@ class ScatterGraph(BaseGraph):
                     x=self.data[first_col],
                     y=self.data[second_col],
                     text=self.data.index,
-                    mode='markers',
+                    mode="markers",
                 )
             ]
         )
@@ -38,25 +41,35 @@ class ScatterGraph(BaseGraph):
 
 
 class GroupScatterGraph(GroupBaseGraph):
-
     def _gen_fig_trace(
-        self, x: list, y: list, name: str, text: list, color: str,
-    ):
+        self,
+        x: list,
+        y: list,
+        name: str,
+        text: list,
+        color: str,
+    ) -> go.Scatter:
         return go.Scatter(
             x=x,
             y=y,
             name=name,
             text=text,
             marker_color=color,
-            mode='markers',
+            mode="markers",
         )
 
     def plot_one_graph(
-        self, first_col: str, second_col: str, group_col: str, plotting_options: dict = None,
-        show: bool = True, output_file: Union[bool, str] = False,
-        colors: dict = None, groups: list = None,
+        self,
+        first_col: str,
+        second_col: str,
+        group_col: str,
+        plotting_options: dict = None,
+        show: bool = True,
+        output_file: Union[bool, str] = False,
+        colors: dict = None,
+        groups: list = None,
         **kwargs
-    ):
+    ) -> go.Figure:
         """
         :param first_col: col name for x data
         :param second_col: col name for y data
@@ -70,11 +83,16 @@ class GroupScatterGraph(GroupBaseGraph):
 
         for group in groups:
             filtered_df = self.data[self.data[group_col] == group]
-            fig.add_trace(self._gen_fig_trace(
-                filtered_df[first_col], filtered_df[second_col],
-                str(group), filtered_df.index, self._get_group_color(group, colors),
-                **kwargs,
-            ))
+            fig.add_trace(
+                self._gen_fig_trace(
+                    filtered_df[first_col],
+                    filtered_df[second_col],
+                    str(group),
+                    filtered_df.index,
+                    self._get_group_color(group, colors),
+                    **kwargs,
+                )
+            )
 
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
@@ -85,11 +103,15 @@ class GroupScatterGraph(GroupBaseGraph):
 
 
 class Scatter3DGraph(BaseGraph):
-
     def plot_one_graph(
-        self, first_col: str, second_col: str, third_col: str, plotting_options: dict = None,
-        show: bool = True, output_file: Union[bool, str] = False,
-    ):
+        self,
+        first_col: str,
+        second_col: str,
+        third_col: str,
+        plotting_options: dict = None,
+        show: bool = True,
+        output_file: Union[bool, str] = False,
+    ) -> go.Figure:
         """
         :param first_col: col name for x data
         :param second_col: col name for y data
@@ -102,7 +124,7 @@ class Scatter3DGraph(BaseGraph):
                     y=self.data[second_col],
                     z=self.data[third_col],
                     text=self.data.index,
-                    mode='markers',
+                    mode="markers",
                 )
             ]
         )
@@ -116,10 +138,15 @@ class Scatter3DGraph(BaseGraph):
 
 
 class GroupScatter3DGraph(GroupBaseGraph):
-
     def _gen_fig_trace(
-        self, x: list, y: list, z: list, name: str, text: list, color: str,
-    ):
+        self,
+        x: list,
+        y: list,
+        z: list,
+        name: str,
+        text: list,
+        color: str,
+    ) -> go.Scatter3d:
         return go.Scatter3d(
             x=x,
             y=y,
@@ -127,15 +154,22 @@ class GroupScatter3DGraph(GroupBaseGraph):
             name=name,
             text=text,
             marker_color=color,
-            mode='markers',
+            mode="markers",
         )
 
     def plot_one_graph(
-        self, first_col: str, second_col: str, third_col: str, group_col: str,
-        show: bool = True, output_file: Union[bool, str] = False,
-        colors: dict = None, groups: list = None,
-        plotting_options: dict = None, **kwargs
-    ):
+        self,
+        first_col: str,
+        second_col: str,
+        third_col: str,
+        group_col: str,
+        show: bool = True,
+        output_file: Union[bool, str] = False,
+        colors: dict = None,
+        groups: list = None,
+        plotting_options: dict = None,
+        **kwargs
+    ) -> go.Figure:
         """
         :param first_col: col name for x data
         :param second_col: col name for y data
@@ -150,11 +184,17 @@ class GroupScatter3DGraph(GroupBaseGraph):
 
         for group in groups:
             filtered_df = self.data[self.data[group_col] == group]
-            fig.add_trace(self._gen_fig_trace(
-                filtered_df[first_col], filtered_df[second_col], filtered_df[third_col],
-                str(group), filtered_df.index, self._get_group_color(group, colors),
-                **kwargs,
-            ))
+            fig.add_trace(
+                self._gen_fig_trace(
+                    filtered_df[first_col],
+                    filtered_df[second_col],
+                    filtered_df[third_col],
+                    str(group),
+                    filtered_df.index,
+                    self._get_group_color(group, colors),
+                    **kwargs,
+                )
+            )
 
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)

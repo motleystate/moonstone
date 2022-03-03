@@ -10,23 +10,26 @@ logger = logging.getLogger(__name__)
 
 
 class BaseViolinGraph:
-
-    def _valid_points_param(self, points):
-        if points not in ['all', 'outliers', 'suspectedoutliers', False]:
-            logger.warning("points=%s not valid, set to default (suspectedoutliers)", points)
+    def _valid_points_param(self, points: str) -> str:
+        if points not in ["all", "outliers", "suspectedoutliers", False]:
+            logger.warning(
+                "points=%s not valid, set to default (suspectedoutliers)", points
+            )
             return "suspectedoutliers"
         return points
 
 
 class ViolinGraph(BaseGraph, BaseViolinGraph):
-
     def plot_one_graph(
-        self, plotting_options: dict = None,
-        show: bool = True, output_file: Union[bool, str] = False,
+        self,
+        plotting_options: dict = None,
+        show: bool = True,
+        output_file: Union[bool, str] = False,
         points: Union[bool, str] = "suspectedoutliers",
-        box: bool = False, color: str = None,
-        line_color: str = None
-    ):
+        box: bool = False,
+        color: str = None,
+        line_color: str = None,
+    ) -> go.Figure:
         color = self.DEFAULT_COLOR if color is None else color
         line_color = self.DEFAULT_COLOR if line_color is None else line_color
         fig = go.Figure(
@@ -39,7 +42,7 @@ class ViolinGraph(BaseGraph, BaseViolinGraph):
                     box_visible=box,
                     name="All",
                     fillcolor=color,
-                    line_color=line_color
+                    line_color=line_color,
                 )
             ]
         )
@@ -53,11 +56,16 @@ class ViolinGraph(BaseGraph, BaseViolinGraph):
 
 
 class GroupViolinGraph(GroupBaseGraph, BaseViolinGraph):
-
     def _gen_fig_trace(
-        self, x: list, y: list, name: str, text: list, color: str,
-        points: Union[bool, str] = "suspectedoutliers", box: bool = False
-    ):
+        self,
+        x: list,
+        y: list,
+        name: str,
+        text: list,
+        color: str,
+        points: Union[bool, str] = "suspectedoutliers",
+        box: bool = False,
+    ) -> go.Violin:
         return go.Violin(
             x=x,
             y=y,
