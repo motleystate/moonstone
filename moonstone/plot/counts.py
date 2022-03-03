@@ -1,7 +1,8 @@
 import logging
 import numpy as np
 import pandas as pd
-from typing import Optional, List
+import plotly.graph_objects as go
+from typing import Optional, List, Tuple, Union
 
 from scipy.cluster import hierarchy
 from scipy.spatial import distance
@@ -13,7 +14,7 @@ from moonstone.utils.dict_operations import merge_dict
 from moonstone.utils.plot import (
     add_x_to_plotting_options,
     add_default_titles_to_plotting_options,
-    add_groups_annotations
+    add_groups_annotations,
 )
 from moonstone.utils.pandas.series import SeriesBinning
 
@@ -64,18 +65,12 @@ class PlotCountsStats:
                 "mean of the number of reads",
                 "number of samples",
             )
-            plotting_options = add_x_to_plotting_options(
-                plotting_options, "layout", "yaxis_type", "log"
-            )
-            plotting_options = add_x_to_plotting_options(
-                plotting_options, "xaxes", "tickangle", -60
-            )
+            plotting_options = add_x_to_plotting_options(plotting_options, "layout", "yaxis_type", "log")
+            plotting_options = add_x_to_plotting_options(plotting_options, "xaxes", "tickangle", -60)
 
         mean_series = self.df.mean(axis=1)
         binned_mean = SeriesBinning(mean_series).binned_data
-        bar_fig = BarGraph(
-            binned_mean, plotting_options, show=show, output_file=output_file
-        )
+        bar_fig = BarGraph(binned_mean, plotting_options, show=show, output_file=output_file)
         bar_fig.plot_one_graph(plotting_options, show=show, output_file=output_file)
 
 
@@ -85,29 +80,32 @@ class PlotTaxonomyCounts:
     """
 
     def __init__(self, taxonomy_dataframe: pd.DataFrame):
-        self.df = taxonomy_dataframe
+        if isinstance(taxonomy_dataframe, pd.Series):
+            self.df = pd.DataFrame(taxonomy_dataframe)
+        else:
+            self.df = taxonomy_dataframe
 
-    def compute_prevalence_series(self) -> pd.DataFrame:
+    def compute_prevalence_series(self) -> pd.Series:
         return (self.df != 0).sum(axis=1) / self.df.shape[1] * 100
 
     @property
     def prevalence_series(self):
         # call compute_prevalence_series and store into self._prevalence_series
-        if getattr(self, '_prevalence_series', None) is None:
+        if getattr(self, "_prevalence_series", None) is None:
             self._prevalence_series = self.compute_prevalence_series()
         return self._prevalence_series
 
-    def compute_relative_abundance_dataframe(self):
-        return self.df*100/self.df.sum()
+    def compute_relative_abundance_dataframe(self) -> pd.DataFrame:
+        return self.df * 100 / self.df.sum()
 
     @property
     def relative_abundance_dataframe(self):
         # call compute_relative_abundance_dataframe and store into self._relative_abundance_dataframe
-        if getattr(self, '_relative_abundance_dataframe', None) is None:
+        if getattr(self, "_relative_abundance_dataframe", None) is None:
             self._relative_abundance_dataframe = self.compute_relative_abundance_dataframe()
         return self._relative_abundance_dataframe
 
-    def _valid_mode_param(self, mode):
+    def _valid_mode_param(self, mode: str) -> str:
         if mode[:3] == "box":
             return "boxplot"
         if mode[:6] == "violin":
@@ -117,20 +115,30 @@ class PlotTaxonomyCounts:
         logger.warning("mode='%s' not valid, set to default (bargraph).", mode)
         return "bargraph"
 
-    def _add_mean_info_to_index(self, data_df, mean_counts_ser_taxa):
+    def _add_mean_info_to_index(self, data_df: Union[pd.DataFrame, pd.Series], mean_counts_ser_taxa: pd.Series):
+        """
+        add the mean of the taxa among samples at the end of its name in the index.
+        """
         mean_top_prev = mean_counts_ser_taxa.loc[data_df.index]
         make_float_legend = lambda x: " (mean={:,.2f})".format(x)  # noqa
         mean_top_prev = mean_top_prev.apply(make_float_legend)
         data_df.index = data_df.index + mean_top_prev.astype("str")
         return data_df
 
-    def _italicize_taxa_name(self, text):
+    def _italicize_taxa_name(self, text: str) -> str:
+        """
+        put <i> and </i> around the taxa name, so that it will be shown in italic in the graph.
+        It leaves the mean info or the higher classification between parenthesis, unitalicized.
+
+        Args:
+            text: string that contains taxa name to italicize
+        """
         s = text.split(" (")
         taxa_name = s[0].replace("_", " ")
-        taxa_name = "<i>"+taxa_name+"</i>"
+        taxa_name = "<i>" + taxa_name + "</i>"
         if len(s) > 1:
-            end = " ("+" (".join(s[1:])
-            return taxa_name+end
+            end = " (" + " (".join(s[1:])
+            return taxa_name + end
         else:
             return taxa_name
 
@@ -142,8 +150,24 @@ class PlotTaxonomyCounts:
         determining_threshold: float = None,
         higher_classification: bool = True,
         threshold_on_other_variable: float = None,
-        ascending: bool = False
-    ):
+        ascending: bool = False,
+    ) -> pd.core.indexes.base.Index:
+        """
+        generate the list of species to plot, the most abundant/prevalent
+
+        Args:
+            determining_ser_taxa: Series used to compute the top most abundant/prevalent taxa.
+            other_variable_ser_taxa: Series used to filter some taxa out based on the other statistical variable.
+              (so on prevalence, if plotting most abundant taxa, and on mean counts, if plotting most prevalent taxa)
+            taxa_number: Number of taxa to plot (skipped by determining_threshold).
+            determining_threshold: (optional) Set a threshold, if rather than show a certain number of taxa, you want
+              to show all taxa with an equal or higher prevalence/relative abundance.
+            higher_classification: Set to False, if you do not want OTU only defined at a higher level to appear in the
+              top. They will still be included in relative abundances.
+            threshold_on_other_variable: (optional) The threshold of the other variable used to filter some taxa out.
+            ascending: Set to True, if you want the taxa to be ordered from least abundant/prevalent taxa of the top,
+              to most abundant/prevalent taxa of the top.
+        """
         # determining_ser_taxa: mean_relab_ser_taxa for abundance; prev_ser_taxa for prevalence
         # other_variable_ser_taxa: prev_ser_taxa for abundance; mean_counts_ser_taxa for prevalence
         # determining_threshold: average_relative_abundance_threshold for abundance; prevalence_threshold for prevalence
@@ -152,7 +176,7 @@ class PlotTaxonomyCounts:
         if not higher_classification:
             other_variable_ser_taxa = other_variable_ser_taxa[
                 ~other_variable_ser_taxa.index.str.contains("(", regex=False)
-                ]
+            ]
         if threshold_on_other_variable:
             sp_to_keep = other_variable_ser_taxa[other_variable_ser_taxa >= threshold_on_other_variable].index
         else:
@@ -170,7 +194,7 @@ class PlotTaxonomyCounts:
         if len(top_species) == 0:
             logger.warning(
                 "No species abide by the threshold(s) given. You may want to try to lower your threshold(s)."
-                )
+            )
         return top_species
 
     def _cluster_samples(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -178,7 +202,7 @@ class PlotTaxonomyCounts:
         Reorder samples with clustering of given order list.
 
         Args:
-            df: dataframe to reorder index
+            df: dataframe whose index needs to be reordered
         """
         # Determine samples order using hierarchical clustering
         Z = hierarchy.linkage(
@@ -192,21 +216,28 @@ class PlotTaxonomyCounts:
 
     def _divide_samples_into_subgroups_and_reorder(
         self,
-        top_and_other_df,
-        sep_series,
-        cluster_samples: bool = True
-    ) -> tuple:
+        top_and_other_df: pd.DataFrame,
+        sep_series: pd.Series,
+        cluster_samples: bool = True,
+    ) -> Tuple[pd.DataFrame, List[Tuple[float, float, float]], np.ndarray]:
+        """
+        divide samples into subgroups and reorder them using hierarchical clustering if cluster_samples is True.
+
+        Args:
+            top_and_other_df: DataFrame of the relative abundances of the top taxa and of Others (every taxa not in the
+              top is considered as Others).
+            sep_series: Series of the metadata used to divide samples.
+            cluster_samples: Set to False, if you don't want the samples to be clusterize using hierarchical clustering.
+        """
         ordered_col = []
         x_coor = []
         prec = -0.5
         subgps = sep_series.unique()
         for subgp in subgps:
             if type(subgp) != str and np.isnan(subgp):
-                df_gp = top_and_other_df[
-                    sep_series[sep_series.isna()].index.intersection(top_and_other_df.columns)]
+                df_gp = top_and_other_df[sep_series[sep_series.isna()].index.intersection(top_and_other_df.columns)]
             else:
-                df_gp = top_and_other_df[
-                    sep_series[sep_series == subgp].index.intersection(top_and_other_df.columns)]
+                df_gp = top_and_other_df[sep_series[sep_series == subgp].index.intersection(top_and_other_df.columns)]
 
             if cluster_samples and len(df_gp.columns) > 1:
                 tmp = list(self._cluster_samples(df_gp).columns)
@@ -216,9 +247,9 @@ class PlotTaxonomyCounts:
 
             nb = len(df_gp.columns)
 
-            med = nb/2
+            med = nb / 2
 
-            x_coor += [(prec, prec+med, prec+nb)]
+            x_coor += [(prec, prec + med, prec + nb)]
             # (x of the start of the subgroup annotation square,
             # x of the annotation text,
             # x of the end of the subgroup annotation square)
@@ -240,14 +271,14 @@ class PlotTaxonomyCounts:
         samples.
 
         Args:
-            taxa_level: Taxonomy level
-            taxa_number: Number of taxa to plot (skipped by average_relative_abundance_threshold)
-            average_relative_abundance_threshold: (optional) Set a threshold, if you want to show all species with an
-              equal or greater average relative abundance
+            taxa_level: Taxonomy level.
+            taxa_number: Number of taxa to plot (skipped by average_relative_abundance_threshold).
+            average_relative_abundance_threshold: (optional) Set a threshold, if you want to show all taxa with an
+              equal or greater average relative abundance.
             higher_classification: Set to False, if you do not want OTU only defined at a higher level to appear in the
-              top. They will still be included in the relative abundances
-            prevalence_threshold: Prevalence threshold for a taxa to be kept in analysis
-            ascending: If set to True, from top to bottom, from least prevalent taxa of the top to most prevalent taxa
+              top. They will still be included in the relative abundances.
+            prevalence_threshold: Prevalence threshold for a taxa to be kept in analysis.
+            ascending: If set to True, from top to bottom, from least prevalent taxa of the top to most prevalent taxa.
         """
         relab_df_taxa = self.relative_abundance_dataframe.groupby(taxa_level).sum()
         # if taxa isn't the lowest taxonomical level, it sums up all counts of the same taxa
@@ -265,10 +296,10 @@ class PlotTaxonomyCounts:
             average_relative_abundance_threshold,
             higher_classification,
             prevalence_threshold,
-            ascending
+            ascending,
         )
 
-        taxa_number = len(top_ab)   # for prevalence_thresholds case
+        taxa_number = len(top_ab)  # for prevalence_thresholds case
         # and also in the case that there is less species that the number asked for
 
         return relab_df_taxa.loc[top_ab], taxa_number, mean_relab_ser_taxa.loc[top_ab]
@@ -282,25 +313,30 @@ class PlotTaxonomyCounts:
         prevalence_threshold: float = None,
         ascending: bool = False,
         plotting_options: dict = {},
-        **kwargs
-    ):
+        **kwargs,
+    ) -> go.Figure:
         """
+        Generate Bar Graph of the most abundant taxa
+
         Args:
-            taxa_level: Taxonomy level
-            taxa_number: Number of taxa to plot (skipped by average_relative_abundance_threshold)
+            taxa_level: Taxonomy level.
+            taxa_number: Number of taxa to plot (skipped by average_relative_abundance_threshold).
             average_relative_abundance_threshold: (optional) Set a threshold, if you want to show all species with an
-              equal or greater average relative abundance
+              equal or greater average relative abundance.
             higher_classification: Set to False, if you do not want OTU only defined at a higher level to appear in the
-              top. They will still be included in the relative abundances
-            prevalence_threshold: Prevalence threshold for a taxa to be kept in analysis
-            ascending: If set to True, from top to bottom, from least abundant taxa of the top to most abundant taxa
+              top. They will still be included in relative abundances.
+            prevalence_threshold: Prevalence threshold for a taxa to be kept in analysis.
+            ascending: If set to True, from top to bottom, from least abundant taxa of the top to most abundant taxa.
+            plotting_options: options for the layout of the graph.
         """
-        taxa_number, average_abundance_ser = self._compute_relative_abundances_taxa_dataframe(
+        (taxa_number, average_abundance_ser,) = self._compute_relative_abundances_taxa_dataframe(
             taxa_level=taxa_level,
-            taxa_number=taxa_number, average_relative_abundance_threshold=average_relative_abundance_threshold,
-            higher_classification=higher_classification, prevalence_threshold=prevalence_threshold,
-            ascending=bool(1 - ascending)
-            )[1:]
+            taxa_number=taxa_number,
+            average_relative_abundance_threshold=average_relative_abundance_threshold,
+            higher_classification=higher_classification,
+            prevalence_threshold=prevalence_threshold,
+            ascending=bool(1 - ascending),
+        )[1:]
         average_abundance_ser.index = average_abundance_ser.index.map(self._italicize_taxa_name)
 
         # Make graph
@@ -317,13 +353,9 @@ class PlotTaxonomyCounts:
             }
         }
 
-        plotting_options = merge_dict(
-            plotting_options, default_plotting_options
-        )
+        plotting_options = merge_dict(plotting_options, default_plotting_options)
 
-        fig = graph.plot_one_graph(
-            orientation="h", plotting_options=plotting_options, **kwargs
-        )
+        fig = graph.plot_one_graph(orientation="h", plotting_options=plotting_options, **kwargs)
 
         return fig
 
@@ -339,9 +371,29 @@ class PlotTaxonomyCounts:
         ascending: bool = False,
         plotting_options: dict = {},
         mean_info: bool = False,
-        **kwargs
-    ):
-        # The kind of plot for both most abundant and most prevalent, except for the species represented
+        **kwargs,
+    ) -> go.Figure:
+        """
+        Generate Box or Violin plot showing every samples' relative abundance as a point, for the top most
+        abundant/prevalent taxa.
+
+        Args:
+            what: { "abundant", "prevalent" } Variable used to determine and order the taxa shown in the graph.
+            mode: { "boxplot", "violin" } Mode of the graph .
+            taxa_level: Taxonomy level.
+            taxa_number: Number of taxa to plot (skipped by determining_threshold).
+            determining_threshold: (optional) Set a threshold, if rather than show a certain number of taxa, you want
+              to show all taxa with an equal or higher prevalence/relative abundance.
+            higher_classification: Set to False, if you do not want OTU only defined at a higher level to appear in the
+              top. They will still be included in relative abundances.
+            threshold_on_other_variable: (optional) Set a threshold to filter some taxa out of top, based on the other
+              variable.
+            ascending: If set to True, from top to bottom, from least abundant/prevalent taxa of the top to most
+              abundant/prevalent taxa.
+            mean_info: To show the taxa's mean counts in the graph, next to the taxa's name.
+            plotting_options: options for the layout of the graph.
+        """
+        # The kind of plot for both most abundant and most prevalent, except for the taxa represented
 
         title = ""
         ascending = bool(1 - ascending)
@@ -362,26 +414,28 @@ class PlotTaxonomyCounts:
                 mean_relab_ser_taxa,
                 prev_ser_taxa,
                 taxa_number,
-                determining_threshold,        # determining_threshold = average_relative_abundance_threshold
+                determining_threshold,  # determining_threshold = average_relative_abundance_threshold
                 higher_classification,
                 threshold_on_other_variable,  # threshold_on_other_variable = prevalence_threshold
-                ascending
+                ascending,
             )
 
             relab_df_taxa = relab_df_taxa.loc[groups]
 
-            if threshold_on_other_variable:   # threshold_on_other_variable = prevalence_threshold
+            if threshold_on_other_variable:  # threshold_on_other_variable = prevalence_threshold
                 title = f" (present in at least {threshold_on_other_variable}% of samples)"
 
         if what == "prevalent":
             mean_counts_ser_taxa = self.df.groupby(taxa_level).sum().mean(axis=1)
 
             groups = self._generate_list_species_to_plot(
-                prev_ser_taxa, mean_counts_ser_taxa, taxa_number,
-                determining_threshold,         # determining_threshold = prevalence_threshold
+                prev_ser_taxa,
+                mean_counts_ser_taxa,
+                taxa_number,
+                determining_threshold,  # determining_threshold = prevalence_threshold
                 higher_classification,
-                threshold_on_other_variable,   # threshold_on_other_variable = mean_threshold
-                ascending=ascending
+                threshold_on_other_variable,  # threshold_on_other_variable = mean_threshold
+                ascending=ascending,
             )
 
             relab_df_taxa = relab_df_taxa.loc[groups]
@@ -391,7 +445,7 @@ class PlotTaxonomyCounts:
                 relab_df_taxa = self._add_mean_info_to_index(relab_df_taxa, mean_counts_ser_taxa)
                 groups = list(relab_df_taxa.index)
 
-            if threshold_on_other_variable:   # threshold_on_other_variable = mean_threshold
+            if threshold_on_other_variable:  # threshold_on_other_variable = mean_threshold
                 title = f" (with mean among samples > {threshold_on_other_variable})"
 
         nb = relab_df_taxa.shape[0]
@@ -417,16 +471,15 @@ class PlotTaxonomyCounts:
         default_plotting_options = {
             "layout": {
                 "title": f"Relative abundance of the {len(groups)} most {what} microbial genomes among individuals \
-of the cohort"+title,
+of the cohort"
+                + title,
                 "xaxis_type": "log",
                 "showlegend": False,
             },
-            "xaxes": {"title_text": "Relative abundance (in percentage)"}
+            "xaxes": {"title_text": "Relative abundance (in percentage)"},
         }
 
-        plotting_options = merge_dict(
-            plotting_options, default_plotting_options
-        )
+        plotting_options = merge_dict(plotting_options, default_plotting_options)
 
         fig = graph.plot_one_graph(
             data_col="relative abundance",
@@ -435,7 +488,7 @@ of the cohort"+title,
             colors=final_colors,
             orientation="h",
             plotting_options=plotting_options,
-            **kwargs
+            **kwargs,
         )
 
         return fig
@@ -450,19 +503,22 @@ of the cohort"+title,
         mean_info: bool = True,
         ascending: bool = False,
         plotting_options: dict = {},
-        **kwargs
-    ):
+        **kwargs,
+    ) -> go.Figure:
         """
+        Generate Bar Graph of the most prevalent taxa
+
         Args:
-            taxa_level: Taxonomy level
-            taxa_number: Number of taxa to plot (skipped by prevalence_threshold)
+            taxa_level: Taxonomy level.
+            taxa_number: Number of taxa to plot (skipped by prevalence_threshold).
             prevalence_threshold: (optional) Set a threshold, if you want to show all species with an equal or greater
-              prevalence
+              prevalence.
             higher_classification: Set to False, if you do not want OTU only defined at a higher level to appear in the
-              top
-            mean_threshold: Mean threshold for a taxa to be kept in analysis
-            mean_info: To show the species mean in the graph, next to the species' name
-            ascending: If set to True, from top to bottom, from least prevalent taxa of the top to most prevalent taxa
+              top.
+            mean_threshold: Mean threshold for a taxa to be kept in analysis.
+            mean_info: To show the taxa's mean counts in the graph, next to the taxa's name.
+            ascending: If set to True, from top to bottom, from least prevalent taxa of the top to most prevalent taxa.
+            plotting_options: options for the layout of the graph.
         """
         ascending = bool(1 - ascending)
         title = ""
@@ -475,8 +531,13 @@ of the cohort"+title,
         mean_counts_ser_taxa = self.df.groupby(taxa_level).sum().mean(axis=1)
 
         top_prev = self._generate_list_species_to_plot(
-            prev_ser_taxa, mean_counts_ser_taxa, taxa_number, prevalence_threshold,
-            higher_classification, mean_threshold, ascending
+            prev_ser_taxa,
+            mean_counts_ser_taxa,
+            taxa_number,
+            prevalence_threshold,
+            higher_classification,
+            mean_threshold,
+            ascending,
         )
 
         prev_ser_taxa = prev_ser_taxa.loc[top_prev]
@@ -489,7 +550,7 @@ of the cohort"+title,
         if mean_threshold:
             title = f" (with mean among samples > {mean_threshold})"
 
-        taxa_number = len(top_prev)   # in the case that there is less species that the number asked for
+        taxa_number = len(top_prev)  # in the case that there is less species that the number asked for
 
         # Make graph
         graph = BarGraph(prev_ser_taxa)
@@ -497,24 +558,21 @@ of the cohort"+title,
         # Plotting options
         default_plotting_options = {
             "layout": {
-                "title": f"{taxa_number} most prevalent {taxa_level}"+title,
+                "title": f"{taxa_number} most prevalent {taxa_level}" + title,
                 "xaxis_title": "Percentage Sample",
                 "yaxis_title": taxa_level.capitalize(),
             }
         }
 
-        plotting_options = merge_dict(
-            plotting_options, default_plotting_options
-        )
+        plotting_options = merge_dict(plotting_options, default_plotting_options)
 
-        fig = graph.plot_one_graph(
-            orientation="h", plotting_options=plotting_options, **kwargs
-        )
+        fig = graph.plot_one_graph(orientation="h", plotting_options=plotting_options, **kwargs)
 
         return fig
 
     def plot_most_prevalent_taxa(
         self,
+        mode: str = "bargraph",
         taxa_level: str = "species",
         taxa_number: int = 20,
         prevalence_threshold: float = None,
@@ -522,29 +580,24 @@ of the cohort"+title,
         mean_threshold: float = None,
         mean_info: bool = False,
         ascending: bool = False,
-        mode: str = "bargraph",
         **kwargs,
-    ):
+    ) -> go.Figure:
         """
-        Plot bar chart of most prevalent taxa.
-
-        The plot represents percentage of sample with the corresponding taxa
-        ordered from most prevalent to less prevalent.
+        Generate a plot of most prevalent taxa.
 
         Args:
-            taxa_level: Taxonomy level
-            taxa_number: Number of taxa to plot (skipped by prevalence_threshold)
-            prevalence_threshold: (optional) Set a threshold, if you want to show all species with an equal or greater
-              prevalence
-            higher_classification: Set to False, if you do not want OTU only defined at a higher level to appear in the
-              top
-            mean_threshold: Mean threshold for a taxa to be kept in analysis
-            mean_info: To show the species mean in the graph, next to the species' name
-            ascending: If set to True, from top to bottom, from least prevalent taxa of the top to most prevalent taxa.
-            mode: {'bargraph' (default), 'boxplot', 'violin'} Bargraph will show you the prevalence of the most
+            mode: { 'bargraph' (default), 'boxplot', 'violin' } Bargraph will show you the prevalence of the most
               prevalent taxa among all the samples. Boxplot and violin plot will show every samples' relative abundance
-              as a point,
-              for the top most prevalent taxa.
+              as a point, for the top most prevalent taxa.
+            taxa_level: Taxonomy level.
+            taxa_number: Number of taxa to plot (skipped by prevalence_threshold).
+            prevalence_threshold: (optional) Set a threshold, if you want to show all species with an equal or greater
+              prevalence.
+            higher_classification: Set to False, if you do not want OTU only defined at a higher level to appear in the
+              top.
+            mean_threshold: Mean threshold for a taxa to be kept in analysis.
+            mean_info: To show the taxa's mean counts in the graph, next to the taxa's name.
+            ascending: If set to True, from top to bottom, from least prevalent taxa of the top to most prevalent taxa.
         """
         plotting_options = kwargs.pop("plotting_options", {})
         mode = self._valid_mode_param(mode)
@@ -558,11 +611,13 @@ of the cohort"+title,
                 mean_info=mean_info,
                 ascending=ascending,
                 plotting_options=plotting_options,
-                **kwargs
+                **kwargs,
             )
         else:
             fig = self._plot_most_what_taxa_boxplot_or_violin(
-                "prevalent", mode, taxa_level=taxa_level,
+                "prevalent",
+                mode,
+                taxa_level=taxa_level,
                 taxa_number=taxa_number,
                 determining_threshold=prevalence_threshold,
                 higher_classification=higher_classification,
@@ -570,40 +625,37 @@ of the cohort"+title,
                 ascending=ascending,
                 plotting_options=plotting_options,
                 mean_info=mean_info,
-                **kwargs
+                **kwargs,
             )
 
         return fig
 
     def plot_most_abundant_taxa(
         self,
+        mode: str = "bargraph",
         taxa_level: str = "species",
         taxa_number: int = 20,
         average_relative_abundance_threshold: float = None,
         higher_classification: bool = True,
         prevalence_threshold: float = None,
         ascending: bool = False,
-        mode: str = "bargraph",
         **kwargs,
-    ):
+    ) -> go.Figure:
         """
-        Plot bar chart of most abundant taxa.
-
-        The plot represents percentage of sample with the corresponding taxa
-        ordered from most abundant to less abundant.
+        Generate a plot of most abundant taxa.
 
         Args:
-            taxa_level: Taxonomy level
-            taxa_number: Number of taxa to plot
+            mode: { 'bargraph' (default), 'boxplot', 'violin' } Bargraph will show you the mean relative abundance of
+              the most abundant species among all the samples. Boxplot and violin plot will show every samples' relative
+              abundance as a point.
+            taxa_level: Taxonomy level.
+            taxa_number: Number of taxa to plot.
             average_relative_abundance_threshold: (optional) Set a threshold, if you want to show all species with an
-              equal or greater average relative abundance
+              equal or greater average relative abundance.
             higher_classification: Set to False, if you do not want OTU only defined at a higher level to appear in the
-              top. They will still be included in the relative abundances
-            prevalence_threshold: Prevalence threshold for a taxa to be kept in analysis
-            ascending: If set to True, from top to bottom, from least abundant taxa of the top to most abundant taxa
-            mode: {'bargraph' (default), 'boxplot', 'violin'} Bargraph will show you the mean relative abundance of the
-              most abundant species among all the samples. Boxplot and violin plot will show every samples' relative
-              abundance as a point
+              top. They will still be included in the relative abundances.
+            prevalence_threshold: Prevalence threshold for a taxa to be kept in analysis.
+            ascending: If set to True, from top to bottom, from least abundant taxa of the top to most abundant taxa.
         """
         plotting_options = kwargs.pop("plotting_options", {})
         mode = self._valid_mode_param(mode)
@@ -616,17 +668,20 @@ of the cohort"+title,
                 prevalence_threshold=prevalence_threshold,
                 ascending=ascending,
                 plotting_options=plotting_options,
-                **kwargs
+                **kwargs,
             )
         else:
             fig = self._plot_most_what_taxa_boxplot_or_violin(
-                "abundant", mode, taxa_level,
-                taxa_number, determining_threshold=average_relative_abundance_threshold,
+                "abundant",
+                mode,
+                taxa_level,
+                taxa_number,
+                determining_threshold=average_relative_abundance_threshold,
                 higher_classification=higher_classification,
                 threshold_on_other_variable=prevalence_threshold,
                 ascending=ascending,
                 plotting_options=plotting_options,
-                **kwargs
+                **kwargs,
             )
 
         return fig
@@ -644,42 +699,44 @@ of the cohort"+title,
         sep_series: pd.Series = None,
         sep_how: str = None,
         **kwargs,
-    ):
+    ) -> go.Figure:
         """
         Plot taxa composition of samples for most abundant taxa.
 
         Args:
-            taxa_level: Taxonomy level
-            taxa_number: Number of taxa to plot (skipped by average_relative_abundance_threshold)
+            taxa_level: Taxonomy level.
+            taxa_number: Number of taxa to plot (skipped by average_relative_abundance_threshold).
             average_relative_abundance_threshold: (optional) Set a threshold, if you want to show all species with an
-              equal or greater average relative abundance
+              equal or greater average relative abundance.
             higher_classification: Set to False, if you do not want OTU only defined at a higher level to appear in
-              the top. They will still appear in "Others"
-            prevalence_threshold: Prevalence threshold for a taxa to be kept in analysis
-            cluster_samples: Use clustering (skipped by samples_order)
-            samples_order: List of samples to force ordering for visualization
-            color_df: Metadata to put as legend on the bottom of the graph
-            sep_series: Metadata used to order samples into subgroups (skipped by samples_order)
-            sep_how: { None, 'color', 'labels' } Graphical way of showing the separation of the different subgroups
-              (skipped if sep_series is empty/None)
+              the top. They will still appear in "Others".
+            prevalence_threshold: Prevalence threshold for a taxa to be kept in analysis.
+            cluster_samples: Use clustering (skipped by samples_order).
+            samples_order: List of samples to force ordering for visualization.
+            color_df: Metadata to put as legend on the bottom of the graph.
+            sep_series: Metadata used to order samples into subgroups (skipped by samples_order).
+            sep_how: { None (default), 'color', 'labels' } Graphical way of showing the separation of the different
+              subgroups (skipped if sep_series is empty/None).
         """
         data_df, taxa_number = self._compute_relative_abundances_taxa_dataframe(
-            taxa_level=taxa_level, taxa_number=taxa_number,
+            taxa_level=taxa_level,
+            taxa_number=taxa_number,
             average_relative_abundance_threshold=average_relative_abundance_threshold,
-            higher_classification=higher_classification, prevalence_threshold=prevalence_threshold,
-            ascending=False
+            higher_classification=higher_classification,
+            prevalence_threshold=prevalence_threshold,
+            ascending=False,
         )[:2]
         data_df.loc["Others"] = 100 - data_df.sum()
 
-        if data_df.shape[1] <= 1:        # only 1 sample, no need for ordering
+        if data_df.shape[1] <= 1:  # only 1 sample, no need for ordering
             sep_series = None
         elif samples_order is not None:
             data_df = data_df.loc[:, samples_order]
-        elif sep_series is not None:     # organize samples inside subgroups and concatenate subgroups one after another
+        elif sep_series is not None:  # organize samples inside subgroups and concatenate subgroups one after another
             data_df, x_coor, subgps = self._divide_samples_into_subgroups_and_reorder(
                 data_df, sep_series, cluster_samples=cluster_samples
-                )
-            if sep_how == 'color':
+            )
+            if sep_how == "color":
                 if color_df is None:
                     color_df = pd.DataFrame(sep_series)
                 elif sep_series.name not in color_df.columns:
@@ -704,9 +761,7 @@ of the cohort"+title,
             }
         }
 
-        plotting_options = merge_dict(
-            kwargs.pop("plotting_options", {}), default_plotting_options
-        )
+        plotting_options = merge_dict(kwargs.pop("plotting_options", {}), default_plotting_options)
 
         if sep_series is not None and sep_how == "labels":
             show = kwargs.pop("show", True)
