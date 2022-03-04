@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Union, Tuple
 
 import copy
 import pandas as pd
@@ -14,8 +14,13 @@ logger = logging.getLogger(__name__)
 class BaseGraph(ABC):
     DEFAULT_COLOR = "#666666"
 
-    def __init__(self, data: Union[pd.Series, pd.DataFrame], plotting_options: dict = None,
-                 show: bool = True, output_file: Union[bool, str] = False):
+    def __init__(
+        self,
+        data: Union[pd.Series, pd.DataFrame],
+        plotting_options: dict = None,
+        show: bool = True,
+        output_file: Union[bool, str] = False,
+    ):
         """
         :param data: data to plot
         :param show: set to False if you don't want to show the plot
@@ -35,7 +40,7 @@ class BaseGraph(ABC):
         """
         pass
 
-    def _valid_orientation_param(self, orientation):
+    def _valid_orientation_param(self, orientation: str) -> str:
         if orientation == "v" or orientation == "vertical":
             return "v"
         elif orientation == "h" or orientation == "horizontal":
@@ -43,7 +48,9 @@ class BaseGraph(ABC):
         logger.warning("orientation=%s not valid, set to default (v).", orientation)
         return "v"
 
-    def _handle_plotting_options_plotly(self, fig, plotting_options: dict):
+    def _handle_plotting_options_plotly(
+        self, fig: go.Figure, plotting_options: dict
+    ) -> go.Figure:
         """
         :param plotting_options: dictionary of dictionaries where the keys are the level to update
         ( "layout" | "traces" | "xaxes" | "yaxes" ...)
@@ -77,7 +84,7 @@ class BaseGraph(ABC):
             getattr(fig, updater)(plotting_options[option])
         return fig
 
-    def _handle_output_plotly(self, fig, show: bool, output_file: str):
+    def _handle_output_plotly(self, fig: go.Figure, show: bool, output_file: str):
         if show is True:
             fig.show()
 
@@ -85,9 +92,11 @@ class BaseGraph(ABC):
             if output_file is True:
                 # if no name given for the output file, a generic name is generated
                 if self.data.name is not None:
-                    output_file = self.data.name+"_"+self.__class__.__name__+".html"
+                    output_file = (
+                        self.data.name + "_" + self.__class__.__name__ + ".html"
+                    )
                 else:
-                    output_file = self.__class__.__name__+".html"
+                    output_file = self.__class__.__name__ + ".html"
             if output_file.split(".")[-1] == "html":
                 plotly.io.write_html(fig, output_file)
             else:
@@ -97,8 +106,16 @@ class BaseGraph(ABC):
 class GroupBaseGraph(BaseGraph):
 
     DEFAULT_COLORS = [
-        "#A63A50", "#FFBF00", "#68ace8", "#97bf8f", "#28464B",
-        "#6D5A72", "#FF8A5B", "#7C9EB2", "#F4F1DE", "#9CD08F",
+        "#A63A50",
+        "#FFBF00",
+        "#68ace8",
+        "#97bf8f",
+        "#28464B",
+        "#6D5A72",
+        "#FF8A5B",
+        "#7C9EB2",
+        "#F4F1DE",
+        "#9CD08F",
     ]
 
     def __init__(self, *args, **kwargs):
@@ -106,7 +123,10 @@ class GroupBaseGraph(BaseGraph):
         super().__init__(*args, **kwargs)
 
     def _gen_default_color_dict(self, groups: list):
-        return {groups[i]: self.DEFAULT_COLORS[i % len(self.DEFAULT_COLORS)] for i in range(0, len(groups))}
+        return {
+            groups[i]: self.DEFAULT_COLORS[i % len(self.DEFAULT_COLORS)]
+            for i in range(0, len(groups))
+        }
 
     def _get_group_color(self, group: str, group_color: dict):
         return group_color.get(group, self.DEFAULT_COLOR)
@@ -116,29 +136,48 @@ class GroupBaseGraph(BaseGraph):
         pass
 
     def _gen_oriented_fig_trace(
-        self, fig, axis1: pd.Series, axis2: pd.Series,
-        name: str, text: str, color: str,
+        self,
+        fig: go.Figure,
+        axis1: pd.Series,
+        axis2: pd.Series,
+        name: str,
+        text: str,
+        color: str,
         orientation: str,
-        **kwargs
-    ):
+        **kwargs,
+    ) -> go.Figure:
         if orientation == "h":
-            fig.add_trace(self._gen_fig_trace(
-                axis2, axis1,
-                name, text, color,
-                **kwargs,
-            ))
-        else:    # default "v"
-            fig.add_trace(self._gen_fig_trace(
-                axis1, axis2,
-                name, text, color,
-                **kwargs,
-            ))
+            fig.add_trace(
+                self._gen_fig_trace(
+                    axis2,
+                    axis1,
+                    name,
+                    text,
+                    color,
+                    **kwargs,
+                )
+            )
+        else:  # default "v"
+            fig.add_trace(
+                self._gen_fig_trace(
+                    axis1,
+                    axis2,
+                    name,
+                    text,
+                    color,
+                    **kwargs,
+                )
+            )
         return fig
 
     def _prep_for_plot_one_graph(
-        self, group_col: str, groups: list, colors: dict,
-        show_counts: bool, sort_groups: bool
-    ):
+        self,
+        group_col: str,
+        groups: list,
+        colors: dict,
+        show_counts: bool,
+        sort_groups: bool,
+    ) -> Tuple[list, dict, dict]:
         if groups is None:
             groups = list(self.data[group_col].unique())
         if sort_groups:
@@ -154,14 +193,21 @@ class GroupBaseGraph(BaseGraph):
         return groups, colors, names
 
     def plot_one_graph(
-        self, data_col: str, group_col: str, group_col2: str = None,
-        groups: list = None, groups2: list = None,
-        sort_groups: bool = False, colors: dict = None,
-        plotting_options: dict = None, orientation: str = "v",
+        self,
+        data_col: str,
+        group_col: str,
+        group_col2: str = None,
+        groups: list = None,
+        groups2: list = None,
+        sort_groups: bool = False,
+        colors: dict = None,
+        plotting_options: dict = None,
+        orientation: str = "v",
         show_counts: bool = False,
-        show: bool = True, output_file: Union[bool, str] = False,
-        **kwargs
-    ):
+        show: bool = True,
+        output_file: Union[bool, str] = False,
+        **kwargs,
+    ) -> go.Figure:
         """
         :param data_col: column with data to visualize
         :param group_col: column used to group data
@@ -198,15 +244,17 @@ class GroupBaseGraph(BaseGraph):
             for group in groups2:
                 filtered_df2 = filtered_df[filtered_df[group_col2] == group]
                 fig = self._gen_oriented_fig_trace(
-                    fig, filtered_df2[group_col], filtered_df2[data_col],
-                    names[group], filtered_df.index, self._get_group_color(group, colors),
+                    fig,
+                    filtered_df2[group_col],
+                    filtered_df2[data_col],
+                    names[group],
+                    filtered_df.index,
+                    self._get_group_color(group, colors),
                     orientation,
-                    **kwargs
-                    )
+                    **kwargs,
+                )
 
-            fig.update_layout(
-                boxmode='group', legend_title_text=group_col2
-            )
+            fig.update_layout(boxmode="group", legend_title_text=group_col2)
         else:
             groups, colors, names = self._prep_for_plot_one_graph(
                 group_col, groups, colors, show_counts, sort_groups
@@ -214,11 +262,15 @@ class GroupBaseGraph(BaseGraph):
             for group in groups:
                 filtered_df = self.data[self.data[group_col] == group]
                 fig = self._gen_oriented_fig_trace(
-                    fig, filtered_df[group_col], filtered_df[data_col],
-                    names[group], filtered_df.index, self._get_group_color(group, colors),
+                    fig,
+                    filtered_df[group_col],
+                    filtered_df[data_col],
+                    names[group],
+                    filtered_df.index,
+                    self._get_group_color(group, colors),
                     orientation,
-                    **kwargs
-                    )
+                    **kwargs,
+                )
 
         if orientation == "h":
             fig.update_traces(orientation="h")

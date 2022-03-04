@@ -6,16 +6,25 @@ from .base import BaseGraph
 
 
 class Histogram(BaseGraph):
-
-    def plot_one_graph(self,
-                       bins_size: Union[int, float], plotting_options: dict = None,
-                       show: bool = True, output_file: Union[bool, str] = False):
+    def plot_one_graph(
+        self,
+        bins_size: Union[int, float],
+        plotting_options: dict = None,
+        show: bool = True,
+        output_file: Union[bool, str] = False,
+    ) -> go.Figure:
         # see if we add nbinsx options
-        minimum = int(self.data.min()/bins_size) * bins_size
+        minimum = int(self.data.min() / bins_size) * bins_size
         maximum = self.data.max()
-        fig = go.Figure([go.Histogram(x=self.data,
-                                      xbins=dict(start=minimum, end=maximum, size=bins_size),
-                                      autobinx=False)])
+        fig = go.Figure(
+            [
+                go.Histogram(
+                    x=self.data,
+                    xbins=dict(start=minimum, end=maximum, size=bins_size),
+                    autobinx=False,
+                )
+            ]
+        )
 
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
