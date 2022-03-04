@@ -6,6 +6,24 @@ Changelogs
 
 Summary of developments of moonstone library.
 
+v0.7
+====
+
+v0.7.0
+------
+
+* https://github.com/motleystate/moonstone/pull/78
+* ``Phylogenetic Diversity`` (https://github.com/motleystate/moonstone/pull/81):
+  * new argument ``force_computation`` allows to force diversity computation even when species are missing in the Tree
+  * only accepting trees in skbio.TreeNode
+* ``PlotTaxonomyCounts`` (https://github.com/motleystate/moonstone/pull/83):
+  * new arguments: ``color_df`` and ``sep_series``/``sep_how`` added to ``plot_sample_composition_most_abundant_taxa``
+  * new ``plot_most_abundant_taxa`` method and renaming of the old one to ``plot_most_prevalant_taxa``
+  * ``mode`` argument for ``plot_most_abundant_taxa()`` and ``plot_most_prevalent_taxa()`` to plot the data as a boxplot or a violin plot, as well as a bargraph (https://github.com/motleystate/moonstone/pull/89)
+* ``plot_complex_graph`` in the ``MatrixBarGraph`` class to display some metadata below the main graph (https://github.com/motleystate/moonstone/pull/83)
+* 2 new arguments, ``group_col2`` and ``groups2``, for the ``analyse_groups`` method from the ``DiversityBase`` class and its descendants (https://github.com/motleystate/moonstone/pull/86)
+* ``orientation`` argument for the ``plot_one_graph`` method of the ``GroupBaseGraph`` class and its descendants (https://github.com/motleystate/moonstone/pull/86)
+
 v0.6
 ====
 
