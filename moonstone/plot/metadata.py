@@ -1,13 +1,12 @@
 import pandas as pd
+import plotly.graph_objects as go
 from typing import Optional
 
-from moonstone.plot.graphs.bargraph import (
-    BarGraph
-)
+from moonstone.plot.graphs.bargraph import BarGraph
 from moonstone.plot.graphs.histogram import Histogram
 from moonstone.utils.plot import (
     add_x_to_plotting_options,
-    add_default_titles_to_plotting_options
+    add_default_titles_to_plotting_options,
 )
 
 
@@ -19,8 +18,13 @@ class PlotMetadataStats:
     def __init__(self, metadata_dataframe: pd.DataFrame):
         self.metadata_df = metadata_dataframe
 
-    def plot_age(self, bins_size=None, plotting_options: dict = None,
-                 show: Optional[bool] = True, output_file: Optional[str] = False):
+    def plot_age(
+        self,
+        bins_size=None,
+        plotting_options: dict = None,
+        show: Optional[bool] = True,
+        output_file: Optional[str] = False,
+    ) -> go.Figure:
         """
         method to visualize the age distribution of patients (whose the samples are originated from)
 
@@ -33,29 +37,42 @@ class PlotMetadataStats:
                                  'tickangle': `[int, float]`
         """
         if plotting_options is None:
-            plotting_options = {'layout': {'title_text': "Age distribution in the samples", 'title_x': 0.5},
-                                'xaxes': {'title_text': "age"},
-                                'yaxes': {'title_text': "number of samples"}}
+            plotting_options = {
+                "layout": {
+                    "title_text": "Age distribution in the samples",
+                    "title_x": 0.5,
+                },
+                "xaxes": {"title_text": "age"},
+                "yaxes": {"title_text": "number of samples"},
+            }
         else:
-            plotting_options = add_default_titles_to_plotting_options(plotting_options,
-                                                                      "Age distribution in the samples",
-                                                                      "age", "number of samples")
+            plotting_options = add_default_titles_to_plotting_options(
+                plotting_options,
+                "Age distribution in the samples",
+                "age",
+                "number of samples",
+            )
 
-        hist_fig = Histogram(self.metadata_df['age'])
+        graph = Histogram(self.metadata_df["age"])
 
         if bins_size is None:
             bins_size = 1
 
-        hist_fig.plot_one_graph(
+        fig = graph.plot_one_graph(
             bins_size,
             plotting_options=plotting_options,
             show=show,
-            output_file=output_file
-            )
+            output_file=output_file,
+        )
+
+        return fig
 
     def plot_sex(
-        self, sex_col: str = "sex", plotting_options: dict = None, show: Optional[bool] = True,
-        output_file: Optional[str] = False
+        self,
+        sex_col: str = "sex",
+        plotting_options: dict = None,
+        show: Optional[bool] = True,
+        output_file: Optional[str] = False,
     ):
         """
         method to visualize the sex distribution of patients (whose the samples are originated from)
@@ -68,29 +85,46 @@ class PlotMetadataStats:
                                  'tickangle': `[int, float]`
         """
         if plotting_options is None:
-            plotting_options = {'layout': {'title_text': "Sex distribution in the samples", 'title_x': 0.5},
-                                'xaxes': {'title_text': "sex"},
-                                'yaxes': {'title_text': "number of samples"},
-                                'traces': {'marker_color': ['pink', 'blue']}}
+            plotting_options = {
+                "layout": {
+                    "title_text": "Sex distribution in the samples",
+                    "title_x": 0.5,
+                },
+                "xaxes": {"title_text": "sex"},
+                "yaxes": {"title_text": "number of samples"},
+                "traces": {"marker_color": ["pink", "blue"]},
+            }
         else:
-            plotting_options = add_default_titles_to_plotting_options(plotting_options,
-                                                                      "Sex distribution in the samples",
-                                                                      "sex", "number of samples")
-            plotting_options = add_x_to_plotting_options(plotting_options, 'traces', 'marker_color', ['pink', 'blue'])
+            plotting_options = add_default_titles_to_plotting_options(
+                plotting_options,
+                "Sex distribution in the samples",
+                "sex",
+                "number of samples",
+            )
+            plotting_options = add_x_to_plotting_options(
+                plotting_options, "traces", "marker_color", ["pink", "blue"]
+            )
 
-        bar_fig = BarGraph(
+        graph = BarGraph(
             pd.value_counts(self.metadata_df[sex_col]),
         )
-        bar_fig.plot_one_graph(
+        fig = graph.plot_one_graph(
             plotting_options=plotting_options,
             show=show,
             output_file=output_file,
         )
 
+        return fig
+
     def plot_category_distribution(
-        self, column_name, title=None, xlabel=None,
-        reset_xnames_dic: dict = None, plotting_options: dict = None,
-        show: Optional[bool] = True, output_file: Optional[str] = False
+        self,
+        column_name,
+        title=None,
+        xlabel=None,
+        reset_xnames_dic: dict = None,
+        plotting_options: dict = None,
+        show: Optional[bool] = True,
+        output_file: Optional[str] = False,
     ):
         """
         :param column_name: name of the column you wish to display into a barplot
@@ -107,21 +141,31 @@ class PlotMetadataStats:
                                  'tickangle': `[int, float]`
         """
         if plotting_options is None:
-            plotting_options = {'layout': {'title_text': column_name+" distribution in the samples", 'title_x': 0.5},
-                                'xaxes': {'title_text': column_name},
-                                'yaxes': {'title_text': "number of samples"}}
+            plotting_options = {
+                "layout": {
+                    "title_text": column_name + " distribution in the samples",
+                    "title_x": 0.5,
+                },
+                "xaxes": {"title_text": column_name},
+                "yaxes": {"title_text": "number of samples"},
+            }
         else:
-            plotting_options = add_default_titles_to_plotting_options(plotting_options,
-                                                                      column_name+" distribution in the samples",
-                                                                      column_name, "number of samples")
+            plotting_options = add_default_titles_to_plotting_options(
+                plotting_options,
+                column_name + " distribution in the samples",
+                column_name,
+                "number of samples",
+            )
 
-        bar_fig = BarGraph(
+        graph = BarGraph(
             pd.value_counts(self.metadata_df[column_name]),
         )
         # if reset_xnames_dic is not None:
         #     bar_fig.reset_xnames(reset_xnames_dic)
-        bar_fig.plot_one_graph(
+        fig = graph.plot_one_graph(
             plotting_options=plotting_options,
             show=show,
             output_file=output_file,
-            )
+        )
+
+        return fig

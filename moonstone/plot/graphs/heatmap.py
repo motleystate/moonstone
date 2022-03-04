@@ -6,12 +6,13 @@ from .base import BaseGraph
 
 
 class HeatmapGraph(BaseGraph):
-
     def plot_one_graph(
-        self, plotting_options: dict = None,
-        show: bool = True, output_file: Union[bool, str] = False,
+        self,
+        plotting_options: dict = None,
+        show: bool = True,
+        output_file: Union[bool, str] = False,
         colorscale: List[list] = None,
-    ):
+    ) -> go.Figure:
         fig = go.Figure(
             [
                 go.Heatmap(

@@ -10,22 +10,24 @@ logger = logging.getLogger(__name__)
 
 
 class BaseBoxGraph:
-
-    def _valid_boxpoints_param(self, boxpoints):
-        if boxpoints not in ['all', 'outliers', 'suspectedoutliers', False]:
-            logger.warning("boxpoints=%s not valid, set to default (suspectedoutliers)", boxpoints)
+    def _valid_boxpoints_param(self, boxpoints: str) -> str:
+        if boxpoints not in ["all", "outliers", "suspectedoutliers", False]:
+            logger.warning(
+                "boxpoints=%s not valid, set to default (suspectedoutliers)", boxpoints
+            )
             return "suspectedoutliers"
         return boxpoints
 
 
 class BoxGraph(BaseGraph, BaseBoxGraph):
-
     def plot_one_graph(
-        self, plotting_options: dict = None,
-        show: bool = True, output_file: Union[bool, str] = False,
+        self,
+        plotting_options: dict = None,
+        show: bool = True,
+        output_file: Union[bool, str] = False,
         boxpoints: Union[bool, str] = "suspectedoutliers",
-        marker_color: str = None
-    ):
+        marker_color: str = None,
+    ) -> go.Figure:
         """
         Plot box graph.
 
@@ -58,11 +60,15 @@ class BoxGraph(BaseGraph, BaseBoxGraph):
 
 
 class GroupBoxGraph(GroupBaseGraph, BaseBoxGraph):
-
     def _gen_fig_trace(
-        self, x: list, y: list, name: str, text: list, color: str,
+        self,
+        x: list,
+        y: list,
+        name: str,
+        text: list,
+        color: str,
         boxpoints: Union[bool, str] = "suspectedoutliers",
-    ):
+    ) -> go.Box:
         return go.Box(
             x=x,
             y=y,
