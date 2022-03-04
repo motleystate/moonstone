@@ -85,6 +85,7 @@ List
     basics_filtering.NaNPercentageFiltering
     basics_filtering.NumberOfDifferentValuesFiltering
     taxonomy_filtering.TaxonomyNamesFiltering
+    taxonomy_filtering.TaxonomyMeanFiltering
     mean_filtering.MeanFiltering
 
 .. Note::
@@ -108,14 +109,15 @@ How it works?
 List
 """"
 
-.. currentmodule:: moonstone.normalization.counts
+.. currentmodule:: moonstone.normalization
 .. autosummary::
    :nosignatures:
 
-    geometric_mean.GeometricMeanNormalization
-    total_counts.TotalCountsNormalization
-    random_selection.RandomSelection
-    random_selection.TaxonomyRandomSelection
+    counts.geometric_mean.GeometricMeanNormalization
+    counts.total_counts.TotalCountsNormalization
+    counts.random_selection.RandomSelection
+    counts.random_selection.TaxonomyRandomSelection
+    processed.scaling_normalization
 
 .. _av_plot:
 
@@ -144,6 +146,7 @@ List
    :nosignatures:
 
    counts.PlotCountsStats
+   counts.PlotTaxonomyCounts
    metadata.PlotMetadataStats
 
 .. Note::

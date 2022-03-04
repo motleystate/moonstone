@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 class DiversityBase(BaseModule, BaseDF, ABC):
-    DIVERSITY_INDEXES_NAME = "index"
-    DEF_TITLE = "(index diversity) distribution across the samples"
-    AVAILABLE_GROUP_VIZ = ['violin', 'boxplot']
-    DEF_GROUP_VIZ = "boxplot"
-    DEF_PVAL_COLORSCALE = [
+    _DIVERSITY_INDEXES_NAME = "index"
+    _DEF_TITLE = "(index diversity) distribution across the samples"
+    _AVAILABLE_GROUP_VIZ = ['violin', 'boxplot']
+    _DEF_GROUP_VIZ = "boxplot"
+    _DEF_PVAL_COLORSCALE = [
         [0, '#FFFF00'], [0.001, '#f5962a'], [0.05, '#FF0000'], [0.050001, '#000055'], [1, '#000000']
     ]
 
@@ -48,11 +48,11 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         # call compute_alpha_diversity and store into self._alpha_indexes
         if getattr(self, '_diversity_indexes', None) is None:
             self._diversity_indexes = self.compute_diversity()
-            self._diversity_indexes.name = self.DIVERSITY_INDEXES_NAME
+            self._diversity_indexes.name = self._DIVERSITY_INDEXES_NAME
         return self._diversity_indexes
 
     def _get_default_title(self) -> str:
-        return f"{self.index_name} {self.DEF_TITLE}"
+        return f"{self.index_name} {self._DEF_TITLE}"
 
     def _get_default_samples_label(self) -> str:
         return "Samples"
@@ -135,9 +135,9 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         self, df, mode: str, group_col: str, group_col2: str, plotting_options: dict, log_scale: bool,
         show: bool, output_file: str, colors: dict, groups: list, groups2: list, **kwargs
     ):
-        if mode not in self.AVAILABLE_GROUP_VIZ:
+        if mode not in self._AVAILABLE_GROUP_VIZ:
             logger.warning("%s not a available mode, set to default (histogram)", mode)
-            mode = self.DEF_GROUP_VIZ
+            mode = self._DEF_GROUP_VIZ
 
         title = self._get_default_title()
         xlabel = f"{group_col}"
@@ -150,7 +150,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         elif mode == "boxplot":
             graph = GroupBoxGraph(df)
         graph.plot_one_graph(
-            self.DIVERSITY_INDEXES_NAME, group_col,
+            self._DIVERSITY_INDEXES_NAME, group_col,
             group_col2=group_col2,
             plotting_options=plotting_options,
             show=show,
@@ -176,7 +176,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
     ):
         if correction_method is not None:
             pval = statistical_test_groups_comparison(
-                    df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                    df[self._DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
                     output='series', sym=False
                 )
 
@@ -198,7 +198,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             return corrected_pval
         else:
             pval = statistical_test_groups_comparison(
-                df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                df[self._DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
                 output=structure_pval, sym=sym
             )
             return pval
@@ -211,7 +211,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             }
         }
         graph.plot_one_graph(
-            colorscale=self.DEF_PVAL_COLORSCALE,
+            colorscale=self._DEF_PVAL_COLORSCALE,
             plotting_options=plotting_options,
             output_file=output_pval_file
         )

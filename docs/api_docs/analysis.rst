@@ -7,12 +7,11 @@ Analysis
 Differential Analysis
 =====================
 
-.. currentmodule:: moonstone.analysis.differential_analysis
-
-.. autosummary::
-    :toctree: stubs
-
-    DifferentialAnalysis
+.. automodule:: moonstone.analysis.differential_analysis
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
 
 
 Diversity
@@ -29,13 +28,19 @@ Alpha-diversity corresponds to the intra-sample diversity
     :special-members: __init__
     :inherited-members:
 
-.. autosummary::
-    :toctree: stubs
+.. autoclass:: moonstone.analysis.diversity.alpha.SimpsonInverseIndex
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
 
-    moonstone.analysis.diversity.alpha.SimpsonInverseIndex
-    moonstone.analysis.diversity.alpha.Chao1Index
+.. autoclass:: moonstone.analysis.diversity.alpha.Chao1Index
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
     
-Phylogenetic alpha-diversity
+Phylogenetic alpha-diversity includes the phylogenetic closeness of species in the computation of the diversity indexes
 
 .. autoclass:: moonstone.analysis.diversity.alpha.FaithsPhylogeneticDiversity
     :members:
@@ -56,7 +61,7 @@ Beta-diversity corresponds to the inter-samples diversity
     :special-members: __init__
     :inherited-members:
 
-Phylogenetic beta-diversity
+Phylogenetic beta-diversity includes the phylogenetic closeness of species in the computation of the diversity indexes
 
 .. autoclass:: moonstone.analysis.diversity.beta.WeightedUniFrac
     :members:

@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class AlphaDiversity(DiversityBase, ABC):
-    DIVERSITY_INDEXES_NAME = "alpha_index"
-    DEF_TITLE = "(alpha diversity) distribution across the samples"
+    _DIVERSITY_INDEXES_NAME = "alpha_index"
+    _DEF_TITLE = "(alpha diversity) distribution across the samples"
 
     @property
     def alpha_diversity_indexes(self):
