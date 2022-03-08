@@ -69,7 +69,8 @@ Phylogenetic beta-diversity includes the phylogenetic closeness of species in th
     :special-members: __init__
     :inherited-members:
 
+.. currentmodule:: moonstone.analysis.diversity.beta
 .. autosummary::
     :toctree: stubs
 
-    moonstone.analysis.diversity.beta.UnweightedUniFrac
+    UnweightedUniFrac

@@ -1,20 +1,8 @@
-.. _api_parsers:
+.. _api_analysis:
 
-*******
+********
 Parsers
-*******
-
-How it works?
-=============
-
-.. code-block:: python
-
-    from moonstone.parsers import YourFavouriteParser
-
-    parser = YourFavouriteParser("/path/to/the/file")
-    df = parser.dataframe
-
----------
+********
 
 Counts
 ======
@@ -22,34 +10,44 @@ Counts
 Simple Counts
 """""""""""""
 
-.. currentmodule:: moonstone.parsers.counts
+.. automodule:: moonstone.parsers.counts.genes
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
 
-.. autosummary::
-    :toctree: stubs
-
-    GeneCountsParser
-    Picrust2PathwaysParser
+.. automodule:: moonstone.parsers.counts.picrust2
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
 
 Taxonomy Counts
 """""""""""""""
 
-.. currentmodule:: moonstone.parsers.counts.taxonomy
+.. automodule:: moonstone.parsers.counts.taxonomy.kraken2
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
 
-.. autosummary::
-    :toctree: stubs
+.. automodule:: moonstone.parsers.counts.taxonomy.metaphlan
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
 
-    SunbeamKraken2Parser
-    Metaphlan2Parser
-    Metaphlan3Parser
-    Qiime2Parser
+.. automodule:: moonstone.parsers.counts.taxonomy.qiime
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
 
 Metadata
 ========
 
-.. currentmodule:: moonstone.parsers.metadata
-
-.. autosummary::
-    :toctree: stubs
-
-    MetadataParser
-    YAMLBasedMetadataParser
+.. automodule:: moonstone.parsers.metadata
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
