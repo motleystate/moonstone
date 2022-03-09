@@ -52,12 +52,12 @@ by checking the .without_infos_index attribute.")
         new_df = self.split_taxa_fill_none(new_df, sep="; ", merge_genus_species=True)
         new_df = new_df.set_index(self.taxonomical_names[:self._rank_level])
         if method == 'sum':
-            nb_levels = len(self.taxonomical_names[:self._rank_level])
-            new_df = new_df.sum(level=list(range(nb_levels)))
+            nlevels = len(self.taxonomical_names[:self._rank_level])
+            new_df = new_df.sum(level=list(range(nlevels)))
         elif method == 'count':
             new_df[:] = np.where(new_df > 0, 1, 0)    # presence/absence -> is > 0 then presence (1) else absence (0)
-            nb_levels = len(self.taxonomical_names[:self._rank_level])
-            new_df = new_df.sum(level=list(range(nb_levels)))
+            nlevels = len(self.taxonomical_names[:self._rank_level])
+            new_df = new_df.sum(level=list(range(nlevels)))
         return new_df
 
     @property

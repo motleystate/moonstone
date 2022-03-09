@@ -39,13 +39,13 @@ class GeometricMeanNormalization(BaseNormalization):
         This method removes rows with 0 reads
         """
         threshold = math.ceil(df.shape[1] * self.zero_threshold/100)
-        total_nb_rows = df.shape[0]
+        total_nrows = df.shape[0]
         non_zero_dataf = df.replace(0, np.nan).dropna(thresh=threshold).astype('float')
-        removed_nb_rows = non_zero_dataf.shape[0]
-        logger.info("%s/%s rows dropped", total_nb_rows - removed_nb_rows, total_nb_rows)
-        if removed_nb_rows / total_nb_rows <= 0.5:
+        removed_nrows = non_zero_dataf.shape[0]
+        logger.info("%s/%s rows dropped", total_nrows - removed_nrows, total_nrows)
+        if removed_nrows / total_nrows <= 0.5:
             logger.warning("Zero-filtering has removed %s %% of items!",
-                           (total_nb_rows - removed_nb_rows) / total_nb_rows*100)
+                           (total_nrows - removed_nrows) / total_nrows*100)
         self._removed_zero_df = df[~df.index.isin(non_zero_dataf.index)]
         return non_zero_dataf
 

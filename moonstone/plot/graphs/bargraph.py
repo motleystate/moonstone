@@ -196,16 +196,16 @@ class MatrixBarGraph(BaseGraph):
         final_colors_metadata = self._color_scheme_metadata(metadata, colors_metadata)
 
         if isinstance(metadata, pd.Series):
-            nb_rows = 1
+            nrows = 1
         else:
-            nb_rows = len(metadata.columns)
+            nrows = len(metadata.columns)
 
         fig = make_subplots(
             rows=2,
             cols=1,
             shared_xaxes=True,
             vertical_spacing=0.02,
-            row_width=[0.02 * nb_rows, 1 - (0.02 * nb_rows)],
+            row_width=[0.02 * nrows, 1 - (0.02 * nrows)],
         )
 
         # main graph
