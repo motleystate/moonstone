@@ -111,6 +111,14 @@ class TestSeriesBinning(TestCase):
         expected_object = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60]
         self.assertListEqual(observed_object, expected_object)
 
+    def test_compute_heterogeneous_bins_87_to_1354(self):
+        tested_object_instance = SeriesBinning(
+            pd.Series(["not empty to avoid warning"])
+        )
+        observed_object = tested_object_instance.compute_heterogeneous_bins(87, 1354)
+        expected_object = [80, 90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000]
+        self.assertListEqual(observed_object, expected_object)
+
     def test_bins_values_homogeneous(self):
         tested_object = pd.Series(
             {
@@ -140,7 +148,7 @@ class TestSeriesBinning(TestCase):
         expected_object = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20.0]
         self.assertListEqual(tested_object_instance.bins_values, expected_object)
 
-    def test_compute_binned_data(self):
+    def test_compute_binned_data_giving_bins_values(self):
         series = pd.Series(
             [5, 8, 10], index=['i1', 'i2', 'i3']
         )
@@ -154,5 +162,25 @@ class TestSeriesBinning(TestCase):
         tested_object = tested_object_instance.compute_binned_data()
         pd.testing.assert_series_equal(tested_object, expected_object)
         pd.testing.assert_series_equal(
-            tested_object_instance.binned_data, expected_object
+            tested_object_instance.binned_data, expected_object   # take the opportunity to check binned_data
         )
+
+    def test_compute_binned_data_nbins_equalwidth(self):
+        series = pd.Series(
+            [0, 8, 10, 13, 14, 18, 19, 20],
+            index=["i1", "i2", "i3", "i4", "i5", "i6", "i7", "i8"]
+            )
+        expected_object = pd.Series([3, 5], index=["[0.0, 10.0]", "]10.0, 20.0]"])
+        tested_object_instance = SeriesBinning(series, nbins=2)
+        tested_object = tested_object_instance.compute_binned_data()
+        pd.testing.assert_series_equal(tested_object, expected_object)
+
+    def test_compute_binned_data_nbins_equalsize(self):
+        series = pd.Series(
+            [0, 8, 10, 13, 14, 18, 19, 20],
+            index=["i1", "i2", "i3", "i4", "i5", "i6", "i7", "i8"]
+            )
+        expected_object = pd.Series([4, 4], index=["[0.0, 13.5]", "]13.5, 20.0]"])
+        tested_object_instance = SeriesBinning(series, nbins=2, cut_type="equal-size")
+        tested_object = tested_object_instance.compute_binned_data()
+        pd.testing.assert_series_equal(tested_object, expected_object)
