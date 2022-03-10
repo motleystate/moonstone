@@ -140,10 +140,6 @@ class SeriesBinning:
                 self.bins_values = self.compute_heterogeneous_bins()
             else:
                 self.bins_values = self.compute_homogeneous_bins()
-        if self.farleft:
-            self._farleftedges = "[" + str(self._bins_values[0])
-            return [self._bins_values[0] - 0.001] + self._bins_values[1:]
-        self._farleftedges = "]" + str(self._bins_values[0])
         return self._bins_values
 
     @bins_values.setter
@@ -171,8 +167,14 @@ class SeriesBinning:
                 )
             self.bins_values = list(bins_values)
         else:
+            if self.farleft:
+                self._farleftedges = "[" + str(self.bins_values[0])
+                bins = [self.bins_values[0] - 0.001] + self.bins_values[1:]
+            else:
+                self._farleftedges = "]" + str(self.bins_values[0])
+                bins = self.bins_values
             binned_df = pd.cut(
-                self.data, bins=self.bins_values
+                self.data, bins=bins
             )  # put every items in the appropriate bin
         data = pd.value_counts(binned_df)
         data = data.reindex(binned_df.cat.categories)

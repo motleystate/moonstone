@@ -171,7 +171,7 @@ class TestChi2Functions(TestCase):
             self.test_df[self.metadata_df[self.metadata_df == 3].index].dropna()
         ]
         bins_values = _compute_best_bins_values(list_of_series)
-        expected_bins_values = [-0.001, 6.333333333333333, 12.666666666666666, 19.0]
+        expected_bins_values = [0, 6.333333333333333, 12.666666666666666, 19.0]
         self.assertListEqual(bins_values, expected_bins_values)
 
     def test_chi2_contingency_groups(self):
