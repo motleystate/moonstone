@@ -9,6 +9,13 @@ import logging
 
 logger = logging.getLogger(__name__)
 DEFAULT_STATS_TEST = "mann_whitney_u"
+"""
+TESTS_FUNCTIONS_USED = {
+    'wilcoxon_rank_test': st.ranksums,
+    'one_way_anova': st.f_oneway,
+    'kruskal_test': st.kruskal
+    }
+"""
 
 
 def _preprocess_groups_comparison(
@@ -22,9 +29,7 @@ def _preprocess_groups_comparison(
     for i in groups:
         groupi = series[group_series[group_series == i].index].dropna()
         if groupi.size < 1:
-            logger.warning(
-                f"No observations for group {i} in data. Group dropped."
-            )
+            logger.warning(f"No observations for group {i} in data. Group dropped.")
         elif groupi.size < 20 and stat_test == "mann_whitney_u":
             logger.warning(f"Less than 20 observations for group {i} in data.")
             list_of_series += [groupi]
@@ -38,7 +43,9 @@ def _preprocess_groups_comparison(
             new_groups += [i]
 
     if len(new_groups) == 0:
-        raise RuntimeError("All groups have been dropped: not enough observations by group.")
+        raise RuntimeError(
+            "All groups have been dropped: not enough observations by group."
+        )
 
     return new_groups, list_of_series
 
@@ -86,18 +93,9 @@ def statistical_test_groups_comparison(
         dic_df = {}
         for i in range(len(groups)):
             for j in range(i + 1, len(groups)):
-                if stat_test == "mann_whitney_u":
-                    pval = mann_whitney_u(
-                        list_of_series[i], list_of_series[j], **kwargs
-                    )[1]
-                elif stat_test == "ttest_independence":
-                    pval = ttest_independence(
-                        list_of_series[i], list_of_series[j], **kwargs
-                    )[1]
-                elif stat_test == "chi2_contingency":
-                    pval = chi2_contingency(
-                        list_of_series[i], list_of_series[j], **kwargs
-                    )[1]
+                pval = eval(stat_test)(list_of_series[i], list_of_series[j], **kwargs)[
+                    1
+                ]
 
                 dic_df[(groups[i], groups[j])] = pval
                 if sym:
@@ -111,17 +109,7 @@ def statistical_test_groups_comparison(
     tab = [[np.nan] * len(groups) for _ in range(len(groups))]
     for i in range(len(groups)):
         for j in range(i + 1, len(groups)):
-
-            if stat_test == "mann_whitney_u":
-                pval = mann_whitney_u(list_of_series[i], list_of_series[j], **kwargs)[1]
-            elif stat_test == "ttest_independence":
-                pval = ttest_independence(
-                    list_of_series[i], list_of_series[j], **kwargs
-                )[1]
-            if stat_test == "chi2_contingency":
-                pval = chi2_contingency(
-                    list_of_series[i], list_of_series[j], **kwargs
-                )[1]
+            pval = eval(stat_test)(list_of_series[i], list_of_series[j], **kwargs)[1]
 
             tab[i][j] = pval
             if sym:
@@ -144,6 +132,9 @@ def ttest_independence(
 
 
 def _compute_best_bins_values(list_of_series):
+    """
+    Try to find the minium number of equal-size bins, so that
+    """
     max_cat = 99
     max = -float("inf")
     min = float("inf")
@@ -158,7 +149,7 @@ def _compute_best_bins_values(list_of_series):
         if tmp > max:
             max = tmp
 
-    nb_cat = max_cat
+    ncat = max_cat
     bins = None
     ind = 0
     ind_validated = []
@@ -174,11 +165,11 @@ def _compute_best_bins_values(list_of_series):
                 ind += 1
                 continue
             bins = None
-            nb_cat -= 1
-        while nb_cat > 1:
+            ncat -= 1
+        while ncat > 1:
             s_binning = SeriesBinning(series)
             bins_values = s_binning.compute_homogeneous_bins(
-                min=min, max=max, nb_bins=nb_cat
+                min=min, max=max, nbins=ncat
             )
             s_binning.bins_values = bins_values
             if (
@@ -193,8 +184,8 @@ def _compute_best_bins_values(list_of_series):
                 ]  # to check new bins with previous series
                 ind_validated = [ind]
                 break
-            nb_cat -= 1
-        if nb_cat < 1:
+            ncat -= 1
+        if ncat < 1:
             raise RuntimeError(
                 "moonstone wasn't able to compute a contingency table of at least 2 x 2 with the data."
             )
@@ -218,7 +209,7 @@ def chi2_contingency(
     if series1.size < 10 or series2.size < 10:
         logger.warning(
             "Data have less than 10 observations by groups. \
-        Another statistical test would be more appropriate to compare the 2 groups."
+        Another statistical test would be more appropriate to compare those 2 groups."
         )
         return (np.nan, np.nan)
 
@@ -230,11 +221,7 @@ def chi2_contingency(
     s1_binning.bins_values = bins
     s2_binning.bins_values = bins
 
-    merged_df = pd.concat(
-        [s1_binning.binned_data, s2_binning.binned_data],
-        axis=1,
-        names=["series1", "series2"],
-    )
+    merged_df = pd.concat([s1_binning.binned_data, s2_binning.binned_data], axis=1)
     merged_df = merged_df.fillna(0)
     to_return = list(stats.chi2_contingency(merged_df))
     to_return += s1_binning.bins_values

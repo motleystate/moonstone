@@ -91,17 +91,7 @@ class TestSeriesBinning(TestCase):
         )
         observed_object = tested_object_instance.compute_homogeneous_bins(0, 1)
         expected_object = [
-            0,
-            0.1,
-            0.2,
-            0.30000000000000004,
-            0.4,
-            0.5,
-            0.6,
-            0.7000000000000001,
-            0.8,
-            0.9,
-            1.0,
+            0, 0.1, 0.2, 0.30000000000000004, 0.4, 0.5, 0.6, 0.7000000000000001, 0.8, 0.9, 1.0,
         ]
         self.assertListEqual(observed_object, expected_object)
 
@@ -132,7 +122,7 @@ class TestSeriesBinning(TestCase):
         tested_object.name = "mean read count"
         tested_object_instance = SeriesBinning(tested_object)
         tested_object_instance.bins_values  # call compute_homogeneous_bins()
-        expected_object = [-0.001, 10, 20]
+        expected_object = [0, 10, 20]
         self.assertListEqual(tested_object_instance.bins_values, expected_object)
 
     def test_bins_values_heterogeneous(self):
@@ -147,7 +137,7 @@ class TestSeriesBinning(TestCase):
         tested_object_instance = SeriesBinning(tested_object)
         tested_object_instance.heterogeneous = True
         tested_object_instance.bins_values  # call compute_heterogeneous_bins()
-        expected_object = [-0.001, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20.0]
+        expected_object = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20.0]
         self.assertListEqual(tested_object_instance.bins_values, expected_object)
 
     def test_compute_binned_data(self):
