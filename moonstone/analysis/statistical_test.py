@@ -1,9 +1,10 @@
 import numpy as np
+from packaging import version
 import pandas as pd
-from scipy import stats
-from typing import List, Union
+import scipy
+from typing import List, Union, Tuple, Optional
 
-from moonstone.utils.pandas.series import SeriesBinning
+from moonstone.utils.dict_operations import filter_dict
 
 import logging
 
@@ -19,10 +20,17 @@ TESTS_FUNCTIONS_USED = {
 
 
 def _preprocess_groups_comparison(
-    series: pd.Series, group_series: pd.Series, stat_test: str
+    series: pd.Series, group_series: pd.Series, stat_test: str, force_computation: bool
 ):
     groups = list(group_series.unique())
     groups.sort()
+
+    if stat_test == "mann_whitney_u":
+        threshold = 20
+    elif stat_test == "chi2_contingency":
+        threshold = 10
+    else:
+        threshold = 0
 
     list_of_series = []
     new_groups = []
@@ -30,17 +38,20 @@ def _preprocess_groups_comparison(
         groupi = series[group_series[group_series == i].index].dropna()
         if groupi.size < 1:
             logger.warning(f"No observations for group {i} in data. Group dropped.")
-        elif groupi.size < 20 and stat_test == "mann_whitney_u":
-            logger.warning(f"Less than 20 observations for group {i} in data.")
-            list_of_series += [groupi]
-            new_groups += [i]
-        elif groupi.size < 10 and stat_test == "chi2_contingency":
-            logger.warning(
-                f"Not enough observations (<10) for group {i} in data. Group dropped."
-            )
-        else:
-            list_of_series += [groupi]
-            new_groups += [i]
+            continue
+        elif groupi.size < threshold:
+            if not force_computation:
+                logger.warning(
+                    f"Less than {threshold} observations for group {i} in data. Group dropped"
+                )
+                continue  # we don't add the group to the list of series = group is dropped
+            else:
+                logger.warning(
+                    f"Less than {threshold} observations for group {i} in data."
+                )
+
+        list_of_series += [groupi]
+        new_groups += [i]
 
     if len(new_groups) == 0:
         raise RuntimeError(
@@ -62,7 +73,7 @@ def statistical_test_groups_comparison(
     :param output: {'series', 'dataframe'}
     :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
 
-    In kwargs, you can pass argument for statistical test, like :
+    In kwargs, you can pass argument for statistical test, like:
     :param equal_var: For ttest_ind, set to True if your samples have the same variance and
     you wish to perform a Student's t-test rather than a Welch's t-test (here default is False)
     :param alternative: {None, 'two-sided', 'less', 'greater'} For Mann - Whitney-U, you can define
@@ -80,14 +91,16 @@ def statistical_test_groups_comparison(
         stat_test = DEFAULT_STATS_TEST
         # raise NotImplementedError("Method %s not implemented" % stat_test)
 
+    if kwargs.pop("force_computation", None) is None:
+        if stat_test == "chi2_contingency" and kwargs.pop("bins", None) is None:
+            kwargs["force_computation"] = False
+        else:
+            kwargs["force_computation"] = True
+
     # split dataframe by group + warn and/or drop groups not respecting minimum number of observations
     groups, list_of_series = _preprocess_groups_comparison(
-        series, group_series, stat_test
+        series, group_series, stat_test, force_computation=kwargs["force_computation"]
     )
-
-    # if no bins defined, compute automatically bins that will be used to bin every series of group
-    if stat_test == "chi2_contingency" and "bins" not in kwargs.keys():
-        kwargs["bins"] = _compute_best_bins_values(list_of_series)
 
     if output == "series":
         dic_df = {}
@@ -120,109 +133,204 @@ def statistical_test_groups_comparison(
 def mann_whitney_u(
     series1: pd.Series, series2: pd.Series, alternative: str = "two-sided", **kwargs
 ):
-    # alternative = 'two-sided' is the default but using None gives a warning
-    return stats.mannwhitneyu(series1, series2, alternative=alternative)
+    # alternative = None is deprecated
+    authorized_keys = ["use_continuity"]
+    scipy_version = version.parse(scipy.__version__)
+    if scipy_version >= version.parse("1.7.0"):
+        authorized_keys += ["method", "axis"]
+    if scipy_version >= version.parse("1.8.0"):
+        authorized_keys += ["nan_policy"]
+    kwargs, raisewarning = filter_dict(
+        kwargs, authorized_keys, ["method", "axis", "nan_policy"]
+    )
+    if raisewarning:
+        logger.warning(
+            f"{raisewarning} not available with version {scipy_version} of scipy"
+        )
+    return scipy.stats.mannwhitneyu(series1, series2, alternative=alternative, **kwargs)
 
 
 def ttest_independence(
     series1: pd.Series, series2: pd.Series, equal_var: bool = False, **kwargs
 ):
-    # equal_var = False is Welch's t-test
-    return stats.ttest_ind(series1, series2, equal_var=equal_var)
+    # equal_var = False is Welch's t-test, which does not assume equal population variance
+    authorized_keys = [
+        "nan_policy",
+        "axis",
+    ]
+    scipy_version = version.parse(scipy.__version__)
+    if scipy_version >= version.parse("1.6.0"):
+        authorized_keys += ["alternative"]
+    if scipy_version >= version.parse("1.7.0"):
+        authorized_keys += ["permutations", "random_state", "trim"]
+    kwargs, raisewarning = filter_dict(
+        kwargs, authorized_keys, ["alternative", "permutations", "random_state", "trim"]
+    )
+    if raisewarning:
+        logger.warning(
+            f"{raisewarning} not available with version {scipy_version} of scipy"
+        )
+    return scipy.stats.ttest_ind(series1, series2, equal_var=equal_var, **kwargs)
 
 
-def _compute_best_bins_values(list_of_series):
-    """
-    Try to find the minium number of equal-size bins, so that
-    """
-    max_cat = 99
-    max = -float("inf")
-    min = float("inf")
-    for series in list_of_series:
-        tmp = int(series.size / 5)  # maybe add other criterium to lower the max_cat
-        if tmp < max_cat:
-            max_cat = tmp
-        tmp = series.min()
-        if tmp < min:
-            min = tmp
-        tmp = series.max()
-        if tmp > max:
-            max = tmp
+def _compute_best_contingency_table(
+    dataframe,
+    cut_type: str = "equal-width",
+    na: bool = False,
+    force_computation: bool = False,
+) -> pd.DataFrame:
+    max_cat = int(
+        dataframe.iloc[:, 1].value_counts()[-1] / 5
+    )  # .iloc[:,1] is the number column
+    if max_cat > 100:  # more is too much anyway
+        max_cat = 100
 
     ncat = max_cat
-    bins = None
-    ind = 0
-    ind_validated = []
-    for series in list_of_series:
-        if bins is not None:
-            s_binning = SeriesBinning(series)
-            s_binning.bins_values = bins
-            if (
-                s_binning.binned_data[s_binning.binned_data >= 5].size
-                == s_binning.binned_data.size
-            ):
-                ind_validated += [ind]
-                ind += 1
-                continue
-            bins = None
-            ncat -= 1
-        while ncat > 1:
-            s_binning = SeriesBinning(series)
-            bins_values = s_binning.compute_homogeneous_bins(
-                min=min, max=max, nbins=ncat
-            )
-            s_binning.bins_values = bins_values
-            if (
-                s_binning.binned_data[s_binning.binned_data >= 5].size
-                == s_binning.binned_data.size
-            ):
-                bins = (
-                    s_binning.bins_values
-                )  # since bins_values has changed, we need ...
-                list_of_series += [
-                    list_of_series[i] for i in ind_validated
-                ]  # to check new bins with previous series
-                ind_validated = [ind]
-                break
-            ncat -= 1
-        if ncat < 1:
-            raise RuntimeError(
-                "moonstone wasn't able to compute a contingency table of at least 2 x 2 with the data."
-            )
-        ind += 1
-    return s_binning.bins_values
+    while ncat > 1:
+        if cut_type == "equal-size":
+            binned_series = pd.qcut(dataframe.iloc[:, 0], q=ncat)
+        else:  # cut_type == "equal-width" (default)
+            binned_series = pd.cut(dataframe.iloc[:, 0], bins=ncat)
+
+        if na:
+            binned_series = binned_series.replace(np.nan, "NaN")
+
+        tab = pd.crosstab(binned_series, dataframe.iloc[:, 1])
+        if (
+            tab[tab >= 5].dropna().size == tab.size
+        ):  # which means that every cells have at least 5 occurences
+            return tab
+        ncat -= 1
+
+    # ncat == 1
+    if force_computation:
+        logger.warning(
+            f"moonstone wasn't able to compute a contingency table with at least 5 observations per cell. \
+    Another statistical test would be more appropriate to compare these groups.\n\
+    force_computation return contingency table of 2 x {len(dataframe.iloc[:,1].unique())}"
+        )
+        return tab
+    else:
+        logger.warning(
+            "moonstone wasn't able to compute a contingency table with at least 5 observations per cell. \
+    Another statistical test would be more appropriate to compare these groups."
+        )
+        return np.nan
+
+
+def _compute_contingency_table_on_given_bins(
+    dataframe, bins, force_computation: bool = False
+) -> pd.DataFrame:
+    binned_series = pd.cut(dataframe.iloc[:, 0], bins=bins)
+    tab = pd.crosstab(binned_series, dataframe.iloc[:, 1])
+    if (
+        tab[tab >= 5].dropna().size != tab.size
+    ):  # which means that every cells have at least 5 occurences
+        logger.warning(
+            "Some cells have less than 5 observations. \
+Another statistical test would be more appropriate to compare these groups."
+        )
+        if not force_computation:
+            return np.nan
+    return tab
+
+
+def _compute_contingency_table(
+    numerical_series: pd.Series,
+    categorical_series: pd.Series,
+    bins: List[Union[int, float]] = None,
+    cut_type: str = "equal-width",
+    na: bool = False,
+    force_computation: bool = False,
+) -> pd.DataFrame:
+    """
+    Try to find the maximum number of bins, where every bins have at least 5 occurrences
+
+    Args:
+        numerical_series: Series that needs to be put into bins
+        categorical_series: Other series used to make the contingency table
+        cut_type: {"equal-width" (default), "equal-size"} how the bins are defined.
+          Note: they are defined on numerical_series only.
+          So all cells of the contingency table might not all have the same weight at the end.
+        na: Should NaN be considered as a value
+    """
+    if numerical_series.name is None:
+        numerical_series.name = "numerical_series"
+    if categorical_series is None:
+        categorical_series.name = "categorical_series"
+
+    if na:
+        categorical_series = categorical_series.replace(np.nan, "NaN")
+
+    dataframe = pd.merge(
+        numerical_series, categorical_series, right_index=True, left_index=True
+    )
+    if dataframe.empty:
+        raise ValueError("Index of numerical_series and categorical_series don't match")
+
+    if bins:
+        return _compute_contingency_table_on_given_bins(
+            dataframe, bins, force_computation=force_computation
+        )
+    else:
+        return _compute_best_contingency_table(
+            dataframe,
+            cut_type=cut_type,
+            na=na,
+            force_computation=False,
+        )
+
+
+def _add_category_column(series, defaultname: str):
+    df = pd.DataFrame(series)
+    if series.name is not None:
+        name = series.name
+    else:
+        name = defaultname
+    df.columns = ["number"]
+    df["category"] = name
+    return df
 
 
 def chi2_contingency(
     series1: pd.Series,
     series2: pd.Series,
-    retbins: bool = False,
+    rettab: bool = False,
     bins: List[Union[int, float]] = None,
+    cut_type: str = "equal-width",
+    na: bool = False,
+    force_computation: bool = False,
     **kwargs,
-):
+) -> Tuple[float, float, int, np.ndarray, Optional[pd.DataFrame]]:
     """
     NB : Cells with 0 raise an error in the scipy.stats.chi2_contingency test. Furthermore, they recommand to use the
     test only if the observed and expected frequencies in each cell are at least 5.
 
-    :param retbins: Whether to return the bins used to make the Chi2 contingency table
+    :param rettab: Whether to return the Chi2 contingency table.
     """
-    if series1.size < 10 or series2.size < 10:
+    if (series1.size < 10 or series2.size < 10) and not force_computation:
         logger.warning(
             "Data have less than 10 observations by groups. \
         Another statistical test would be more appropriate to compare those 2 groups."
         )
-        return (np.nan, np.nan)
+        return tuple([np.nan] * 4)
 
-    if bins is None:
-        bins = _compute_best_bins_values([series1, series2])
+    df1 = _add_category_column(series1, defaultname="series1")
+    df2 = _add_category_column(series2, defaultname="series2")
+    df = df1.append(df2)
 
-    s1_binning = SeriesBinning(series1)
-    s2_binning = SeriesBinning(series2)
-    s1_binning.bins_values = bins
-    s2_binning.bins_values = bins
+    tab = _compute_contingency_table(
+        df["number"],
+        df["category"],
+        bins=bins,
+        cut_type=cut_type,
+        na=na,
+        force_computation=force_computation,
+    )
 
-    merged_df = pd.concat([s1_binning.binned_data, s2_binning.binned_data], axis=1)
-    merged_df = merged_df.fillna(0)
-    to_return = list(stats.chi2_contingency(merged_df))
-    to_return += s1_binning.bins_values
+    to_return = list(
+        scipy.stats.chi2_contingency(tab)
+    )  # ch2, pval, degree of freedom, expected table
+    if rettab:
+        to_return += tab  # observed table
     return tuple(to_return)
