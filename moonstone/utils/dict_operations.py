@@ -1,3 +1,6 @@
+from typing import Union, Tuple
+
+
 """Operations on dictionnarie(s)."""
 from collections.abc import MutableMapping
 
@@ -17,6 +20,22 @@ def merge_dict(first_dict: dict, second_dict: dict):
             else:
                 merged_dict[key] = first_dict[key]
     return merged_dict
+
+
+def filter_dict(
+    dic: dict, authorized_keys: list, raisingwarning_keys: list = None
+) -> Union[dict, Tuple[dict, list]]:
+    if raisingwarning_keys is None:
+        return dict((k, dic[k]) for k in authorized_keys if k in dic)
+    else:
+        newdic = {}
+        raisewarning = []
+        for k in dic.keys():
+            if k in authorized_keys:
+                newdic[k] = dic[k]
+            elif k in raisingwarning_keys:
+                raisewarning += [k]
+        return newdic, raisewarning
 
 
 def _flatten_dict_gen(d, parent_key, sep, flatten_list):
@@ -87,3 +106,4 @@ def super_pop(dic: dict, list_of_keys: list, default):
         else:
             return default
     return dic
+
