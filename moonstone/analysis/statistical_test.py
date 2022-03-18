@@ -36,6 +36,7 @@ def _preprocess_groups_comparison(
     new_groups = []
     for i in groups:
         groupi = series[group_series[group_series == i].index].dropna()
+        groupi.name = str(i)
         if groupi.size < 1:
             logger.warning(f"No observations for group {i} in data. Group dropped.")
             continue
@@ -70,15 +71,23 @@ def statistical_test_groups_comparison(
     **kwargs,
 ):
     """
-    :param output: {'series', 'dataframe'}
-    :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
+    Args:
+        output: {'series', 'dataframe'}
+        sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
 
     In kwargs, you can pass argument for statistical test, like:
-    :param equal_var: For ttest_ind, set to True if your samples have the same variance and
+        equal_var: For ttest_ind, set to True if your samples have the same variance and
     you wish to perform a Student's t-test rather than a Welch's t-test (here default is False)
-    :param alternative: {None, 'two-sided', 'less', 'greater'} For Mann - Whitney-U, you can define
+        alternative: {None, 'two-sided', 'less', 'greater'} For Mann - Whitney-U, you can define
     the alternative hypothesis.
-    :param bins: For chi2_contingency, you can define bins.
+        bins: For chi2_contingency, the criteria to bin by.
+          * int : Defines the number of bins in the range of x. The range of x is extended by .1% on each side to
+            include the minimum and maximum values of x.
+          * sequence of scalars : Defines the bin edges. No extension of the range of x is done. So don't forget to make
+            the first bin edge a little smaller than the minimum value you want included.
+          * "best_pvalue": Returns the contingency table associated with the best chi2 contingency pvalue
+          * "max_nbins": Returns the contingency table with the maximum number of bins with at least 5 observations by
+            cell
     """
 
     method = ["mann_whitney_u", "ttest_independence", "chi2_contingency"]
@@ -173,111 +182,192 @@ def ttest_independence(
     return scipy.stats.ttest_ind(series1, series2, equal_var=equal_var, **kwargs)
 
 
-def _compute_best_contingency_table(
-    dataframe,
+def _compute_contingency_table(
+    numerical_series: pd.Series,
+    categorical_series: pd.Series,
+    bins: Union[List[Union[int, float]], int],
     cut_type: str = "equal-width",
     na: bool = False,
     force_computation: bool = False,
+    warn: bool = True
 ) -> pd.DataFrame:
-    max_cat = int(
-        dataframe.iloc[:, 1].value_counts()[-1] / 5
-    )  # .iloc[:,1] is the number column
-    if max_cat > 100:  # more is too much anyway
-        max_cat = 100
-
-    ncat = max_cat
-    while ncat > 1:
-        if cut_type == "equal-size":
-            binned_series = pd.qcut(dataframe.iloc[:, 0], q=ncat)
-        else:  # cut_type == "equal-width" (default)
-            binned_series = pd.cut(dataframe.iloc[:, 0], bins=ncat)
-
-        if na:
-            binned_series = binned_series.replace(np.nan, "NaN")
-
-        tab = pd.crosstab(binned_series, dataframe.iloc[:, 1])
-        if (
-            tab[tab >= 5].dropna().size == tab.size
-        ):  # which means that every cells have at least 5 occurences
-            return tab
-        ncat -= 1
-
-    # ncat == 1
-    if force_computation:
-        logger.warning(
-            f"moonstone wasn't able to compute a contingency table with at least 5 observations per cell. \
-    Another statistical test would be more appropriate to compare these groups.\n\
-    force_computation return contingency table of 2 x {len(dataframe.iloc[:,1].unique())}"
-        )
-        return tab
-    else:
-        logger.warning(
-            "moonstone wasn't able to compute a contingency table with at least 5 observations per cell. \
-    Another statistical test would be more appropriate to compare these groups."
-        )
-        return np.nan
-
-
-def _compute_contingency_table_on_given_bins(
-    dataframe, bins, force_computation: bool = False
-) -> pd.DataFrame:
-    binned_series = pd.cut(dataframe.iloc[:, 0], bins=bins)
-    tab = pd.crosstab(binned_series, dataframe.iloc[:, 1])
+    """
+    binning numerical series and computing contingency table
+    """
+    # binning numerical series
+    if cut_type == "equal-size":
+        binned_series = pd.qcut(numerical_series, q=bins)
+    else:  # cut_type == "equal-width" (default)
+        binned_series = pd.cut(numerical_series, bins=bins)
+    if na:
+        # print("here")
+        # print(numerical_series.iloc[-1])
+        # print(type(binned_series.iloc[-1]))
+        binned_series = binned_series.replace(np.nan, "NaN")  # crosstab doesn't count np.nan as a value
+        # print(binned_series.iloc[-1])
+        # print(type(binned_series.iloc[-1]))
+        # so we need to change it to a string for those values to appear in the contingency table
+    # creation of the contingency table
+    tab = pd.crosstab(binned_series, categorical_series)  # rows -> numerical_series; columns -> categorical_series
     if (
         tab[tab >= 5].dropna().size != tab.size
     ):  # which means that every cells have at least 5 occurences
-        logger.warning(
-            "Some cells have less than 5 observations. \
+        if warn:
+            logger.warning(
+                "Some cells have less than 5 observations. \
 Another statistical test would be more appropriate to compare these groups."
-        )
+            )
         if not force_computation:
             return np.nan
     return tab
 
 
-def _compute_contingency_table(
+def _compute_max_nbins_contingency_table(
     numerical_series: pd.Series,
     categorical_series: pd.Series,
-    bins: List[Union[int, float]] = None,
     cut_type: str = "equal-width",
     na: bool = False,
     force_computation: bool = False,
-) -> pd.DataFrame:
+) -> Tuple[pd.DataFrame, int]:
+    max_nbins = int(
+        categorical_series.value_counts().iloc[-1] / 5
+    )  # .iloc[:,1] is the number column
+    if max_nbins > 100:  # more is too much anyway
+        max_nbins = 100
+
+    nbins = max_nbins
+    while nbins > 1:
+        tab = _compute_contingency_table(
+            numerical_series, categorical_series, nbins,
+            cut_type=cut_type, na=na, force_computation=False, warn=False
+        )
+        if type(tab) != float:  # type(np.nan) == float
+            return tab, nbins
+        nbins -= 1
+
+    # nbins == 1
+    if force_computation:
+        logger.warning(
+            f"moonstone wasn't able to compute a contingency table with at least 5 observations per cell. \
+    Another statistical test would be more appropriate to compare these groups.\n\
+    force_computation return contingency table of 2 x {len(categorical_series.unique())}"
+        )
+        return tab, 2
+    else:
+        logger.warning(
+            "moonstone wasn't able to compute a contingency table with at least 5 observations per cell. \
+    Another statistical test would be more appropriate to compare these groups."
+        )
+        return np.nan, None
+
+
+def _comparison_chi2_pval_depending_on_nbins(
+    numerical_series: pd.Series,
+    categorical_series: pd.Series,
+    cut_type: str = "equal-width",
+    na: bool = False,
+    force_computation: bool = False,
+):
+    df_dic = {}
+
+    tab, nbins = _compute_max_nbins_contingency_table(
+        numerical_series, categorical_series, cut_type=cut_type, na=na, force_computation=force_computation
+    )
+    df_dic[nbins] = list(
+        scipy.stats.chi2_contingency(tab)
+        ) + [tab]
+    nbins -= 1
+    while nbins > 1:
+        tab = _compute_contingency_table(
+            numerical_series, categorical_series, nbins,
+            cut_type=cut_type, na=na, force_computation=force_computation,
+            warn=False
+        )
+        df_dic[nbins] = list(
+            scipy.stats.chi2_contingency(tab)
+            ) + [tab]
+        nbins -= 1
+    return pd.DataFrame.from_dict(
+        df_dic, orient='index',
+        columns=['chi2', 'pval', 'dof', 'expected table', 'observed table']
+        )
+
+
+def compute_contingency_table(
+    numerical_series: pd.Series,
+    categorical_series: pd.Series,
+    bins: Union[List[Union[int, float]], int, str],
+    cut_type: str = "equal-width",
+    na: bool = False,
+    force_computation: bool = False,
+    retpvalcomparisondf: bool = False
+):
     """
+    binning numerical series and computing contingency table
+
     Try to find the maximum number of bins, where every bins have at least 5 occurrences
 
     Args:
         numerical_series: Series that needs to be put into bins
         categorical_series: Other series used to make the contingency table
-        cut_type: {"equal-width" (default), "equal-size"} how the bins are defined.
+        bins: The criteria to bin by.
+          * int : Defines the number of bins in the range of x. The range of x is extended by .1% on each side to
+            include the minimum and maximum values of x.
+          * sequence of scalars : Defines the bin edges. No extension of the range of x is done. So don't forget to make
+            the first bin edge a little smaller than the minimum value you want included.
+          * "best_pvalue": Returns the contingency table associated with the best chi2 contingency pvalue
+          * "max_nbins": Returns the contingency table with the maximum number of bins with at least 5 observations by
+            cell
+        cut_type: {"equal-width" (default), "equal-size"} Defines how the bins are cut when a integer is given to bins.
           Note: they are defined on numerical_series only.
           So all cells of the contingency table might not all have the same weight at the end.
-        na: Should NaN be considered as a value
+        na: Defines if NaN should be considered as a value
+        force_computation: Returns contingency table even if not every cell has at least 5 observations
+        retpvalcomparisondf: Returns the comparison dataframe used to evaluate the number of bins that gives the lowest
+          chi2 contingency pvalues. (used with bins set to "best_pvalue")
     """
-    if numerical_series.name is None:
-        numerical_series.name = "numerical_series"
-    if categorical_series is None:
-        categorical_series.name = "categorical_series"
-
     if na:
         categorical_series = categorical_series.replace(np.nan, "NaN")
-
-    dataframe = pd.merge(
-        numerical_series, categorical_series, right_index=True, left_index=True
-    )
-    if dataframe.empty:
+    samples = numerical_series.index.intersection(categorical_series.index)
+    if len(samples) == 0:
         raise ValueError("Index of numerical_series and categorical_series don't match")
 
-    if bins:
-        return _compute_contingency_table_on_given_bins(
-            dataframe, bins, force_computation=force_computation
-        )
-    else:
-        return _compute_best_contingency_table(
-            dataframe,
+    categorical_series = categorical_series.loc[samples]
+    numerical_series = numerical_series.loc[samples]
+
+    if numerical_series.name is None:
+        numerical_series.name = "numerical_series"
+    if categorical_series.name is None:
+        categorical_series.name = "categorical_series"
+
+    if bins == "max_nbins":
+        return _compute_max_nbins_contingency_table(
+            numerical_series,
+            categorical_series,
             cut_type=cut_type,
             na=na,
-            force_computation=False,
+            force_computation=force_computation,
+        )[0]
+    elif bins == "best_pvalue":
+        comparison_df = _comparison_chi2_pval_depending_on_nbins(
+            numerical_series,
+            categorical_series,
+            cut_type=cut_type,
+            na=na,
+            force_computation=force_computation,
+        )
+        nbins_best_pvalue = comparison_df["pval"].iloc[::-1].idxmin()
+        if retpvalcomparisondf:
+            return comparison_df.loc[nbins_best_pvalue]["observed table"], comparison_df
+        return comparison_df.loc[nbins_best_pvalue]["observed table"]
+    else:
+        return _compute_contingency_table(
+            numerical_series,
+            categorical_series,
+            bins,
+            na=na,
+            cut_type=cut_type,
+            force_computation=force_computation
         )
 
 
@@ -295,11 +385,11 @@ def _add_category_column(series, defaultname: str):
 def chi2_contingency(
     series1: pd.Series,
     series2: pd.Series,
-    rettab: bool = False,
-    bins: List[Union[int, float]] = None,
+    bins: Union[List[Union[int, float]], int, str] = "best_pvalue",
     cut_type: str = "equal-width",
     na: bool = False,
     force_computation: bool = False,
+    rettab: bool = False,
     **kwargs,
 ) -> Tuple[float, float, int, np.ndarray, Optional[pd.DataFrame]]:
     """
@@ -319,18 +409,33 @@ def chi2_contingency(
     df2 = _add_category_column(series2, defaultname="series2")
     df = df1.append(df2)
 
-    tab = _compute_contingency_table(
-        df["number"],
-        df["category"],
-        bins=bins,
-        cut_type=cut_type,
-        na=na,
-        force_computation=force_computation,
-    )
-
-    to_return = list(
-        scipy.stats.chi2_contingency(tab)
-    )  # ch2, pval, degree of freedom, expected table
-    if rettab:
-        to_return += tab  # observed table
-    return tuple(to_return)
+    if bins == "best pvalue":
+        tab, comparison_df = compute_contingency_table(
+            df["number"],
+            df["category"],
+            bins,
+            cut_type=cut_type,
+            na=na,
+            force_computation=force_computation,
+            retpvalcomparisondf=True
+        )
+        nbins_best_pvalue = tab.shape[0]
+        if rettab:
+            return comparison_df[nbins_best_pvalue].to_list()
+        else:
+            return comparison_df[nbins_best_pvalue].to_list()[:-1]
+    else:
+        tab = compute_contingency_table(
+            df["number"],
+            df["category"],
+            bins,
+            cut_type=cut_type,
+            na=na,
+            force_computation=force_computation,
+        )
+        to_return = list(
+            scipy.stats.chi2_contingency(tab)
+        )  # ch2, pval, degree of freedom, expected table
+        if rettab:
+            to_return += [tab]  # observed table
+        return tuple(to_return)
