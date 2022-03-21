@@ -2,10 +2,14 @@ from unittest import TestCase
 
 from math import isnan
 import numpy as np
+from packaging import version
 import pandas as pd
+import scipy
 
 from moonstone.analysis.statistical_test import (
     statistical_test_groups_comparison,
+    mann_whitney_u,
+    ttest_independence,
     _compute_max_nbins_contingency_table,
     _compute_contingency_table,
     _comparison_chi2_pval_depending_on_nbins,
@@ -131,6 +135,25 @@ class TestStatisticalTestFunction(TestCase):
                                                     output='series', sym=False)
         pd.testing.assert_series_equal(matrix, expected_df, check_dtype=False)
 
+    def test_mann_whitney_u_authorized_keys(self):
+        """
+        depending on the version of scipy check different things
+        """
+        with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
+            stat, pval = mann_whitney_u(
+                self.test_df.iloc[:2], self.test_df.iloc[2:], nan_policy="propagate"
+            )
+            scipy_version = version.parse(scipy.__version__)
+            if scipy_version < version.parse("1.8.0"):
+                self.assertEqual(len(log.output), 1)
+                self.assertIn(
+                    f"WARNING:moonstone.analysis.statistical_test:['nan_policy'] not available with version \
+{scipy_version} of scipy.",
+                    log.output,
+                )
+            self.assertEqual(stat, 4.0)
+            self.assertEqual(pval, 0.7670968684102772)
+
     def test_ttest_independance_groups(self):
         metadata_df = pd.DataFrame(
             [
@@ -155,6 +178,25 @@ class TestStatisticalTestFunction(TestCase):
 
         matrix = statistical_test_groups_comparison(self.test_df, metadata_df['group'], stat_test='ttest_independence')
         pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
+
+    def test_ttest_independence(self):
+        """
+        depending on the version of scipy check different things
+        """
+        with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
+            stat, pval = ttest_independence(
+                self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
+            )
+            scipy_version = version.parse(scipy.__version__)
+            if scipy_version < version.parse("1.7.0"):
+                self.assertEqual(len(log.output), 1)
+                self.assertIn(
+                    f"WARNING:moonstone.analysis.statistical_test:['trim'] not available with version {scipy_version} \
+of scipy.",
+                    log.output,
+                )
+            self.assertEqual(stat, -0.176164072157316)
+            self.assertEqual(pval, 0.8733823222145742)
 
 
 class TestChi2Functions(TestCase):
@@ -499,6 +541,9 @@ with at least 5 observations per cell. Another statistical test would be more ap
         pd.testing.assert_frame_equal(observed_table, expected_observed_tab, check_dtype=False)
 
     def test_chi2_contingency_else(self):
+        """
+        testing the else path with bins="max nbins"
+        """
         expected_observed_tab = pd.DataFrame(
             [
                 [13, 7],
@@ -527,8 +572,25 @@ with at least 5 observations per cell. Another statistical test would be more ap
             )
         pd.testing.assert_frame_equal(observed_table, expected_observed_tab, check_dtype=False)
 
+    def test_chi2_contingency_lessthan10_and_not_force_computation(self):
+        """
+        testing one of the 2 series with less than 10 observations
+        (not enough to bin and have at least 5 observations per cell)
+        """
+        chi2, pval, dof, expected_by_chi2_table, observed_table = chi2_contingency(
+            self.test_df.iloc[:5],
+            self.test_df.loc[5:],
+            bins="max nbins",
+            rettab=True,
+        )
+        self.assertTrue(isnan(chi2))
+        self.assertTrue(isnan(pval))
+        self.assertTrue(isnan(dof))
+        self.assertTrue(isnan(expected_by_chi2_table))
+        self.assertTrue(isnan(observed_table))
+
     def test_chi2_contingency_groups(self):
-        expected_df = pd.DataFrame(  # noqa
+        expected_df = pd.DataFrame(
             [
                 [np.nan, 0.06720551273974977, 0.9310443064194389],
                 [0.06720551273974977, np.nan, 0.152090],
@@ -537,8 +599,7 @@ with at least 5 observations per cell. Another statistical test would be more ap
             columns=[1, 2, 3],
             index=[1, 2, 3]
         )
-        #matrix = statistical_test_groups_comparison(  # noqa
-        #    self.test_df, self.metadata_df, stat_test='chi2_contingency'
-        #    )
-        # print(matrix)
-        # pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
+        matrix = statistical_test_groups_comparison(
+            self.test_df, self.metadata_df, stat_test='chi2_contingency'
+            )
+        pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)

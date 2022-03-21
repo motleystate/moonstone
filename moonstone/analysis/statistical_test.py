@@ -163,7 +163,7 @@ def mann_whitney_u(
     )
     if raisewarning:
         logger.warning(
-            f"{raisewarning} not available with version {scipy_version} of scipy"
+            f"{raisewarning} not available with version {scipy_version} of scipy."
         )
     return scipy.stats.mannwhitneyu(series1, series2, alternative=alternative, **kwargs)
 
@@ -186,7 +186,7 @@ def ttest_independence(
     )
     if raisewarning:
         logger.warning(
-            f"{raisewarning} not available with version {scipy_version} of scipy"
+            f"{raisewarning} not available with version {scipy_version} of scipy."
         )
     return scipy.stats.ttest_ind(series1, series2, equal_var=equal_var, **kwargs)
 
@@ -412,7 +412,10 @@ def chi2_contingency(
             "Data have less than 10 observations by groups. \
         Another statistical test would be more appropriate to compare those 2 groups."
         )
-        return tuple([np.nan] * 4)
+        to_return = [np.nan] * 4
+        if rettab:
+            to_return += [np.nan]
+        return tuple(to_return)
 
     df1 = _add_category_column(series1, defaultname="series1")
     df2 = _add_category_column(series2, defaultname="series2")
