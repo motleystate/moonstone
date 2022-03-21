@@ -9,7 +9,8 @@ from moonstone.analysis.statistical_test import (
     _compute_max_nbins_contingency_table,
     _compute_contingency_table,
     _comparison_chi2_pval_depending_on_nbins,
-    compute_contingency_table
+    compute_contingency_table,
+    chi2_contingency
 )
 # from moonstone.analysis.statistical_test import *
 
@@ -191,6 +192,27 @@ class TestChi2Functions(TestCase):
         )
         pd.testing.assert_frame_equal(tab, expected_tab, check_dtype=False)
 
+    def test__compute_contingency_table_binsedges_not_including_every_value(self):
+        expected_tab = pd.DataFrame(
+            [
+                [14, 15, 8],
+                [10, 15, 10]
+            ],
+            columns=[1, 2, 3],
+        )
+        ii = pd.IntervalIndex.from_tuples([(2, 9.0), (9.0, 17.0)])
+        ci = pd.CategoricalIndex(ii, ordered=True)
+        ci.name = "row_0"
+        expected_tab.index = ci
+        expected_tab.columns.name = "col_0"
+        tab = _compute_contingency_table(
+            self.test_df,
+            self.metadata_df,
+            bins=[2, 9.0, 17.0],
+            cut_type="equal-width",
+        )
+        pd.testing.assert_frame_equal(tab, expected_tab, check_dtype=False)
+
     def test__compute_contingency_table_binsedges_lessthan5(self):
         # testing a cell with less than 5 observations
         # if force_coputation == True,
@@ -349,16 +371,161 @@ Another statistical test would be more appropriate to compare these groups.",
         )
         pd.testing.assert_frame_equal(comparison_df, expected_comparison_df, check_dtype=False)
 
-    def test_compute_contingency_table_max_nbins(self):
-        # testing na=True
-        tab = compute_contingency_table(  # noqa
-            self.test_df.replace(0, np.nan),
-            self.metadata_df,
-            bins="max_nbins",
-            na=True
+    def test_compute_contingency_table_max_nbins_na_force_computation(self):
+        # testing na=True when na in numerical_series
+        # + warning in _compute_max_nbins_contingency_table when force_computation=True
+        expected_tab = pd.DataFrame(
+            [
+                [20, 16, 15],
+                [15, 17, 13],
+                [0, 2, 2]
+            ],
+            columns=[1, 2, 3],
         )
-        # print(tab)
-        # print(tab.index)
+        ii = pd.IntervalIndex.from_tuples([(0.982, 10.0), (10.0, 19.0)])
+        ci = pd.CategoricalIndex(ii, ordered=True)
+        ci = ci.add_categories("NaN")
+        ci = ci.append(pd.Index(["NaN"]))
+        ci.name = "numerical_series"
+        expected_tab.index = ci
+        expected_tab.columns.name = "categorical_series"
+        with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
+            tab = compute_contingency_table(
+                self.test_df.replace(0, np.nan),
+                self.metadata_df,
+                bins="max nbins",
+                na=True,
+                force_computation=True
+            )
+            pd.testing.assert_frame_equal(tab, expected_tab, check_dtype=False)
+            self.assertEqual(len(log.output), 1)
+            self.assertIn(
+                "WARNING:moonstone.analysis.statistical_test:moonstone wasn't able to compute a contingency table \
+with at least 5 observations per cell. Another statistical test would be more appropriate to compare these groups.\n\
+force_computation return contingency table of 2 x 3.",
+                log.output,
+            )
+
+    def test_compute_contingency_table_max_nbins_na_not_force_computation(self):
+        # testing na=True when na in categorical_series
+        # + warning in _compute_max_nbins_contingency_table when force_computation=False
+        with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
+            tab = compute_contingency_table(
+                self.test_df,
+                pd.Series(
+                    np.where(self.test_df == 0, np.nan, self.metadata_df),
+                    index=self.metadata_df.index),
+                bins="max nbins",
+                na=True,
+                force_computation=False
+            )
+            self.assertTrue(isnan(tab))
+            self.assertEqual(len(log.output), 1)
+            self.assertIn(
+                "WARNING:moonstone.analysis.statistical_test:moonstone wasn't able to compute a contingency table \
+with at least 5 observations per cell. Another statistical test would be more appropriate to compare these groups.",
+                log.output,
+            )
+
+    def test_compute_contingency_table_best_pvalue(self):
+        expected_tab = pd.DataFrame(
+            [
+                [13, 7, 11],
+                [8, 17, 8],
+                [14, 11, 11]
+            ],
+            columns=[1, 2, 3],
+        )
+        ii = pd.IntervalIndex.from_tuples([(-0.019, 6.333), (6.333, 12.667), (12.667, 19.0)])
+        ci = pd.CategoricalIndex(ii, ordered=True)
+        ci.name = "numerical_series"
+        expected_tab.index = ci
+        expected_tab.columns.name = "categorical_series"
+        tab = compute_contingency_table(
+            self.test_df,
+            self.metadata_df,
+            bins="best pvalue"
+        )
+        pd.testing.assert_frame_equal(tab, expected_tab, check_dtype=False)
+
+    def test_compute_contingency_given_nbins(self):
+        expected_tab = pd.DataFrame(
+            [
+                [13, 7, 11],
+                [8, 17, 8],
+                [14, 11, 11]
+            ],
+            columns=[1, 2, 3],
+        )
+        ii = pd.IntervalIndex.from_tuples([(-0.019, 6.333), (6.333, 12.667), (12.667, 19.0)])
+        ci = pd.CategoricalIndex(ii, ordered=True)
+        ci.name = "numerical_series"
+        expected_tab.index = ci
+        expected_tab.columns.name = "categorical_series"
+        tab = compute_contingency_table(
+            self.test_df,
+            self.metadata_df,
+            bins=3
+        )
+        pd.testing.assert_frame_equal(tab, expected_tab, check_dtype=False)
+
+    def test_chi2_contingency_best_pvalue(self):
+        expected_observed_tab = pd.DataFrame(
+            [
+                [13, 7],
+                [8, 17],
+                [14, 11]
+            ],
+            columns=['series1', 'series2'],
+        )
+        ii = pd.IntervalIndex.from_tuples([(-0.019, 6.333), (6.333, 12.667), (12.667, 19.0)])
+        ci = pd.CategoricalIndex(ii, ordered=True)
+        ci.name = "number"
+        expected_observed_tab.index = ci
+        expected_observed_tab.columns.name = "category"
+        chi2, pval, dof, expected_by_chi2_table, observed_table = chi2_contingency(
+            self.test_df[self.metadata_df[self.metadata_df == 1].index],
+            self.test_df[self.metadata_df[self.metadata_df == 2].index],
+            bins="best pvalue",
+            rettab=True,
+        )
+        self.assertEqual(chi2, 5.3999999999999995)
+        self.assertEqual(pval, 0.06720551273974977)
+        self.assertEqual(dof, 2)
+        np.testing.assert_array_equal(
+            expected_by_chi2_table,
+            np.array([[10.0, 10.0], [12.5, 12.5], [12.5, 12.5]])
+            )
+        pd.testing.assert_frame_equal(observed_table, expected_observed_tab, check_dtype=False)
+
+    def test_chi2_contingency_else(self):
+        expected_observed_tab = pd.DataFrame(
+            [
+                [13, 7],
+                [8, 17],
+                [14, 11]
+            ],
+            columns=['series1', 'series2'],
+        )
+        ii = pd.IntervalIndex.from_tuples([(-0.019, 6.333), (6.333, 12.667), (12.667, 19.0)])
+        ci = pd.CategoricalIndex(ii, ordered=True)
+        ci.name = "number"
+        expected_observed_tab.index = ci
+        expected_observed_tab.columns.name = "category"
+        chi2, pval, dof, expected_by_chi2_table, observed_table = chi2_contingency(
+            self.test_df[self.metadata_df[self.metadata_df == 1].index],
+            self.test_df[self.metadata_df[self.metadata_df == 2].index],
+            bins="max nbins",
+            rettab=True,
+        )
+        self.assertEqual(chi2, 5.3999999999999995)
+        self.assertEqual(pval, 0.06720551273974977)
+        self.assertEqual(dof, 2)
+        np.testing.assert_array_equal(
+            expected_by_chi2_table,
+            np.array([[10.0, 10.0], [12.5, 12.5], [12.5, 12.5]])
+            )
+        pd.testing.assert_frame_equal(observed_table, expected_observed_tab, check_dtype=False)
 
     def test_chi2_contingency_groups(self):
         expected_df = pd.DataFrame(  # noqa
@@ -370,9 +537,8 @@ Another statistical test would be more appropriate to compare these groups.",
             columns=[1, 2, 3],
             index=[1, 2, 3]
         )
-
-        matrix = statistical_test_groups_comparison(  # noqa
-            self.test_df, self.metadata_df, stat_test='chi2_contingency'
-            )
+        #matrix = statistical_test_groups_comparison(  # noqa
+        #    self.test_df, self.metadata_df, stat_test='chi2_contingency'
+        #    )
         # print(matrix)
         # pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
