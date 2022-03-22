@@ -198,6 +198,22 @@ of scipy.",
             self.assertEqual(stat, -0.176164072157316)
             self.assertEqual(pval, 0.8733823222145742)
 
+    def test_wrong_stat_test_groups(self):
+        with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
+            stat, pval = ttest_independence(
+                self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
+            )
+            scipy_version = version.parse(scipy.__version__)
+            if scipy_version < version.parse("1.7.0"):
+                self.assertEqual(len(log.output), 1)
+                self.assertIn(
+                    f"WARNING:moonstone.analysis.statistical_test:['trim'] not available with version {scipy_version} \
+of scipy.",
+                    log.output,
+                )
+            self.assertEqual(stat, -0.176164072157316)
+            self.assertEqual(pval, 0.8733823222145742)        
+
 
 class TestChi2Functions(TestCase):
 
@@ -577,17 +593,24 @@ with at least 5 observations per cell. Another statistical test would be more ap
         testing one of the 2 series with less than 10 observations
         (not enough to bin and have at least 5 observations per cell)
         """
-        chi2, pval, dof, expected_by_chi2_table, observed_table = chi2_contingency(
-            self.test_df.iloc[:5],
-            self.test_df.loc[5:],
-            bins="max nbins",
-            rettab=True,
-        )
-        self.assertTrue(isnan(chi2))
-        self.assertTrue(isnan(pval))
-        self.assertTrue(isnan(dof))
-        self.assertTrue(isnan(expected_by_chi2_table))
-        self.assertTrue(isnan(observed_table))
+        with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
+            chi2, pval, dof, expected_by_chi2_table, observed_table = chi2_contingency(
+                self.test_df.iloc[:5],
+                self.test_df.loc[5:],
+                bins="max nbins",
+                rettab=True,
+            )
+            self.assertTrue(isnan(chi2))
+            self.assertTrue(isnan(pval))
+            self.assertTrue(isnan(dof))
+            self.assertTrue(isnan(expected_by_chi2_table))
+            self.assertTrue(isnan(observed_table))
+            self.assertEqual(len(log.output), 1)
+            self.assertIn(
+                "WARNING:moonstone.analysis.statistical_test:Data have less than 10 observations by groups. \
+Another statistical test would be more appropriate to compare those 2 groups.",
+                log.output,
+            )
 
     def test_chi2_contingency_groups(self):
         expected_df = pd.DataFrame(
@@ -603,3 +626,11 @@ with at least 5 observations per cell. Another statistical test would be more ap
             self.test_df, self.metadata_df, stat_test='chi2_contingency'
             )
         pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
+
+    def test_chi2_contingency_groups_all_groups_dropped(self):
+        with self.assertRaises(RuntimeError) as cm:
+            matrix = statistical_test_groups_comparison(
+                self.test_df.iloc[:20], self.metadata_df, stat_test='chi2_contingency'
+                )
+        the_exception = cm.exception
+        self.assertEqual(the_exception.__str__(), "All groups have been dropped: not enough observations by group.")

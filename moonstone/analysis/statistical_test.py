@@ -35,7 +35,8 @@ def _preprocess_groups_comparison(
     list_of_series = []
     new_groups = []
     for i in groups:
-        groupi = series[group_series[group_series == i].index].dropna()
+        groupi_index = group_series[group_series == i].index
+        groupi = series[series.index.intersection(groupi_index)].dropna()
         groupi.name = str(i)
         if groupi.size < 1:
             logger.warning(f"No observations for group {i} in data. Group dropped.")
@@ -100,8 +101,8 @@ def statistical_test_groups_comparison(
         stat_test = DEFAULT_STATS_TEST
         # raise NotImplementedError("Method %s not implemented" % stat_test)
 
-    if kwargs.pop("force_computation", None) is None:
-        if stat_test == "chi2_contingency" and kwargs.pop("bins", None) is None:
+    if kwargs.get("force_computation", None) is None:
+        if stat_test == "chi2_contingency" and kwargs.get("bins", None) is None:
             kwargs["force_computation"] = False
         else:
             kwargs["force_computation"] = True
@@ -115,10 +116,7 @@ def statistical_test_groups_comparison(
         dic_df = {}
         for i in range(len(groups)):
             for j in range(i + 1, len(groups)):
-                pval = eval(stat_test)(list_of_series[i], list_of_series[j], **kwargs)[
-                    1
-                ]
-
+                pval = eval(stat_test)(list_of_series[i], list_of_series[j], **kwargs)[1]
                 dic_df[(groups[i], groups[j])] = pval
                 if sym:
                     dic_df[(groups[j], groups[i])] = pval
@@ -132,7 +130,6 @@ def statistical_test_groups_comparison(
     for i in range(len(groups)):
         for j in range(i + 1, len(groups)):
             pval = eval(stat_test)(list_of_series[i], list_of_series[j], **kwargs)[1]
-
             tab[i][j] = pval
             if sym:
                 tab[j][i] = pval
@@ -401,7 +398,7 @@ def chi2_contingency(
     if (series1.size < 10 or series2.size < 10) and not force_computation:
         logger.warning(
             "Data have less than 10 observations by groups. \
-        Another statistical test would be more appropriate to compare those 2 groups."
+Another statistical test would be more appropriate to compare those 2 groups."
         )
         to_return = [np.nan] * 4
         if rettab:
