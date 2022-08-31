@@ -49,7 +49,7 @@ class TestBrayCurtis(TestCase):
             ]
         )
         expected_object = pd.Series(
-            [0.333, 0.714, 1.0], index=multi_index, name=BrayCurtis.DIVERSITY_INDEXES_NAME
+            [0.333, 0.714, 1.0], index=multi_index, name=BrayCurtis._DIVERSITY_INDEXES_NAME
         )
         # Two ways of retrieving the series
         pd.testing.assert_series_equal(
