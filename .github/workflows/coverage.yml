@@ -23,6 +23,9 @@ jobs:
         pip install pytest pytest-cov
         pip install numpy==1.18.1
         pip install .
+        pip install odfpy     # optional dependencies
+        pip install openpyxl  # idem
+        pip install xlrd      # idem
     - name: Generate coverage report
       run: |
         pytest --cov ./moonstone --cov-report xml --cov-report term
