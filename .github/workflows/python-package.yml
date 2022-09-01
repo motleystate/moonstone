@@ -26,6 +26,9 @@ jobs:
         pip install flake8 pytest
         pip install numpy==1.18.1
         pip install .
+        pip install odfpy     # optional dependencies
+        pip install openpyxl  # idem
+        pip install xlrd      # idem
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
