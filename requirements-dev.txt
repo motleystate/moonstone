@@ -7,3 +7,4 @@ pip-tools
 black
 pydocstyle
 mypy
+odfpy
