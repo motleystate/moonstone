@@ -40,8 +40,8 @@ def replacing_labels(
 
 def adapt_phylogenetic_tree_to_counts_df(
     new_otu_id_name_ser: pd.Series,
-    tree_file: str,
-    output_tree_file: str,
+    tree: str,
+    output_tree_file: str = None,
     quotechr: str = "'"
 ):
     """
@@ -49,16 +49,25 @@ def adapt_phylogenetic_tree_to_counts_df(
     Args:
         - new_otu_id_name_ser: pd.Series issued from count dataframe with only new_otu_id_name column
           ('NCBI_taxonomy_ID' for Kraken2, 'NCBI_tax_id' for Metaphlan3)
-        - tree_file: path to the tree file to adapt. The format of the tree leaves labels should be
+        - tree: path to the tree file to adapt or tree as a string. The format of the tree leaves labels should be
           '{species name}, {txid}' or '{species name}, {txid}*'
-        - output_tree_file: path to the output adapted tree file
+        - output_tree_file: path to the output adapted tree file.
+          If None, then function return the adaptated tree as a string
         - quotechr: quote character used as delimiter of labels in tree
     """
-    dic_translate_tree = generate_translation_dictionary(new_otu_id_name_ser)
-    infile = open(tree_file, "r")
-    T = infile.read()
-    infile.close()
+    try:
+        infile = open(tree, "r")
+        T = infile.read()
+        infile.close()
+    except FileNotFoundError:
+        T = tree
 
-    outfile = open(output_tree_file, "w")
-    outfile.write(replacing_labels(T, dic_translate_tree, quotechr))
-    outfile.close()
+    dic_translate_tree = generate_translation_dictionary(new_otu_id_name_ser)
+    T = replacing_labels(T, dic_translate_tree, quotechr)
+
+    if output_tree_file:
+        outfile = open(output_tree_file, "w")
+        outfile.write(T)
+        outfile.close()
+    else:
+        return T
