@@ -1,4 +1,3 @@
-from cgi import test
 import pandas as pd
 
 from unittest import TestCase
@@ -37,11 +36,11 @@ class TestPhylogeneticTreeAdaptation(TestCase):
 ('Prevotella sp. oral taxon 473, 712469':0.5,\
 'Enterococcus lactis, 357441':0.05):1)root;\n"
         tested_string = replacing_labels(
-            tree_string, 
+            tree_string,
             {
-                '109790': 'Lactobacillus_jensenii', 
-                '147802': 'Lactobacillus_iners', 
-                '712469': 'Alloprevotella_Prevotella sp. oral taxon 473', 
+                '109790': 'Lactobacillus_jensenii',
+                '147802': 'Lactobacillus_iners',
+                '712469': 'Alloprevotella_Prevotella sp. oral taxon 473',
                 '1263085': 'Lactobacillus_ruminis CAG:367'
             }
         )

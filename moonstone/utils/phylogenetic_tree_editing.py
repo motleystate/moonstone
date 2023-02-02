@@ -2,12 +2,11 @@
 
 import pandas as pd
 import re
-from typing import Union
 
 
 def generate_translation_dictionary(
-    new_otu_id_name_ser: pd.Series,
-    ):
+    new_otu_id_name_ser: pd.Series
+):
     """
     Args:
         - new_otu_id_name_ser: pd.Series issued from kraken 2 count dataframe with only new_otu_id_name column
@@ -20,35 +19,38 @@ def generate_translation_dictionary(
 
 
 def replacement(
-    matchobj, 
-    dic_translate_tree: dict, 
+    matchobj,
+    dic_translate_tree: dict,
     quotechr: str
-    ) -> str:
+) -> str:
     s = matchobj.group(0).split(", ")[-1].rstrip("*"+quotechr)
     if s in dic_translate_tree.keys():
         return quotechr+dic_translate_tree[s]+quotechr
-    else: 
+    else:
         return matchobj.group(0)
+
 
 def replacing_labels(
     tree_string: str,
     dic_translate_tree: dict,
-    quotechr = "'"
+    quotechr: str = "'"
 ):
-    return re.sub("'[^,]*, [0-9]*\*?'", lambda  match: replacement(match, dic_translate_tree, quotechr), tree_string)
+    return re.sub(r"'[^,]*, [0-9]*\*?'", lambda match: replacement(match, dic_translate_tree, quotechr), tree_string)
 
 
 def adapt_phylogenetic_tree_to_counts_df(
     new_otu_id_name_ser: pd.Series,
     tree_file: str,
     output_tree_file: str,
-    quotechr = "'"
-    ):
+    quotechr: str = "'"
+):
     """
     Translate phylogenetic tree labels to names present in a counts dataframe using the txid as key
     Args:
-        - new_otu_id_name_ser: pd.Series issued from count dataframe with only new_otu_id_name column ('NCBI_taxonomy_ID' for Kraken2, 'NCBI_tax_id' for Metaphlan3)
-        - tree_file: path to the tree file to adapt. The format of the tree leaves labels should be '{species name}, {txid}' or '{species name}, {txid}*'
+        - new_otu_id_name_ser: pd.Series issued from count dataframe with only new_otu_id_name column
+          ('NCBI_taxonomy_ID' for Kraken2, 'NCBI_tax_id' for Metaphlan3)
+        - tree_file: path to the tree file to adapt. The format of the tree leaves labels should be
+          '{species name}, {txid}' or '{species name}, {txid}*'
         - output_tree_file: path to the output adapted tree file
         - quotechr: quote character used as delimiter of labels in tree
     """
