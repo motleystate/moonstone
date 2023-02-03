@@ -163,7 +163,10 @@ class DiversityBase(BaseModule, BaseDF, ABC):
 
     def _structure_remodelling(self, datastruct: Union[pd.Series, pd.DataFrame], structure: str, sym: bool):
         if sym:
-            datastruct = pd.concat([datastruct, datastruct.reorder_levels([1, 0])])
+            if isinstance(datastruct, pd.Series):
+                datastruct = pd.concat([datastruct, datastruct.reorder_levels([1, 0])])
+            else:  # ed. pd.DataFrame
+                datastruct = datastruct.fillna(datastruct.transpose())
         if structure == 'dataframe':
             datastruct = datastruct.unstack(level=1)
             datastruct.index.name = None
