@@ -240,7 +240,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         self, diversity_index_dataframe: pd.DataFrame, group_col: str, final_group_col: str,
         stats_test: str, correction_method: str, structure_pval: str, sym: bool
     ):
-        pval = pd.Series([])
+        pval = pd.Series([], dtype='float64')
         for g in diversity_index_dataframe[group_col].dropna().unique():
             df_gp = diversity_index_dataframe[diversity_index_dataframe[group_col] == g]
             if df_gp.shape[0] < 2:
