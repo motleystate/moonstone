@@ -52,7 +52,8 @@ class TestMetaphlan2Parser(TestCase):
                 ['Bacteria', 'Firmicutes', 'Bacilli', 'Lactobacillales', 'Streptococcaceae', 'Streptococcus',
                  'Streptococcus_salivarius', 3.3, 1.2, '1304']
             ],
-            columns=['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species', 'SAMPLE_1', 'SAMPLE_2', 'NCBI_tax_id']
+            columns=['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species', 'SAMPLE_1', 'SAMPLE_2',
+                     'NCBI_tax_id']
         )
         expected_df = expected_df.set_index(['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species'])
         observed_df = meta2parser.dataframe

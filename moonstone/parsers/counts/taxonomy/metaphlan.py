@@ -12,8 +12,8 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
     def __init__(self, *args, analysis_type: str = 'rel_ab', **kwargs):
         """
         Args:
-            analysis_type: output type of Metaphlan3 (see ``-t`` option of metaphlan3) 
-              { 'rel_ab', 'rel_ab_w_read_stats', 'reads_map', 'clade_profiles', 'marker_ab_table', 'marker_counts', 
+            analysis_type: output type of Metaphlan3 (see ``-t`` option of metaphlan3)
+              { 'rel_ab', 'rel_ab_w_read_stats', 'reads_map', 'clade_profiles', 'marker_ab_table', 'marker_counts',
               'marker_pres_table', 'clade_specific_strain_tracker' }
         """
         self.analysis_type = self._valid_analysis_type(analysis_type)
@@ -108,7 +108,7 @@ class Metaphlan3Parser(BaseMetaphlanParser):
         """
         Args:
             analysis_type: output type of Metaphlan3 (see ``-t`` option of metaphlan3)
-              { 'rel_ab', 'rel_ab_w_read_stats', 'reads_map', 'clade_profiles', 'marker_ab_table', 'marker_counts', 
+              { 'rel_ab', 'rel_ab_w_read_stats', 'reads_map', 'clade_profiles', 'marker_ab_table', 'marker_counts',
               'marker_pres_table', 'clade_specific_strain_tracker' }
             keep_NCBI_tax_col: set to True if you want the NCBI tax column in the returned dataframe.
         """
