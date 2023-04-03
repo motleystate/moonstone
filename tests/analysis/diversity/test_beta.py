@@ -82,7 +82,7 @@ class TestBrayCurtis(TestCase):
                 'samples14': [9.35, 'A'],
                 'samples15': [7.89, 'A'],
                 'samples16': [4.65, 'C'],
-                'samples17': [8.90, 'D'],
+                'samples17': [8.90, 'D'],  # only 1 sample from group D < 5 required to do ttest-independence
                 'samples18': [2.33, 'C'],
                 'samples19': [1.34, 'B'],
                 'samples20': [6.87, 'C']

@@ -1,6 +1,10 @@
+import logging
+
 from pandas import DataFrame
 
 from moonstone.parsers.counts.taxonomy.base import BaseTaxonomyCountsParser
+
+logger = logging.getLogger(__name__)
 
 
 class BaseMetaphlanParser(BaseTaxonomyCountsParser):
@@ -8,10 +12,22 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
     def __init__(self, *args, analysis_type: str = 'rel_ab', **kwargs):
         """
         Args:
-            analysis_type: output type of Metaphlan3 (see ``-t`` option of metaphlan3)
+            analysis_type: output type of Metaphlan3 (see ``-t`` option of metaphlan3) 
+              { 'rel_ab', 'rel_ab_w_read_stats', 'reads_map', 'clade_profiles', 'marker_ab_table', 'marker_counts', 
+              'marker_pres_table', 'clade_specific_strain_tracker' }
         """
-        self.analysis_type = analysis_type
+        self.analysis_type = self._valid_analysis_type(analysis_type)
         super().__init__(*args, **kwargs)
+
+    def _valid_analysis_type(self, analysis_type):
+        choices = [
+            "rel_ab", "rel_ab_w_read_stats", "reads_map", "clade_profiles",
+            "marker_ab_table", "marker_counts", "marker_pres_table", "clade_specific_strain_tracker"
+        ]
+        if analysis_type not in choices:
+            logger.warning("analysis_type='%s' not valid, set to default ('rel_ab').", analysis_type)
+            analysis_type = "rel_ab"
+        return analysis_type
 
     def rows_differences(self, dataframe1, dataframe2) -> DataFrame:
         rows_diff = dataframe1 - dataframe2
@@ -88,17 +104,30 @@ class Metaphlan3Parser(BaseMetaphlanParser):
     taxa_column = 'clade_name'
     NCBI_tax_column = 'NCBI_tax_id'
 
-    def __init__(self, *args, analysis_type: str = 'rel_ab', **kwargs):
+    def __init__(self, *args, analysis_type: str = 'rel_ab', keep_NCBI_tax_col: bool = False, **kwargs):
         """
         Args:
             analysis_type: output type of Metaphlan3 (see ``-t`` option of metaphlan3)
+              { 'rel_ab', 'rel_ab_w_read_stats', 'reads_map', 'clade_profiles', 'marker_ab_table', 'marker_counts', 
+              'marker_pres_table', 'clade_specific_strain_tracker' }
+            keep_NCBI_tax_col: set to True if you want the NCBI tax column in the returned dataframe.
         """
+        self.keep_NCBI_tax_col = keep_NCBI_tax_col
         super().__init__(*args, analysis_type=analysis_type, parsing_options={'skiprows': 1}, **kwargs)
 
     def _load_data(self) -> DataFrame:
         df = super()._load_data()
-        df = df.drop(self.NCBI_tax_column, axis=1)
+
+        if self.keep_NCBI_tax_col:
+            tmp = df[[self.NCBI_tax_column, self.taxa_column]]
+
+        df = df.drop(self.NCBI_tax_column, axis=1)  # NCBI_tax_column needs to be dropped because sum
         df = self.remove_duplicates(df)
+
+        if self.keep_NCBI_tax_col:
+            tmp[self.NCBI_tax_column] = tmp[self.NCBI_tax_column].map(lambda x: x.split("|")[-1])
+            df = df.merge(tmp)
+
         df = self.split_taxa_fill_none(df, sep="|")
         df = df.set_index(self.taxonomical_names[:self.rank_level])
         return df

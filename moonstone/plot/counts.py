@@ -747,7 +747,7 @@ of the cohort"
         # Make graph
         graph = MatrixBarGraph(data_df)
         # Plotting options
-        title = f"{taxa_level.capitalize()} composition for the top {taxa_number} most abundant species across samples"
+        title = f"{taxa_level.capitalize()} composition for the top {taxa_number} most abundant {taxa_level} across samples"
         if prevalence_threshold is not None:
             title += f" (present in at least {prevalence_threshold}% of samples)"
 
