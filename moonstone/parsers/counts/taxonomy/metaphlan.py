@@ -33,7 +33,9 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
         rows_diff = dataframe1 - dataframe2
         rows_diff[rows_diff.isnull()] = dataframe1
         if self.analysis_type == 'rel_ab':
-            rows_diff[rows_diff < 0.0001] = 0
+            rows_diff[rows_diff < 0.0001] = 0   # if difference between sum of organism of rank r (ex: sum of species of genus X)
+            # and value of rank r+1 (ex:genus X) is so small,
+            # we assume that it's due to python addition approximation with decimal
         else:
             rows_diff[rows_diff < 0] = 0
         rows_diff = rows_diff.loc[rows_diff.sum(axis=1)[rows_diff.sum(axis=1) != 0].index]
@@ -49,6 +51,21 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
         return self.rows_differences(df_rank, df_rank_computed)
 
     def remove_duplicates(self, df) -> DataFrame:
+        """
+        Metaphlan3 results are by level therefore we need to remove the duplicated informations
+        Example:
+        We have:
+            ...|g_GenusA    50.0
+            ...|g_GenusA|s_Species1 30.0
+            ...|g_GenusB    50.0
+            ...|g_GenusB|s_Species2 50.0
+            Sum = 180.0 =/= 100.0 (while it's relative abundance -> but same problem with other analysis type)
+        We want:
+            ...|g_GenusA|s_GenusA (genus)   20.0    # unspecified species
+            ...|g_GenusA|s_Species1 30.0
+            ...|g_GenusB|s_Species2 50.0
+            Sum = 100.0
+        """
         df = df.set_index(self.taxa_column)
 
         # dataframe at rank level
