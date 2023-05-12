@@ -33,7 +33,8 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
         rows_diff = dataframe1 - dataframe2
         rows_diff[rows_diff.isnull()] = dataframe1
         if self.analysis_type == 'rel_ab':
-            rows_diff[rows_diff < 0.0001] = 0   # if difference between sum of organism of rank r (ex: sum of species of genus X)
+            rows_diff[rows_diff < 0.0001] = 0
+            # if difference between sum of organism of rank r (ex: sum of species of genus X)
             # and value of rank r+1 (ex:genus X) is so small,
             # we assume that it's due to python addition approximation with decimal
         else:
@@ -135,6 +136,13 @@ class Metaphlan3Parser(BaseMetaphlanParser):
     def _load_data(self) -> DataFrame:
         df = super()._load_data()
 
+        # if number of taxonomical_names is inferior to the default,
+        if len(self.taxonomical_names) < len(BaseTaxonomyCountsParser.taxonomical_names):
+            # we need to restrict the rows considered to only the rows that recount taxonomical level inside the range
+            # wanted.
+            # Or error "ValueError: Error : expecting a integer inferior or equal to the number of taxonomical_names."
+            # will be raised
+            df = df[df["NCBI_tax_id"].map(lambda x: len(x.split("|"))) <= len(self.taxonomical_names)]
         if self.keep_NCBI_tax_col:
             tmp = df[[self.NCBI_tax_column, self.taxa_column]]
 
