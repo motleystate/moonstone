@@ -22,14 +22,13 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest
-        pip install numpy==1.18.1
-        pip install scikit-bio==0.5.6
-        pip install .
-        pip install odfpy     # optional dependencies
-        pip install openpyxl  # idem
-        pip install xlrd      # idem
+        python -m pip3 install --upgrade pip3
+        pip3 install flake8 pytest
+        pip3 install numpy==1.18.1
+        pip3 install .
+        pip3 install odfpy     # optional dependencies
+        pip3 install openpyxl  # idem
+        pip3 install xlrd      # idem
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
