@@ -1,11 +1,11 @@
 import logging
 import re
 from abc import ABC, abstractmethod
-import skbio
+#import skbio
 from string import capwords
 from typing import Union
 
-import numpy as np
+#import numpy as np
 import pandas as pd
 from statsmodels.stats.multitest import multipletests
 
@@ -16,6 +16,8 @@ from moonstone.plot.graphs.box import GroupBoxGraph, BoxGraph
 from moonstone.plot.graphs.heatmap import HeatmapGraph
 from moonstone.plot.graphs.histogram import Histogram
 from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
+from moonstone.utils.dict_operations import merge_dict
+
 
 logger = logging.getLogger(__name__)
 
@@ -219,14 +221,28 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             output_file=output_pval_file
         )
 
-    def _valid_pval_param(self, pval_to_compute):
+    def _valid_pval_param(self, pval_to_compute, pval_to_display):
         choices = [
             "all", "same group_col or group_col2 values", "same group_col values", None
         ]
+        dicpval = {}
+        for i in range(len(choices)):
+            dicpval[choices[i]]=i
+            
         if pval_to_compute not in choices:
             logger.warning("pval_to_compute='%s' not valid, set to default (all).", pval_to_compute)
             pval_to_compute = "all"
-        return pval_to_compute
+
+        if pval_to_display not in choices:
+            logger.warning("pval_to_display='%s' not valid, set to default (None).", pval_to_display)
+            pval_to_display = None
+        elif dicpval[pval_to_display]<dicpval[pval_to_compute]:
+            raise ValueError("pval_to_display='{}' not valid, when pval_to_compute='{}'. \
+pval_to_display should be set to :{}".format(
+                pval_to_display, pval_to_compute, choices[dicpval[pval_to_compute]:]
+            ))
+        
+        return pval_to_compute, pval_to_display
 
     def _valid_correction_method_param(self, correction_method):
         if correction_method == "uncorrected":
@@ -235,6 +251,243 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             logger.warning("correction_method='%s' not valid, set to default (None).", correction_method)
             return None
         return correction_method
+
+    def _pval_selection(
+        self, pval_series, groups
+    ):
+        
+        pval_series = pval_series[pval_series < 0.05]
+        if groups is not None:
+            pval_series = pval_series[
+                (pval_series.index.get_level_values(0).isin(groups) & pval_series.index.get_level_values(1).isin(groups))
+            ]
+        return pval_series     
+    
+    def _pval_selection_with_group_col2(
+        self, pval_series, final_groups, pval_to_compute, pval_to_display
+    ):
+        #Reminder: 
+        #    1) This method called only if pval_to_display is not None. So pval_to_compute/pval_to_display = {"all", "same group_col or group_col2 values", "same group_col values"}
+        #    2) Index values follow this pattern: "{group_col value} - {group_col2 value}"
+        print("pval_to_compute:", pval_to_compute)
+        print("pval_to_display:", pval_to_display)
+        pval_series = self._pval_selection(pval_series, final_groups)
+        if (pval_to_compute != "same group_col values" and
+            pval_to_display == "same group_col values"):
+            # we only have to check first part of index values
+            pval_series = pval_series[
+                (
+                    pval_series.index.get_level_values(0).map(lambda x: x.split(" - ")[0]) == pval_series.index.get_level_values(1).map(lambda x: x.split(" - ")[0])
+                )
+            ]
+        elif (pval_to_compute == "all" and
+              pval_to_display == "same group_col or group_col2 values"):
+            # we compare both part of the index values -> if first part is the same = same group_col value
+                                                     # -> if second part is the same = same group_col2 value
+            pval_series = pval_series[
+                (
+                    pval_series.index.get_level_values(0).map(lambda x: x.split(" - ")[0]) == pval_series.index.get_level_values(1).map(lambda x: x.split(" - ")[0])
+                ) | (
+                    pval_series.index.get_level_values(0).map(lambda x: x.split(" - ")[1]) == pval_series.index.get_level_values(1).map(lambda x: x.split(" - ")[1])    
+                )]
+
+        return pval_series
+
+    def _order_pval_series(
+        self, pval_series, groups, dic_gps
+    ):
+        # Reminder: pvalue series is a MultiIndex series -> 2 level of index are the 2 groups compared
+        # to order p-value series in a specific order dictated in dic_gps
+        # example: dic_gps = {"Group A": 0, "Group B": 1, "Group C": 3}
+        names = pval_series.index.names     # default: ["Group1", "Group2"]
+
+        # first we order p-value series index name to have the group that should come first as first member
+        pval_series = pval_series.reset_index()
+        for i in pval_series.index:
+            level0 = pval_series.loc[i][names[0]]
+            level1 = pval_series.loc[i][names[1]]
+            if dic_gps[level0] > dic_gps[level1]:
+                pval_series.loc[i, names[0]] = level1       # invert to have the Group that should be put first as first
+                pval_series.loc[i, names[1]] = level0       # in example: "Group B - Group A" becomes "Group A - Group B"
+        pval_series[names[0]] = pval_series[names[0]].astype("category")
+        pval_series[names[0]].cat.set_categories(groups, inplace=True)
+        pval_series[names[1]] = pval_series[names[1]].astype("category")
+        pval_series[names[1]].cat.set_categories(groups, inplace=True)
+        pval_series = pval_series.sort_values([names[0], names[1]]) # we sort by 1st member, and then 2nd member
+        pval_series = pval_series.set_index([names[0], names[1]])
+        return pval_series[0]
+
+    def _generate_shapes_annotations_lists(
+        self, pval_series, groups, hgt_min
+    ):
+        """
+        To generate annotations to represent significant pvalues. Methods for group_col only (not group_col2)
+
+        Args:
+            pval_series: pd.Series of the pvalue to put on the graph (need to be filtered beforehand so that it only contains significant pvalues)
+        """
+        # Overview of this method: We're trying to generate the shapes (1 bracket = 3 lines =
+        # 1 going from Group1 to Group2 and 2 small lines to form the edge of the bracket)
+        # and the annotations.
+        # To ensure that the brackets don't overlap, we create a table/list named `level`
+        # with a number of columns equal to the number of groups and an expendable number of rows
+        # When we fill the list, we replace 0 to 1 meaning that there is now a bracket at this
+        # location and that we can't add another bracket on top of it, and that another level (row)
+        # need to be added to `level`
+        dic_gps = {}
+        for i in range(len(groups)):
+            dic_gps[groups[i]]=i        
+        
+        # the pvalues need to be ordered so that looking at the cell corresponding to the left edge 
+        # of the bracket that needs to be added is enough to determine if there is already a
+        # bracket there.
+        pval_series = self._order_pval_series(pval_series, groups, dic_gps)
+        
+        det = (hgt_min/15)
+        
+        hgt_min += det/2
+        fontsize = int(12+det)
+        linewidth = 0.5+0.15*det
+    
+        level=[[0] * (len(groups))]
+        list_shapes = []
+        list_annotations = []
+        
+        for ind, val in pval_series.items():
+            y = 0
+            
+            left_ind = dic_gps[ind[0]]  # -> could be directly ind for shapes but /!\ not for the annotations
+            right_ind = dic_gps[ind[1]]
+            
+            for i in range(len(level)):
+                if level[i][left_ind] == 0:
+                    level[i][left_ind:right_ind+1]=[1]*(right_ind-left_ind+1)
+                    list_shapes += [
+                        {'x0':left_ind, 'y0':hgt_min+(i*det/2), 
+                         'x1':right_ind, 'y1':hgt_min+(i*det/2), 'line':dict(width=linewidth)},   # from Group1 to Group2
+                        {'x0':left_ind, 'y0':hgt_min+(i*det/2)-0.15*det, 
+                         'x1':left_ind, 'y1':hgt_min+(i*det/2), 'line':dict(width=linewidth)},    # left edge of the bracket
+                        {'x0':right_ind, 'y0':hgt_min+(i*det/2)-0.15*det, 
+                         'x1':right_ind, 'y1':hgt_min+(i*det/2), 'line':dict(width=linewidth)}    # right edge of the bracket
+                    ]
+                    if val < 0.01:
+                        list_annotations += [{'text':'**', "font":dict(size=fontsize),
+                                              'x':(left_ind+right_ind)/2, 
+                                              'y':hgt_min+(i*det/2)+0.15*det, 'showarrow':False}]
+                    else:
+                        list_annotations += [{'text':'*', "font":dict(size=fontsize),
+                                              'x':(left_ind+right_ind)/2, 
+                                              'y':hgt_min+(i*det/2)+0.15*det, 'showarrow':False}]
+                    y = 1
+                    break
+            if y == 0:
+                # we need to add another level
+                i += 1
+                level += [[0] * (len(groups))]
+                level[i][left_ind:right_ind+1]=[1]*(right_ind-left_ind+1)  # or ind
+                list_shapes += [
+                    {'x0':left_ind, 'y0':hgt_min+(i*det/2), 
+                     'x1':right_ind, 'y1':hgt_min+(i*det/2), 'line':dict(width=linewidth)},
+                    {'x0':left_ind, 'y0':hgt_min+(i*det/2)-0.15*det, 
+                     'x1':left_ind, 'y1':hgt_min+(i*det/2), 'line':dict(width=linewidth)},
+                    {'x0':right_ind, 'y0':hgt_min+(i*det/2)-0.15*det, 
+                     'x1':right_ind, 'y1':hgt_min+(i*det/2), 'line':dict(width=linewidth)}]
+                if val < 0.01:
+                    list_annotations += [{'text':'**', "font":dict(size=fontsize),
+                                          'x':(left_ind+right_ind)/2, 
+                                          'y':hgt_min+(i*det/2)+0.15*det, 'showarrow':False}]
+                else:
+                    list_annotations += [{'text':'*',"font":dict(size=fontsize),
+                                          'x':(left_ind+right_ind)/2,
+                                          'y':hgt_min+(i*det/2)+0.15*det, 'showarrow':False}]
+        
+        return list_shapes, list_annotations, len(level)
+
+    """
+    def _generate_shapes_annotations_lists_supergroup(
+        self, pval_series, groups, supergroups, hgt_min
+    ):
+    """
+        #:param supergroups dictionary with supergroup edges
+    """
+        dic_gps = {}
+        for i in range(len(groups)):
+            dic_gps[groups[i]]=i
+    
+    
+        list_shapes = []
+        dic_middle = {}
+        supergroups_to_display = set(list(pval_series.index.get_level_values(0)) + list(pval_series.index.get_level_values(1)))
+        for i in supergroups_to_display:
+            if isinstance(supergroups[i], list):
+                list_shapes += [{'x0':supergroups[i][0], 'y0':hgt_min, 'x1':supergroups[i][1], 'y1':hgt_min, 'line':dict(width=1)}]                      
+                dic_middle[i] = (dic_gps[supergroups[i][0]] + dic_gps[supergroups[i][1]])/2
+            else:
+                dic_middle[i] = dic_gps[supergroups[i]]
+
+        dic_supergps = {}
+        i = 0
+        for k, v in sorted(dic_middle.items(), key=lambda item: item[1]):
+            dic_supergps[k] = i
+            i+=1
+                
+        level=[[0] * (len(dic_supergps))]
+        list_annotations = []
+        for ind, val in pval_series.items():
+            y = 0
+            for i in range(len(level)):
+                if dic_middle[ind[0]] > dic_middle[ind[1]]:
+                    ind = (ind[1], ind[0])
+                if level[i][dic_supergps[ind[0]]] == 0:
+                    level[i][dic_supergps[ind[0]]:dic_supergps[ind[1]]+1]=[1]*(dic_supergps[ind[1]]-dic_supergps[ind[0]]+1)  # or ind
+                    list_shapes += [
+                            {'x0':dic_middle[ind[0]], 'y0':hgt_min+i+0.5, 
+                             'x1':dic_middle[ind[1]], 'y1':hgt_min+i+0.5, 'line':dict(width=1)},
+                            {'x0':dic_middle[ind[0]], 'x1':dic_middle[ind[0]], 'y1':hgt_min+i+0.5,
+                             #'y0':hgt_min, 'line':dict(width=1, dash="dot")},
+                             'y0':hgt_min+i+0.35, 'line':dict(width=1)},
+                            {'x0':dic_middle[ind[1]], 'x1':dic_middle[ind[1]], 'y1':hgt_min+i+0.5, 
+                             #'y0':hgt_min, 'line':dict(width=1, dash="dot")}
+                             'y0':hgt_min+i+0.35, 'line':dict(width=1)}
+                                   ]
+                    if val < 0.01:
+                        list_annotations += [{'text':'**','x':(dic_middle[ind[0]]+dic_middle[ind[1]])/2, 
+                                              'y':hgt_min+i+0.65, 'showarrow':False}]
+                    else:
+                        list_annotations += [{'text':'*','x':(dic_middle[ind[0]]+dic_middle[ind[1]])/2, 
+                                              'y':hgt_min+i+0.65, 'showarrow':False}]
+                    y = 1
+                    break
+            if y == 0:
+                i += 1
+                level += [[0] * (len(dic_supergps))]
+                level[i][dic_supergps[ind[0]]:dic_supergps[ind[1]]+1]=[1]*(dic_supergps[ind[1]]-dic_supergps[ind[0]]+1)  # or ind
+                list_shapes += [
+                            {'x0':dic_middle[ind[0]], 'y0':hgt_min+i+0.5, 
+                             'x1':dic_middle[ind[1]], 'y1':hgt_min+i+0.5, 'line':dict(width=1)},
+                            {'x0':dic_middle[ind[0]], 'x1':dic_middle[ind[0]], 'y1':hgt_min+i+0.5, 
+                             #'y0':hgt_min, 'line':dict(width=1, dash="dot")},
+                             'y0':hgt_min+i+0.35, 'line':dict(width=1)},
+                            {'x0':dic_middle[ind[1]], 'x1':dic_middle[ind[1]], 'y1':hgt_min+i+0.5, 
+                             #'y0':hgt_min, 'line':dict(width=1, dash="dot")}
+                             'y0':hgt_min+i+0.35, 'line':dict(width=1)}
+                                ]
+                if val < 0.01:
+                    list_annotations += [{'text':'**','x':(dic_middle[ind[0]]+dic_middle[ind[1]])/2, 
+                                              'y':hgt_min+i+0.65, 'showarrow':False}]
+                else:
+                    list_annotations += [{'text':'*','x':(dic_middle[ind[0]]+dic_middle[ind[1]])/2, 
+                                              'y':hgt_min+i+0.65, 'showarrow':False}]
+        
+        return list_shapes, list_annotations, len(level)
+    """
+    # for now, method above and below in different methods
+    #def _generate_dic_shapes_and_annotations(
+    #    self, pval_series, dic_lev, hgt_min
+    #):   
+    #    list_shapes={}
+    #    dic_annotations={}
+    #    for ind, val in pval_series.items():
 
     def _compute_pval_inside_subgroups(
         self, diversity_index_dataframe: pd.DataFrame, group_col: str, final_group_col: str,
@@ -264,7 +517,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         plotting_options: dict = None,
         stats_test: str = 'mann_whitney_u', correction_method: str = None,
         structure_pval: str = 'dataframe', sym: bool = True,
-        pval_to_compute: bool = 'all',
+        pval_to_compute: bool = 'all', pval_to_display: str = None,
         show_pval: bool = True, output_pval_file: str = False,
         **kwargs
     ) -> dict:
@@ -277,7 +530,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         :param groups: specifically select groups to display among group_col
         :param groups2: specifically select groups to display among group_col2
         :param show: also visualize
-        :param show_pval: visualize p-values
+        :param show_pval: visualize p-values's heatmap
         :param output_file: file path to output your html graph
         :param make_graph: whether or not to make the graph
         :param plotting_options: plotly plotting_options
@@ -290,10 +543,14 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         :param pval_to_compute: if group_col2 used, problems of memory or in maximum recursion depth
           may occur. In this case, you may want to compute only p-values of specific comparisons.
           {"all" (default), None, "same group_col values", "same group_col or group_col2 values"}
+        :param pval_to_display: whether you want the significant pvalues displayed on the graph ("all") or not (None)
+          When group_col2 is used you may want to specify which type of comparisons you want to display the
+          significant pvalues of. Otherwise the graph can appear crowded by pvalues lines.
+          {None (default), "all", "same group_col values", "same group_col or group_col2 values"}
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
 
-        pval_to_compute = self._valid_pval_param(pval_to_compute)
+        pval_to_compute, pval_to_display = self._valid_pval_param(pval_to_compute, pval_to_display)
         correction_method = self._valid_correction_method_param(correction_method)
 
         if group_col2:
@@ -306,6 +563,19 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 filtered_metadata_df[group_col2].astype(str)
             )
             df = self._get_grouped_df(filtered_metadata_df[[group_col, group_col2, final_group_col]])
+
+            #if pval_to_display:
+            if 1 == 1:
+                # listing and sorting all final_groups possibles respecting the order given by
+                # groups first and then by groups2
+                t = df.drop_duplicates(subset=[final_group_col])
+                t[group_col] = t[group_col].astype("category")
+                t[group_col].cat.set_categories(groups, inplace=True)
+                t[group_col2] = t[group_col2].astype("category")
+                t[group_col2].cat.set_categories(groups2, inplace=True)
+                t.dropna(how="any", subset=[group_col, group_col2], inplace=True)
+                t = t.sort_values([group_col, group_col2])
+                final_groups = list(t[final_group_col])
 
             if pval_to_compute == "all":
                 pval = self._run_statistical_test_groups(
@@ -324,12 +594,41 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                         )
                     )
 
+            if pval_to_display:
+                to_display = self._pval_selection_with_group_col2(pval, final_groups, pval_to_compute, pval_to_display)
+
         else:
             df = self._get_grouped_df(filtered_metadata_df[group_col])
             pval = self._run_statistical_test_groups(
                 df, group_col, stats_test, correction_method, structure_pval, sym
                 )
             # pval is in the right structure to be returned
+
+            final_groups = groups   # to remove from here later on
+            
+            if pval_to_display:
+                final_groups = groups
+                to_display = self._pval_selection(pval, groups)
+                
+        if pval_to_display and to_display.empty:       # nothing to display
+            pval_to_display = None
+
+        if pval_to_display:
+            hgt_min = df[self.DIVERSITY_INDEXES_NAME].max() #+ 0.5
+            list_shapes, list_annotations, nb_lev = self._generate_shapes_annotations_lists(
+                to_display, final_groups, hgt_min
+            )
+            if not plotting_options:
+                plotting_options = {}
+            det = (hgt_min/15)
+            hgt_min += det/2
+            nblevels=to_display.shape[0]
+            plotting_options = merge_dict(plotting_options, {
+                'layout': {
+                    'shapes': list_shapes,            # we should had to previous list if there is one
+                    'annotations': list_annotations,  # idem
+                }
+            })
 
         self.last_grouped_df = df
         self.report_data['analyse_groups'] = {
