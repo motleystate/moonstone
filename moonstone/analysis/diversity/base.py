@@ -5,7 +5,7 @@ from numbers import Real
 from string import capwords
 from typing import Union
 
-import numpy as np
+#import numpy as np
 import pandas as pd
 import skbio
 from statsmodels.stats.multitest import multipletests
@@ -20,6 +20,8 @@ from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
 from moonstone.utils.dict_operations import merge_dict
 from moonstone.utils.pandas.remodelling import StructureRemodelling
 from moonstone.utils.log_messages import reset_warnings_decorator
+from moonstone.utils.dict_operations import merge_dict
+
 
 logger = logging.getLogger(__name__)
 
@@ -318,8 +320,7 @@ pval_to_display should be set to: {}".format(
         self, pval_series: pd.Series, groups: list, **kwargs
     ) -> pd.Series:
         """
-        To select the p-values to display when the group_col2 argument is being used.
-        The significant p-values, meaning the p-values under a given threshold, belonging to two groups diplayed
+        Order the p-values based on the order of the groups in the graph. Works with and without group_col2.
 
         Args:
             pval_series: series of all the p-values computed.
@@ -327,13 +328,13 @@ pval_to_display should be set to: {}".format(
         """
         dic_gps = kwargs.pop("dic_gps", {})
         if not dic_gps:
-            for i in range(len(groups)):
-                dic_gps[groups[i]] = i
+            dic_gps = {key: idx for idx, key in enumerate(groups)}
 
         # Reminder: pvalue series is a MultiIndex series -> 2 level of index are the 2 groups compared
         # to order p-value series in a specific order dictated in dic_gps
         # example: dic_gps = {"Group A": 0, "Group B": 1, "Group C": 3}
         names = pval_series.index.names     # default: ["Group1", "Group2"]
+
         # first we order p-value series index name to have the group that should come first as first member
         pval_series = pval_series.reset_index()
         for i in pval_series.index:
@@ -387,13 +388,16 @@ pval_to_display should be set to: {}".format(
         self, pval_series: pd.Series, groups: list, hgt_min: Real
     ):
         """
-        To generate annotations to represent significant p-values. Methods for group_col only (not group_col2)
+        To generate annotations to represent significant p-values. Methods for group_col only (not group_col2).
 
         Args:
             pval_series: series of the p-values to put on the graph (need to be filtered beforehand
               so that it only contains significant p-values).
             groups: list of groups displayed in graph.
         """
+        # SPREAD/NOT TIGHT = 2 brackets sharing a same edge as left and right edges respectively
+        # are not allowed on the same line.
+
         # Overview of this method: We're trying to generate the shapes (1 bracket = 3 lines =
         # 1 going from Group1 to Group2 and 2 small lines to form the edge of the bracket)
         # and the annotations.
@@ -402,9 +406,7 @@ pval_to_display should be set to: {}".format(
         # When we fill the list, we replace 0 to 1 meaning that there is now a bracket at this
         # location and that we can't add another bracket on top of it, and that another level (row)
         # need to be added to `level`
-        dic_gps = {}
-        for i in range(len(groups)):
-            dic_gps[groups[i]] = i
+        dic_gps = {key: idx for idx, key in enumerate(groups)}  # key = Group name; value = number from 0 to len(groups)
 
         # the pvalues need to be ordered so that looking at the cell corresponding to the left edge
         # of the bracket that needs to be added is enough to determine if there is already a
@@ -424,7 +426,8 @@ pval_to_display should be set to: {}".format(
         for ind, val in pval_series.items():
             y = 0
 
-            left_ind = dic_gps[ind[0]]  # -> could be directly ind for shapes but /!\ not for the annotations
+            left_ind = dic_gps[ind[0]]  # -> could be directly ind (Group name) for shapes
+            # but /!\ not for the annotations. So using a numerical value
             right_ind = dic_gps[ind[1]]
 
             for i in range(len(level)):
@@ -505,6 +508,7 @@ pval_to_display should be set to: {}".format(
             else:
                 dic_middle[i] = dic_gps[supergroups[i]]
 
+        # Purpose of the dic_supergps ?
         dic_supergps = {}
         i = 0
         for k, v in sorted(dic_middle.items(), key=lambda item: item[1]):
@@ -718,9 +722,12 @@ image")
         if pval_to_display:
             # print(final_groups)
             hgt_min = df[self._DIVERSITY_INDEXES_NAME].max()  # + 0.5
-            list_shapes, list_annotations, nb_lev = self._generate_shapes_annotations_lists(
+            # if not group_col2:  # always the case right now
+            list_shapes, list_annotations, nb_lev = self._generate_shapes_annotations_lists_simple(
                 to_display, final_groups, hgt_min
             )
+            # else: self._generate_shapes_annotations_lists_supergroups
+
             if not plotting_options:
                 plotting_options = {}
             # det = (hgt_min/15)
