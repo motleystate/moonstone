@@ -1,11 +1,11 @@
 import logging
 import re
 from abc import ABC, abstractmethod
-#import skbio
+import skbio
 from string import capwords
 from typing import Union
 
-#import numpy as np
+import numpy as np
 import pandas as pd
 from statsmodels.stats.multitest import multipletests
 
