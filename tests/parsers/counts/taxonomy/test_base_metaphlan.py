@@ -271,6 +271,6 @@ s__Streptococcus_salivarius', 64.04123, 32.8],
         with self.assertLogs('moonstone.parsers.counts.taxonomy.metaphlan', level='WARNING') as log:
             tested_object_instance = BaseMetaphlanParser("file", analysis_type="INVALID ANALYSIS TYPE")
             self.assertEqual(len(log.output), 1)
-            self.assertIn("WARNING:moonstone.parsers.counts.taxonomy.metaphlan:analysis_type='INVALID ANALYSIS TYPE' not valid, \
-set to default ('rel_ab').", log.output)
+            self.assertIn("WARNING:moonstone.parsers.counts.taxonomy.metaphlan:analysis_type='INVALID ANALYSIS TYPE' \
+not valid, set to default ('rel_ab').", log.output)
             self.assertEqual(tested_object_instance.analysis_type, 'rel_ab')

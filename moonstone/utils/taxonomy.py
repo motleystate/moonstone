@@ -85,7 +85,7 @@ class TaxonomyCountsBase():
         taxa_columns.columns = self.taxonomical_names[:self.rank_level]
         taxa_columns = taxa_columns.applymap(lambda x: remove_taxo_prefix(x))
         if terms_to_remove is not None:
-            taxa_columns = taxa_columns.replace(terms_to_remove, np.nan)
+            taxa_columns = taxa_columns.replace(terms_to_remove, None)
         if merge_genus_species:
             taxa_columns = self._merge_genus_species(taxa_columns)
         taxa_columns = self._fill_none(taxa_columns)

@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.7", "3.8"]
+        python-version: ["3.8", "3.9"]
 
     steps:
     - uses: actions/checkout@v2
@@ -24,7 +24,7 @@ jobs:
       run: |
         python -m pip3 install --upgrade pip3
         pip3 install flake8 pytest
-        pip3 install numpy==1.18.1
+        pip3 install numpy==1.24.3
         pip3 install .
         pip3 install odfpy     # optional dependencies
         pip3 install openpyxl  # idem

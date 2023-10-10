@@ -22,12 +22,19 @@ class GenesToTaxonomy(TaxonomyCountsBase):
         self.taxonomy_df = taxonomy_dataframe
         self.taxa_column = taxa_column
 
-    def reindex_with_taxonomy(self, method: str = 'sum'):
+    def _sum_at_lowest_level(self, df):
+        df.index = df.index.to_flat_index()
+        df = df.groupby(level=0).sum()
+        df.index = pd.MultiIndex.from_tuples(df.index, names=self.taxonomical_names[:self._rank_level])
+        return df
+
+    def reindex_with_taxonomy(self, method: str = 'sum', na: str = 'drop'):
         """
         reindexation on taxonomic information (if there are).
 
         :param method: how to combine genes' information of genes that have the same taxonomy.
         Choose 'sum' to sum the counts or 'count' to only have the number of genes with this taxonomy
+        :param na: {'drop' (default), 'keep', 'sum'} what to do with the genes with missing taxonomical information.
 
         NB: You can access the list of items without taxonomic information by checking the .without_info_index
         attributes
@@ -48,16 +55,21 @@ by checking the .without_infos_index attribute.")
         self.without_info_index = new_df['_merge'].loc[new_df['_merge'] == 'left_only'].index
 
         new_df = new_df.drop(['_merge'], axis=1)
-        new_df[self.taxa_column] = new_df[self.taxa_column].fillna(value='k__; p__; c__; o__; f__; g__; s__')
+        if na == 'drop':
+            new_df = new_df.dropna(subset=[self.taxa_column])
+        elif na == 'keep':
+            new_df[self.taxa_column] = new_df[self.taxa_column].fillna(
+                'k__; p__; c__; o__; f__; g__; s__'+new_df.index.to_series()+'_species'
+                )
+        else:  # na == 'sum'
+            new_df[self.taxa_column] = new_df[self.taxa_column].fillna(value='k__; p__; c__; o__; f__; g__; s__')
         new_df = self.split_taxa_fill_none(new_df, sep="; ", merge_genus_species=True)
         new_df = new_df.set_index(self.taxonomical_names[:self._rank_level])
         if method == 'sum':
-            nb_levels = len(self.taxonomical_names[:self._rank_level])
-            new_df = new_df.sum(level=list(range(nb_levels)))
+            new_df = self._sum_at_lowest_level(new_df)
         elif method == 'count':
             new_df[:] = np.where(new_df > 0, 1, 0)    # presence/absence -> is > 0 then presence (1) else absence (0)
-            nb_levels = len(self.taxonomical_names[:self._rank_level])
-            new_df = new_df.sum(level=list(range(nb_levels)))
+            new_df = self._sum_at_lowest_level(new_df)
         return new_df
 
     @property

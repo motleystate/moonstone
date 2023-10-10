@@ -1,6 +1,6 @@
 import logging
 
-from pandas import DataFrame
+import pandas as pd
 
 from moonstone.parsers.counts.taxonomy.base import BaseTaxonomyCountsParser
 
@@ -29,7 +29,7 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
             analysis_type = "rel_ab"
         return analysis_type
 
-    def rows_differences(self, dataframe1, dataframe2) -> DataFrame:
+    def rows_differences(self, dataframe1, dataframe2) -> pd.DataFrame:
         rows_diff = dataframe1 - dataframe2
         rows_diff[rows_diff.isnull()] = dataframe1
         if self.analysis_type == 'rel_ab':
@@ -42,7 +42,7 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
         rows_diff = rows_diff.loc[rows_diff.sum(axis=1)[rows_diff.sum(axis=1) != 0].index]
         return rows_diff
 
-    def compare_difference_between_two_levels(self, whole_df, df_at_lower_level, rank) -> DataFrame:
+    def compare_difference_between_two_levels(self, whole_df, df_at_lower_level, rank) -> pd.DataFrame:
         df_rank = whole_df[whole_df.index.map(lambda x: len(x.split('|'))) == rank]
 
         # transformation lower_level to rank (level)
@@ -51,7 +51,7 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
         df_rank_computed = df_rank_computed.groupby(df_rank_computed.index).sum()             # grouping by rank (level)
         return self.rows_differences(df_rank, df_rank_computed)
 
-    def remove_duplicates(self, df) -> DataFrame:
+    def remove_duplicates(self, df) -> pd.DataFrame:
         """
         Metaphlan3 results are by level therefore we need to remove the duplicated informations
         Example:
@@ -90,8 +90,8 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
             rank -= 1
             rows_diff = self.compare_difference_between_two_levels(df, new_df, rank)
             if rows_diff.size != 0:
-                new_df = new_df.append(rows_diff)              # add missing rows to the dataframe of the lower level
-
+                # new_df = new_df.append(rows_diff)              # add missing rows to the dataframe of the lower level
+                new_df = pd.concat([new_df, rows_diff])        # add missing rows to the dataframe of the lower level
             # verification that everything is defined up to the lower_level
             samples_with_incomp_lowerlevel = new_df.sum()[new_df.sum() < total]
 
@@ -106,7 +106,7 @@ class Metaphlan2Parser(BaseMetaphlanParser):
 
     taxa_column = 'ID'
 
-    def _load_data(self) -> DataFrame:
+    def _load_data(self) -> pd.DataFrame:
         df = super()._load_data()
         df = self.remove_duplicates(df)
         df = self.split_taxa_fill_none(df, sep="|")
@@ -133,7 +133,7 @@ class Metaphlan3Parser(BaseMetaphlanParser):
         self.keep_NCBI_tax_col = keep_NCBI_tax_col
         super().__init__(*args, analysis_type=analysis_type, parsing_options={'skiprows': 1}, **kwargs)
 
-    def _load_data(self) -> DataFrame:
+    def _load_data(self) -> pd.DataFrame:
         df = super()._load_data()
 
         # if number of taxonomical_names is inferior to the default,

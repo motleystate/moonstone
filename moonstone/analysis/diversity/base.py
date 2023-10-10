@@ -194,8 +194,8 @@ class DiversityBase(BaseModule, BaseDF, ABC):
 
             corrected_pval.index = pval.dropna().index   # postulate that the order hasn't changed
             if pval[pval.isnull()].size > 0:
-                corrected_pval = corrected_pval.append(pval[pval.isnull()])
-
+                # corrected_pval = corrected_pval.append(pval[pval.isnull()])
+                corrected_pval = pd.concat([corrected_pval, pval[pval.isnull()]])
             # remodelling of p-values output
             corrected_pval = self._structure_remodelling(corrected_pval, structure=structure_pval, sym=sym)
             return corrected_pval
@@ -248,10 +248,13 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                     f"Less than 2 samples in dataframe group {g} in data. P-val can't be computed."
                 )
             else:
-                pval = pval.append(self._run_statistical_test_groups(
-                    df_gp, final_group_col, stats_test,
-                    correction_method, structure_pval, sym
-                ))
+                pval = pd.concat([
+                    pval,
+                    self._run_statistical_test_groups(
+                        df_gp, final_group_col, stats_test,
+                        correction_method, structure_pval, sym
+                    )
+                ])
         pval.index = pd.MultiIndex.from_tuples(pval.index, names=('Group1', 'Group2'))
         return pval
 
@@ -317,12 +320,13 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                     df, group_col, final_group_col, stats_test, correction_method, structure_pval, sym
                 )
                 if pval_to_compute == "same group_col or group_col2 values":
-                    pval = pval.append(
+                    pval = pd.concat([
+                        pval,
                         self._compute_pval_inside_subgroups(
                             df, group_col2, final_group_col,
                             stats_test, correction_method, structure_pval, sym
                         )
-                    )
+                    ])
 
         else:
             df = self._get_grouped_df(filtered_metadata_df[group_col])
@@ -359,7 +363,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
 
         # 'data' different from 'diversity indexes' in the fact that it has been filtered on metadata, meaning that
         # samples without metadata for group_col (or group_col2) have been dropped
-        return{**{'data': df}, **self.report_data['analyse_groups']}
+        return {**{'data': df}, **self.report_data['analyse_groups']}
 
     def generate_report_data(self) -> dict:
         """
