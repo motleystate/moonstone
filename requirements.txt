@@ -22,7 +22,7 @@ decorator==4.4.2
     # via
     #   ipython
     #   scikit-bio
-hdmedians==0.13
+hdmedians==0.14.2
     # via
     #   moonstone (setup.py)
     #   scikit-bio
