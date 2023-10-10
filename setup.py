@@ -12,7 +12,7 @@ setup(
         'pandas==2.0.2',
         'matplotlib==3.3.0',
         'plotly==5.6.0',
-        'statsmodels==0.11.1',
+        'statsmodels==0.13.0',
         'python-slugify==4.0.1',
         'pyaml==20.4.0',
         'numpy==1.24.3',
