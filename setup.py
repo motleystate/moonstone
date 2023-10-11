@@ -18,7 +18,7 @@ setup(
         'numpy==1.24.3',
         'scikit-bio==0.5.9',
         'scikit-learn==1.3.1',
-        'hdmedians==0.13',
+        'hdmedians==0.14.2',
         'cython==0.29.21',
         'scipy==1.5.2'
     ],
