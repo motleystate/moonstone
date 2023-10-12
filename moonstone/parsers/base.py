@@ -44,6 +44,20 @@ class BaseParser:
         """
         method that handles the loading and parsing of your file into a pandas dataframe.
         """
+        ext = self.file_path.split(".")[-1]
+        ext_engine = {
+            "xls": "xlrd",                              # old-style Excel files
+            "xlsx": "openpyxl",                         # newer Excel file formats
+            "odf": "odf", "ods": "odf", "odt": "odf",   # OpenDocument file formats
+            "xlsb": "pyxlsb"                            # Binary Excel files
+            }
+        if ext in ext_engine.keys():
+            if self.header == "infer":
+                self.header = 0  # "infer" not accepted with read_excel anymore
+            return pd.read_excel(
+                self.file_path, header=self.header, **self.parsing_options,
+                engine=ext_engine[ext]
+            )
         return pd.read_csv(
             self.file_path, sep=self.sep, header=self.header, **self.parsing_options
         )

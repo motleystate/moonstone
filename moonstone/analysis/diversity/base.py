@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 class DiversityBase(BaseModule, BaseDF, ABC):
-    DIVERSITY_INDEXES_NAME = "index"
-    DEF_TITLE = "(index diversity) distribution across the samples"
-    AVAILABLE_GROUP_VIZ = ['violin', 'boxplot']
-    DEF_GROUP_VIZ = "boxplot"
-    DEF_PVAL_COLORSCALE = [
+    _DIVERSITY_INDEXES_NAME = "index"
+    _DEF_TITLE = "(index diversity) distribution across the samples"
+    _AVAILABLE_GROUP_VIZ = ['violin', 'boxplot']
+    _DEF_GROUP_VIZ = "boxplot"
+    _DEF_PVAL_COLORSCALE = [
         [0, '#FFFF00'], [0.001, '#f5962a'], [0.05, '#FF0000'], [0.050001, '#000055'], [1, '#000000']
     ]
 
@@ -48,11 +48,11 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         # call compute_alpha_diversity and store into self._alpha_indexes
         if getattr(self, '_diversity_indexes', None) is None:
             self._diversity_indexes = self.compute_diversity()
-            self._diversity_indexes.name = self.DIVERSITY_INDEXES_NAME
+            self._diversity_indexes.name = self._DIVERSITY_INDEXES_NAME
         return self._diversity_indexes
 
     def _get_default_title(self) -> str:
-        return f"{self.index_name} {self.DEF_TITLE}"
+        return f"{self.index_name} {self._DEF_TITLE}"
 
     def _get_default_samples_label(self) -> str:
         return "Samples"
@@ -135,9 +135,9 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         self, df, mode: str, group_col: str, group_col2: str, plotting_options: dict, log_scale: bool,
         show: bool, output_file: str, colors: dict, groups: list, groups2: list, **kwargs
     ):
-        if mode not in self.AVAILABLE_GROUP_VIZ:
+        if mode not in self._AVAILABLE_GROUP_VIZ:
             logger.warning("%s not a available mode, set to default (histogram)", mode)
-            mode = self.DEF_GROUP_VIZ
+            mode = self._DEF_GROUP_VIZ
 
         title = self._get_default_title()
         xlabel = f"{group_col}"
@@ -150,7 +150,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         elif mode == "boxplot":
             graph = GroupBoxGraph(df)
         graph.plot_one_graph(
-            self.DIVERSITY_INDEXES_NAME, group_col,
+            self._DIVERSITY_INDEXES_NAME, group_col,
             group_col2=group_col2,
             plotting_options=plotting_options,
             show=show,
@@ -163,7 +163,10 @@ class DiversityBase(BaseModule, BaseDF, ABC):
 
     def _structure_remodelling(self, datastruct: Union[pd.Series, pd.DataFrame], structure: str, sym: bool):
         if sym:
-            datastruct = pd.concat([datastruct, datastruct.reorder_levels([1, 0])])
+            if isinstance(datastruct, pd.Series):
+                datastruct = pd.concat([datastruct, datastruct.reorder_levels([1, 0])])
+            else:  # ed. pd.DataFrame
+                datastruct = datastruct.fillna(datastruct.transpose())
         if structure == 'dataframe':
             datastruct = datastruct.unstack(level=1)
             datastruct.index.name = None
@@ -176,7 +179,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
     ):
         if correction_method is not None:
             pval = statistical_test_groups_comparison(
-                    df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                    df[self._DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
                     output='series', sym=False
                 )
 
@@ -191,14 +194,14 @@ class DiversityBase(BaseModule, BaseDF, ABC):
 
             corrected_pval.index = pval.dropna().index   # postulate that the order hasn't changed
             if pval[pval.isnull()].size > 0:
-                corrected_pval = corrected_pval.append(pval[pval.isnull()])
-
+                # corrected_pval = corrected_pval.append(pval[pval.isnull()])
+                corrected_pval = pd.concat([corrected_pval, pval[pval.isnull()]])
             # remodelling of p-values output
             corrected_pval = self._structure_remodelling(corrected_pval, structure=structure_pval, sym=sym)
             return corrected_pval
         else:
             pval = statistical_test_groups_comparison(
-                df[self.DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
+                df[self._DIVERSITY_INDEXES_NAME], df[group_col], stats_test,
                 output=structure_pval, sym=sym
             )
             return pval
@@ -211,7 +214,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             }
         }
         graph.plot_one_graph(
-            colorscale=self.DEF_PVAL_COLORSCALE,
+            colorscale=self._DEF_PVAL_COLORSCALE,
             plotting_options=plotting_options,
             output_file=output_pval_file
         )
@@ -237,7 +240,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         self, diversity_index_dataframe: pd.DataFrame, group_col: str, final_group_col: str,
         stats_test: str, correction_method: str, structure_pval: str, sym: bool
     ):
-        pval = pd.Series([])
+        pval = pd.Series([], dtype='float64')
         for g in diversity_index_dataframe[group_col].dropna().unique():
             df_gp = diversity_index_dataframe[diversity_index_dataframe[group_col] == g]
             if df_gp.shape[0] < 2:
@@ -245,10 +248,13 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                     f"Less than 2 samples in dataframe group {g} in data. P-val can't be computed."
                 )
             else:
-                pval = pval.append(self._run_statistical_test_groups(
-                    df_gp, final_group_col, stats_test,
-                    correction_method, structure_pval, sym
-                ))
+                pval = pd.concat([
+                    pval,
+                    self._run_statistical_test_groups(
+                        df_gp, final_group_col, stats_test,
+                        correction_method, structure_pval, sym
+                    )
+                ])
         pval.index = pd.MultiIndex.from_tuples(pval.index, names=('Group1', 'Group2'))
         return pval
 
@@ -279,14 +285,14 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         :param make_graph: whether or not to make the graph
         :param plotting_options: plotly plotting_options
         :param stats_test: {'mann_whitney_u', 'ttest_independence', 'chi2_contingency'} statistical test
-        used to calculate the p-values between each groups
+          used to calculate the p-values between each groups
         :param correction_method: {None, 'fdr_bh' (benjamini-hochberg), 'bonferroni'} method used (if any)
-        to correct generated p-values
+          to correct generated p-values
         :param structure_pval: {'series', 'dataframe'}
         :param sym: whether generated dataframe (or MultiIndexed series) is symetric or half-full
         :param pval_to_compute: if group_col2 used, problems of memory or in maximum recursion depth
-        may occur. In this case, you may want to compute only p-values of specific comparisons.
-        {"all" (default), None, "same group_col values", "same group_col or group_col2 values"}
+          may occur. In this case, you may want to compute only p-values of specific comparisons.
+          {"all" (default), None, "same group_col values", "same group_col or group_col2 values"}
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
 
@@ -314,12 +320,13 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                     df, group_col, final_group_col, stats_test, correction_method, structure_pval, sym
                 )
                 if pval_to_compute == "same group_col or group_col2 values":
-                    pval = pval.append(
+                    pval = pd.concat([
+                        pval,
                         self._compute_pval_inside_subgroups(
                             df, group_col2, final_group_col,
                             stats_test, correction_method, structure_pval, sym
                         )
-                    )
+                    ])
 
         else:
             df = self._get_grouped_df(filtered_metadata_df[group_col])
@@ -329,13 +336,14 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             # pval is in the right structure to be returned
 
         self.last_grouped_df = df
-        report_dictionary = {
-            'data': df,
+        self.report_data['analyse_groups'] = {
             'pval': pval,
-            'meta': {
+            'param': {
                 'pval_to_compute': pval_to_compute,
                 'stats_test': stats_test,
                 'correction_method': correction_method,
+                'group_col': group_col,
+                'group_col2': group_col2
             }
         }
 
@@ -344,7 +352,6 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 df, mode, group_col, group_col2, plotting_options, log_scale, show, output_file,
                 colors, groups, groups2, **kwargs
             )
-            report_dictionary['fig'] = fig
             if show_pval:
                 if structure_pval != 'dataframe' or not sym:
                     pval_for_visualization = self._structure_remodelling(pval, 'dataframe', sym=True)
@@ -352,7 +359,18 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 else:
                     self._visualize_pvalue_matrix(pval, output_pval_file)
 
-        return report_dictionary
+            return {**{'data': df, 'fig': fig}, **self.report_data['analyse_groups']}
+
+        # 'data' different from 'diversity indexes' in the fact that it has been filtered on metadata, meaning that
+        # samples without metadata for group_col (or group_col2) have been dropped
+        return {**{'data': df}, **self.report_data['analyse_groups']}
+
+    def generate_report_data(self) -> dict:
+        """
+        method that generates a report summurazing the diversity computed
+        (parameters, results)
+        """
+        return {"title": self.index_name+" diversity", "diversity indexes": self.diversity_indexes}
 
 
 class PhylogeneticDiversityBase(DiversityBase):
@@ -369,13 +387,14 @@ class PhylogeneticDiversityBase(DiversityBase):
         """
         Args:
             validate: skbio argument. "If False, validation of the input won’t be performed.
-            This step can be slow, so if validation is run elsewhere it can be disabled here.
-            However, invalid input data can lead to invalid results or error messages that
-            are hard to interpret, so this step should not be bypassed if you’re not certain
-            that your input data are valid. See skbio.diversity for the description of what
-            validation entails so you can determine if you can safely disable validation.
+              This step can be slow, so if validation is run elsewhere it can be disabled here.
+              However, invalid input data can lead to invalid results or error messages that
+              are hard to interpret, so this step should not be bypassed if you’re not certain
+              that your input data are valid. See
+              `skbio.diversity <https://http://scikit-bio.org/docs/latest/diversity.html#module-skbio.diversity/>`_
+              for the description of what validation entails so you can determine if you can safely disable validation."
             force_computation: if True, doesn't raise error if OTU IDs are missing and compute
-            the diversity with the OTU IDs that are present in the Tree
+              the diversity with the OTU IDs that are present in the Tree
         """
         super().__init__(taxonomy_dataframe)
         if type(taxonomy_tree) == skbio.tree._tree.TreeNode:

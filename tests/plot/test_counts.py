@@ -741,7 +741,7 @@ of the cohort (with mean among samples > 2.0)",
 
         expected_x = [75.0, 100.0]
         expected_y = [
-            "<i>Streptococcus salivarius</i>",
+            "<i>Lactobacillus</i> (genus)",  # with Streptococcus_salivarius and Streptococcus (genus) all at 75%
             "<i>Streptococcus thermophilus</i>",
         ]
 

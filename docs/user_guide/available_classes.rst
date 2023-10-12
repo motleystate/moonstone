@@ -52,7 +52,8 @@ Taxonomy counts parsers (``from moonstone.parsers.counts.taxonomy``):
    :nosignatures:
 
     kraken2.SunbeamKraken2Parser
-    metaphlan2.Metaphlan2Parser
+    metaphlan.Metaphlan2Parser
+    metaphlan.Metaphlan3Parser
     qiime.Qiime2Parser
 
 .. Note::
@@ -85,6 +86,7 @@ List
     basics_filtering.NaNPercentageFiltering
     basics_filtering.NumberOfDifferentValuesFiltering
     taxonomy_filtering.TaxonomyNamesFiltering
+    taxonomy_filtering.TaxonomyMeanFiltering
     mean_filtering.MeanFiltering
 
 .. Note::
@@ -108,14 +110,15 @@ How it works?
 List
 """"
 
-.. currentmodule:: moonstone.normalization.counts
+.. currentmodule:: moonstone.normalization
 .. autosummary::
    :nosignatures:
 
-    geometric_mean.GeometricMeanNormalization
-    total_counts.TotalCountsNormalization
-    random_selection.RandomSelection
-    random_selection.TaxonomyRandomSelection
+    counts.geometric_mean.GeometricMeanNormalization
+    counts.total_counts.TotalCountsNormalization
+    counts.random_selection.RandomSelection
+    counts.random_selection.TaxonomyRandomSelection
+    processed.scaling_normalization
 
 .. _av_plot:
 
@@ -144,6 +147,7 @@ List
    :nosignatures:
 
    counts.PlotCountsStats
+   counts.PlotTaxonomyCounts
    metadata.PlotMetadataStats
 
 .. Note::
@@ -176,7 +180,11 @@ List
    differential_analysis.DifferentialAnalysis
    diversity.alpha.ShannonIndex
    diversity.alpha.SimpsonInverseIndex
+   diversity.alpha.Chao1Index
+   diversity.alpha.FaithsPhylogeneticDiversity
    diversity.beta.BrayCurtis
+   diversity.beta.WeightedUniFrac
+   diversity.beta.UnweightedUniFrac
 
 .. Note::
     More details on API documentation for :ref:`api_plot`.

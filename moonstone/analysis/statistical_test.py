@@ -22,6 +22,15 @@ TESTS_FUNCTIONS_USED = {
 def _preprocess_groups_comparison(
     series: pd.Series, group_series: pd.Series, stat_test: str, force_computation: bool
 ):
+    # If samples in group_series/metadata but not in series/count_dataframe
+    # then we need to remove them from the group_series/metadata
+    # to not get an error like "None of [Index(['sample7'], dtype='object')] are in the [index]"
+    group_series_index_to_keep = group_series.index.intersection(series.index)
+    if len(group_series_index_to_keep) != len(group_series.index):
+        logger.info(
+            "Some index values in group_series aren't found in the series. Dropping those rows."
+        )
+        group_series = group_series.loc[group_series_index_to_keep]
     groups = list(group_series.unique())
     groups.sort()
 
@@ -199,8 +208,8 @@ def _compute_contingency_table(
     if na:
         # crosstab doesn't count np.nan as a value
         # so we need to change it to a string for those values to appear in the contingency table
-        binned_series.cat.add_categories("NaN", inplace=True)
-        binned_series.fillna("NaN", inplace=True)
+        binned_series = binned_series.cat.add_categories("NaN")
+        binned_series = binned_series.fillna("NaN")
     # creation of the contingency table
     tab = pd.crosstab(binned_series, categorical_series)  # rows -> numerical_series; columns -> categorical_series
     if (
@@ -407,7 +416,7 @@ Another statistical test would be more appropriate to compare those 2 groups."
 
     df1 = _add_category_column(series1, defaultname="series1")
     df2 = _add_category_column(series2, defaultname="series2")
-    df = df1.append(df2)
+    df = pd.concat([df1, df2])
 
     if bins == "best pvalue":
         tab, comparison_df = compute_contingency_table(

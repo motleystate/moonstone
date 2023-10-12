@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class AlphaDiversity(DiversityBase, ABC):
-    DIVERSITY_INDEXES_NAME = "alpha_index"
-    DEF_TITLE = "(alpha diversity) distribution across the samples"
+    _DIVERSITY_INDEXES_NAME = "alpha_index"
+    _DEF_TITLE = "(alpha diversity) distribution across the samples"
 
     @property
     def alpha_diversity_indexes(self):
@@ -38,6 +38,13 @@ class ShannonIndex(AlphaDiversity):
         for i in self.df.columns:
             Seriesdic[i] = skbio.diversity.alpha.shannon(self.df[i], base=self.base)
         return pd.Series(Seriesdic)
+
+    def generate_report_data(self) -> dict:
+        """
+        method that generates a report summurazing the diversity computed
+        (parameters, results)
+        """
+        return {**{"param": {"base": self.base}, **super().generate_report_data()}}
 
 
 class SimpsonInverseIndex(AlphaDiversity):
@@ -69,6 +76,13 @@ class Chao1Index(AlphaDiversity):
         for i in self.df.columns:
             Seriesdic[i] = skbio.diversity.alpha.chao1(self.df[i], bias_corrected=self.bias_corrected)
         return pd.Series(Seriesdic)
+
+    def generate_report_data(self) -> dict:
+        """
+        method that generates a report summurazing the diversity computed
+        (parameters, results)
+        """
+        return {**{"param": {"bias_corrected": self.bias_corrected}, **super().generate_report_data()}}
 
 
 class FaithsPhylogeneticDiversity(AlphaDiversity, PhylogeneticDiversityBase):

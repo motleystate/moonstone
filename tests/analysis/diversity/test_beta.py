@@ -35,7 +35,8 @@ class TestBrayCurtis(TestCase):
         )
         pd.testing.assert_frame_equal(
             tested_object_instance.beta_diversity_df, expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+            rtol=0.01
+            # check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
     def test_compute_beta_diversity_series(self):
@@ -49,16 +50,16 @@ class TestBrayCurtis(TestCase):
             ]
         )
         expected_object = pd.Series(
-            [0.333, 0.714, 1.0], index=multi_index, name=BrayCurtis.DIVERSITY_INDEXES_NAME
+            [0.333, 0.714, 1.0], index=multi_index, name=BrayCurtis._DIVERSITY_INDEXES_NAME
         )
         # Two ways of retrieving the series
         pd.testing.assert_series_equal(
             tested_object_instance.beta_diversity_series, expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+            rtol=0.01
         )
         pd.testing.assert_series_equal(
             tested_object_instance.diversity_indexes, expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
+            rtol=0.01
         )
 
     def test_run_statistical_test_groups_with_NaN(self):
@@ -82,7 +83,7 @@ class TestBrayCurtis(TestCase):
                 'samples14': [9.35, 'A'],
                 'samples15': [7.89, 'A'],
                 'samples16': [4.65, 'C'],
-                'samples17': [8.90, 'D'],
+                'samples17': [8.90, 'D'],  # only 1 sample from group D < 5 required to do ttest-independence
                 'samples18': [2.33, 'C'],
                 'samples19': [1.34, 'B'],
                 'samples20': [6.87, 'C']
@@ -109,7 +110,6 @@ class TestBrayCurtis(TestCase):
 
         pd.testing.assert_series_equal(
             pval, expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
     def test_get_grouped_df_series(self):
@@ -131,7 +131,6 @@ class TestBrayCurtis(TestCase):
         output = tested_object_instance._get_grouped_df_series(metadata_ser)
         pd.testing.assert_frame_equal(
             output, expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
     def test_get_grouped_df_dataframe(self):
@@ -172,7 +171,6 @@ class TestBrayCurtis(TestCase):
         output = tested_object_instance._get_grouped_df_dataframe(metadata_df)
         pd.testing.assert_frame_equal(
             output, expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
     def test_analyse_grouped_df(self):
@@ -195,7 +193,6 @@ class TestBrayCurtis(TestCase):
         output = tested_object_instance.analyse_groups(metadata_df, 'sex', show=False, show_pval=False)
         pd.testing.assert_frame_equal(
             output['data'], expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
     def test_analyse_grouped_df_with_group_col2(self):
@@ -238,7 +235,6 @@ class TestBrayCurtis(TestCase):
             )
         pd.testing.assert_frame_equal(
             output["data"], expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
 
@@ -269,7 +265,6 @@ class TestWeightedUniFrac(TestCase):
         )
         pd.testing.assert_frame_equal(
             tested_object_instance.beta_diversity_df, expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
     def test_compute_beta_diversity_force_computation(self):
@@ -325,7 +320,6 @@ class TestUnweightedUniFrac(TestCase):
         )
         pd.testing.assert_frame_equal(
             tested_object_instance.beta_diversity_df, expected_object,
-            check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
     def test_compute_beta_diversity_force_computation(self):

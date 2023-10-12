@@ -151,6 +151,7 @@ class TestSeriesBinning(TestCase):
     def test_compute_binned_data_giving_bins_values(self):
         series = pd.Series([5, 8, 10], index=["i1", "i2", "i3"])
         expected_object = pd.Series([1, 2], index=["]0, 5]", "]5, 10]"])
+        expected_object.name = "count"
         tested_object_instance = SeriesBinning(series)
         tested_object_instance.bins_values = [0, 5, 10]
         tested_object_instance.farleft = False
@@ -166,6 +167,7 @@ class TestSeriesBinning(TestCase):
             index=["i1", "i2", "i3", "i4", "i5", "i6", "i7", "i8"]
             )
         expected_object = pd.Series([3, 5], index=["[0.0, 10.0]", "]10.0, 20.0]"])
+        expected_object.name = "count"
         tested_object_instance = SeriesBinning(series, nbins=2)
         tested_object = tested_object_instance.compute_binned_data()
         pd.testing.assert_series_equal(tested_object, expected_object)
@@ -176,6 +178,7 @@ class TestSeriesBinning(TestCase):
             index=["i1", "i2", "i3", "i4", "i5", "i6", "i7", "i8"]
             )
         expected_object = pd.Series([4, 4], index=["[0.0, 13.5]", "]13.5, 20.0]"])
+        expected_object.name = "count"
         tested_object_instance = SeriesBinning(series, nbins=2, cut_type="equal-size")
         tested_object = tested_object_instance.compute_binned_data()
         pd.testing.assert_series_equal(tested_object, expected_object)

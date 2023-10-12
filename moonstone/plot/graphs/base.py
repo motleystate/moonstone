@@ -236,7 +236,7 @@ class GroupBaseGraph(BaseGraph):
             if groups:
                 filtered_df = self.data[self.data[group_col].isin(groups)]
                 filtered_df[group_col] = filtered_df[group_col].astype("category")
-                filtered_df[group_col].cat.set_categories(groups, inplace=True)
+                filtered_df[group_col].cat = filtered_df[group_col].cat.set_categories(groups)
                 filtered_df = filtered_df.sort_values([group_col])
             else:
                 filtered_df = copy.deepcopy(self.data)
@@ -247,7 +247,7 @@ class GroupBaseGraph(BaseGraph):
                     fig,
                     filtered_df2[group_col],
                     filtered_df2[data_col],
-                    names[group],
+                    str(names[group]),
                     filtered_df.index,
                     self._get_group_color(group, colors),
                     orientation,
@@ -265,7 +265,7 @@ class GroupBaseGraph(BaseGraph):
                     fig,
                     filtered_df[group_col],
                     filtered_df[data_col],
-                    names[group],
+                    str(names[group]),
                     filtered_df.index,
                     self._get_group_color(group, colors),
                     orientation,

@@ -24,3 +24,12 @@ Counts
     :undoc-members:
     :special-members: __init__
     :inherited-members:
+
+Processed
+=========
+
+.. automodule:: moonstone.normalization.processed.scaling_normalization
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:

@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 
 class BetaDiversity(DiversityBase, ABC):
-    DIVERSITY_INDEXES_NAME = "beta_index"
-    DEF_TITLE = "(beta diversity) distribution across the samples"
+    _DIVERSITY_INDEXES_NAME = "beta_index"
+    _DEF_TITLE = "(beta diversity) distribution across the samples"
 
     @abstractmethod
     def compute_beta_diversity(self, df) -> DistanceMatrix:
@@ -28,7 +28,7 @@ class BetaDiversity(DiversityBase, ABC):
 
     def compute_diversity(self) -> pd.Series:
         series = self.beta_diversity.to_series()
-        series.name = self.DIVERSITY_INDEXES_NAME
+        series.name = self._DIVERSITY_INDEXES_NAME
         return series
 
     @property
@@ -62,7 +62,7 @@ class BetaDiversity(DiversityBase, ABC):
             beta_div_solo_indexed_df = beta_div_not_indexed_df.set_index(
                 beta_div_not_indexed_df[index_col_names].agg('-'.join, axis=1)
             ).drop(index_col_names, axis=1)
-            beta_div_solo_indexed_df.columns = [self.DIVERSITY_INDEXES_NAME]
+            beta_div_solo_indexed_df.columns = [self._DIVERSITY_INDEXES_NAME]
             # Add corresponding group name
             beta_div_solo_indexed_df[metadata_series.name] = group
             df_list.append(beta_div_solo_indexed_df)
@@ -85,7 +85,7 @@ class BetaDiversity(DiversityBase, ABC):
             beta_div_solo_indexed_df = beta_div_not_indexed_df.set_index(
                 beta_div_not_indexed_df[index_col_names].agg('-'.join, axis=1)
             ).drop(index_col_names, axis=1)
-            beta_div_solo_indexed_df.columns = [self.DIVERSITY_INDEXES_NAME]
+            beta_div_solo_indexed_df.columns = [self._DIVERSITY_INDEXES_NAME]
             # Add corresponding group name
             beta_div_solo_indexed_df[final_group_col] = group
             beta_div_solo_indexed_df[group_col] = group.split(" - ")[0]

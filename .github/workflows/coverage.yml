@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7]
+        python-version: [3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -19,10 +19,13 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip setuptools wheel
         pip install pytest pytest-cov
-        pip install numpy==1.18.1
+        pip install numpy==1.24.3
         pip install .
+        pip install odfpy     # optional dependencies
+        pip install openpyxl  # idem
+        pip install xlrd      # idem
     - name: Generate coverage report
       run: |
         pytest --cov ./moonstone --cov-report xml --cov-report term
