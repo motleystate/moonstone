@@ -52,8 +52,10 @@ class BaseParser:
             "xlsb": "pyxlsb"                            # Binary Excel files
             }
         if ext in ext_engine.keys():
+            if self.header == "infer":
+                self.header = 0  # "infer" not accepted with read_excel anymore
             return pd.read_excel(
-                self.file_path, sep=self.sep, header=self.header, **self.parsing_options,
+                self.file_path, header=self.header, **self.parsing_options,
                 engine=ext_engine[ext]
             )
         return pd.read_csv(

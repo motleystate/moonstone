@@ -456,7 +456,8 @@ class PlotTaxonomyCounts:
             tmp = relab_df_taxa[i].reset_index()
             tmp.index = nb * [i]
             tmp.columns = ["species", "relative abundance"]
-            relab_df_taxa2 = relab_df_taxa2.append(tmp)
+            # relab_df_taxa2 = relab_df_taxa2.append(tmp)
+            relab_df_taxa2 = pd.concat([relab_df_taxa2, tmp])
         relab_df_taxa2.species = relab_df_taxa2.species.apply(self._italicize_taxa_name)
         groups = [self._italicize_taxa_name(name) for name in groups]
 
@@ -747,7 +748,8 @@ of the cohort"
         # Make graph
         graph = MatrixBarGraph(data_df)
         # Plotting options
-        title = f"{taxa_level.capitalize()} composition for the top {taxa_number} most abundant species across samples"
+        title = f"{taxa_level.capitalize()} composition for the top {taxa_number} most abundant {taxa_level} across \
+samples"
         if prevalence_threshold is not None:
             title += f" (present in at least {prevalence_threshold}% of samples)"
 

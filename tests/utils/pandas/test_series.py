@@ -74,7 +74,7 @@ class TestSeriesStatsBuilder(TestCase):
 
 class TestSeriesBinning(TestCase):
 
-    def test_compute_homoogeneous_bins(self):
+    def test_compute_homogeneous_bins(self):
         tested_object = pd.Series(
             {
                 'gene_1': 10.5,
@@ -108,6 +108,7 @@ class TestSeriesBinning(TestCase):
         expected_object = pd.Series(
             [1, 2], index=[']0, 5]', ']5, 10]']
         )
+        expected_object.name = "count"
         tested_object_instance = SeriesBinning(series)
         tested_object_instance.bins_values = [0, 5, 10]
         tested_object = tested_object_instance.compute_binned_data()

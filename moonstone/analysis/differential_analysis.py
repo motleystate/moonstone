@@ -1,7 +1,6 @@
 import logging
 
 import pandas as pd
-import numpy as np
 import scipy.stats as st
 from statsmodels.stats.multitest import multipletests
 
@@ -53,8 +52,8 @@ class DifferentialAnalysis:
         cat1 = self.full_table[self.full_table[feature] == self.full_table[feature][0]]
         cat2 = self.full_table[self.full_table[feature] != self.full_table[feature][0]]
         for family in range(self.number_columns_to_skip, self.full_table.shape[1]):
-            test = self.tests_functions_used[test_to_use](cat1[self.full_table.columns[family]],
-                                                          cat2[self.full_table.columns[family]])
+            test = self.tests_functions_used[test_to_use](cat1[self.full_table.columns[family]].astype(float),
+                                                          cat2[self.full_table.columns[family]].astype(float))
             features.append(feature)
             taxons.append(self.full_table.columns[family])
             static_value.append(round(test[0], 6))
@@ -79,7 +78,8 @@ class DifferentialAnalysis:
             list_ofgroups = []
             for variable in variable_dic:
                 list_ofgroups.append(variable_dic[variable][self.full_table.columns[family]])
-            test = self.tests_functions_used[test_to_use](*np.asarray(list_ofgroups))
+            #test = self.tests_functions_used[test_to_use](*np.asarray(list_ofgroups))
+            test = self.tests_functions_used[test_to_use](*list_ofgroups)  # works for kruskal and one way anova
             features.append(feature)
             taxons.append(self.full_table.columns[family])
             static_values.append(round(test[0], 6))
@@ -114,5 +114,5 @@ class DifferentialAnalysis:
         for feature in features:
             test_result = getattr(self, f"test_{type_of_features}", self.test_default)(feature, test_to_use)
             test_result['corrected_p-value'] = self.corrected_p_values(test_result['p-value'], correction_method_used)
-            final_table = final_table.append(test_result)
+            final_table = pd.concat([final_table, test_result])
         return final_table
