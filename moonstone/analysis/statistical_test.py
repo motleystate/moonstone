@@ -14,6 +14,15 @@ DEFAULT_STATS_TEST = "mann_whitney_u"
 def _preprocess_groups_comparison(
     series: pd.Series, group_series: pd.Series, stat_test: str
 ):
+    # If samples in group_series/metadata but not in series/count_dataframe
+    # then we need to remove them from the group_series/metadata
+    # to not get an error like "None of [Index(['sample7'], dtype='object')] are in the [index]"
+    group_series_index_to_keep = group_series.index.intersection(series.index)
+    if len(group_series_index_to_keep) != len(group_series.index):
+        logger.info(
+            "Some index values in group_series aren't found in the series. Dropping those rows."
+        )
+        group_series = group_series.loc[group_series_index_to_keep]
     groups = list(group_series.unique())
     groups.sort()
 

@@ -1,6 +1,5 @@
 import logging
 import pandas as pd
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +25,15 @@ class MergeDF(object):
         logger.info('Merge function called to merge count data and metadata.')
         logger.info(f'Variable {self.variable} from metadata file will be merged with counts.')
 
-        if not isinstance(self.dc.index, type(self.dm.index)):
-            logger.warning(f'Index types do not match: {type(self.dc.index)} and {type(self.dm.index)}.')
-            self.dc.set_index(np.int64(np.array(self.dc.index)), inplace=True)
-            logger.info(f' Indexes reset. Count Index={type(self.dc.index)}, Metadata Index={type(self.dm.index)}')
+        # if not isinstance(self.dc.index, type(self.dm.index)):
+        if self.dc.index.dtype != self.dm.index.dtype:
+            # logger.warning(f'Index types do not match: {type(self.dc.index)} and {type(self.dm.index)}.')
+            # self.dc = self.dc.set_index(np.int64(np.array(self.dc.index)))
+            # logger.info(f' Indexes reset. Count Index={type(self.dc.index)}, Metadata Index={type(self.dm.index)}')
+            logger.warning(f'Index types do not match: {self.dc.index.dtype} and {self.dm.index.dtype}.')
+            self.dc.index = self.dc.index.astype(str)
+            self.dm.index = self.dm.index.astype(str)
+            logger.warning('Both Count and Metadata Indexes set as string')
 
         df = pd.merge(self.dm[self.variable], self.dc, left_index=True, right_index=True)
         logger.info('Merge function completed. Returning merged data frame.')
