@@ -74,7 +74,7 @@ pickleshare==0.7.5
     # via ipython
 pillow==7.2.0
     # via matplotlib
-plotly==5.6.0
+plotly==5.17.0
     # via moonstone (setup.py)
 prompt-toolkit==3.0.7
     # via ipython
