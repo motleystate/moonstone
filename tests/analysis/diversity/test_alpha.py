@@ -107,10 +107,12 @@ set to default (None).", log.output)
     def test_invalid_pval_param(self):
         tested_object_instance = ShannonIndex(self.tested_object)
         with self.assertLogs('moonstone.analysis.diversity.base', level='WARNING') as log:
-            tested_object_instance._valid_pval_param("lalala")
-            self.assertEqual(len(log.output), 1)
+            tested_object_instance._valid_pval_param("lalala", "lilili")
+            self.assertEqual(len(log.output), 2)
             self.assertIn("WARNING:moonstone.analysis.diversity.base:pval_to_compute='lalala' not valid, \
 set to default (all).", log.output)
+            self.assertIn("WARNING:moonstone.analysis.diversity.base:pval_to_display='lilili' not valid, \
+set to default (None).", log.output)
 
     def test_analyse_groups_pval_to_compute_all(self):
         tested_object_instance = ShannonIndex(self.tested_object)
@@ -199,6 +201,81 @@ set to default (all).", log.output)
         )
         pd.testing.assert_series_equal(output['pval'], expected_ser, check_dtype=False)
 
+    def test_generate_ordered_final_groups(self):
+        tested_object = pd.DataFrame.from_dict({
+            'sex_Group': {'comp1': 'M - A', 'comp2': 'F - B', 'comp3': 'F - A', 'comp4': 'F - C', 'comp5': 'M - C', 'comp6': 'M - B', 'comp7': 'M - A'}, 
+            'sex': {'comp1': 'M', 'comp2': 'F', 'comp3': 'F', 'comp4': 'F', 'comp5': 'M', 'comp6': 'M', 'comp7': 'M'}, 
+            'Group': {'comp1': 'A', 'comp2': 'B', 'comp3': 'A', 'comp4': 'C', 'comp5': 'C', 'comp6': 'B', 'comp7': 'A'},
+        })
+        groups_Group=["C", "A", "B"]
+        groups_sex=["M", "F"]
+        tested_object_instance = ShannonIndex(self.tested_object)
+        final_groups = tested_object_instance._generate_ordered_final_groups(
+            tested_object, final_group_col='sex_Group', group_col='Group', group_col2='sex',
+            groups=groups_Group, groups2=groups_sex
+        )
+        self.assertListEqual(final_groups, ['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B'])
+        # now testing other way around
+        final_groups = tested_object_instance._generate_ordered_final_groups(
+            tested_object, final_group_col='sex_Group', group_col='sex', group_col2='Group',
+            groups=groups_sex, groups2=groups_Group
+        )
+        self.assertListEqual(final_groups, ['M - C', 'M - A', 'M - B', 'F - C', 'F - A', 'F - B'])
+        # testing if order of groups not given        
+        final_groups = tested_object_instance._generate_ordered_final_groups(
+            tested_object, final_group_col='sex_Group', group_col='sex', group_col2='Group',
+            groups=None, groups2=groups_Group
+        )
+        self.assertListEqual(final_groups, ['F - C', 'F - A', 'F - B', 'M - C', 'M - A', 'M - B'])
+        # testing if order of groups2 not given
+        final_groups = tested_object_instance._generate_ordered_final_groups(
+            tested_object, final_group_col='sex_Group', group_col='sex', group_col2='Group',
+            groups=groups_sex, groups2=None
+        )
+        self.assertListEqual(final_groups, ['M - A', 'M - B', 'M - C', 'F - A', 'F - B', 'F - C'])        
+
+    def test_order_pval_series(self):
+        tested_object = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('M - A', 'F - A'): 0.5,
+            ('F - C', 'F - B'): 0.0014,
+            ('M - B', 'F - B'): 0.2,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+            ('M - C', 'F - C'): 0.0003,
+            ('M - A', 'M - C'): 0.89,
+        })
+        tested_object.index.names = ["Group1", "Group2"]
+        groups = ['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B']
+        tested_object_instance = ShannonIndex(self.tested_object)
+
+        level0 = pd.Categorical(
+            ['M - C', 'M - C', 'M - C', 'F - C', 'F - C', 'M - A', 'M - A', 'F - A', 'M - B'], 
+            categories=['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B'], 
+            ordered=True, dtype='category'
+        )
+        level1 = pd.Categorical(
+            ['F - C', 'M - A', 'M - B', 'F - A', 'F - B', 'F - A', 'M - B', 'F - B', 'F - B'], 
+            categories=['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B'], 
+            ordered=True, dtype='category'
+        )
+        data = [[0.0003, 0.89, 0.03, 0.0031, 0.0014, 0.5, 0.00067, 0.001, 0.2]]
+        expected_ser = pd.DataFrame(
+            data=data,
+            columns=pd.MultiIndex.from_arrays([level0, level1]),
+
+        ).T[0]
+        expected_ser.index.names = ["Group1", "Group2"]
+
+        pd.testing.assert_series_equal(
+            tested_object_instance._order_pval_series(
+                tested_object, groups, 
+                {'M - C': 0, 'F - C': 1, 'M - A': 2, 'F - A': 3, 'M - B': 4, 'F - B': 5}
+            ),
+            expected_ser
+        )
+        
 
 class TestSimpsonInverseIndex(TestCase):
 

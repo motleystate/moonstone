@@ -294,13 +294,12 @@ pval_to_display should be set to :{}".format(
         return pval_series
 
     def _order_pval_series(
-        self, pval_series, groups, dic_gps
+        self, pval_series: pd.Series, groups: list, dic_gps: dict
     ):
         # Reminder: pvalue series is a MultiIndex series -> 2 level of index are the 2 groups compared
         # to order p-value series in a specific order dictated in dic_gps
         # example: dic_gps = {"Group A": 0, "Group B": 1, "Group C": 3}
         names = pval_series.index.names     # default: ["Group1", "Group2"]
-
         # first we order p-value series index name to have the group that should come first as first member
         pval_series = pval_series.reset_index()
         for i in pval_series.index:
@@ -310,12 +309,30 @@ pval_to_display should be set to :{}".format(
                 pval_series.loc[i, names[0]] = level1       # invert to have the Group that should be put first as first
                 pval_series.loc[i, names[1]] = level0       # in example: "Group B - Group A" becomes "Group A - Group B"
         pval_series[names[0]] = pval_series[names[0]].astype("category")
-        pval_series[names[0]].cat.set_categories(groups, inplace=True)
+        pval_series[names[0]] = pval_series[names[0]].cat.set_categories(groups, ordered=True)
         pval_series[names[1]] = pval_series[names[1]].astype("category")
-        pval_series[names[1]].cat.set_categories(groups, inplace=True)
+        pval_series[names[1]] = pval_series[names[1]].cat.set_categories(groups, ordered=True)
         pval_series = pval_series.sort_values([names[0], names[1]]) # we sort by 1st member, and then 2nd member
         pval_series = pval_series.set_index([names[0], names[1]])
         return pval_series[0]
+
+    def _generate_ordered_final_groups(
+        self, df: pd.DataFrame, final_group_col: str, group_col: str, group_col2: str,
+        groups: list, groups2: list
+    ):
+        # listing and sorting all final_groups possibles respecting the order given by
+        # groups first and then by groups2
+        # NB: At least one of groups or groups2 need to not be None
+        t = df.drop_duplicates(subset=[final_group_col]).copy()  # copy() to avoid raising SettingWithCopyWarning
+        if groups:
+            t[group_col] = t[group_col].astype("category")
+            t[group_col] = t[group_col].cat.set_categories(groups, ordered=True)
+        if groups2:
+            t[group_col2] = t[group_col2].astype("category")
+            t[group_col2] = t[group_col2].cat.set_categories(groups2, ordered=True)
+        t = t.dropna(how="any", subset=[group_col, group_col2])
+        t = t.sort_values([group_col, group_col2])
+        return list(t[final_group_col])
 
     def _generate_shapes_annotations_lists(
         self, pval_series, groups, hgt_min
@@ -567,16 +584,15 @@ pval_to_display should be set to :{}".format(
             )
             df = self._get_grouped_df(filtered_metadata_df[[group_col, group_col2, final_group_col]])
 
-            #if pval_to_display:
-            if 1 == 1:
+            if pval_to_display and (groups or groups2):
                 # listing and sorting all final_groups possibles respecting the order given by
                 # groups first and then by groups2
                 t = df.drop_duplicates(subset=[final_group_col])
                 t[group_col] = t[group_col].astype("category")
-                t[group_col].cat.set_categories(groups, inplace=True)
+                t[group_col].cat = t[group_col].cat.set_categories(groups)
                 t[group_col2] = t[group_col2].astype("category")
-                t[group_col2].cat.set_categories(groups2, inplace=True)
-                t.dropna(how="any", subset=[group_col, group_col2], inplace=True)
+                t[group_col].cat = t[group_col2].cat.set_categories(groups2)
+                t = t.dropna(how="any", subset=[group_col, group_col2])
                 t = t.sort_values([group_col, group_col2])
                 final_groups = list(t[final_group_col])
 
@@ -626,7 +642,7 @@ pval_to_display should be set to :{}".format(
                 plotting_options = {}
             det = (hgt_min/15)
             hgt_min += det/2
-            nblevels=to_display.shape[0]
+            #nblevels=to_display.shape[0]
             plotting_options = merge_dict(plotting_options, {
                 'layout': {
                     'shapes': list_shapes,            # we should had to previous list if there is one

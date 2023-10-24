@@ -70,8 +70,8 @@ class PlotCountsStats:
 
         mean_series = self.df.mean(axis=1)
         binned_mean = SeriesBinning(mean_series).binned_data
-        bar_fig = BarGraph(binned_mean, plotting_options, show=show, output_file=output_file)
-        bar_fig.plot_one_graph(plotting_options, show=show, output_file=output_file)
+        bar_fig = BarGraph(binned_mean)
+        bar_fig.plot_one_graph(plotting_options=plotting_options, show=show, output_file=output_file)
 
 
 class PlotTaxonomyCounts:
