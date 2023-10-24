@@ -334,7 +334,6 @@ pval_to_display should be set to: {}".format(
         # to order p-value series in a specific order dictated in dic_gps
         # example: dic_gps = {"Group A": 0, "Group B": 1, "Group C": 3}
         names = pval_series.index.names     # default: ["Group1", "Group2"]
-
         # first we order p-value series index name to have the group that should come first as first member
         pval_series = pval_series.reset_index()
         for i in pval_series.index:
