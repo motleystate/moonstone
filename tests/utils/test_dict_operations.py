@@ -7,8 +7,14 @@ class TestMergeDict(TestCase):
     def test_simple_dicts(self):
         first_dict = {"a": 3, "b": 4}
         second_dict = {"a": 5, "c": 7}
+        expected_second_dict = {"a": 5, "c": 7}
         expected_dict = {"a": 3, "b": 4, "c": 7}
+
+        # Testing the merging
         self.assertDictEqual(merge_dict(first_dict, second_dict), expected_dict)
+
+        # ... but also testing that second_dict has not been changed
+        self.assertDictEqual(second_dict, expected_second_dict)
 
     def test_with_subdict(self):
         first_dict = {"a": 3, "sub": {"b": 4, "c": 6}}

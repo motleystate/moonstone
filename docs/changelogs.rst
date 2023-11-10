@@ -6,6 +6,20 @@ Changelogs
 
 Summary of developments of moonstone library.
 
+
+v1.0
+====
+
+v1.0.0
+------
+
+* upgrade to python >= 3.8. Version requirements have been updated for numpy, scikit-bio, scikit-learn, pandas, statsmodels, hdmedians, scipy and plotly
+* ``mode`` argument for ``plot_most_abundant_taxa()`` and ``plot_most_prevalent_taxa()`` that allows to plot the data as boxplot or violin plot, as well as a bargraph.
+* ``parsers``:
+  * More formats accepted in parsers: ".xls", ".xlsx", ".odt", ".ods", ".odf", ".xlsb"
+  * ``Metaphlan3Parser``: ``keep_NCBI_tax_col`` argument and possibility to compute dataframe with less taxonomical level than expected
+* ``adapt_phylogenetic_tree_to_counts_df`` function in utils/phylogenetic_tree_editing.py
+
 v0.7
 ====
 
