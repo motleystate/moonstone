@@ -488,9 +488,7 @@ pval_to_display should be set to: {}".format(
             groups: list of groups displayed in graph.
             supergroups: dictionary with supergroup edges
         """
-        dic_gps = {}
-        for i in range(len(groups)):
-            dic_gps[groups[i]] = i
+        dic_gps = {key: idx for idx, key in enumerate(groups)}  # key = Group name; value = number from 0 to len(groups)
 
         list_shapes = []
         dic_middle = {}
