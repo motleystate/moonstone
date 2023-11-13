@@ -114,6 +114,15 @@ set to default (all).", log.output)
             self.assertIn("WARNING:moonstone.analysis.diversity.base:pval_to_display='lilili' not valid, \
 set to default (None).", log.output)
 
+    def test_inconsistent_pval_to_diplay_param(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+        with self.assertRaises(ValueError) as cm:
+            tested_object_instance._valid_pval_param("same group_col or group_col2 values", "all")
+        the_exception = cm.exception
+        expected_msg = "pval_to_display='all' not valid, when pval_to_compute='same group_col or group_col2 values'. \
+pval_to_display should be set to: ['same group_col or group_col2 values', 'same group_col values', None]"
+        self.assertEqual(the_exception.__str__(), expected_msg)
+
     def test_analyse_groups_pval_to_compute_all(self):
         tested_object_instance = ShannonIndex(self.tested_object)
 
@@ -201,14 +210,237 @@ set to default (None).", log.output)
         )
         pd.testing.assert_series_equal(output['pval'], expected_ser, check_dtype=False)
 
+    def test_pval_selection(self):
+        tested_object = pd.Series({
+            ('A', 'B'): 0.03,
+            ('A', 'C'): 0.5,
+            ('A', 'D'): 0.0014,
+            ('B', 'C'): 0.2,
+            ('B', 'D'): 0.001,
+            ('C', 'D'): 0.00067,
+        })
+        tested_object.index.names = ["Group1", "Group2"]
+        tested_object_instance = ShannonIndex(self.tested_object)
+
+        expected_ser = pd.Series({
+            ('A', 'B'): 0.03,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        pd.testing.assert_series_equal(
+            tested_object_instance._pval_selection(tested_object, ['A', 'B', 'C']),
+            expected_ser
+        )
+
+        expected_ser = pd.Series({
+            ('A', 'D'): 0.0014,
+            ('C', 'D'): 0.00067,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        pd.testing.assert_series_equal(
+            tested_object_instance._pval_selection(tested_object, ['A', 'C', 'D']),
+            expected_ser
+        )
+
+    def test_pval_selection_with_group_col2(self):
+        # pval_to_compute = 'all'
+        tested_object = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('M - A', 'F - A'): 0.5,
+            ('M - C', 'F - A'): 0.0034,
+            ('F - B', 'M - A'): 0.6,
+            ('F - C', 'F - B'): 0.0014,
+            ('F - B', 'M - B'): 0.2,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+            ('M - C', 'F - C'): 0.0003,
+            ('M - C', 'F - B'): 0.0056,
+            ('M - A', 'M - C'): 0.89,
+            ('M - A', 'F - C'): 0.0006,
+            ('M - B', 'F - C'): 0.0043,
+            ('F - A', 'M - B'): 0.234,
+        })
+        tested_object.index.names = ["Group1", "Group2"]
+        tested_object_instance = ShannonIndex(self.tested_object)
+
+        groups = ['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B']
+
+        # Case pval_to_display = 'all':  only pval > 0.05 removed
+        pval_to_display = 'all'
+        expected_ser = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('M - C', 'F - A'): 0.0034,
+            ('F - C', 'F - B'): 0.0014,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+            ('M - C', 'F - C'): 0.0003,
+            ('M - C', 'F - B'): 0.0056,
+            ('M - A', 'F - C'): 0.0006,
+            ('M - B', 'F - C'): 0.0043,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        res = tested_object_instance._pval_selection_with_group_col2(
+            tested_object, groups, 'all', pval_to_display
+        )
+        pd.testing.assert_series_equal(res, expected_ser)
+
+        # Case pval_to_display = 'same group_col or group_col2 values'
+        pval_to_display = 'same group_col or group_col2 values'
+        expected_ser = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('F - C', 'F - B'): 0.0014,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+            ('M - C', 'F - C'): 0.0003,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        res = tested_object_instance._pval_selection_with_group_col2(
+            tested_object, groups, 'all', pval_to_display
+        )
+        pd.testing.assert_series_equal(res, expected_ser)
+
+        # Case pval_to_display = 'same group_col values'
+        pval_to_display = 'same group_col values'
+        expected_ser = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('F - C', 'F - B'): 0.0014,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        res = tested_object_instance._pval_selection_with_group_col2(
+            tested_object, groups, 'all', pval_to_display
+        )
+        pd.testing.assert_series_equal(res, expected_ser)
+
+        # Case final_groups defined
+        groups = ['M - A', 'F - A', 'M - C', 'F - C']
+        expected_ser = pd.Series({
+            ('M - C', 'F - A'): 0.0034,
+            ('F - A', 'F - C'): 0.0031,
+            ('M - C', 'F - C'): 0.0003,
+            ('M - A', 'F - C'): 0.0006,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        res = tested_object_instance._pval_selection_with_group_col2(
+            tested_object, groups, 'all', 'all'
+        )
+        pd.testing.assert_series_equal(res, expected_ser)
+
+    def test_pval_selection_with_group_col2_pval_to_compute_same_group_col_or_same_group_col2(self):
+        # pval_to_compute = 'same group_col or group_col2 values'
+        tested_object = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('M - A', 'F - A'): 0.5,
+            ('F - C', 'F - B'): 0.0014,
+            ('F - B', 'M - B'): 0.2,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+            ('F - C', 'M - C'): 0.0003,
+            ('M - A', 'M - C'): 0.89,
+        })
+        tested_object.index.names = ["Group1", "Group2"]
+        tested_object_instance = ShannonIndex(self.tested_object)
+
+        groups = ['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B']
+
+        # Case pval_to_display = 'same group_col or group_col2 values':  only pval > 0.05 removed
+        pval_to_display = 'same group_col or group_col2 values'
+        expected_ser = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('F - C', 'F - B'): 0.0014,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+            ('F - C', 'M - C'): 0.0003,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        res = tested_object_instance._pval_selection_with_group_col2(
+            tested_object, groups, 'same group_col or group_col2 values', pval_to_display
+        )
+        pd.testing.assert_series_equal(res, expected_ser)
+
+        # Case pval_to_display = 'same group_col values'
+        pval_to_display = 'same group_col values'
+        expected_ser = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('F - C', 'F - B'): 0.0014,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        res = tested_object_instance._pval_selection_with_group_col2(
+            tested_object, groups, 'same group_col or group_col2 values', pval_to_display
+        )
+        pd.testing.assert_series_equal(res, expected_ser)
+
+        # Case final_groups defined
+        groups = ['M - A', 'F - A', 'M - C', 'F - C']
+        expected_ser = pd.Series({
+            ('F - A', 'F - C'): 0.0031,
+            ('F - C', 'M - C'): 0.0003,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        res = tested_object_instance._pval_selection_with_group_col2(
+            tested_object, groups, 'same group_col or group_col2 values', 'same group_col or group_col2 values'
+        )
+        pd.testing.assert_series_equal(res, expected_ser)
+
+    def test_pval_selection_with_group_col2_pval_to_compute_same_group_col(self):
+        # pval_to_compute = 'same group_col values'
+        tested_object = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('F - C', 'F - B'): 0.0014,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+            ('M - A', 'M - C'): 0.89,
+        })
+        tested_object.index.names = ["Group1", "Group2"]
+        tested_object_instance = ShannonIndex(self.tested_object)
+
+        groups = ['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B']
+
+        # Case pval_to_display = 'same group_col values'
+        pval_to_display = 'same group_col values'
+        expected_ser = pd.Series({
+            ('M - C', 'M - B'): 0.03,
+            ('F - C', 'F - B'): 0.0014,
+            ('F - A', 'F - B'): 0.001,
+            ('M - A', 'M - B'): 0.00067,
+            ('F - A', 'F - C'): 0.0031,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        res = tested_object_instance._pval_selection_with_group_col2(
+            tested_object, groups, 'same group_col values', pval_to_display
+        )
+        pd.testing.assert_series_equal(res, expected_ser)
+
+        # Case final_groups defined
+        groups = ['M - A', 'F - A', 'M - C', 'F - C']
+        expected_ser = pd.Series({
+            ('F - A', 'F - C'): 0.0031,
+        })
+        expected_ser.index.names = ["Group1", "Group2"]
+        res = tested_object_instance._pval_selection_with_group_col2(
+            tested_object, groups, 'same group_col values', pval_to_display
+        )
+        pd.testing.assert_series_equal(res, expected_ser)
+
     def test_generate_ordered_final_groups(self):
         tested_object = pd.DataFrame.from_dict({
-            'sex_Group': {'comp1': 'M - A', 'comp2': 'F - B', 'comp3': 'F - A', 'comp4': 'F - C', 'comp5': 'M - C', 'comp6': 'M - B', 'comp7': 'M - A'}, 
-            'sex': {'comp1': 'M', 'comp2': 'F', 'comp3': 'F', 'comp4': 'F', 'comp5': 'M', 'comp6': 'M', 'comp7': 'M'}, 
+            'sex_Group': {'comp1': 'M - A', 'comp2': 'F - B', 'comp3': 'F - A', 'comp4': 'F - C', 'comp5': 'M - C',
+                          'comp6': 'M - B', 'comp7': 'M - A'},
+            'sex': {'comp1': 'M', 'comp2': 'F', 'comp3': 'F', 'comp4': 'F', 'comp5': 'M', 'comp6': 'M', 'comp7': 'M'},
             'Group': {'comp1': 'A', 'comp2': 'B', 'comp3': 'A', 'comp4': 'C', 'comp5': 'C', 'comp6': 'B', 'comp7': 'A'},
         })
-        groups_Group=["C", "A", "B"]
-        groups_sex=["M", "F"]
+        groups_Group = ["C", "A", "B"]
+        groups_sex = ["M", "F"]
         tested_object_instance = ShannonIndex(self.tested_object)
         final_groups = tested_object_instance._generate_ordered_final_groups(
             tested_object, final_group_col='sex_Group', group_col='Group', group_col2='sex',
@@ -221,7 +453,7 @@ set to default (None).", log.output)
             groups=groups_sex, groups2=groups_Group
         )
         self.assertListEqual(final_groups, ['M - C', 'M - A', 'M - B', 'F - C', 'F - A', 'F - B'])
-        # testing if order of groups not given        
+        # testing if order of groups not given
         final_groups = tested_object_instance._generate_ordered_final_groups(
             tested_object, final_group_col='sex_Group', group_col='sex', group_col2='Group',
             groups=None, groups2=groups_Group
@@ -232,7 +464,7 @@ set to default (None).", log.output)
             tested_object, final_group_col='sex_Group', group_col='sex', group_col2='Group',
             groups=groups_sex, groups2=None
         )
-        self.assertListEqual(final_groups, ['M - A', 'M - B', 'M - C', 'F - A', 'F - B', 'F - C'])        
+        self.assertListEqual(final_groups, ['M - A', 'M - B', 'M - C', 'F - A', 'F - B', 'F - C'])
 
     def test_order_pval_series(self):
         tested_object = pd.Series({
@@ -251,13 +483,13 @@ set to default (None).", log.output)
         tested_object_instance = ShannonIndex(self.tested_object)
 
         level0 = pd.Categorical(
-            ['M - C', 'M - C', 'M - C', 'F - C', 'F - C', 'M - A', 'M - A', 'F - A', 'M - B'], 
-            categories=['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B'], 
+            ['M - C', 'M - C', 'M - C', 'F - C', 'F - C', 'M - A', 'M - A', 'F - A', 'M - B'],
+            categories=['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B'],
             ordered=True, dtype='category'
         )
         level1 = pd.Categorical(
-            ['F - C', 'M - A', 'M - B', 'F - A', 'F - B', 'F - A', 'M - B', 'F - B', 'F - B'], 
-            categories=['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B'], 
+            ['F - C', 'M - A', 'M - B', 'F - A', 'F - B', 'F - A', 'M - B', 'F - B', 'F - B'],
+            categories=['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B'],
             ordered=True, dtype='category'
         )
         data = [[0.0003, 0.89, 0.03, 0.0031, 0.0014, 0.5, 0.00067, 0.001, 0.2]]
@@ -270,12 +502,12 @@ set to default (None).", log.output)
 
         pd.testing.assert_series_equal(
             tested_object_instance._order_pval_series(
-                tested_object, groups, 
+                tested_object, groups,
                 {'M - C': 0, 'F - C': 1, 'M - A': 2, 'F - A': 3, 'M - B': 4, 'F - B': 5}
             ),
             expected_ser
         )
-        
+
 
 class TestSimpsonInverseIndex(TestCase):
 
