@@ -1,4 +1,3 @@
-import re
 from unittest import TestCase
 
 from io import StringIO

@@ -258,7 +258,8 @@ pval_to_display should be set to: {}".format(
         threshold: float = 0.05
     ) -> pd.Series:
         """
-        To select the p-values to display. The significant p-values, meaning the p-values under a given threshold, belonging to two groups diplayed
+        To select the p-values to display. The significant p-values, meaning the p-values under a given threshold,
+        belonging to two groups diplayed.
 
         Args:
             pval_series: series of all the p-values computed.
@@ -358,9 +359,9 @@ pval_to_display should be set to: {}".format(
         groups: list, groups2: list
     ) -> list:
         """
-        To order the values from final_group_col 
+        To order the values from final_group_col
         (e.g. the combined names of group_col and group_col2: "{group_col value} - {group_col2 value}")
-        as it should be displayed in the graph: 
+        as it should be displayed in the graph:
         Following first the order commanded by groups, and then the order commanded by groups2
 
         Args:
@@ -374,7 +375,8 @@ pval_to_display should be set to: {}".format(
         """
         # This method is called if pval_to_display isn't None and if at least one of groups or groups2 isn't None
         # It lists and sorts all final_groups possibles respecting the order given by groups first and then by groups2
-        t = metadata_df.drop_duplicates(subset=[final_group_col]).copy()  # copy() to avoid raising SettingWithCopyWarning
+        t = metadata_df.drop_duplicates(subset=[final_group_col])\
+            .copy()  # copy() to avoid raising SettingWithCopyWarning
         if groups:
             t[group_col] = t[group_col].astype("category")
             t[group_col] = t[group_col].cat.set_categories(groups, ordered=True)
@@ -386,7 +388,7 @@ pval_to_display should be set to: {}".format(
         return list(t[final_group_col])
 
     def _generate_shapes_annotations_lists(
-        self, pval_series:pd.Series, groups: list, hgt_min: Real
+        self, pval_series: pd.Series, groups: list, hgt_min: Real
     ):
         """
         To generate annotations to represent significant p-values. Methods for group_col only (not group_col2)
