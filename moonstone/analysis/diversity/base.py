@@ -1,12 +1,13 @@
 import logging
 import re
 from abc import ABC, abstractmethod
-import skbio
+from numbers import Real
 from string import capwords
 from typing import Union
 
 import numpy as np
 import pandas as pd
+import skbio
 from statsmodels.stats.multitest import multipletests
 
 from moonstone.analysis.statistical_test import statistical_test_groups_comparison
@@ -253,10 +254,18 @@ pval_to_display should be set to: {}".format(
         return correction_method
 
     def _pval_selection(
-        self, pval_series, groups
-    ):
+        self, pval_series: pd.Series, groups: list,
+        threshold: float = 0.05
+    ) -> pd.Series:
+        """
+        To select the p-values to display. The significant p-values, meaning the p-values under a given threshold, belonging to two groups diplayed
 
-        pval_series = pval_series[pval_series < 0.05]
+        Args:
+            pval_series: series of all the p-values computed.
+            groups: list of groups displayed in graph.
+            threshold: the significance threshold. It must be between between 0 and 1. Default is 0.05.
+        """
+        pval_series = pval_series[pval_series < threshold]
         if groups is not None:
             pval_series = pval_series[(
                 pval_series.index.get_level_values(0).isin(groups) & pval_series.index.get_level_values(1).isin(groups)
@@ -264,15 +273,26 @@ pval_to_display should be set to: {}".format(
         return pval_series
 
     def _pval_selection_with_group_col2(
-        self, pval_series, final_groups, pval_to_compute, pval_to_display
-    ):
+        self, pval_series: pd.Series, final_groups: list,
+        pval_to_compute: str, pval_to_display: str,
+        threshold: float = 0.05
+    ) -> pd.Series:
+        """
+        To select the p-values to display when the group_col2 argument is being used.
+        The significant p-values, meaning the p-values under a given threshold, belonging to two groups diplayed
+
+        Args:
+            pval_series: series of all the p-values computed.
+            final_groups: list of all the combinations displayed in graph: "{group_col value} - {group_col2 value}".
+            threshold: the significance threshold. It must be between between 0 and 1. Default is 0.05.
+        """
         # Reminder:
         #    1) This method called only if pval_to_display is not None.
         #       So pval_to_compute/pval_to_display =
         #           {"all", "same group_col or group_col2 values", "same group_col values"}
         #    2) Index values follow this pattern: "{group_col value} - {group_col2 value}"
 
-        pval_series = self._pval_selection(pval_series, final_groups)
+        pval_series = self._pval_selection(pval_series, final_groups, threshold)
         if (pval_to_compute != "same group_col values" and
                 pval_to_display == "same group_col values"):
             # we only have to check first part of index values
@@ -298,8 +318,21 @@ pval_to_display should be set to: {}".format(
         return pval_series
 
     def _order_pval_series(
-        self, pval_series: pd.Series, groups: list, dic_gps: dict
-    ):
+        self, pval_series: pd.Series, groups: list, **kwargs
+    ) -> pd.Series:
+        """
+        To select the p-values to display when the group_col2 argument is being used.
+        The significant p-values, meaning the p-values under a given threshold, belonging to two groups diplayed
+
+        Args:
+            pval_series: series of all the p-values computed.
+            groups: ordered list of the groups displayed in graph: "{group_col value} - {group_col2 value}".
+        """
+        dic_gps = kwargs.pop("dic_gps", {})
+        if not dic_gps:
+            for i in range(len(groups)):
+                dic_gps[groups[i]] = i
+
         # Reminder: pvalue series is a MultiIndex series -> 2 level of index are the 2 groups compared
         # to order p-value series in a specific order dictated in dic_gps
         # example: dic_gps = {"Group A": 0, "Group B": 1, "Group C": 3}
@@ -321,13 +354,27 @@ pval_to_display should be set to: {}".format(
         return pval_series[0]
 
     def _generate_ordered_final_groups(
-        self, df: pd.DataFrame, final_group_col: str, group_col: str, group_col2: str,
+        self, metadata_df: pd.DataFrame, final_group_col: str, group_col: str, group_col2: str,
         groups: list, groups2: list
-    ):
-        # listing and sorting all final_groups possibles respecting the order given by
-        # groups first and then by groups2
-        # NB: At least one of groups or groups2 need to not be None
-        t = df.drop_duplicates(subset=[final_group_col]).copy()  # copy() to avoid raising SettingWithCopyWarning
+    ) -> list:
+        """
+        To order the values from final_group_col 
+        (e.g. the combined names of group_col and group_col2: "{group_col value} - {group_col2 value}")
+        as it should be displayed in the graph: 
+        Following first the order commanded by groups, and then the order commanded by groups2
+
+        Args:
+            metadata_df: dataframe containing metadata and information to group the data.
+            final_group_col: column generated from concatening group_col and group_col2
+              (e.g. "{group_col value} - {group_col2 value}")
+            group_col: column from metadata_df used to group the data
+            group_col2: column from metadata_df used to further divide the data
+            groups: ordered list of groups from group_col to display in graph.
+            groups2: ordered list of groups from group_col2 to display in graph.
+        """
+        # This method is called if pval_to_display isn't None and if at least one of groups or groups2 isn't None
+        # It lists and sorts all final_groups possibles respecting the order given by groups first and then by groups2
+        t = metadata_df.drop_duplicates(subset=[final_group_col]).copy()  # copy() to avoid raising SettingWithCopyWarning
         if groups:
             t[group_col] = t[group_col].astype("category")
             t[group_col] = t[group_col].cat.set_categories(groups, ordered=True)
@@ -339,14 +386,15 @@ pval_to_display should be set to: {}".format(
         return list(t[final_group_col])
 
     def _generate_shapes_annotations_lists(
-        self, pval_series, groups, hgt_min
+        self, pval_series:pd.Series, groups: list, hgt_min: Real
     ):
         """
-        To generate annotations to represent significant pvalues. Methods for group_col only (not group_col2)
+        To generate annotations to represent significant p-values. Methods for group_col only (not group_col2)
 
         Args:
-            pval_series: pd.Series of the pvalue to put on the graph (need to be filtered beforehand
-              so that it only contains significant pvalues)
+            pval_series: series of the p-values to put on the graph (need to be filtered beforehand
+              so that it only contains significant p-values).
+            groups: list of groups displayed in graph.
         """
         # Overview of this method: We're trying to generate the shapes (1 bracket = 3 lines =
         # 1 going from Group1 to Group2 and 2 small lines to form the edge of the bracket)
@@ -390,7 +438,7 @@ pval_to_display should be set to: {}".format(
                          'line': dict(width=linewidth)},   # from Group1 to Group2
                         {'x0': left_ind, 'y0': hgt_min+(i*det/2)-0.15*det,
                          'x1': left_ind, 'y1': hgt_min+(i*det/2),
-                         'line': dict(width=linewidth)},    # left edge of the bracket
+                         'line': dict(width=linewidth)},   # left edge of the bracket
                         {'x0': right_ind, 'y0': hgt_min+(i*det/2)-0.15*det,
                          'x1': right_ind, 'y1': hgt_min+(i*det/2),
                          'line': dict(width=linewidth)}    # right edge of the bracket
@@ -521,7 +569,7 @@ pval_to_display should be set to: {}".format(
     def _compute_pval_inside_subgroups(
         self, diversity_index_dataframe: pd.DataFrame, group_col: str, final_group_col: str,
         stats_test: str, correction_method: str, structure_pval: str, sym: bool
-    ):
+    ) -> pd.Series:
         pval = pd.Series([], dtype='float64')
         for g in diversity_index_dataframe[group_col].dropna().unique():
             df_gp = diversity_index_dataframe[diversity_index_dataframe[group_col] == g]
@@ -597,16 +645,11 @@ pval_to_display should be set to: {}".format(
             df = self._get_grouped_df(filtered_metadata_df[[group_col, group_col2, final_group_col]])
 
             if pval_to_display and (groups or groups2):
-                # listing and sorting all final_groups possibles respecting the order given by
+                # list and sort all final_groups possibles respecting the order given by
                 # groups first and then by groups2
-                t = df.drop_duplicates(subset=[final_group_col])
-                t[group_col] = t[group_col].astype("category")
-                t[group_col].cat = t[group_col].cat.set_categories(groups)
-                t[group_col2] = t[group_col2].astype("category")
-                t[group_col].cat = t[group_col2].cat.set_categories(groups2)
-                t = t.dropna(how="any", subset=[group_col, group_col2])
-                t = t.sort_values([group_col, group_col2])
-                final_groups = list(t[final_group_col])
+                final_groups = self._generate_ordered_final_groups(
+                    df, final_group_col, group_col, group_col2, groups, groups2
+                )
 
             if pval_to_compute == "all":
                 pval = self._run_statistical_test_groups(

@@ -1,3 +1,4 @@
+import re
 from unittest import TestCase
 
 from io import StringIO
@@ -474,9 +475,9 @@ pval_to_display should be set to: ['same group_col or group_col2 values', 'same 
             ('M - B', 'F - B'): 0.2,
             ('F - A', 'F - B'): 0.001,
             ('M - A', 'M - B'): 0.00067,
-            ('F - A', 'F - C'): 0.0031,
+            ('F - A', 'F - C'): 0.0031,    # should be reorganized as ('F - C', 'F - A')
             ('M - C', 'F - C'): 0.0003,
-            ('M - A', 'M - C'): 0.89,
+            ('M - A', 'M - C'): 0.89,      # should be reorganized as ('M - C', 'M - A')
         })
         tested_object.index.names = ["Group1", "Group2"]
         groups = ['M - C', 'F - C', 'M - A', 'F - A', 'M - B', 'F - B']
@@ -495,16 +496,12 @@ pval_to_display should be set to: ['same group_col or group_col2 values', 'same 
         data = [[0.0003, 0.89, 0.03, 0.0031, 0.0014, 0.5, 0.00067, 0.001, 0.2]]
         expected_ser = pd.DataFrame(
             data=data,
-            columns=pd.MultiIndex.from_arrays([level0, level1]),
-
+            columns=pd.MultiIndex.from_arrays([level0, level1])
         ).T[0]
         expected_ser.index.names = ["Group1", "Group2"]
 
         pd.testing.assert_series_equal(
-            tested_object_instance._order_pval_series(
-                tested_object, groups,
-                {'M - C': 0, 'F - C': 1, 'M - A': 2, 'F - A': 3, 'M - B': 4, 'F - B': 5}
-            ),
+            tested_object_instance._order_pval_series(tested_object, groups),
             expected_ser
         )
 
