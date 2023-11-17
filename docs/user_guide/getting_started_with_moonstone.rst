@@ -269,6 +269,7 @@ Plot available for metadata :
 - etc. (`plot_other`)
 
 Plot available for taxonomy counts :
+
 - most prevalent taxa (species, genus etc.)(`plot_most_prevalent_taxa`)(top left on figure below)
 - most abundant taxa (`plot_most_abundant_taxa`)(bottom left on figure below)
 - the sample composition for most abundant taxa (`plot_sample_composition_most_abundant_taxa`)(right on figure below)
@@ -277,7 +278,7 @@ Plot available for taxonomy counts :
   :alt: Examples of PlotTaxonomyCounts plots
 
 .. Note::
-    For hand-on starting experience with moonstone, you can check our `jupyter notebook<IPYNB>`_ tutorial_
+    For hand-on starting experience with moonstone, you can check our `jupyter notebook`_ tutorial_
 
-.. _IPYNB: https://jupyter.org/install
+.. _jupyter notebook: https://jupyter.org/install
 .. _tutorial: https://github.com/motleystate/moonstone/tree/master/tutorial
