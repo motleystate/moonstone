@@ -187,4 +187,4 @@ List
    diversity.beta.UnweightedUniFrac
 
 .. Note::
-    More details on API documentation for :ref:`api_plot`.
+    More details on API documentation for :ref:`api_analysis`.

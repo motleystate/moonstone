@@ -1,4 +1,4 @@
-.. _api_analysis:
+.. _api_parsers:
 
 ********
 Parsers
