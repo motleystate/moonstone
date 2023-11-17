@@ -177,9 +177,9 @@ How does it work?
 
 .. code-block:: python
 
-    from moonstone.normalization import YourFavouriteNormalization
+    from moonstone.normalization import YourFavoriteNormalization
 
-    normalization = YourFavouriteNormalization(your_df)
+    normalization = YourFavoriteNormalization(your_df)
     df = normalization.normalized_df
 
 .. Note::
@@ -203,6 +203,16 @@ How it works?
 
 .. Note::
     The way analysis instances work will change using a defined common way of performing analysis.
+
+For diversity analysis
+
+.. code-block:: python
+
+    from moonstone.analysis.diversity import YourFavoriteDiversityMeasure
+
+    # instantiation
+    analysis_instance = YourFavoriteDiversityMeasure(df)
+    analysis_instance.analyse_groups(metadata_df, group_col, stats_test, correction_method)
 
 Plot
 """""
@@ -229,21 +239,13 @@ To plot your data, you need to instantiate a `PlotCountsStats` object with a pan
     plot_instance.your_favorite_plot()
     plot_instance.another_of_your_favorite_plot()
 
-Likewise, for the metada
+Likewise, for the metada (`PlotMetadataStats`) and for taxonomy counts (`PlotTaxonomyCounts`)
 
-.. code-block:: python
-
-    from moonstone.plot import PlotMetadataStats
-
-    plot_instance = PlotMetadataStats(metadata_df)
-    plot_instance.your_favorite_plot()
-
-Arguments can be given to any plotting methods of both classes,
+Arguments can be given to any plotting methods of any of the plotting classes,
 
 - ... to override the standard parameters of plotting of the method with the argument `plotting_options`.
-- ... or to ask for a html file to be generated with the argument `output_file`
+- ... or to ask for an image file (html, png etc.) to be generated with the argument `output_file`
 - ... or even to ask not to show the plot with the argument `show` set to False
-
 
 .. code-block:: python
 
@@ -265,3 +267,17 @@ Plot available for metadata :
 - the age distribution of patients (whose samples are originated from) (`plot_age`)
 - the sex distribution of patients (whose samples are originated from) (`plot_sex`)
 - etc. (`plot_other`)
+
+Plot available for taxonomy counts :
+- most prevalent taxa (species, genus etc.)(`plot_most_prevalent_taxa`)(top left on figure below)
+- most abundant taxa (`plot_most_abundant_taxa`)(bottom left on figure below)
+- the sample composition for most abundant taxa (`plot_sample_composition_most_abundant_taxa`)(right on figure below)
+
+.. image:: /img/PlotTaxonomyCounts_example_of_available_plots.png
+  :alt: Examples of PlotTaxonomyCounts plots
+
+.. Note::
+    For hand-on starting experience with moonstone, you can check our `jupyter notebook<IPYNB>`_ tutorial_
+
+.. _IPYNB: https://jupyter.org/install
+.. _tutorial: https://github.com/motleystate/moonstone/tree/master/tutorial
