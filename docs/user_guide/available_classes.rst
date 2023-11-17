@@ -35,6 +35,7 @@ Classic and simple parsers:
    :nosignatures:
 
     MetadataParser
+    YAMLBasedMetadataParser
 
 Counts parsers (``from moonstone.parsers.counts``):
 
