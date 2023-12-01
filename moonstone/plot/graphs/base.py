@@ -17,18 +17,9 @@ class BaseGraph(ABC):
     def __init__(
         self,
         data: Union[pd.Series, pd.DataFrame],
-        plotting_options: dict = None,
-        show: bool = True,
-        output_file: Union[bool, str] = False,
     ):
         """
         :param data: data to plot
-        :param show: set to False if you don't want to show the plot
-        :param output_file: name of the output file
-        :param plotting_options: options of plotting that will override the default setup \n
-                                 [!] Make sure the value given to an argument is of the right type \n
-                                 options allowed : 'log': `bool` ; 'colorbar': `[str, List[str]]` ;
-                                 'tickangle': `[int, float]`
         """
         self.data = data
 
