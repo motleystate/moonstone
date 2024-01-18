@@ -9,3 +9,4 @@ from .scatter import (  # noqa
     GroupScatter3DGraph,
 )
 from .violin import ViolinGraph, GroupViolinGraph  # noqa
+from .trendlines import ScatterTrendlines  # noqa
