@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest.mock import patch, call
 
 import pandas as pd
 
@@ -33,10 +34,13 @@ class TestScatterTrendlines(TestCase):
         self.ins = ScatterTrendlines(self.test_df)
 
     def test_define_n_trendlines(self):
-        output = self.ins.define_n_trendlines(
-            "species1", "species2", 2, False, False, nb_iter=100, outliers='keep', show=False, v=False,
-            random_state=2
-        )
+        with patch('builtins.print') as mocked_print:
+            output = self.ins.define_n_trendlines(
+                "species1", "species2", 2, log_x=False, log_y=False, nb_iter=100, outliers='keep', show=False, v=True,
+                random_state=2
+            )
+            assert mocked_print.mock_calls == [call('Stable after 6 iterations.')]
+
         # output =
         #   * group_series
         pd.testing.assert_series_equal(output["group_series"], self.expected_group_series)
@@ -94,7 +98,7 @@ class TestScatterTrendlines(TestCase):
                 pd.DataFrame([[0, 100]], columns=["species1", "species2"], index=["outliers1"])
                 ]))
         output = ins.define_n_trendlines(
-            "species1", "species2", 2, False, False, nb_iter=100, outliers='trim', show=False, v=False,
+            "species1", "species2", 2, log_x=False, log_y=False, nb_iter=100, outliers='trim', show=False, v=False,
             random_state=2
         )
         expected_group_series = pd.concat([self.expected_group_series, pd.Series([0], index=["outliers1"])])
@@ -105,7 +109,7 @@ class TestScatterTrendlines(TestCase):
         # Exception 1 = case where less than 2 points in one of the chunk_lists
         # which makes it impossible to compute a (trend)line
         output = self.ins.define_n_trendlines(
-            "species1", "species2", 3, False, False, nb_iter=100, outliers='keep', show=False, v=False,
+            "species1", "species2", 3, log_x=False, log_y=False, nb_iter=100, outliers='keep', show=False, v=False,
             random_state=19
         )
         pd.testing.assert_series_equal(output["group_series"], self.expected_group_series)
@@ -116,32 +120,45 @@ class TestScatterTrendlines(TestCase):
         # but during the assignment of the datapoints to one of the trendlines,
         # one of the trendline didn't get assigned any datapoints
         output = self.ins.define_n_trendlines(
-            "species1", "species2", 3, False, False, nb_iter=100, outliers='keep', show=False, v=False,
+            "species1", "species2", 3, log_x=False, log_y=False, nb_iter=100, outliers='keep', show=False, v=False,
             random_state=5
         )
         pd.testing.assert_series_equal(output["group_series"], self.expected_group_series)
         self.assertEqual(len(output["trendlines"]), 2)
 
+    def test_define_n_trendlines_exception3(self):
+        # Exception 3 = cannot find a stable configuration in the number of iteration defined
+        with self.assertLogs("moonstone.plot.graphs.trendlines", level="WARNING") as log:
+            self.ins.define_n_trendlines(
+                "species1", "species2", 5, log_x=False, log_y=False, nb_iter=5, outliers='keep', show=False, v=True,
+                random_state=0,
+            )
+            self.assertEqual(len(log.output), 1)
+            self.assertIn(
+                "WARNING:moonstone.plot.graphs.trendlines:Not stable after 5 iterations.",
+                log.output,
+            )
+
     def test_bootstraps_define_n_trendlines(self):
         output = self.ins.bootstraps_define_n_trendlines(
-            "species1", "species2", 2, False, False, nb_iter=100, nb_bootstraps=5, outliers="keep", show=False,
-            random_state=11
+            "species1", "species2", 2, log_x=False, log_y=False, nb_iter=100, nb_bootstraps=5, outliers="keep",
+            show=False, random_state=11
         )
         pd.testing.assert_series_equal(output["group_series"], self.expected_group_series)
 
     def test_plot_one_graph(self):
         # no bootstraps -> calls define_n_trendlines()
         fig = self.ins.plot_one_graph(
-            "species1", "species2", 2, log=False, nb_iter=100, nb_bootstraps=1, outliers="keep", show=False,
-            random_state=2
+            "species1", "species2", 2, log_x=False, log_y=False, nb_iter=100, nb_bootstraps=1, outliers="keep",
+            show=False, random_state=2
         )
         # just checking that it runs with errors and returns something
         self.assertEqual(fig.data[0]["type"], "scatter")
 
         # 2 bootstraps -> calls bootstraps_define_n_trendlines()
         fig = self.ins.plot_one_graph(
-            "species1", "species2", 2, log=False, nb_iter=100, nb_bootstraps=2, outliers="keep", show=False,
-            random_state=2
+            "species1", "species2", 2, log_x=False, log_y=False, nb_iter=100, nb_bootstraps=2, outliers="keep",
+            show=False, random_state=2
         )
         self.assertEqual(fig.data[0]["type"], "scatter")
 
@@ -161,5 +178,89 @@ class TestScatterTrendlines(TestCase):
         tested_object = self.ins._color_palette(123)
         self.assertEqual(len(tested_object), 123)
 
-#    def test_define_n_trendlines_log(self):
-#       @TODO: write test with x and y as log
+    def test_invalid_outliers_param(self):
+        with self.assertLogs("moonstone.plot.graphs.trendlines", level="WARNING") as log:
+            self.ins._valid_outliers_param("invalid outliers param")
+            self.assertEqual(len(log.output), 1)
+            self.assertIn(
+                "WARNING:moonstone.plot.graphs.trendlines:outliers='invalid outliers param' not valid, \
+set to default (keep).",
+                log.output,
+            )
+
+    def test_define_n_trendlines_log(self):
+        sp1 = [
+            85.11380382023764, 2.884031503126606, 66.06934480075961, 18.620871366628677, 2.4547089156850306,
+            26.915348039269155, 7.244359600749901, 4.36515832240166, 72.44359600749902, 169.82436524617444,
+            2.2387211385683394, 12.882495516931343, 691.8309709189363, 389.04514499428046, 7.244359600749901,
+            7.762471166286917, 194.98445997580455, 537.0317963702527, 1.2589254117941673, 295.1209226666387]
+        sp2 = [
+            5296.634438916581, 1508.3426105404806, 6722.023091115663, 32.396642243484465, 14.655478409559112,
+            2089.2961308540407, 810.0279416803508, 654.6361740672747, 60.32537079266128, 3859.2241159472915,
+            8.851156098308357, 2133.0449131465753, 18302.061063110566, 21281.390459827133, 21.28139045982711,
+            15.170503674593368, 68.23386941416697, 7269.423992141202, 225.68359954972254, 44258.83723626265]
+        samples = [
+            'A11', 'A12', 'A16', 'B3', 'B11', 'A27', 'A23', 'A20', 'B4', 'A8', 'B17', 'A30', 'A3', 'A29', 'B26', 'B20',
+            'B21', 'A14', 'A31', 'A39']
+        test_df = pd.DataFrame(
+            [sp1, sp2], columns=samples, index=["species1", "species2"]
+        ).T
+        expected_group_series = test_df.index.to_series().map(lambda x: 1 if x[0] == "A" else 0)
+        expected_group_series.name = "group"
+        ins = ScatterTrendlines(test_df)
+        output = ins.define_n_trendlines(
+            "species1", "species2", 2, log_x=True, log_y=True, nb_iter=100, outliers="keep", show=False, v=False,
+            random_state=86
+        )
+        pd.testing.assert_series_equal(output["group_series"], expected_group_series)
+
+    def test_define_n_trendlines_log_x_only(self):
+        sp1 = [
+            85.11380382023764, 2.884031503126606, 66.06934480075961, 18.620871366628677, 2.4547089156850306,
+            26.915348039269155, 7.244359600749901, 4.36515832240166, 72.44359600749902, 169.82436524617444,
+            2.2387211385683394, 12.882495516931343, 691.8309709189363, 389.04514499428046, 7.244359600749901,
+            7.762471166286917, 194.98445997580455, 537.0317963702527, 1.2589254117941673, 295.1209226666387]
+        sp2 = [
+            74.48, 63.57, 76.55, 30.21, 23.32, 66.4, 58.17, 56.32, 35.61, 71.73, 18.94, 66.58, 85.25, 86.56, 26.56,
+            23.62, 36.68, 77.23, 47.07, 92.92]
+        samples = [
+            'A11', 'A12', 'A16', 'B3', 'B11', 'A27', 'A23', 'A20', 'B4', 'A8', 'B17', 'A30', 'A3', 'A29', 'B26', 'B20',
+            'B21', 'A14', 'A31', 'A39']
+        test_df = pd.DataFrame(
+            [sp1, sp2], columns=samples, index=["species1", "species2"]
+        ).T
+        expected_group_series = test_df.index.to_series().map(lambda x: 0 if x[0] == "A" else 1)
+        expected_group_series.name = "group"
+        ins = ScatterTrendlines(test_df)
+        output = ins.define_n_trendlines(
+            "species1", "species2", 2, log_x=True, log_y=False, nb_iter=100, outliers="keep", show=False, v=False,
+            random_state=15
+        )
+        pd.testing.assert_series_equal(output["group_series"], expected_group_series)
+
+    def test_define_n_trendlines_log_y_only(self):
+        sp1 = [
+            1.93, 0.46, 1.82, 1.27, 0.39, 1.43, 0.86, 0.64, 1.86, 2.23, 0.35, 1.11, 2.84, 2.59, 0.86, 0.89, 2.29, 2.73,
+            0.1, 2.47]
+        sp2 = [
+            5296.634438916581, 1508.3426105404806, 6722.023091115663, 32.396642243484465, 14.655478409559112,
+            2089.2961308540407, 810.0279416803508, 654.6361740672747, 60.32537079266128, 3859.2241159472915,
+            8.851156098308357, 2133.0449131465753, 18302.061063110566, 21281.390459827133, 21.28139045982711,
+            15.170503674593368, 68.23386941416697, 7269.423992141202, 225.68359954972254, 44258.83723626265]
+        samples = [
+            'A11', 'A12', 'A16', 'B3', 'B11', 'A27', 'A23', 'A20', 'B4', 'A8', 'B17', 'A30', 'A3', 'A29', 'B26', 'B20',
+            'B21', 'A14', 'A31', 'A39']
+        test_df = pd.DataFrame(
+            [sp1, sp2], columns=samples, index=["species1", "species2"]
+        ).T
+        expected_group_series = test_df.index.to_series().map(lambda x: 0 if x[0] == "A" else 1)
+        expected_group_series.name = "group"
+        ins = ScatterTrendlines(test_df)
+        output = ins.define_n_trendlines(
+            "species1", "species2", 2, log_x=False, log_y=True, nb_iter=100, outliers="keep", show=False, v=False,
+            random_state=2
+        )
+        pd.testing.assert_series_equal(output["group_series"], expected_group_series)
+
+#    def Scatter_plot_color_ser(self):
+#       @TODO: color_ser to set the color of the data point

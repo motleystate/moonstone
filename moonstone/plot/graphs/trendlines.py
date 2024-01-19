@@ -17,10 +17,6 @@ logger = logging.getLogger(__name__)
 
 class ScatterTrendlines(BaseGraph):
 
-    def _check_log_validity(self, log_x, log_y):
-        if (not log_x and log_y) or (not log_x and log_y):
-            raise ValueError("For now, define_n_trendlines doesn't work when only one of the axis is logarithmic.")
-
     def _generate_default_plotting_options(self, log_x, log_y):
         if log_x:
             plotting_options = {"xaxes": {"type": "log"}}
@@ -87,10 +83,14 @@ class ScatterTrendlines(BaseGraph):
         ))
 
         for tl in trendlines:
+            if forced_color_dic:
+                marker_color = {'color': forced_color_dic[tl[1]]}
+            else:
+                marker_color = None
             fig.add_trace(go.Scatter(
                 x=tl[0].x, y=tl[0].y,
                 mode='lines',
-                marker={'color': forced_color_dic[tl[1]]}
+                marker=marker_color
             ))
 
         title = f'Correlation between {y_ser.name} and {x_ser.name}'
@@ -155,7 +155,7 @@ class ScatterTrendlines(BaseGraph):
 
     # NB: should work if both axis are linear or both axis are log
     # -> to think about cases where one is linear and the other log
-    def _attribute_linegroup_to_sample(self, x, y, list_params):
+    def _assign_sample_to_a_linegroup(self, x, y, list_params):
         best_d = np.inf
         params_best_d = None
         for params in list_params:
@@ -165,7 +165,7 @@ class ScatterTrendlines(BaseGraph):
                 params_best_d = params
         return params_best_d, best_d
 
-    def _attribute_linegroup_to_samples(
+    def _assign_samples_to_linegroups(
         self,
         dataframe: pd.DataFrame, x_col: str, y_col: str,
         list_params: list, log_x: bool, log_y: bool
@@ -183,7 +183,7 @@ class ScatterTrendlines(BaseGraph):
         dic_l = {}
         dic_d = {}
         for s in dataframe.index:
-            lp, d = self._attribute_linegroup_to_sample(X.loc[s], Y.loc[s], list_params)
+            lp, d = self._assign_sample_to_a_linegroup(X.loc[s], Y.loc[s], list_params)
             dic_l[s] = lp[2]
             dic_d[s] = d
         return pd.Series(dic_l, name="group"), pd.DataFrame.from_dict(dic_d, orient="index", columns=["distance"])
@@ -191,7 +191,7 @@ class ScatterTrendlines(BaseGraph):
     def define_n_trendlines(
         self,
         x_col: str, y_col: str, n: int,
-        log_x: bool, log_y: bool,
+        log_x: bool = False, log_y: bool = False,
         outliers: str = "keep", nb_iter: int = 100,
         random_state: int = None,
         show: str = "last", output_file: Union[bool, str] = False,
@@ -213,7 +213,6 @@ class ScatterTrendlines(BaseGraph):
             - random_state: Set to an integer for reproductibility purpose.
         """
         to_return = {}
-        self._check_log_validity(log_x, log_y)
         try:
             self.outliers
         except AttributeError:
@@ -245,14 +244,14 @@ class ScatterTrendlines(BaseGraph):
                         (pd.DataFrame({"x": chunks_list[c][x_col], "y": y_tl}), c)
                         # x = same x as dot/sample, y = projection of x on trendline
                     ]
-            group_ser, distance_df = self._attribute_linegroup_to_samples(
+            group_ser, distance_df = self._assign_samples_to_linegroups(
                 dataframe, x_col, y_col, list_params, log_x, log_y
             )
             # ... but outliers still put inside a group and still get a distance to the trendline [2/2]
 
             if group_ser.equals(group_ser_prec):
                 if v:
-                    print(f"Stable after {i} iterations")
+                    print(f"Stable after {i} iterations.")
                 stable = True
                 break
 
@@ -284,8 +283,8 @@ class ScatterTrendlines(BaseGraph):
             group_ser_prec = group_ser
             i += 1
 
-        if not stable and v:
-            print(f"Not stable after {i} iterations")
+        if not stable:
+            logger.warning(f"Not stable after {i-1} iterations.")
 
         to_return["figure"] = self.Scatter_plot(
             dataframe[x_col], dataframe[y_col],
@@ -315,7 +314,7 @@ class ScatterTrendlines(BaseGraph):
     def bootstraps_define_n_trendlines(
         self,
         x_col: str, y_col: str, n: int,
-        log_x: bool, log_y: bool,
+        log_x: bool = False, log_y: bool = False,
         outliers: str = "keep",
         nb_iter: int = 100, nb_bootstraps: int = 25,
         random_state: int = None,
@@ -346,7 +345,7 @@ class ScatterTrendlines(BaseGraph):
         for i in range(nb_bootstraps):
             dfnt_output = self.define_n_trendlines(
                 x_col, y_col, n,
-                log_x, log_y,
+                log_x=log_x, log_y=log_y,
                 outliers=self.outliers, nb_iter=nb_iter,
                 show=False, output_file=False, v=False,
                 random_state=random_state,
@@ -354,19 +353,20 @@ class ScatterTrendlines(BaseGraph):
             if dfnt_output["distance_dataframe"]['distance'].mean() < best_mean:
                 best_mean = dfnt_output["distance_dataframe"]['distance'].mean()
                 best_dfnt_output = dfnt_output
+                best_rs = random_state
             if random_state:
                 random_state += 1
 
         if show or output_file:
             self._handle_output_plotly(best_dfnt_output["figure"], show, output_file)
-
+        print(best_rs)
         # output: cf define_n_trendlines' output
         return best_dfnt_output
 
     def plot_one_graph(
         self,
         x_col: str, y_col: str, n: int,
-        log: bool = False,  # for now only 1 arg for both x and y axis because works only if both or neither are log
+        log_x: bool = False, log_y: bool = False,
         outliers: str = "keep",
         nb_iter: int = 100, nb_bootstraps: int = 1,
         random_state: int = None,
@@ -377,7 +377,7 @@ class ScatterTrendlines(BaseGraph):
             - x_col: column of the dataframe to plot on the x axis of the graph.
             - y_col: column of the dataframe to plot on the y axis of the graph.
             - n: number of different trendlines to trace. >1 (otherwise use the plotly function).
-            - log: set to True if the x and y axes are logarithmic.
+            - log_x, log_y: set to True if the x (or y) axis is logarithmic.
             - outliers: {'keep' (default), 'trim'}. Set to 'trim' to remove outliers (|z-score| > 3) between iteration.
             - nb_iter: maximum number of iteration to run the research of n stable trendlines.
               NB: If stability is reached before, then function ends before this maximum number.
@@ -390,7 +390,7 @@ class ScatterTrendlines(BaseGraph):
         if nb_bootstraps > 1:
             fig = self.bootstraps_define_n_trendlines(
                 x_col, y_col, n,
-                log_x=log, log_y=log,
+                log_x=log_x, log_y=log_y,
                 outliers=outliers,
                 nb_iter=nb_iter, nb_bootstraps=nb_bootstraps,
                 random_state=random_state,
@@ -402,7 +402,7 @@ class ScatterTrendlines(BaseGraph):
 
             fig = self.define_n_trendlines(
                 x_col, y_col, n,
-                log_x=log, log_y=log,
+                log_x=log_x, log_y=log_y,
                 outliers=outliers, nb_iter=nb_iter,
                 random_state=random_state,
                 show=show, output_file=output_file, v=False
