@@ -801,6 +801,9 @@ class PhylogeneticDiversityBase(DiversityBase):
               the diversity with the OTU IDs that are present in the Tree
         """
         super().__init__(taxonomy_dataframe)
+        if self.df.index.nlevels > 1:   # if the dataframe is a multiindex...
+            self.df.groupby(self.df.index.names[-1]).sum()  # it needs to be transformed as a single index dataframe
+            # otherwise error: "TypeError: not all arguments converted during string formatting"
         if isinstance(taxonomy_tree, skbio.tree._tree.TreeNode):
             self.tree = taxonomy_tree
         else:
