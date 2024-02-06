@@ -1,9 +1,10 @@
 import logging
 from typing import Union
 
+from matplotlib.colors import is_color_like
+import numbers
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from scipy import stats
 import statsmodels.api as sm
@@ -35,20 +36,12 @@ class ScatterTrendlines(BaseGraph):
             logger.warning("outliers='%s' not valid, set to default (keep).", outliers)
         return 'keep'
 
-    def _color_palette(self, n):
-        if n <= 10:
-            return px.colors.qualitative.Plotly[:n]
-        elif n <= 26:
-            return px.colors.qualitative.Alphabet[:n]
-        else:
-            return px.colors.qualitative.Alphabet * int(n/26) + px.colors.qualitative.Alphabet[:n % 26]
-
-    def Scatter_plot(
+    def scatter_plot(
         self,
         x_ser: pd.Series, y_ser: pd.Series,
         trendlines: list,
-        color_ser: pd.Series = None,
-        forced_color_dic: dict = None,
+        datapoints_color_ser: pd.Series = None,
+        trendlines_color_dic: dict = None,
         show: bool = True, output_file: Union[bool, str] = False,
         plotting_options: dict = {},
     ):
@@ -57,34 +50,39 @@ class ScatterTrendlines(BaseGraph):
         Args:
             - x_ser: pandas Series containing the data to plot along the x axis.
             - y_ser: pandas Series containing the data to plot along the y axis.
-            - forced_color_dic: directory
-            - output_file: str = None,
-            - plotting_options: dict = {},
             - trendlines: list of tuples describing the trendlines.
               Tuples contain a dataframe of x and y coordinates tracing the line, and the number of the group
+            - datapoints_color_ser: series defining the color of the datapoints.
+            - trendlines_color_dic: directory defining the color of the trendlines
+            - output_file: str = None,
+            - plotting_options: dict = {},
             - show: {True (default), False}. Set to False if you do not wish to generate the graph.
         """
-        if color_ser is not None and not forced_color_dic:
-            u = list(color_ser.value_counts().index)
-            u.sort()
+
+        if datapoints_color_ser is not None:
+            # If values aren't numbers or color string then we need to convert them into number so that it
+            # is accepted by marker_color in go.Scatter
+
+            u = list(datapoints_color_ser.unique())
             color_dic = {}
-            if type(u[0]) != float and type(u[0]) != int:
-                for i in range(0, len(u)):
-                    color_dic[u[i]] = i
-                if color_ser.dropna().shape[0] != color_ser.shape[0]:
-                    color_dic[pd.NA] = i+1
-                color_ser.replace(color_dic, inplace=True)
+            for el in u:
+                if not isinstance(el, numbers.Number) and not is_color_like(el):
+                    # NB: pd.NA is not a number but np.nan is
+                    for i in range(0, len(u)):
+                        color_dic[u[i]] = i
+                    datapoints_color_ser = datapoints_color_ser.replace(color_dic)
+                    break
 
         fig = go.Figure(data=go.Scatter(
             x=x_ser, y=y_ser,
             mode='markers',
-            marker_color=color_ser,
+            marker_color=datapoints_color_ser,
             text=x_ser.index            # hover text goes here
         ))
 
         for tl in trendlines:
-            if forced_color_dic:
-                marker_color = {'color': forced_color_dic[tl[1]]}
+            if trendlines_color_dic:
+                marker_color = {'color': trendlines_color_dic[tl[1]]}
             else:
                 marker_color = None
             fig.add_trace(go.Scatter(
@@ -219,7 +217,7 @@ class ScatterTrendlines(BaseGraph):
             self.outliers = self._valid_outliers_param(outliers)
 
         plotting_options = self._generate_default_plotting_options(log_x, log_y)
-        forced_color_dic = dict(zip(range(0, n), self._color_palette(n)))
+        forced_color_dic = self._color_scheme_metadata(n)
 
         # random first split of the samples into n groups
         dataframe = self.data.sample(frac=1, random_state=random_state)  # shuffles dataframe's rows
@@ -256,10 +254,10 @@ class ScatterTrendlines(BaseGraph):
                 break
 
             if show == 'all':
-                self.Scatter_plot(
+                self.scatter_plot(
                     dataframe[x_col], dataframe[y_col],
-                    color_ser=group_ser.apply(lambda x: forced_color_dic[x]),
-                    forced_color_dic=forced_color_dic,
+                    datapoints_color_ser=group_ser.apply(lambda x: forced_color_dic[x]),
+                    trendlines_color_dic=forced_color_dic,
                     show=True, output_file=None,
                     plotting_options=plotting_options,
                     trendlines=trendlines
@@ -286,10 +284,10 @@ class ScatterTrendlines(BaseGraph):
         if not stable:
             logger.warning(f"Not stable after {i-1} iterations.")
 
-        to_return["figure"] = self.Scatter_plot(
+        to_return["figure"] = self.scatter_plot(
             dataframe[x_col], dataframe[y_col],
-            color_ser=group_ser.apply(lambda x: forced_color_dic[x]),
-            forced_color_dic=forced_color_dic,
+            datapoints_color_ser=group_ser.apply(lambda x: forced_color_dic[x]),
+            trendlines_color_dic=forced_color_dic,
             show=bool(show), output_file=output_file,
             plotting_options=plotting_options,
             trendlines=trendlines
