@@ -2,7 +2,6 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -80,36 +79,6 @@ class MatrixBarGraph(BaseGraph):
             )
         return fig
 
-    def _color_scheme(self, colors: dict = None) -> dict:
-        final_colors = {name: generate_color_code(name) for name in self.data.index}
-        if colors is not None:
-            final_colors.update(**colors)
-        return final_colors
-
-    def _color_scheme_metadata(
-        self, metadata: Union[pd.DataFrame, pd.Series], colors: dict = None
-    ) -> dict:
-        final_colors = {}
-        if isinstance(metadata, pd.Series):
-            all_gp = list(metadata.unique())
-        else:
-            all_gp = []
-            for cc in metadata.columns:
-                all_gp += list(metadata[cc].unique())
-            all_gp = list(set(all_gp))  # doesn't remove all different nan
-        # we can't do it manually because then some nan don't correspond to the one manually added
-
-        if len(all_gp) <= 10:
-            final_colors = dict(zip(all_gp, px.colors.qualitative.Plotly))
-        elif len(all_gp) <= 26:
-            final_colors = dict(zip(all_gp, px.colors.qualitative.Alphabet))
-        else:
-            c = px.colors.qualitative.Alphabet + px.colors.qualitative.Set3
-            final_colors = dict(zip(all_gp, c * (int(len(all_gp) / len(c)) + 1)))
-        if colors is not None:
-            final_colors.update(**colors)
-        return final_colors
-
     def _gen_traces_metadata_legends_subplot(
         self,
         fig: go.Figure,
@@ -167,7 +136,7 @@ class MatrixBarGraph(BaseGraph):
         Args:
             colors: Selected colors for a group
         """
-        final_colors = self._color_scheme(colors)
+        final_colors = self._color_scheme_species(colors)
 
         fig = go.Figure()
         fig = self._add_chart(fig, final_colors)
@@ -192,7 +161,7 @@ class MatrixBarGraph(BaseGraph):
         # metadata = samples (row) * metadata (col)
         # data = species * samples
 
-        final_colors = self._color_scheme(colors)
+        final_colors = self._color_scheme_species(colors)  # attribute a color to each species
         final_colors_metadata = self._color_scheme_metadata(metadata, colors_metadata)
 
         if isinstance(metadata, pd.Series):

@@ -78,7 +78,7 @@ class DifferentialAnalysis:
             list_ofgroups = []
             for variable in variable_dic:
                 list_ofgroups.append(variable_dic[variable][self.full_table.columns[family]])
-            #test = self.tests_functions_used[test_to_use](*np.asarray(list_ofgroups))
+            # test = self.tests_functions_used[test_to_use](*np.asarray(list_ofgroups))
             test = self.tests_functions_used[test_to_use](*list_ofgroups)  # works for kruskal and one way anova
             features.append(feature)
             taxons.append(self.full_table.columns[family])
