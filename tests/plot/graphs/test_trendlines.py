@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import patch, call
 
 import pandas as pd
+import numpy as np
 
 from moonstone.plot.graphs.trendlines import ScatterTrendlines
 
@@ -162,20 +163,21 @@ class TestScatterTrendlines(TestCase):
         )
         self.assertEqual(fig.data[0]["type"], "scatter")
 
-    def test_color_palette(self):
+    def test_color_scheme_metadata(self):
+        # method actually in BaseGraph
         # simplest case
-        tested_object = self.ins._color_palette(5)
+        tested_object = self.ins._color_scheme_metadata(5)
         self.assertEqual(len(tested_object), 5)
 
-        tested_object = self.ins._color_palette(10)
+        tested_object = self.ins._color_scheme_metadata(10)
         self.assertEqual(len(tested_object), 10)
 
         # n > 10 -> second palette
-        tested_object = self.ins._color_palette(15)
+        tested_object = self.ins._color_scheme_metadata(15)
         self.assertEqual(len(tested_object), 15)
 
         # n > 26 -> second palette repeated over and over again
-        tested_object = self.ins._color_palette(123)
+        tested_object = self.ins._color_scheme_metadata(123)
         self.assertEqual(len(tested_object), 123)
 
     def test_invalid_outliers_param(self):
@@ -262,5 +264,97 @@ set to default (keep).",
         )
         pd.testing.assert_series_equal(output["group_series"], expected_group_series)
 
-#    def Scatter_plot_color_ser(self):
-#       @TODO: color_ser to set the color of the data point
+    def test_scatter_plot_color_ser(self):
+        # Testing when datapoints_color_ser is made of not-color string
+        samples = ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15']
+        sp1_ser = pd.Series(
+            [1.93, 0.46, 1.82, 1.27, 0.39, 1.43, 0.86, 0.64, 1.86, 2.23, 0.35, 1.11, 2.84, 2.59, 0.86], index=samples)
+        sp1_ser.name = "species1"
+        sp2_ser = pd.Series(
+            [74.48, 63.57, 76.55, 30.21, 23.32, 66.4, 58.17, 56.32, 35.61, 71.73, 18.94, 66.58, 85.25, 86.56, 26.56],
+            index=samples)
+        sp2_ser.name = "species2"
+
+        # trendlines
+        x_tl0 = [1.11, 1.43, 1.93, 2.23, 0.46, 0.64, 2.84, 1.82, 0.86, 2.59]
+        y_tl0 = [
+            64.98092237706031, 68.69324013036737, 74.49373661990967, 77.97403451363505, 57.44027694065532,
+            59.52845567689055, 85.05064023087664, 73.21762739221036, 62.08067413228916, 82.15039198610549]
+        samples_group0 = ['A12', 'A6', 'A1', 'A10', 'A2', 'A8', 'A13', 'A3', 'A7', 'A14']
+        trendlines = [(
+            pd.DataFrame([x_tl0, y_tl0], columns=samples_group0, index=["x", "y"]).T, 0
+        )]
+        # --
+        x_tl1 = [0.39, 1.27, 0.35, 0.86, 1.86]
+        y_tl1 = [21.47972284941567, 30.1028953179664, 21.087760464481544, 26.08528087239163, 35.88434049574473]
+        samples_group1 = ['A5', 'A4', 'A11', 'A15', 'A9']
+        trendlines += [(
+            pd.DataFrame([x_tl1, y_tl1], columns=samples_group1, index=["x", "y"]).T, 0
+        )]
+
+        # -- TESTING THE DIFFERENT CASES COLOR SERIES COULD BE --
+
+        # Case #1 = Simplest case: color series (datapoints_color_ser) already made of numbers
+        color_ser = pd.Series(
+            [1, 2, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2], index=samples)
+        tested_fig = self.ins.scatter_plot(
+           x_ser=sp1_ser, y_ser=sp2_ser,
+           trendlines=trendlines,
+           datapoints_color_ser=color_ser,
+           show=False
+           )
+        self.assertEqual(tested_fig["layout"]["title"]["text"], "Correlation between species2 and species1")
+        self.assertEqual(tested_fig["layout"]["xaxis"]["title"]["text"], "species1")
+        np.testing.assert_array_equal(
+            tested_fig["data"][0]["marker"]["color"], [1, 2, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2])
+
+        # Case #2: color series contains a np.nan
+        color_ser = pd.Series(
+            [1, 2, 2, np.nan, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1, np.nan], index=samples)
+        tested_fig = self.ins.scatter_plot(
+           x_ser=sp1_ser, y_ser=sp2_ser,
+           trendlines=trendlines,
+           datapoints_color_ser=color_ser,
+           show=False
+           )
+        np.testing.assert_array_equal(
+            tested_fig["data"][0]["marker"]["color"],
+            [1., 2., 2., np.nan, 1., 1., 2., 1., 2., 2., 2., 1., 2., 1., np.nan])
+
+        # Case #3a: color series contains a pd.NA
+        # -> pd.NA not accepted by plotly so everything need to be converted in number
+        color_ser = pd.Series(
+            [1, 2, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1, pd.NA], index=samples)
+        tested_fig = self.ins.scatter_plot(
+           x_ser=sp1_ser, y_ser=sp2_ser,
+           trendlines=trendlines,
+           datapoints_color_ser=color_ser,
+           show=False
+           )
+        np.testing.assert_array_equal(
+            tested_fig["data"][0]["marker"]["color"], [0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 2])
+
+        # Case #4: color series made of non-color strings
+        color_ser = pd.Series(
+            ['C', 'C', 'B', 'B', 'C', 'A', 'A', 'A', 'A', 'C', 'B', 'A', 'A', 'A', 'B'], index=samples)
+        tested_fig = self.ins.scatter_plot(
+           x_ser=sp1_ser, y_ser=sp2_ser,
+           trendlines=trendlines,
+           datapoints_color_ser=color_ser,
+           show=False
+           )
+        np.testing.assert_array_equal(
+            tested_fig["data"][0]["marker"]["color"], [0, 0, 1, 1, 0, 2, 2, 2, 2, 0, 1, 2, 2, 2, 1])
+
+        # Case #5: color series made of non-color strings and np.nan values
+        color_ser = pd.Series(
+            ['C', 'C', 'B', 'B', 'C', 'A', 'A', 'A', 'A', np.nan, 'B', 'A', 'A', 'A', np.nan], index=samples)
+
+        tested_fig = self.ins.scatter_plot(
+           x_ser=sp1_ser, y_ser=sp2_ser,
+           trendlines=trendlines,
+           datapoints_color_ser=color_ser,
+           show=False
+           )
+        np.testing.assert_array_equal(
+            tested_fig["data"][0]["marker"]["color"], [0., 0., 1., 1., 0., 2., 2., 2., 2., 3., 1., 2., 2., 2., 3.])
