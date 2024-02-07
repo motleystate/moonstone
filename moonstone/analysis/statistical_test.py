@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 DEFAULT_STATS_TEST = "mann_whitney_u"
+AVAILABLE_STATS_TESTS = ["mann_whitney_u", "ttest_independence", "chi2_contingency"]
 """
 TESTS_FUNCTIONS_USED = {
     'wilcoxon_rank_test': st.ranksums,
@@ -99,9 +100,7 @@ def statistical_test_groups_comparison(
           * "max nbins": Returns the contingency table with the maximum number of bins with at least 5 observations by
             cell
     """
-
-    method = ["mann_whitney_u", "ttest_independence", "chi2_contingency"]
-    if stat_test not in method:
+    if stat_test not in AVAILABLE_STATS_TESTS:
         logger.warning(
             "%s not a available mode, set to default (%s)",
             stat_test,
@@ -402,8 +401,25 @@ def chi2_contingency(
     NB : Cells with 0 raise an error in the scipy.stats.chi2_contingency test. Furthermore, they recommand to use the
     test only if the observed and expected frequencies in each cell are at least 5.
 
-    :param rettab: Whether to return the Chi2 contingency table.
+    Args:
+        bins: The criteria to bin by.
+          * int : Defines the number of bins in the range of x. The range of x is extended by .1% on each side to
+            include the minimum and maximum values of x.
+          * sequence of scalars : Defines the bin edges. No extension of the range of x is done. So don't forget to make
+            the first bin edge a little smaller than the minimum value you want included.
+          * "best pvalue": Returns the contingency table associated with the best chi2 contingency pvalue
+          * "max nbins": Returns the contingency table with the maximum number of bins with at least 5 observations by
+            cell
+        cut_type: {"equal-width" (default), "equal-size"} Defines how the bins are cut when a integer is given to bins.
+          Note: they are defined on numerical_series only.
+          So all cells of the contingency table might not all have the same weight at the end.
+        na: Defines if NaN should be considered as a value
+        force_computation: Returns contingency table even if not every cell has at least 5 observations
+        rettab: Whether to return the Chi2 contingency table.
     """
+    # OUTPUT = to_return = tuple of 4-5 variables
+    #   * output of skbio.chi2_contingency: chi2, pval, degree of freedom, expected table
+    #   * (optional) if rettab is True, chi2 contingency table
     if (series1.size < 10 or series2.size < 10) and not force_computation:
         logger.warning(
             "Data have less than 10 observations by groups. \
@@ -422,7 +438,7 @@ Another statistical test would be more appropriate to compare those 2 groups."
         tab, comparison_df = compute_contingency_table(
             df["number"],
             df["category"],
-            bins,
+            bins=bins,
             cut_type=cut_type,
             na=na,
             force_computation=force_computation,
@@ -437,14 +453,14 @@ Another statistical test would be more appropriate to compare those 2 groups."
         tab = compute_contingency_table(
             df["number"],
             df["category"],
-            bins,
+            bins=bins,
             cut_type=cut_type,
             na=na,
             force_computation=force_computation,
         )
         to_return = list(
             scipy.stats.chi2_contingency(tab)
-        )  # ch2, pval, degree of freedom, expected table
+        )  # chi2, pval, degree of freedom, expected table
         if rettab:
             to_return += [tab]  # observed table
         return tuple(to_return)

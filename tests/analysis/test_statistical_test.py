@@ -140,7 +140,7 @@ class TestStatisticalTestFunction(TestCase):
         depending on the version of scipy check different things
         """
         scipy_version = version.parse(scipy.__version__)
-        if scipy_version < version.parse("1.8.0"):        
+        if scipy_version < version.parse("1.8.0"):
             with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
                 stat, pval = mann_whitney_u(
                     self.test_df.iloc[:2], self.test_df.iloc[2:], nan_policy="propagate"
@@ -190,7 +190,7 @@ class TestStatisticalTestFunction(TestCase):
         depending on the version of scipy check different things
         """
         scipy_version = version.parse(scipy.__version__)
-        if scipy_version < version.parse("1.7.0"):        
+        if scipy_version < version.parse("1.7.0"):
             with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
                 stat, pval = ttest_independence(
                     self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
@@ -222,13 +222,13 @@ of scipy.",
 of scipy.",
                     log.output,
                 )
-        else: 
+        else:
             stat, pval = ttest_independence(
                 self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
             )
 
         self.assertEqual(stat, -0.176164072157316)
-        self.assertEqual(pval, 0.8733823222145742)        
+        self.assertEqual(pval, 0.8733823222145742)
 
 
 class TestChi2Functions(TestCase):
@@ -645,7 +645,7 @@ Another statistical test would be more appropriate to compare those 2 groups.",
 
     def test_chi2_contingency_groups_all_groups_dropped(self):
         with self.assertRaises(RuntimeError) as cm:
-            matrix = statistical_test_groups_comparison(
+            statistical_test_groups_comparison(
                 self.test_df.iloc[:20], self.metadata_df, stat_test='chi2_contingency'
                 )
         the_exception = cm.exception

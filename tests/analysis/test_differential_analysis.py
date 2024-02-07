@@ -51,7 +51,23 @@ class TestDifferentialAnalysis(TestCase):
             },
             orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1',
                                      'variance_group2'])
-        pd.testing.assert_frame_equal(test_object.test_dichotomic_features(self.dicotomic_feature, 't_test'),
+        pd.testing.assert_frame_equal(
+            test_object.test_dichotomic_features(self.dicotomic_feature, 't_test', equal_var=True),
+            expected_object)
+
+    def test_test_dichotomic_features_mann_whitney_u(self):
+        test_object = DifferentialAnalysis(self.tested_object_metadata, self.tested_object_reads)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                0: ['SEX', 'specie_1', 25.0, 0.007937, 64219.3, 925.7],
+                1: ['SEX', 'specie_2', 15.0, 0.690476, 4611894.3, 432948.3],
+                2: ['SEX', 'specie_3', 13.0, 1.000000, 769104.2, 180.0],
+                3: ['SEX', 'specie_4', 18.0, 0.309524, 915345.3,	227463.2],
+                4: ['SEX', 'specie_5', 12.0, 1.000000, 102820.3, 39705.3],
+            },
+            orient='index', columns=['features', 'taxons', 'static_value', 'p-value', 'variance_group1',
+                                     'variance_group2'])
+        pd.testing.assert_frame_equal(test_object.test_dichotomic_features(self.dicotomic_feature, 'mann_whitney_u'),
                                       expected_object)
 
     def test_test_dichotomic_features_wilcoxon_rank_test(self):
