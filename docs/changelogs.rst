@@ -7,6 +7,18 @@ Changelogs
 Summary of developments of moonstone library.
 
 
+v1.1
+====
+
+v1.1.0
+------
+
+* Compatibility with Python 3.10. Upgrade of statsmodels requirement to version=1.14
+* class `ScatterTrendlines`: input counts dataframe; give the two species to plot against each other to `plot_one_graph` and the number of trendlines to generate (https://github.com/motleystate/moonstone/pull/104)
+* 3 new functions in dict_operations: `flatten_dict`, `super_pop` and `filter_dict` (https://github.com/motleystate/moonstone/pull/104)(https://github.com/motleystate/moonstone/pull/92)
+* reorganization Chi2 and other statistical tests (https://github.com/motleystate/moonstone/pull/92)
+* `SeriesBinning`: to put series into bins (https://github.com/motleystate/moonstone/pull/92)
+
 v1.0
 ====
 
