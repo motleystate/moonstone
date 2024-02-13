@@ -4,8 +4,9 @@ import pandas as pd
 import scipy.stats as st
 from statsmodels.stats.multitest import multipletests
 
-from moonstone.transformers.mergers import MergeCountsAndMetadata
 from moonstone.filtering.basics_filtering import NoCountsFiltering
+from moonstone.transformers.mergers import MergeCountsAndMetadata
+import moonstone.analysis.statistical_test as mast
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,8 @@ class DifferentialAnalysis:
         'multiple': ['one_way_anova', 'kruskal_test']
     }
     tests_functions_used = {
-        't_test': st.ttest_ind,
+        't_test': mast.ttest_independence,
+        'mann_whitney_u': mast.mann_whitney_u,
         'wilcoxon_rank_test': st.ranksums,
         'one_way_anova': st.f_oneway,
         'kruskal_test': st.kruskal
@@ -42,7 +44,9 @@ class DifferentialAnalysis:
             setattr(self, "_number_columns_to_skip", len(self.metadata_df))
         return self._number_columns_to_skip
 
-    def test_dichotomic_features(self, feature, test_to_use):
+    def test_dichotomic_features(
+        self, feature: str, test_to_use: str, **kwargs
+    ):
         features = []
         taxons = []
         static_value = []
@@ -52,8 +56,10 @@ class DifferentialAnalysis:
         cat1 = self.full_table[self.full_table[feature] == self.full_table[feature][0]]
         cat2 = self.full_table[self.full_table[feature] != self.full_table[feature][0]]
         for family in range(self.number_columns_to_skip, self.full_table.shape[1]):
-            test = self.tests_functions_used[test_to_use](cat1[self.full_table.columns[family]].astype(float),
-                                                          cat2[self.full_table.columns[family]].astype(float))
+            s1 = cat1[self.full_table.columns[family]].astype(float)
+            s2 = cat2[self.full_table.columns[family]].astype(float)
+            test = self.tests_functions_used[test_to_use](s1, s2, **kwargs)
+            # append to lists that will constitute the columns
             features.append(feature)
             taxons.append(self.full_table.columns[family])
             static_value.append(round(test[0], 6))
@@ -66,7 +72,9 @@ class DifferentialAnalysis:
                                                                          'variance_group2'])
         return test_results
 
-    def test_multiple_features(self, feature, test_to_use):
+    def test_multiple_features(
+        self, feature: str, test_to_use: str
+    ):
         features = []
         taxons = []
         static_values = []
@@ -103,16 +111,21 @@ class DifferentialAnalysis:
         corrected_p_values = multipletests(p_value_serie, method=correction_method_used)
         return corrected_p_values[1]
 
-    def differential_analysis_by_feature(self, features, type_of_features, test_to_use, correction_method_used):
+    def differential_analysis_by_feature(
+        self, features: list, type_of_features: str, test_to_use: str, correction_method_used: str,
+        **kwargs
+    ):
         '''
         Features should be provided in a list splited by dichotomic or multiple option features.
         example:
         dicotomic_features = ['SEX', 'GRIPPE']
         multiple_option_features = ['Season', Age_Group']
+
+        Arguments for the statistical test can be specified and pass to the test
         '''
         final_table = pd.DataFrame()
         for feature in features:
-            test_result = getattr(self, f"test_{type_of_features}", self.test_default)(feature, test_to_use)
+            test_result = getattr(self, f"test_{type_of_features}", self.test_default)(feature, test_to_use, **kwargs)
             test_result['corrected_p-value'] = self.corrected_p_values(test_result['p-value'], correction_method_used)
             final_table = pd.concat([final_table, test_result])
         return final_table
