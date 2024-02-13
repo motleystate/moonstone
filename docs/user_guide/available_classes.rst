@@ -35,6 +35,7 @@ Classic and simple parsers:
    :nosignatures:
 
     MetadataParser
+    YAMLBasedMetadataParser
 
 Counts parsers (``from moonstone.parsers.counts``):
 
@@ -187,4 +188,4 @@ List
    diversity.beta.UnweightedUniFrac
 
 .. Note::
-    More details on API documentation for :ref:`api_plot`.
+    More details on API documentation for :ref:`api_analysis`.

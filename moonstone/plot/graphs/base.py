@@ -4,9 +4,12 @@ from typing import Union, Tuple
 import copy
 import pandas as pd
 import plotly.io
+import plotly.express as px
 import plotly.graph_objects as go
 
 import logging
+
+from moonstone.utils.colors import generate_color_code
 
 logger = logging.getLogger(__name__)
 
@@ -17,18 +20,9 @@ class BaseGraph(ABC):
     def __init__(
         self,
         data: Union[pd.Series, pd.DataFrame],
-        plotting_options: dict = None,
-        show: bool = True,
-        output_file: Union[bool, str] = False,
     ):
         """
         :param data: data to plot
-        :param show: set to False if you don't want to show the plot
-        :param output_file: name of the output file
-        :param plotting_options: options of plotting that will override the default setup \n
-                                 [!] Make sure the value given to an argument is of the right type \n
-                                 options allowed : 'log': `bool` ; 'colorbar': `[str, List[str]]` ;
-                                 'tickangle': `[int, float]`
         """
         self.data = data
 
@@ -39,6 +33,51 @@ class BaseGraph(ABC):
         needs to be defined in every child class
         """
         pass
+
+    def _color_scheme_species(self, colors: dict = None) -> dict:
+        final_colors = {name: generate_color_code(name) for name in self.data.index}
+        if colors is not None:
+            final_colors.update(**colors)
+        return final_colors
+
+    def _color_scheme_metadata(
+        self, metadata: Union[pd.DataFrame, pd.Series, list, int], colors: dict = None
+    ) -> dict:
+        """
+        Generate a dictionary with the different groups as key and a color as value.
+        If number of different groups > 38, then colors are repeted.
+
+            Args:
+                - metadata: Can take DataFrame or Series, then all different values are listed and assigned a color.
+                  Or can take a list/array, then all elements of the list are assigned a color.
+                  Finally, metadata can be an integer which act like a list ranging from 0 to that integer (excluded),
+                  and each integer is assigned a color.
+                - colors: Dictionary that dictate a particular color to a particular group.
+        """
+        final_colors = {}
+        if isinstance(metadata, pd.Series):
+            all_gp = list(metadata.unique())
+        elif isinstance(metadata, pd.DataFrame):
+            all_gp = []
+            for cc in metadata.columns:
+                all_gp += list(metadata[cc].unique())
+            all_gp = list(set(all_gp))  # doesn't remove all different nan
+        # we can't do it manually because then some nan don't correspond to the one manually added
+        elif type(metadata) == int:
+            all_gp = list(range(0, metadata))
+        else:  # array
+            all_gp = metadata
+
+        if len(all_gp) <= 10:
+            final_colors = dict(zip(all_gp, px.colors.qualitative.Plotly))
+        elif len(all_gp) <= 26:
+            final_colors = dict(zip(all_gp, px.colors.qualitative.Alphabet))
+        else:
+            c = px.colors.qualitative.Alphabet + px.colors.qualitative.Set3
+            final_colors = dict(zip(all_gp, c * (int(len(all_gp) / len(c)) + 1)))
+        if colors is not None:
+            final_colors.update(**colors)
+        return final_colors
 
     def _valid_orientation_param(self, orientation: str) -> str:
         if orientation == "v" or orientation == "vertical":
