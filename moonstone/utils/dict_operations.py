@@ -77,6 +77,8 @@ def flatten_dict(d: MutableMapping, parent_key: str = '', sep: str = '.', flatte
         - d: dictionary to flatten
         - parent_key: name of the keys under which d was registered. It is used as prefix for the keys in d.
         - sep: character or string of character used to separate parent_key/prefix and keys of d.
+        - flatten_list: should list be flatten. Key would be parent_key followed by position in list.
+          Example: {'a': ['b', 'c']} -> {'a.0': 'b', 'a.1': 'c'} 
     """
     return dict(_flatten_dict_gen(d, parent_key, sep, flatten_list))
 
