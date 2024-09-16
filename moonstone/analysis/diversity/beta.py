@@ -102,35 +102,52 @@ class BetaDiversity(DiversityBase, ABC):
     @property
     def pcoa(self):
         if getattr(self, '_pcoa', None) is None:
-            self._pcoa = pcoa(self.beta_diversity).samples
+            self._pcoa = pcoa(self.beta_diversity)
         return self._pcoa
+    
+    def _label_with_proportion(self, var):
+        string = "{} ({:2.2%})".format(var, self.pcoa.proportion_explained[var])
+        return string
 
     def visualize_pcoa(
         self, metadata_df: pd.DataFrame, group_col: str, mode: str = 'scatter',
+        proportions: bool = False, x_pc: int = 1, y_pc: int = 2, z_pc: int = 3,
         show: bool = True, output_file: Union[bool, str] = False,
         colors: dict = None, groups: list = None,
         plotting_options: dict = None,
     ):
+        """
+        Args:
+            proportions: write proportion explained for each PC in the x/y labels.
+        """
 
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
-        df = pd.concat([self.pcoa, filtered_metadata_df[group_col]], axis=1)
+        df = pd.concat([self.pcoa.samples, filtered_metadata_df[group_col]], axis=1)
 
         if mode not in ['scatter', 'scatter3d']:
             logger.warning("%s not a available mode, set to default (scatter)", mode)
             mode = "scatter"
+        
         title = f"PCOA of samples from {self.index_name} distance matrix"
-        xlabel = "PC1"
-        ylabel = "PC2"
+        xvar = "PC"+str(x_pc)
+        yvar = "PC"+str(y_pc)
+        if proportions:
+            xlabel = self._label_with_proportion(xvar)
+            ylabel = self._label_with_proportion(yvar)
+        else:
+            xlabel = xvar
+            ylabel = yvar
         plotting_options = self._handle_plotting_options(
             plotting_options, title, xlabel, ylabel, False
         )
 
         if mode == "scatter":
             graph = GroupScatterGraph(df)
-            args_for_plot = ["PC1", "PC2", group_col]
+            args_for_plot = [xvar, yvar, group_col]
         elif mode == "scatter3d":
             graph = GroupScatter3DGraph(df)
-            args_for_plot = ["PC1", "PC2", "PC3", group_col]
+            zvar = "PC"+str(z_pc)
+            args_for_plot = [xlabel, ylabel, zvar, group_col]
         graph.plot_one_graph(
             *args_for_plot,
             plotting_options=plotting_options,

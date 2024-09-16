@@ -23,9 +23,11 @@ TESTS_FUNCTIONS_USED = {
 def _preprocess_groups_comparison(
     series: pd.Series, group_series: pd.Series, stat_test: str, force_computation: bool
 ):
-    # If samples in group_series/metadata but not in series/count_dataframe
+    # 1) If samples in group_series/metadata but not in series/count_dataframe
     # then we need to remove them from the group_series/metadata
     # to not get an error like "None of [Index(['sample7'], dtype='object')] are in the [index]"
+    # 2) Checking number of observations per groups and warns (if force_computation) or drops group
+    # if the number of observations is less than optimal for the statistical test used
     group_series_index_to_keep = group_series.index.intersection(series.index)
     if len(group_series_index_to_keep) != len(group_series.index):
         logger.info(
