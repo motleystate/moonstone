@@ -357,7 +357,9 @@ class ScatterTrendlines(BaseGraph):
 
         if show or output_file:
             self._handle_output_plotly(best_dfnt_output["figure"], show, output_file)
-        print(best_rs)
+
+        if random_state:
+            print("best random_state:", best_rs)
         # output: cf define_n_trendlines' output
         return best_dfnt_output
 
