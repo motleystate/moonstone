@@ -137,17 +137,22 @@ class BetaDiversity(DiversityBase, ABC):
         else:
             xlabel = xvar
             ylabel = yvar
-        plotting_options = self._handle_plotting_options(
-            plotting_options, title, xlabel, ylabel, False
-        )
+        
 
         if mode == "scatter":
+            plotting_options = self._handle_plotting_options(
+                plotting_options, title, xlabel, ylabel, False
+            )
             graph = GroupScatterGraph(df)
             args_for_plot = [xvar, yvar, group_col]
         elif mode == "scatter3d":
-            graph = GroupScatter3DGraph(df)
             zvar = "PC"+str(z_pc)
-            args_for_plot = [xlabel, ylabel, zvar, group_col]
+            zlabel = self._label_with_proportion(zvar)
+            plotting_options = self._handle_plotting_options(
+                plotting_options, title, xlabel, ylabel, False, zlabel=zlabel
+            )
+            graph = GroupScatter3DGraph(df)
+            args_for_plot = [xvar, yvar, zvar, group_col]
         graph.plot_one_graph(
             *args_for_plot,
             plotting_options=plotting_options,

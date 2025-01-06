@@ -2,6 +2,8 @@ from typing import Union
 
 import plotly.graph_objects as go
 
+from moonstone.utils.dict_operations import merge_dict
+
 
 def check_list_type(items, expected_type: Union[tuple, type]) -> bool:
     """
@@ -44,6 +46,21 @@ def add_default_titles_to_plotting_options(
     plotting_options = add_x_to_plotting_options(
         plotting_options, "yaxes", "title_text", ylabel
     )
+    return plotting_options
+
+
+def add_default_titles_to_plotting_options_3d(
+    plotting_options: dict, title: str, xlabel: str, ylabel: str, zlabel: str
+) -> dict:
+    plotting_options = add_x_to_plotting_options(
+        plotting_options, "layout", "title_text", title
+    )
+    scene_dic = {"xaxis_title": xlabel, "yaxis_title": ylabel, "zaxis_title": zlabel}
+    if "scene" in plotting_options["layout"].keys():
+        scene_dic = merge_dict(plotting_options["layout"]["scene"], scene_dic)
+
+    plotting_options["layout"]["scene"] = scene_dic
+
     return plotting_options
 
 
