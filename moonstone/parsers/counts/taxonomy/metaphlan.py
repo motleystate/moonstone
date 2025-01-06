@@ -122,7 +122,7 @@ class Metaphlan3Parser(BaseMetaphlanParser):
     taxa_column = 'clade_name'
     NCBI_tax_column = 'NCBI_tax_id'
 
-    def __init__(self, *args, analysis_type: str = 'rel_ab', keep_NCBI_tax_col: bool = False, **kwargs):
+    def __init__(self, *args, analysis_type: str = 'rel_ab', keep_NCBI_tax_col: bool = False, skiprows: int = 1, **kwargs):
         """
         Args:
             analysis_type: output type of Metaphlan3 (see ``-t`` option of metaphlan3)
@@ -131,7 +131,7 @@ class Metaphlan3Parser(BaseMetaphlanParser):
             keep_NCBI_tax_col: set to True if you want the NCBI tax column in the returned dataframe.
         """
         self.keep_NCBI_tax_col = keep_NCBI_tax_col
-        super().__init__(*args, analysis_type=analysis_type, parsing_options={'skiprows': 1}, **kwargs)
+        super().__init__(*args, analysis_type=analysis_type, parsing_options={'skiprows': skiprows}, **kwargs)
 
     def _load_data(self) -> pd.DataFrame:
         df = super()._load_data()

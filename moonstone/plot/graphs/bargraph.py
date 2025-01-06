@@ -152,7 +152,7 @@ class MatrixBarGraph(BaseGraph):
     def plot_complex_graph(
         self,
         metadata: Union[pd.DataFrame, pd.Series],
-        plotting_options: dict = None,
+        plotting_options: dict = {},
         show: bool = True,
         output_file: Union[bool, str] = False,
         colors: dict = None,
@@ -194,6 +194,8 @@ class MatrixBarGraph(BaseGraph):
             xaxis_title = plotting_options["layout"].pop("xaxis_title", "Samples")
             if "legend" in plotting_options["layout"].keys():
                 plotting_options["layout"]["legend"].pop("traceorder", None)
+        else:
+            xaxis_title = "Samples"
 
         fig.update_layout(
             xaxis2=dict(  # xaxis of the 2nd subplot (to not have "samples" * 2)
