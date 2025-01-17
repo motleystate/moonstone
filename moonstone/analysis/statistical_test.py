@@ -245,7 +245,7 @@ def _compute_max_nbins_contingency_table(
             numerical_series, categorical_series, nbins,
             cut_type=cut_type, na=na, force_computation=False, warn=False
         )
-        if type(tab) != float:  # type(np.nan) == float
+        if type(tab) is not float:  # type(np.nan) == float
             return tab, nbins
         nbins -= 1
 

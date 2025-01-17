@@ -400,7 +400,7 @@ class PhylogeneticDiversityBase(DiversityBase):
         if self.df.index.nlevels > 1:   # if the dataframe is a multiindex...
             self.df.groupby(self.df.index.names[-1]).sum()  # it needs to be transformed as a single index dataframe
             # otherwise error: "TypeError: not all arguments converted during string formatting"
-        if type(taxonomy_tree) == skbio.tree._tree.TreeNode:
+        if type(taxonomy_tree) is skbio.tree._tree.TreeNode:
             self.tree = taxonomy_tree
         else:
             raise RuntimeError("taxonomy_tree should be a skbio.TreeNode.")

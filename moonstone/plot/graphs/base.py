@@ -63,7 +63,7 @@ class BaseGraph(ABC):
                 all_gp += list(metadata[cc].unique())
             all_gp = list(set(all_gp))  # doesn't remove all different nan
         # we can't do it manually because then some nan don't correspond to the one manually added
-        elif type(metadata) == int:
+        elif type(metadata) is int:
             all_gp = list(range(0, metadata))
         else:  # array
             all_gp = metadata

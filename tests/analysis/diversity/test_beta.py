@@ -237,6 +237,128 @@ class TestBrayCurtis(TestCase):
             output["data"], expected_object,
         )
 
+    def test_unit_scale_with_scale_between0and1(self):
+        tested_object_instance = BrayCurtis(self.tested_object)
+
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [-30],
+                'species2': [-1],
+                'species3': [-0.2],
+                'species4': [0],
+                'species5': [0.5],
+                'species6': [1],
+                'species7': [198]
+            },
+            orient='index',
+            columns=['PC1']
+        )
+
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'species1': [-0.06],
+                'species2': [-0.002],
+                'species3': [-0.0004],
+                'species4': [0],
+                'species5': [0.001],
+                'species6': [0.002],
+                'species7': [0.396]
+            },
+            orient='index',
+            columns=['PC1']
+        )
+        pd.testing.assert_frame_equal(
+            tested_object_instance._unit_scale(tested_object, 228, 0.456),
+            expected_object
+        )
+
+    def test_unit_scale_with_scale_above1(self):
+        tested_object_instance = BrayCurtis(self.tested_object)
+
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [-30],
+                'species2': [-1],
+                'species3': [-0.2],
+                'species4': [0],
+                'species5': [0.5],
+                'species6': [1],
+                'species7': [198]
+            },
+            orient='index',
+            columns=['PC1']
+        )
+
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'species1': [-3],
+                'species2': [-0.1],
+                'species3': [-0.02],
+                'species4': [0],
+                'species5': [0.05],
+                'species6': [0.1],
+                'species7': [19.80]
+            },
+            orient='index',
+            columns=['PC1']
+        )
+        pd.testing.assert_frame_equal(
+            tested_object_instance._unit_scale(tested_object, 228, 22.8),
+            expected_object
+        )
+
+    def test_scale_biplot(self):
+        tested_object_instance = BrayCurtis(self.tested_object)
+
+        tested_features_df = pd.DataFrame.from_dict(
+            {
+                ('genusA', 'species1'): [-30, 0],
+                ('genusA', 'species2'): [-1, 89],
+                ('genusB', 'species3'): [-0.2, -5.7],
+                ('genusB', 'species4'): [0, 0],
+                ('genusB', 'species5'): [0.5, 0.32],
+                ('genusC', 'species6'): [1, -0.6],
+                ('genusC', 'species7'): [198, 1]
+            },
+            orient='index',
+            columns=['PC1', 'PC2']
+        )
+        tested_features_df.index = pd.MultiIndex.from_tuples(tested_features_df.index, names=('genus', 'species'))
+
+        tested_samples_df = pd.DataFrame.from_dict(
+            {
+                'sample1': [-6, 3.4],
+                'sample2': [2, 0.9],
+                'sample3': [5, -2.4],
+                'sample4': [13, -0.1],
+                'sample5': [-0.5, 0],
+                'sample6': [-62, -25],
+                'sample7': [0, 0.3]
+            },
+            orient='index',
+            columns=['PC1', 'PC2']
+        )
+
+        expected_object = pd.DataFrame.from_dict(
+            {
+                ('genusA', 'species1'): [-62, -23.290602],
+                ('genusA', 'species2'): [-52.460526, 3.4],
+                ('genusB', 'species3'): [-52.197368, -25],
+                ('genusB', 'species4'): [-52.131579, -23.290602],
+                ('genusB', 'species5'): [-51.967105, -23.194636],
+                ('genusC', 'species6'): [-51.802632, -23.470539],
+                ('genusC', 'species7'): [13, -22.990707]
+            },
+            orient='index',
+            columns=['PC1', 'PC2']
+        )
+        expected_object.index = pd.MultiIndex.from_tuples(expected_object.index, names=('genus', 'species'))
+
+        pd.testing.assert_frame_equal(
+            tested_object_instance._scale_biplot(tested_features_df, tested_samples_df),
+            expected_object
+        )
+
 
 class TestWeightedUniFrac(TestCase):
 

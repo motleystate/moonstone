@@ -234,7 +234,7 @@ class PlotTaxonomyCounts:
         prec = -0.5
         subgps = sep_series.unique()
         for subgp in subgps:
-            if type(subgp) != str and np.isnan(subgp):
+            if type(subgp) is not str and np.isnan(subgp):
                 df_gp = top_and_other_df[sep_series[sep_series.isna()].index.intersection(top_and_other_df.columns)]
             else:
                 df_gp = top_and_other_df[sep_series[sep_series == subgp].index.intersection(top_and_other_df.columns)]
