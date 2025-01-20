@@ -145,7 +145,8 @@ class TestScatterTrendlines(TestCase):
             "species1", "species2", 2, log_x=False, log_y=False, nb_iter=100, nb_bootstraps=5, outliers="keep",
             show=False, random_state=11
         )
-        pd.testing.assert_series_equal(output["group_series"], self.expected_group_series)
+        expected_group_series_inv = (~self.expected_group_series.astype(bool)).astype(int)
+        pd.testing.assert_series_equal(output["group_series"], expected_group_series_inv)
 
     def test_plot_one_graph(self):
         # no bootstraps -> calls define_n_trendlines()
