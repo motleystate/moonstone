@@ -772,7 +772,7 @@ samples"
                 fig = graph.plot_one_graph(plotting_options=plotting_options, **kwargs, show=False)
             else:
                 fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, **kwargs, show=False)
-            fig = add_groups_annotations(fig, x_coor, subgps)
+            fig = add_groups_annotations(fig, x_coor, (0, 100, 104), subgps)
             graph._handle_output_plotly(fig, show, output_file)
         else:
             if color_df is None:

@@ -227,14 +227,19 @@ class BetaDiversity(DiversityBase, ABC):
         return fig
 
     def visualize_pcoa(
-        self, metadata_df: pd.DataFrame, group_col: str, mode: str = 'scatter',
+        self, metadata_df: pd.DataFrame, group_col: str, group_col2: str = None,
+        mode: str = 'scatter',
         proportions: bool = False, x_pc: int = 1, y_pc: int = 2, z_pc: int = 3,
         show: bool = True, output_file: Union[bool, str] = False,
-        colors: dict = None, groups: list = None,
+        colors: dict = None, groups: list = None, groups2: list = None,
         n_biplot_features: int = 0, plotting_options: dict = None,
     ):
         """
         Args:
+            metadata_df: dataframe containing metadata and information to group the data.
+            group_col: column of the metadata_df to use for coloring.
+            group_col2: (optional) column from metadata_df to use for.
+            mode: type of graph to visualize the PCoA. { 'scatter' (default), 'scatter3d' }.
             proportions: write proportion explained for each PC in the x/y labels.
             n_biplot_features: add arrows showing the n most explanatory features per axis direction
         """
@@ -282,11 +287,13 @@ class BetaDiversity(DiversityBase, ABC):
             args_for_plot = [xvar, yvar, zvar, group_col]
         fig = graph.plot_one_graph(
             *args_for_plot,
+            group_col2=group_col2,
             plotting_options=plotting_options,
             show=tmp_show,
             output_file=tmp_output_file,
             colors=colors,
             groups=groups,
+            groups2=groups2
         )
 
         if n_biplot_features > 0:
@@ -304,7 +311,7 @@ class BetaDiversity(DiversityBase, ABC):
                 fig = self._bi_plotly(fig, pcx, pcy, d_bf.index, n_biplot_features)
 
             graph._handle_output_plotly(fig, show, output_file)
-        return fig, d_bf, self.pcoa.samples
+        return fig
 
 
 class BrayCurtis(BetaDiversity):
