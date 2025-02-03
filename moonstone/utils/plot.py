@@ -64,23 +64,28 @@ def add_default_titles_to_plotting_options_3d(
     return plotting_options
 
 
-def add_groups_annotations(fig, x_coor: list, groups: list) -> go.Figure:
+def add_groups_annotations(fig, x_coor: list, y_coor: tuple, groups: list) -> go.Figure:
     """
+    Add labels annotations, in the form of rectangles for the label with text annotations and a line separating the
+    groups going from the bottom of the rectangle to the bottom of the data.
+
     Args
         fig: The figure to which you want to add labels annotation above the data.
         x_coor: List of x coordinates triplet [(x start of background, x of text annotation, x end of background)].
+        y_coor: Tuple of 3 y coordinates : (y bottom of line, y bottom of rectangle, y top of rectangle)
         groups: List of groups' name, should be in the same order as x_coor.
     """
     i = 0
+    y_med = (y_coor[1] + y_coor[2])/2
     color_bg = ["#FFFFFF", "#a7bcdb"]
     while i < len(groups):
         # adding background color
         fig.add_shape(
             type="rect",
             x0=x_coor[i][0],
-            y0=100,
+            y0=y_coor[1],
             x1=x_coor[i][2],
-            y1=104,
+            y1=y_coor[2],
             line=dict(
                 width=0,
             ),
@@ -89,7 +94,7 @@ def add_groups_annotations(fig, x_coor: list, groups: list) -> go.Figure:
         # adding text annotation (group name)
         fig.add_annotation(
             x=x_coor[i][1],
-            y=102,
+            y=y_med,
             xref="x",
             yref="y",
             text=groups[i],
@@ -101,9 +106,9 @@ def add_groups_annotations(fig, x_coor: list, groups: list) -> go.Figure:
             fig.add_shape(
                 type="line",
                 x0=x_coor[i][2],
-                y0=100,
+                y0=y_coor[1],
                 x1=x_coor[i][2],
-                y1=0,
+                y1=y_coor[0],
                 line=dict(width=1, dash="solid", color="white"),
             )
         i += 1
