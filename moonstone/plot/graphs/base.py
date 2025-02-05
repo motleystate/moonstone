@@ -45,14 +45,14 @@ class BaseGraph(ABC):
     ) -> dict:
         """
         Generate a dictionary with the different groups as key and a color as value.
-        If number of different groups > 38, then colors are repeted.
+        If number of different groups > 38, then colors are repeated.
 
-            Args:
-                - metadata: Can take DataFrame or Series, then all different values are listed and assigned a color.
-                  Or can take a list/array, then all elements of the list are assigned a color.
-                  Finally, metadata can be an integer which act like a list ranging from 0 to that integer (excluded),
-                  and each integer is assigned a color.
-                - colors: Dictionary that dictate a particular color to a particular group.
+        Args:
+            metadata: Can take DataFrame or Series, then all different values are listed and assigned a color.
+                Or can take a list/array, then all elements of the list are assigned a color.
+                Finally, metadata can be an integer which act like a list ranging from 0 to that integer (excluded),
+                and each integer is assigned a color.
+            colors: Dictionary that dictate a particular color to a particular group.
         """
         final_colors = {}
         if isinstance(metadata, pd.Series):

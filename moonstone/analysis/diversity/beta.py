@@ -245,7 +245,10 @@ class BetaDiversity(DiversityBase, ABC):
         """
 
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
-        df = pd.concat([self.pcoa.samples, filtered_metadata_df[group_col]], axis=1)
+        if group_col2:
+            df = pd.concat([self.pcoa.samples, filtered_metadata_df[[group_col, group_col2]]], axis=1)
+        else:
+            df = pd.concat([self.pcoa.samples, filtered_metadata_df[group_col]], axis=1)
 
         if mode not in ['scatter', 'scatter3d']:
             logger.warning("%s not a available mode, set to default (scatter)", mode)

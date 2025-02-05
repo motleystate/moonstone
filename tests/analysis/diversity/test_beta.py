@@ -35,7 +35,7 @@ class TestBrayCurtis(TestCase):
         )
         pd.testing.assert_frame_equal(
             tested_object_instance.beta_diversity_df, expected_object,
-            rtol=0.01
+            rtol=0.01    # set relative tolerance to 0.01 so that 1/3=0.333
             # check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
@@ -236,6 +236,9 @@ class TestBrayCurtis(TestCase):
         pd.testing.assert_frame_equal(
             output["data"], expected_object,
         )
+
+#    def test_label_with_proportion(self):
+#
 
     def test_unit_scale_with_scale_between0and1(self):
         tested_object_instance = BrayCurtis(self.tested_object)
