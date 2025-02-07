@@ -6,7 +6,7 @@ import pandas as pd
 from skbio import TreeNode
 
 from moonstone.analysis.diversity.beta import (
-    BrayCurtis, WeightedUniFrac, UnweightedUniFrac
+    BrayCurtis, Jaccard, WeightedUniFrac, UnweightedUniFrac
 )
 
 
@@ -22,9 +22,9 @@ class TestBrayCurtis(TestCase):
             },
             orient='index', columns=['sample1', 'sample2', 'sample3']
         )
+        self.tested_object_instance = BrayCurtis(self.tested_object)
 
     def test_compute_beta_diversity_df(self):
-        tested_object_instance = BrayCurtis(self.tested_object)
         expected_object = pd.DataFrame.from_dict(
             {
                 'sample1': [0, 0.333, 0.714],
@@ -34,14 +34,12 @@ class TestBrayCurtis(TestCase):
             orient='index', columns=['sample1', 'sample2', 'sample3']
         )
         pd.testing.assert_frame_equal(
-            tested_object_instance.beta_diversity_df, expected_object,
+            self.tested_object_instance.beta_diversity_df, expected_object,
             rtol=0.01    # set relative tolerance to 0.01 so that 1/3=0.333
             # check_less_precise=2,  # Deprecated since version 1.1.0, to be changed when updating pandas
         )
 
     def test_compute_beta_diversity_series(self):
-
-        tested_object_instance = BrayCurtis(self.tested_object)
         multi_index = pd.MultiIndex.from_tuples(
             [
                 ('sample1', 'sample2'),
@@ -54,17 +52,15 @@ class TestBrayCurtis(TestCase):
         )
         # Two ways of retrieving the series
         pd.testing.assert_series_equal(
-            tested_object_instance.beta_diversity_series, expected_object,
+            self.tested_object_instance.beta_diversity_series, expected_object,
             rtol=0.01
         )
         pd.testing.assert_series_equal(
-            tested_object_instance.diversity_indexes, expected_object,
+            self.tested_object_instance.diversity_indexes, expected_object,
             rtol=0.01
         )
 
     def test_run_statistical_test_groups_with_NaN(self):
-        tested_object_instance = BrayCurtis(self.tested_object)
-
         tested_df = pd.DataFrame.from_dict(
             {
                 'samples1': [1.88, 'B'],
@@ -103,7 +99,7 @@ class TestBrayCurtis(TestCase):
         )
         expected_object.index.names = ["Group1", "Group2"]
 
-        pval = tested_object_instance._run_statistical_test_groups(
+        pval = self.tested_object_instance._run_statistical_test_groups(
             tested_df, 'Group', stats_test='ttest_independence', correction_method='fdr_bh',
             structure_pval='series', sym=False
             )
@@ -134,14 +130,13 @@ class TestBrayCurtis(TestCase):
             },
             name='sex'
         )
-        tested_object_instance = BrayCurtis(self.tested_object)
         expected_object = pd.DataFrame.from_dict(
             {
                 'sample2-sample3': [1.0, 'F'],
             },
             orient='index', columns=['beta_index', 'sex']
         )
-        output = tested_object_instance._get_grouped_df_series(metadata_ser)
+        output = self.tested_object_instance._get_grouped_df_series(metadata_ser)
         pd.testing.assert_frame_equal(
             output, expected_object,
         )
@@ -195,15 +190,13 @@ class TestBrayCurtis(TestCase):
             },
             orient='index', columns=['sex']
         )
-        tested_object_instance = BrayCurtis(self.tested_object)
-
         expected_object = pd.DataFrame.from_dict(
             {
                 'sample2-sample3': [1.0, 'F'],
             },
             orient='index', columns=['beta_index', 'sex']
         )
-        output = tested_object_instance.analyse_groups(metadata_df, 'sex', show=False, show_pval=False)
+        output = self.tested_object_instance.analyse_groups(metadata_df, 'sex', show=False, show_pval=False)
         pd.testing.assert_frame_equal(
             output['data'], expected_object,
         )
@@ -250,12 +243,35 @@ class TestBrayCurtis(TestCase):
             output["data"], expected_object,
         )
 
-#    def test_label_with_proportion(self):
-#
+    def test_pcoa(self):
+        # So I discovered that pcoa.samples is not identical between my moonstone environment and my jupyter notebook
+        # environment at the 17th decimal. Unsure why...
+        # moonstone environment: python=3.10.16 =/= jupyter notebook environment: python=3.10.14
+        # In both environment: scikit-bio==0.5.9, scikit-learn==1.3.1
+        expected_pcoa_samples = pd.DataFrame.from_dict(
+            {
+                'sample1': [-0.136535, 0.091198, 0.0],
+                'sample2': [-0.431383, -0.064289, 0.0],
+                'sample3': [0.567918, -0.026908, 0.0],
+            },
+            orient='index', columns=['PC1', 'PC2', 'PC3']
+        )
+        pd.testing.assert_frame_equal(
+            self.tested_object_instance.pcoa.samples, expected_pcoa_samples,
+        )
+
+        expected_pcoa_proportions_explained = pd.Series(
+            [0.975623, 0.024377, 0], index=["PC1", "PC2", "PC3"],
+        )
+        pd.testing.assert_series_equal(
+            self.tested_object_instance.pcoa.proportion_explained, expected_pcoa_proportions_explained,
+        )
+
+    def test_label_with_proportion(self):
+        expected_object = "PC1 (97.56%)"
+        self.assertEqual(self.tested_object_instance._label_with_proportion("PC1"), expected_object)
 
     def test_unit_scale_with_scale_between0and1(self):
-        tested_object_instance = BrayCurtis(self.tested_object)
-
         tested_object = pd.DataFrame.from_dict(
             {
                 'species1': [-30],
@@ -284,13 +300,11 @@ class TestBrayCurtis(TestCase):
             columns=['PC1']
         )
         pd.testing.assert_frame_equal(
-            tested_object_instance._unit_scale(tested_object, 228, 0.456),
+            self.tested_object_instance._unit_scale(tested_object, 228, 0.456),
             expected_object
         )
 
     def test_unit_scale_with_scale_above1(self):
-        tested_object_instance = BrayCurtis(self.tested_object)
-
         tested_object = pd.DataFrame.from_dict(
             {
                 'species1': [-30],
@@ -319,13 +333,11 @@ class TestBrayCurtis(TestCase):
             columns=['PC1']
         )
         pd.testing.assert_frame_equal(
-            tested_object_instance._unit_scale(tested_object, 228, 22.8),
+            self.tested_object_instance._unit_scale(tested_object, 228, 22.8),
             expected_object
         )
 
     def test_scale_biplot(self):
-        tested_object_instance = BrayCurtis(self.tested_object)
-
         tested_features_df = pd.DataFrame.from_dict(
             {
                 ('genusA', 'species1'): [-30, 0],
@@ -371,8 +383,270 @@ class TestBrayCurtis(TestCase):
         expected_object.index = pd.MultiIndex.from_tuples(expected_object.index, names=('genus', 'species'))
 
         pd.testing.assert_frame_equal(
-            tested_object_instance._scale_biplot(tested_features_df, tested_samples_df),
+            self.tested_object_instance._scale_biplot(tested_features_df, tested_samples_df),
             expected_object
+        )
+
+    def test_map_loadings(self):
+        # already sorted
+        tested_pci = [-18, -12, -0.8, 0, 1.3, 4.5, 12, 38.2]
+        expected_object = ([6, 7], [0, 1])
+        self.assertTupleEqual(self.tested_object_instance._map_loadings(tested_pci, 2), expected_object)
+
+        # unsorted
+        tested_pci = [1.3, -0.8, 38.2, 0, 4.5, -18, -12, 12]
+        expected_object = ([7, 2], [5, 6])
+        self.assertTupleEqual(self.tested_object_instance._map_loadings(tested_pci, 2), expected_object)
+
+    def test_visualize_pcoa_scatter_1groupcol_nobiplot_noproportion(self):
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M'],
+                'sample2': ['F'],
+                'sample3': ['F'],
+            },
+            orient='index', columns=['sex']
+        )
+
+        # PC1 vs PC2 (default)
+        # testing that it runs without error and checking a few variables
+        result_fig = self.tested_object_instance.visualize_pcoa(metadata_df, "sex", show=False)
+        self.assertEqual(result_fig.data[0]["type"], "scatter")
+        self.assertEqual(result_fig.layout["xaxis"]["title"]["text"], "PC1")
+        self.assertEqual(result_fig.layout["yaxis"]["title"]["text"], "PC2")
+
+        self.assertEqual(result_fig["data"][1]["name"], "F")
+        np.testing.assert_array_almost_equal(
+            result_fig["data"][1]["x"], [-0.43138279,  0.56791829], decimal=8)
+        np.testing.assert_array_almost_equal(
+            result_fig["data"][1]["y"], [-0.06428938, -0.02690815], decimal=8)
+
+        # PC2 vs PC3
+        result_fig = self.tested_object_instance.visualize_pcoa(metadata_df, "sex", x_pc=2, y_pc=3, show=False)
+        self.assertEqual(result_fig.layout["xaxis"]["title"]["text"], "PC2")
+        self.assertEqual(result_fig.layout["yaxis"]["title"]["text"], "PC3")
+
+        self.assertEqual(result_fig["data"][1]["name"], "F")
+        np.testing.assert_array_almost_equal(
+            result_fig["data"][1]["x"], [-0.06428938, -0.02690815], decimal=8)
+        np.testing.assert_array_equal(
+            result_fig["data"][1]["y"], [0, 0])
+
+    def test_visualize_pcoa_invalidmode_proportion(self):
+        # Checking that proportion work but also giving an invalid mode
+        # that will be changed to the default meaning 'scatter'
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M'],
+                'sample2': ['F'],
+                'sample3': ['F'],
+            },
+            orient='index', columns=['sex']
+        )
+
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            result_fig = self.tested_object_instance.visualize_pcoa(
+                metadata_df, "sex", x_pc=1, y_pc=2,
+                mode="invalidmode", proportions=True,
+                show=False
+                )
+
+            # check warning
+            self.assertEqual(len(log.output), 1)
+            self.assertIn(
+                "WARNING:moonstone.analysis.diversity.beta:'invalidmode' not a available mode, \
+set to default (scatter).",
+                log.output,
+            )
+
+            # check invalid mode has been changed to 'scatter' the default
+            self.assertEqual(result_fig.data[0]["type"], "scatter")
+
+            # check proportions in title
+            self.assertEqual(result_fig.layout["xaxis"]["title"]["text"], "PC1 (97.56%)")
+            self.assertEqual(result_fig.layout["yaxis"]["title"]["text"], "PC2 (2.44%)")
+
+    def test_visualize_pcoa_scatter_2groupcol(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0, 5, 3, 1, 0],
+                'species2': [1, 0, 2, 2, 1, 2, 2],
+                'species3': [0, 0, 0, 0, 1, 0, 0],
+                'species4': [0, 3, 0, 0, 2, 4, 1]
+            },
+            orient='index',
+            columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7']
+        )
+
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M', 'A'],
+                'sample2': ['F', 'B'],
+                'sample3': ['F', 'B'],
+                'sample4': ['F', 'A'],
+                'sample5': ['M', 'B'],
+                'sample6': ['M', 'A'],
+                'sample7': ['F', 'A']
+            },
+            orient='index', columns=['sex', 'Group']
+        )
+        tested_object_instance = BrayCurtis(tested_object)
+
+        # testing that it runs without error and checking a few variables
+        result_fig = tested_object_instance.visualize_pcoa(
+            metadata_df, group_col='sex', group_col2='Group', x_pc=1, y_pc=2,
+            show=False)
+
+        # 2 "sex" * 2 "group" = 4 categories
+        self.assertEqual(len(result_fig.data), 4)
+        self.assertEqual(result_fig.data[0].marker.symbol, 0)
+        self.assertEqual(result_fig.data[0].marker.color, '#A63A50')
+        self.assertEqual(result_fig.data[0].name, "M - A")
+        np.testing.assert_array_almost_equal(
+            result_fig.data[0].x, [-0.24953334,  0.07681437], decimal=8)
+        np.testing.assert_array_almost_equal(
+            result_fig.data[0].y, [-0.26419982,  0.31054222], decimal=8)
+
+    def test_visualize_pcoa_scatter_biplot(self):
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M'],
+                'sample2': ['F'],
+                'sample3': ['F'],
+            },
+            orient='index', columns=['sex']
+        )
+
+        # testing that it runs without error and checking a few variables
+        result_fig = self.tested_object_instance.visualize_pcoa(
+            metadata_df, "sex", x_pc=1, y_pc=2,
+            n_biplot_features=1,
+            show=False)
+
+        # x = pc1 axis explained most by:
+        #   * 'species1' in the negative direction
+        #   * 'species2' in the positive direction
+        # y = pc2 axis explained most by:
+        #   * 'species4' in the negative direction
+        #   * 'species1' in the positibe direction        # So 3 features shown * 2 (arrow + text) = 6 annotations
+        self.assertEqual(len(result_fig["layout"]["annotations"]), 6)
+
+        # checking one annotation
+        self.assertTrue(result_fig.layout.annotations[0].showarrow)
+        self.assertAlmostEqual(result_fig.layout.annotations[0].x, -0.4313827918950854, places=15)
+        self.assertAlmostEqual(result_fig.layout.annotations[0].y, 0.09119753638724884, places=15)
+        # see explanation for the use of the AlmostEqual in test_pcoa
+
+    def test_visualize_pcoa_scatter3d_1groupcol_nobiplot_noproportion(self):
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M'],
+                'sample2': ['F'],
+                'sample3': ['F'],
+            },
+            orient='index', columns=['sex']
+        )
+
+        # PC1 vs PC2 vs PC3 (default)
+        # testing that it runs without error and checking a few variables
+        result_fig = self.tested_object_instance.visualize_pcoa(metadata_df, "sex", show=False, mode="scatter3d")
+        self.assertEqual(result_fig.data[0]["type"], "scatter3d")
+        self.assertEqual(result_fig.layout["scene"]["xaxis"]["title"]["text"], "PC1")
+        self.assertEqual(result_fig.layout["scene"]["yaxis"]["title"]["text"], "PC2")
+        self.assertEqual(result_fig.layout["scene"]["zaxis"]["title"]["text"], "PC3")
+
+        self.assertEqual(result_fig["data"][1]["name"], "F")
+        np.testing.assert_array_almost_equal(
+            result_fig["data"][1]["x"], [-0.43138279,  0.56791829], decimal=8)
+        np.testing.assert_array_almost_equal(
+            result_fig["data"][1]["y"], [-0.06428938, -0.02690815], decimal=8)
+        np.testing.assert_array_equal(
+            result_fig["data"][1]["z"], [0.0, 0.0])
+
+        # PC3 vs PC1 vs PC2
+        result_fig = self.tested_object_instance.visualize_pcoa(
+            metadata_df, "sex", show=False, mode="scatter3d",
+            x_pc=3, y_pc=1, z_pc=2
+        )
+        self.assertEqual(result_fig.layout["scene"]["xaxis"]["title"]["text"], "PC3")
+        self.assertEqual(result_fig.layout["scene"]["yaxis"]["title"]["text"], "PC1")
+        self.assertEqual(result_fig.layout["scene"]["zaxis"]["title"]["text"], "PC2")
+
+        np.testing.assert_array_equal(
+            result_fig["data"][1]["x"], [0.0, 0.0])
+
+    def test_visualize_pcoa_scatter3d_2groupcol_biplot_proportion(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0, 5, 3, 1, 0],
+                'species2': [1, 0, 2, 2, 1, 2, 2],
+                'species3': [0, 0, 0, 0, 1, 0, 0],
+                'species4': [0, 3, 0, 0, 2, 4, 1]
+            },
+            orient='index',
+            columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7']
+        )
+
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M', 'A'],
+                'sample2': ['F', 'B'],
+                'sample3': ['F', 'B'],
+                'sample4': ['F', 'A'],
+                'sample5': ['M', 'B'],
+                'sample6': ['M', 'A'],
+                'sample7': ['F', 'A']
+            },
+            orient='index', columns=['sex', 'Group']
+        )
+        tested_object_instance = BrayCurtis(tested_object)
+
+        # testing that it runs without error and checking a few variables
+        result_fig = tested_object_instance.visualize_pcoa(
+            metadata_df, group_col='sex', group_col2="Group",
+            mode='scatter3d', n_biplot_features=1, proportions=True,
+            show=False)
+
+        # x = pc1 axis explained most by:
+        #   * 'species1' in the negative direction
+        #   * 'species2' in the positive direction
+        # y = pc2 axis explained most by:
+        #   * 'species4' in the negative direction
+        #   * 'species1' in the positibe direction
+        # z = pc3 axis explained most by:
+        #   * ???
+        # So 4 features shown * 3 (line + cone + text) + 4 groups ("M - A", "M - B", "F - A", "F - B") = 16
+        self.assertEqual(len(result_fig.data), 16)
+        self.assertEqual(result_fig.layout.scene.xaxis.title.text, 'PC1 (67.37%)')
+        self.assertEqual(result_fig.layout.scene.yaxis.title.text, 'PC2 (26.23%)')
+        self.assertEqual(result_fig.layout.scene.zaxis.title.text, 'PC3 (5.59%)')
+
+
+class TestJaccard(TestCase):
+
+    def setUp(self):
+        self.tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 4, 0],
+                'species2': [1, 0, 2],
+                'species3': [0, 0, 0],
+                'species4': [0, 3, 0]
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3']
+        )
+
+    def test_compute_beta_diversity(self):
+        tested_object_instance = Jaccard(self.tested_object)
+        expected_object = pd.DataFrame.from_dict(
+            {
+                'sample1': [0, 0.666667, 0.5],
+                'sample2': [0.666667, 0, 1],
+                'sample3': [0.5, 1, 0],
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3']
+        )
+        pd.testing.assert_frame_equal(
+            tested_object_instance.beta_diversity_df, expected_object,
         )
 
 

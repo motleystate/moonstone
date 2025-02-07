@@ -142,7 +142,6 @@ class BetaDiversity(DiversityBase, ABC):
             # Center features with respect to samples so ploting fisuals make sense
             positive_feature_correction = pcoa_sample_coordinates_df[axis].max() - d_pbf[axis].max()
             d_pbf[axis] = d_pbf[axis] + positive_feature_correction
-
         return d_pbf
 
     def _map_loadings(self, pci, n):
@@ -171,11 +170,6 @@ class BetaDiversity(DiversityBase, ABC):
             fig.add_annotation(x=pcx[m]*1.1, y=pcy[m]*1.1, text=formatted_text,
                                ay=0, font={"color": "black", "size": 14})
         return fig
-
-    def _calculate_base_cone_1coor(self, single_coor, d):
-        if single_coor < 0:
-            return single_coor + d
-        return single_coor - d
 
     def _bi_plotly3d(self, fig, pcx, pcy, pcz, features, n):
         """
@@ -243,7 +237,6 @@ class BetaDiversity(DiversityBase, ABC):
             proportions: write proportion explained for each PC in the x/y labels.
             n_biplot_features: add arrows showing the n most explanatory features per axis direction
         """
-
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
         if group_col2:
             df = pd.concat([self.pcoa.samples, filtered_metadata_df[[group_col, group_col2]]], axis=1)
@@ -251,7 +244,7 @@ class BetaDiversity(DiversityBase, ABC):
             df = pd.concat([self.pcoa.samples, filtered_metadata_df[group_col]], axis=1)
 
         if mode not in ['scatter', 'scatter3d']:
-            logger.warning("%s not a available mode, set to default (scatter)", mode)
+            logger.warning("'%s' not a available mode, set to default (scatter).", mode)
             mode = "scatter"
 
         title = f"PCOA of samples from {self.index_name} distance matrix"
@@ -303,7 +296,6 @@ class BetaDiversity(DiversityBase, ABC):
             my_pcoa_biplot = pcoa_biplot(self.pcoa, self.df.transpose())
             d_bf = my_pcoa_biplot.features                           # DF of PCoA feature contributions
             d_sbf = self._scale_biplot(d_bf, self.pcoa.samples)      # DF of SCALLED PCoA features contribution
-
             loadings = d_sbf.transpose().values
             pcx = loadings[x_pc-1, :]
             pcy = loadings[y_pc-1, :]
