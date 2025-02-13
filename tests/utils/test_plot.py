@@ -21,6 +21,8 @@ class TestUtils(TestCase):
         plotting_options = {}
         self.assertDictEqual(add_x_to_plotting_options(plotting_options, 'traces', 'marker_color', '#ee048e'),
                              {'traces': {'marker_color': '#ee048e'}})
+        # checking that the original plotting_options hasn't been changed
+        self.assertDictEqual(plotting_options, {})
 
         # test with option_cat dictionary but without x
         plotting_options = {'traces': {'marker_opacity': 0.5}}
