@@ -122,7 +122,9 @@ class Metaphlan3Parser(BaseMetaphlanParser):
     taxa_column = 'clade_name'
     NCBI_tax_column = 'NCBI_tax_id'
 
-    def __init__(self, *args, analysis_type: str = 'rel_ab', keep_NCBI_tax_col: bool = False, skiprows: int = 1, **kwargs):
+    def __init__(
+        self, *args, analysis_type: str = 'rel_ab', keep_NCBI_tax_col: bool = False, skiprows: int = 1, **kwargs
+    ):
         """
         Args:
             analysis_type: output type of Metaphlan3 (see ``-t`` option of metaphlan3)

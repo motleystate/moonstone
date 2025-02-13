@@ -18,12 +18,13 @@ class BaseModule(ABC):
     """
 
     def _handle_plotting_options(
-        self, plotting_options: dict, 
-        title: str, xlabel: str, ylabel: str, log_scale: bool, 
+        self, plotting_options: dict,
+        title: str, xlabel: str, ylabel: str, log_scale: bool,
         zlabel: str = None
     ):
         """
-        Update or create plotting options with the title of the graph and of the different axis, as well as the log scale
+        Update or create plotting options with the title of the graph and of the different axis,
+        as well as the log scale
         """
         if plotting_options is None:
             plotting_options = {}

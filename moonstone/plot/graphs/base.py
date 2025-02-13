@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.io
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.validators.scatter.marker import SymbolValidator
 
 import logging
 
@@ -45,14 +46,14 @@ class BaseGraph(ABC):
     ) -> dict:
         """
         Generate a dictionary with the different groups as key and a color as value.
-        If number of different groups > 38, then colors are repeted.
+        If number of different groups > 38, then colors are repeated.
 
-            Args:
-                - metadata: Can take DataFrame or Series, then all different values are listed and assigned a color.
-                  Or can take a list/array, then all elements of the list are assigned a color.
-                  Finally, metadata can be an integer which act like a list ranging from 0 to that integer (excluded),
-                  and each integer is assigned a color.
-                - colors: Dictionary that dictate a particular color to a particular group.
+        Args:
+            metadata: Can take DataFrame or Series, then all different values are listed and assigned a color.
+                Or can take a list/array, then all elements of the list are assigned a color.
+                Finally, metadata can be an integer which act like a list ranging from 0 to that integer (excluded),
+                and each integer is assigned a color.
+            colors: Dictionary that dictate a particular color to a particular group.
         """
         final_colors = {}
         if isinstance(metadata, pd.Series):
@@ -63,7 +64,7 @@ class BaseGraph(ABC):
                 all_gp += list(metadata[cc].unique())
             all_gp = list(set(all_gp))  # doesn't remove all different nan
         # we can't do it manually because then some nan don't correspond to the one manually added
-        elif type(metadata) == int:
+        elif type(metadata) is int:
             all_gp = list(range(0, metadata))
         else:  # array
             all_gp = metadata
@@ -169,6 +170,129 @@ class GroupBaseGraph(BaseGraph):
 
     def _get_group_color(self, group: str, group_color: dict):
         return group_color.get(group, self.DEFAULT_COLOR)
+
+    @property
+    def dictionary_marker_symbols(self):
+        """
+        Dictionary of all the symbols accepted by a scatter (or other) plot.
+        key is the name of the symbol and value is its number
+        ex: {'circle': 0, 'circle-open': 100, ...}
+        """
+        if getattr(self, '_dictionary_marker_symbols', None) is None:
+            raw_symbols = SymbolValidator().values
+            self._dictionary_marker_symbols = {}
+            for i in range(0, len(raw_symbols), 3):
+                self._dictionary_marker_symbols[raw_symbols[i+2]] = raw_symbols[i]
+        return self._dictionary_marker_symbols
+
+    def _translating_forced_symbols(self, forced_symbols: Union[list, set]) -> set:
+        translated_symbols = []
+        txt_symbols = []
+        for x in forced_symbols:
+            if type(x) is int:
+                translated_symbols += [x]
+            elif x.isnumeric():
+                translated_symbols += [int(x)]
+            else:
+                txt_symbols += [x]
+
+        if len(txt_symbols) > 0:
+            for i in txt_symbols:
+                if i in self.dictionary_marker_symbols.keys():
+                    translated_symbols += [self.dictionary_marker_symbols[i]]
+                    # txt_symbols.remove(i)
+                else:
+                    # raise error
+                    error_message = f"Invalid symbol values: {txt_symbols}.\n\
+Accepted values: {SymbolValidator().values}"
+                    raise ValueError(error_message)
+        return set(translated_symbols)
+
+    def _symbol_scheme(self, groups: list, symbols: dict = None):
+        """
+        Generate a dictionary with the different groups as key and an int corresponding to a symbol (following
+        go.Marker's definition) as value.
+        If number of different groups > 162, then symbols are repeated.
+
+        Args:
+            metadata: Can take DataFrame or Series, then all different values are listed and assigned a color.
+                Or can take a list/array, then all elements of the list are assigned a color.
+                Finally, metadata can be an integer which act like a list ranging from 0 to that integer (excluded),
+                and each integer is assigned a color.
+            symbols: Dictionary that dictate a particular symbol to a particular group.
+        """
+        if symbols is not None and len(set(groups).difference(symbols.keys())) == 0:
+            return symbols
+
+        if len(groups) > 162:
+            list_symbols = list(self.dictionary_marker_symbols.values())
+            dic_symbols = dict(zip(groups, list_symbols * (int(len(groups) / len(list_symbols)) + 1)))
+        else:
+            if len(groups) <= 72:
+                list_fill_pattern = ["", "1", "3"]     # 2 is filled with a dot inside ("-dot")
+                # but it is not very clear
+                list_shape = [
+                    "00", "01", "02", "03", "04", "05", "06", "17", "13", "18", "07", "08", "14", "23", "24", "19",
+                    "20", "21", "22", "16", "09", "10", "11", "12", "15",
+                ]
+                n = -(-len(groups) // 3)
+                if n <= 8:
+                    n = 8
+
+                list_symbols = [int(prefix + suffix) for prefix in list_fill_pattern for suffix in list_shape[:n]]
+            else:
+                list_symbols = self.dictionary_marker_symbols.values()
+
+            if symbols is not None:
+                to_remove = self._translating_forced_symbols(set(symbols.values()))
+
+                # for reusability, we can't use set().difference()
+                list_symbols = [x for x in list_symbols if x not in to_remove]
+                skeys = set(symbols.keys())
+                groups = [x for x in groups if x not in skeys]
+            dic_symbols = dict(zip(groups, list_symbols))
+
+        if symbols is not None:
+            dic_symbols.update(**symbols)
+
+        return dic_symbols
+
+    def _symbol_scheme3d(self, groups: list, symbols: dict = None):
+        """
+        Generate a dictionary with the different groups as key and the name of a symbol as value.
+        If number of different groups > 8, then symbols are repeated.
+        NB: Unlike for the 2D plots that accept 162 different symbols, 3D plots accept only 8 different symbols
+        and only their name (and not their number).
+
+        Args:
+            metadata: Can take DataFrame or Series, then all different values are listed and assigned a color.
+                Or can take a list/array, then all elements of the list are assigned a color.
+                Finally, metadata can be an integer which act like a list ranging from 0 to that integer (excluded),
+                and each integer is assigned a color.
+            symbols: Dictionary that dictate a particular symbol to a particular group.
+        """
+        if symbols is not None and len(set(groups).difference(symbols.keys())) == 0:
+            return symbols
+
+        accepted_symbols = [
+            'circle', 'cross', 'diamond', 'square',
+            'circle-open', 'diamond-open', 'square-open',
+            'x'  # this one is crazy big so let's put it as the last resort
+        ]
+        if len(groups) > 8:
+            dic_symbols = dict(zip(groups, accepted_symbols * (int(len(groups) / len(accepted_symbols)) + 1)))
+        else:
+            if symbols is not None:
+                # for reusability, we can't use set().difference()
+                accepted_symbols = [x for x in accepted_symbols if x not in symbols.values()]
+                skeys = set(symbols.keys())
+                groups = [x for x in groups if x not in skeys]
+            dic_symbols = dict(zip(groups, accepted_symbols))
+
+        if symbols is not None:
+            dic_symbols.update(**symbols)
+
+        return dic_symbols
 
     @abstractmethod
     def _gen_fig_trace(self, x: list, y: list, name: str, text: list, color: str):

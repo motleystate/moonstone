@@ -234,7 +234,7 @@ class PlotTaxonomyCounts:
         prec = -0.5
         subgps = sep_series.unique()
         for subgp in subgps:
-            if type(subgp) != str and np.isnan(subgp):
+            if type(subgp) is not str and np.isnan(subgp):
                 df_gp = top_and_other_df[sep_series[sep_series.isna()].index.intersection(top_and_other_df.columns)]
             else:
                 df_gp = top_and_other_df[sep_series[sep_series == subgp].index.intersection(top_and_other_df.columns)]
@@ -772,7 +772,7 @@ samples"
                 fig = graph.plot_one_graph(plotting_options=plotting_options, **kwargs, show=False)
             else:
                 fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, **kwargs, show=False)
-            fig = add_groups_annotations(fig, x_coor, subgps)
+            fig = add_groups_annotations(fig, x_coor, (0, 100, 104), subgps)
             graph._handle_output_plotly(fig, show, output_file)
         else:
             if color_df is None:
