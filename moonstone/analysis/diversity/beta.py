@@ -155,7 +155,6 @@ class BetaDiversity(DiversityBase, ABC):
             loadings: is the vector for each indiviudal variable (columns) in as many dimentions as PCs (rows).
             n: Number of individual loadings to plot.
         """
-
         pcx_pos, pcx_neg = self._map_loadings(pcx, n)
         pcy_pos, pcy_neg = self._map_loadings(pcy, n)
         map_loadings = set(pcx_pos + pcx_neg + pcy_pos + pcy_neg)

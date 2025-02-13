@@ -3,6 +3,8 @@ from unittest import TestCase
 from io import StringIO
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
+from plotly.graph_objs._cone import Cone
 from skbio import TreeNode
 
 from moonstone.analysis.diversity.beta import (
@@ -432,6 +434,76 @@ class TestBrayCurtis(TestCase):
         np.testing.assert_array_equal(
             result_fig["data"][1]["y"], [0, 0])
 
+    def test_bi_plotly_multiindex(self):
+        # Testing if it works with MultiIndex for the 2d version
+        fig = go.Figure()
+        tested_pcx = [-0.44, 0.52, 0.22, 0.07]
+        tested_pcy = [-0.26, -0.07, -0.04, 0.31]
+        tested_features = pd.MultiIndex.from_tuples(
+            [('genus1', 'species1'), ('genus1', 'species2'), ('genus2', 'species3'), ('genus2', 'species4')],
+            names=['genus', 'species'])
+
+        result_fig = self.tested_object_instance._bi_plotly(fig, tested_pcx, tested_pcy, tested_features, 1)
+        # pcx explained most by:
+        #   * 'species1' in the negative direction
+        #   * 'species2' in the positive direction
+        # pcy explained most by:
+        #   * 'species1' in the negative direction
+        #   * 'species4' in the positive direction
+        # So 3 features shown * 2 (arrow + text) = 6 annotations
+        self.assertEqual(len(result_fig.layout.annotations), 6)
+
+        # checking for one feature
+        # 0 = arrow for first feature
+        self.assertTrue(result_fig.layout.annotations[0].showarrow)
+        self.assertEqual(result_fig.layout.annotations[0].x, -0.44)
+        self.assertEqual(result_fig.layout.annotations[0].y, -0.26)
+        # 1 = text for first feature
+        self.assertEqual(result_fig.layout.annotations[1].text, 'species1')   # the real test here
+
+        # So let's check for the two other features
+        self.assertEqual(result_fig.layout.annotations[3].text, 'species2')
+        self.assertEqual(result_fig.layout.annotations[5].text, 'species4')
+
+    def test_bi_plotly3d_multiindex(self):
+        # Testing if it works with MultiIndex for the 3d version
+        fig = go.Figure()
+        tested_pcx = [-0.44, 0.52, 0.22, 0.07]
+        tested_pcy = [-0.26, -0.07, -0.04, 0.31]
+        tested_pcz = [-0.08, -0.02, 0.18, -0.10]
+        tested_features = pd.MultiIndex.from_tuples(
+            [('genus1', 'species1'), ('genus1', 'species2'), ('genus2', 'species3'), ('genus2', 'species4')],
+            names=['genus', 'species'])
+
+        result_fig = self.tested_object_instance._bi_plotly3d(
+            fig, tested_pcx, tested_pcy, tested_pcz, tested_features, 1)
+        # pcx explained most by:
+        #   * 'species1' in the negative direction
+        #   * 'species2' in the positive direction
+        # pcy explained most by:
+        #   * 'species1' in the negative direction
+        #   * 'species4' in the positive direction
+        # pcz explained most by:
+        #   * 'species4' in the negative direction
+        #   * 'species3' in the positive direction
+        # So 4 features shown * 3 (line + cone + text) = 12 annotations
+        self.assertEqual(len(result_fig.data), 12)
+        # checking for one feature
+        # 0 = line for first feature
+        self.assertTrue(result_fig.data[0].mode, 'lines')
+        self.assertTrue(result_fig.data[0].x, [0, -0.44])
+        self.assertTrue(result_fig.data[0].y, [0, -0.26])
+        self.assertTrue(result_fig.data[0].z, [0, -0.08])
+        # 1 = text for first feature
+        self.assertEqual(result_fig.data[1].text[0], 'species1')
+        # 2 = cone for first feature
+        self.assertEqual(type(result_fig.data[2]), Cone)
+
+        # Let's check for the three other features' name
+        self.assertEqual(result_fig.data[4].text[0], 'species2')
+        self.assertEqual(result_fig.data[7].text[0], 'species3')
+        self.assertEqual(result_fig.data[10].text[0], 'species4')
+
     def test_visualize_pcoa_invalidmode_proportion(self):
         # Checking that proportion work but also giving an invalid mode
         # that will be changed to the default meaning 'scatter'
@@ -528,7 +600,8 @@ set to default (scatter).",
         #   * 'species2' in the positive direction
         # y = pc2 axis explained most by:
         #   * 'species4' in the negative direction
-        #   * 'species1' in the positibe direction        # So 3 features shown * 2 (arrow + text) = 6 annotations
+        #   * 'species1' in the positive direction
+        # So 3 features shown * 2 (arrow + text) = 6 annotations
         self.assertEqual(len(result_fig["layout"]["annotations"]), 6)
 
         # checking one annotation
@@ -611,10 +684,11 @@ set to default (scatter).",
         #   * 'species1' in the negative direction
         #   * 'species2' in the positive direction
         # y = pc2 axis explained most by:
-        #   * 'species4' in the negative direction
-        #   * 'species1' in the positibe direction
+        #   * 'species1' in the negative direction
+        #   * 'species4' in the positive direction
         # z = pc3 axis explained most by:
-        #   * ???
+        #   * 'species4' in the negative direction
+        #   * 'species3' in the positive direction
         # So 4 features shown * 3 (line + cone + text) + 4 groups ("M - A", "M - B", "F - A", "F - B") = 16
         self.assertEqual(len(result_fig.data), 16)
         self.assertEqual(result_fig.layout.scene.xaxis.title.text, 'PC1 (67.37%)')
