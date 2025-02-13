@@ -64,7 +64,10 @@ def add_default_titles_to_plotting_options_3d(
     return plotting_options
 
 
-def add_groups_annotations(fig, x_coor: list, y_coor: tuple, groups: list) -> go.Figure:
+def add_groups_annotations(
+    fig, x_coor: list, y_coor: tuple, groups: list,
+    color_bg=["#FFFFFF", "#a7bcdb"],
+) -> go.Figure:
     """
     Add labels annotations, in the form of rectangles for the label with text annotations and a line separating the
     groups going from the bottom of the rectangle to the bottom of the data.
@@ -77,7 +80,7 @@ def add_groups_annotations(fig, x_coor: list, y_coor: tuple, groups: list) -> go
     """
     i = 0
     y_med = (y_coor[1] + y_coor[2])/2
-    color_bg = ["#FFFFFF", "#a7bcdb"]
+    n_cbg = len(color_bg)
     while i < len(groups):
         # adding background color
         fig.add_shape(
@@ -89,7 +92,7 @@ def add_groups_annotations(fig, x_coor: list, y_coor: tuple, groups: list) -> go
             line=dict(
                 width=0,
             ),
-            fillcolor=color_bg[i % 2],
+            fillcolor=color_bg[i % n_cbg],
         )
         # adding text annotation (group name)
         fig.add_annotation(
