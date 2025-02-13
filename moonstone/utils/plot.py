@@ -19,6 +19,7 @@ def add_x_to_plotting_options(
     don't override given plotting_options, meaning it only add the default value
     if value not already defined in plotting_options
     """
+    plotting_options = plotting_options.copy()   # so that it doesn't affect the original plotting_options
     if plotting_options is None:
         plotting_options = {}
     if option_cat not in plotting_options.keys():
