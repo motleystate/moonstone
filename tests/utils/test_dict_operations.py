@@ -10,6 +10,7 @@ from moonstone.utils.dict_operations import (
 
 
 class TestMergeDict(TestCase):
+
     def test_simple_dicts(self):
         first_dict = {"a": 3, "b": 4}
         second_dict = {"a": 5, "c": 7}
@@ -71,6 +72,7 @@ class TestFilterDict(TestCase):
 
 
 class TestFlattenDict(TestCase):
+
     def test_flatten_dict(self):
         tested_dict = {'a': {'b': 1, 'c': 2}, 'd': 3, 'e': {'f': 4, 'g': {'h': 5}, 'i': 6}}
         expected_dict = {

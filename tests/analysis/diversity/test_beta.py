@@ -400,40 +400,6 @@ class TestBrayCurtis(TestCase):
         expected_object = ([7, 2], [5, 6])
         self.assertTupleEqual(self.tested_object_instance._map_loadings(tested_pci, 2), expected_object)
 
-    def test_visualize_pcoa_scatter_1groupcol_nobiplot_noproportion(self):
-        metadata_df = pd.DataFrame.from_dict(
-            {
-                'sample1': ['M'],
-                'sample2': ['F'],
-                'sample3': ['F'],
-            },
-            orient='index', columns=['sex']
-        )
-
-        # PC1 vs PC2 (default)
-        # testing that it runs without error and checking a few variables
-        result_fig = self.tested_object_instance.visualize_pcoa(metadata_df, "sex", show=False)
-        self.assertEqual(result_fig.data[0]["type"], "scatter")
-        self.assertEqual(result_fig.layout["xaxis"]["title"]["text"], "PC1")
-        self.assertEqual(result_fig.layout["yaxis"]["title"]["text"], "PC2")
-
-        self.assertEqual(result_fig["data"][1]["name"], "F")
-        np.testing.assert_array_almost_equal(
-            result_fig["data"][1]["x"], [-0.43138279,  0.56791829], decimal=8)
-        np.testing.assert_array_almost_equal(
-            result_fig["data"][1]["y"], [-0.06428938, -0.02690815], decimal=8)
-
-        # PC2 vs PC3
-        result_fig = self.tested_object_instance.visualize_pcoa(metadata_df, "sex", x_pc=2, y_pc=3, show=False)
-        self.assertEqual(result_fig.layout["xaxis"]["title"]["text"], "PC2")
-        self.assertEqual(result_fig.layout["yaxis"]["title"]["text"], "PC3")
-
-        self.assertEqual(result_fig["data"][1]["name"], "F")
-        np.testing.assert_array_almost_equal(
-            result_fig["data"][1]["x"], [-0.06428938, -0.02690815], decimal=8)
-        np.testing.assert_array_equal(
-            result_fig["data"][1]["y"], [0, 0])
-
     def test_bi_plotly_multiindex(self):
         # Testing if it works with MultiIndex for the 2d version
         fig = go.Figure()
@@ -503,6 +469,40 @@ class TestBrayCurtis(TestCase):
         self.assertEqual(result_fig.data[4].text[0], 'species2')
         self.assertEqual(result_fig.data[7].text[0], 'species3')
         self.assertEqual(result_fig.data[10].text[0], 'species4')
+
+    def test_visualize_pcoa_scatter_1groupcol_nobiplot_noproportion(self):
+        metadata_df = pd.DataFrame.from_dict(
+            {
+                'sample1': ['M'],
+                'sample2': ['F'],
+                'sample3': ['F'],
+            },
+            orient='index', columns=['sex']
+        )
+
+        # PC1 vs PC2 (default)
+        # testing that it runs without error and checking a few variables
+        result_fig = self.tested_object_instance.visualize_pcoa(metadata_df, "sex", show=False)
+        self.assertEqual(result_fig.data[0]["type"], "scatter")
+        self.assertEqual(result_fig.layout["xaxis"]["title"]["text"], "PC1")
+        self.assertEqual(result_fig.layout["yaxis"]["title"]["text"], "PC2")
+
+        self.assertEqual(result_fig["data"][1]["name"], "F")
+        np.testing.assert_array_almost_equal(
+            result_fig["data"][1]["x"], [-0.43138279,  0.56791829], decimal=8)
+        np.testing.assert_array_almost_equal(
+            result_fig["data"][1]["y"], [-0.06428938, -0.02690815], decimal=8)
+
+        # PC2 vs PC3
+        result_fig = self.tested_object_instance.visualize_pcoa(metadata_df, "sex", x_pc=2, y_pc=3, show=False)
+        self.assertEqual(result_fig.layout["xaxis"]["title"]["text"], "PC2")
+        self.assertEqual(result_fig.layout["yaxis"]["title"]["text"], "PC3")
+
+        self.assertEqual(result_fig["data"][1]["name"], "F")
+        np.testing.assert_array_almost_equal(
+            result_fig["data"][1]["x"], [-0.06428938, -0.02690815], decimal=8)
+        np.testing.assert_array_equal(
+            result_fig["data"][1]["y"], [0, 0])
 
     def test_visualize_pcoa_invalidmode_proportion(self):
         # Checking that proportion work but also giving an invalid mode

@@ -19,7 +19,7 @@ from moonstone.plot.graphs.histogram import Histogram
 from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
 from moonstone.utils.dict_operations import merge_dict
 from moonstone.utils.pandas.remodelling import StructureRemodelling
-
+from moonstone.utils.log_messages import reset_warnings_decorator
 
 logger = logging.getLogger(__name__)
 
@@ -595,6 +595,7 @@ pval_to_display should be set to: {}".format(
         pval.index = pd.MultiIndex.from_tuples(pval.index, names=('Group1', 'Group2'))
         return pval
 
+    @reset_warnings_decorator
     def analyse_groups(
         self, metadata_df: pd.DataFrame, group_col: str, group_col2: str = None,
         mode: str = 'boxplot',

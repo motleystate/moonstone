@@ -13,6 +13,7 @@ from moonstone.analysis.diversity.base import (
     DiversityBase, PhylogeneticDiversityBase
 )
 from moonstone.plot.graphs.scatter import GroupScatterGraph, GroupScatter3DGraph
+from moonstone.utils.log_messages import warn_once, reset_warnings_decorator
 
 logger = logging.getLogger(__name__)
 
@@ -219,6 +220,7 @@ class BetaDiversity(DiversityBase, ABC):
         fig.update_layout(scene={"annotations": annotations})
         return fig
 
+    @reset_warnings_decorator
     def visualize_pcoa(
         self, metadata_df: pd.DataFrame, group_col: str, group_col2: str = None,
         mode: str = 'scatter',
@@ -342,7 +344,9 @@ class WeightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
             if not self.force_computation:
                 raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
             else:
-                logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\
+                #logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\
+#Computation of the Weighted UniFrac diversity using only the OTU IDs present in the Tree.")
+                warn_once(logger, f"INCOMPLETE TREE: missing {missing_ids}.\n\
 Computation of the Weighted UniFrac diversity using only the OTU IDs present in the Tree.")
                 otu_ids = list(set(otu_ids) - set(missing_ids))
 
@@ -365,7 +369,7 @@ class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
             if not self.force_computation:
                 raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
             else:
-                logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\
+                warn_once(logger, f"INCOMPLETE TREE: missing {missing_ids}.\n\
 Computation of the Unweighted UniFrac diversity using only the OTU IDs present in the Tree.")
                 otu_ids = list(set(otu_ids) - set(missing_ids))
 
