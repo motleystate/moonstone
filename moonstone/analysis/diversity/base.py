@@ -16,6 +16,7 @@ from moonstone.plot.graphs.box import GroupBoxGraph, BoxGraph
 from moonstone.plot.graphs.heatmap import HeatmapGraph
 from moonstone.plot.graphs.histogram import Histogram
 from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
+from moonstone.utils.log_messages import reset_warnings_decorator
 
 logger = logging.getLogger(__name__)
 
@@ -258,6 +259,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         pval.index = pd.MultiIndex.from_tuples(pval.index, names=('Group1', 'Group2'))
         return pval
 
+    @reset_warnings_decorator
     def analyse_groups(
         self, metadata_df: pd.DataFrame, group_col: str, group_col2: str = None,
         mode: str = 'boxplot',
@@ -309,7 +311,6 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 filtered_metadata_df[group_col2].astype(str)
             )
             df = self._get_grouped_df(filtered_metadata_df[[group_col, group_col2, final_group_col]])
-
             if pval_to_compute == "all":
                 pval = self._run_statistical_test_groups(
                     df, final_group_col, stats_test, correction_method, structure_pval, sym
