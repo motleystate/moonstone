@@ -94,7 +94,7 @@ class BetaDiversity(DiversityBase, ABC):
         return pd.concat(df_list).dropna()
 
     def _get_grouped_df(self, metadata_df):
-        if type(metadata_df) == pd.core.series.Series:
+        if isinstance(metadata_df, pd.Series):
             return self._get_grouped_df_series(metadata_df)
         else:
             return self._get_grouped_df_dataframe(metadata_df)

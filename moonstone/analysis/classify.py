@@ -9,7 +9,7 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.feature_selection import RFECV
 from moonstone.analysis import stats
 from moonstone.normalization.processed.scaling_normalization import StandardScaler
-from moonstone.utils.df_merge import MergeDF
+from moonstone.utils.pandas.df_merge import MergeDF
 
 logger = logging.getLogger(__name__)
 

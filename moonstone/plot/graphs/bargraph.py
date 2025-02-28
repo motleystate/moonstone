@@ -120,7 +120,7 @@ class MatrixBarGraph(BaseGraph):
         lbls = list(metadata_ser.unique())
         lbls.sort(reverse=True)
         for lbl in lbls:
-            if type(lbl) != str and np.isnan(lbl):
+            if type(lbl) is not str and np.isnan(lbl):
                 dfp = pd.DataFrame(
                     metadata_ser.loc[self.data.columns][
                         metadata_ser.loc[self.data.columns].isna()
