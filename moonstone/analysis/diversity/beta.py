@@ -171,8 +171,8 @@ Computation of the Weighted UniFrac diversity using only the OTU IDs present in 
                 otu_ids = list(set(otu_ids) - set(missing_ids))
 
         return skbio.diversity.beta_diversity(
-            "weighted_unifrac", df.loc[otu_ids].transpose(), df.columns,
-            validate=self.validate, otu_ids=otu_ids, tree=self.tree,
+            "weighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
+            validate=self.validate, taxa=otu_ids, tree=self.tree,
             )
 
 
@@ -193,7 +193,8 @@ class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
 Computation of the Unweighted UniFrac diversity using only the OTU IDs present in the Tree.")
                 otu_ids = list(set(otu_ids) - set(missing_ids))
 
+        # df = counts dataframe
         return skbio.diversity.beta_diversity(
-            "unweighted_unifrac", df.loc[otu_ids].transpose(), df.columns,
-            validate=self.validate, otu_ids=otu_ids, tree=self.tree,
+            "unweighted_unifrac", counts=df.loc[otu_ids].transpose(),ids=df.columns,
+            validate=self.validate, taxa=otu_ids, tree=self.tree,
             )
