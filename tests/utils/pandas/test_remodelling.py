@@ -303,7 +303,7 @@ class TestStructureRemodelling(TestCase):
         obj_path2 = tested_instance.asymmetric_dataframe  # sym ser -> sym df -> asym df
 
         pd.testing.assert_frame_equal(obj_path1, obj_path2)
-    
+
     def test_get_from_arguments(self):
         tested_object = pd.Series({
             ("A", "B"): 1,
@@ -323,6 +323,6 @@ class TestStructureRemodelling(TestCase):
         }, orient="index", columns=["A", "B", "C", "D"])
 
         pd.testing.assert_frame_equal(
-            tested_instance.get_from_arguments(structure="dataframe", sym=True), 
+            tested_instance.get_from_arguments(structure="dataframe", sym=True),
             expected_object
         )

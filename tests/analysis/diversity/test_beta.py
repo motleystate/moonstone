@@ -108,9 +108,22 @@ class TestBrayCurtis(TestCase):
             structure_pval='series', sym=False
             )
 
-        pd.testing.assert_series_equal(
-            pval, expected_object,
-        )
+        pd.testing.assert_series_equal(pval, expected_object)
+
+        # and checking structure_pval='dataframe'
+        expected_object = pd.DataFrame.from_dict({
+            'B': [0.03220171408367315, np.nan, np.nan],
+            'C': [0.21475494241030912, 0.10740702992087024, np.nan],
+            'D': [np.nan, np.nan, np.nan]
+        })
+        expected_object.index = ["A", "B", "C"]
+
+        pval = tested_object_instance._run_statistical_test_groups(
+            tested_df, 'Group', stats_test='ttest_independence', correction_method='fdr_bh',
+            structure_pval='dataframe', sym=False
+            )
+
+        pd.testing.assert_frame_equal(pval, expected_object)
 
     def test_get_grouped_df_series(self):
         metadata_ser = pd.Series(

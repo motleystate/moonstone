@@ -21,7 +21,7 @@ class ScatterGraph(BaseGraph):
         :param first_col: col name for x data
         :param second_col: col name for y data
         """
-        fig = go.Fig(
+        fig = go.Figure(
             [
                 go.Scatter(
                     x=self.data[first_col],
@@ -117,7 +117,7 @@ class Scatter3DGraph(BaseGraph):
         :param second_col: col name for y data
         :param third_col: col name for z data
         """
-        fig = go.Fig(
+        fig = go.Figure(
             [
                 go.Scatter3d(
                     x=self.data[first_col],

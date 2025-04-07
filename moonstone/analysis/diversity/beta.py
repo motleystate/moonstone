@@ -195,6 +195,6 @@ Computation of the Unweighted UniFrac diversity using only the OTU IDs present i
 
         # df = counts dataframe
         return skbio.diversity.beta_diversity(
-            "unweighted_unifrac", counts=df.loc[otu_ids].transpose(),ids=df.columns,
+            "unweighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
             validate=self.validate, taxa=otu_ids, tree=self.tree,
             )

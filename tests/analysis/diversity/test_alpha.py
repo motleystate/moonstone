@@ -104,10 +104,28 @@ class TestShannonIndex(TestCase):
             self.assertIn("WARNING:moonstone.analysis.diversity.base:correction_method='lalala' not valid, \
 set to default (None).", log.output)
 
-    def test_invalid_pval_param(self):
+    def test_valid_pval_param(self):
+        # everything is valid
+        # testing with none default value to be sure
+        tested_object_instance = ShannonIndex(self.tested_object)
+        pvc, pvd = tested_object_instance._valid_pval_param(
+            "same group_col or group_col2 values", "same group_col values", group_col2=True
+        )
+        self.assertEqual(pvc, "same group_col or group_col2 values")
+        self.assertEqual(pvd, "same group_col values")
+
+    def test_invalid_pval_param_wogroup_col2(self):
         tested_object_instance = ShannonIndex(self.tested_object)
         with self.assertLogs('moonstone.analysis.diversity.base', level='WARNING') as log:
-            tested_object_instance._valid_pval_param("lalala", "lilili")
+            tested_object_instance._valid_pval_param("same group_col", None, group_col2=False)
+            self.assertEqual(len(log.output), 1)
+            self.assertIn("WARNING:moonstone.analysis.diversity.base:Without a second group column (group_col2), \
+pval_to_compute='same group_col' not valid, set to default (all).", log.output)
+
+    def test_invalid_pval_param_wgroup_col2(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+        with self.assertLogs('moonstone.analysis.diversity.base', level='WARNING') as log:
+            tested_object_instance._valid_pval_param("lalala", "lilili", group_col2=True)
             self.assertEqual(len(log.output), 2)
             self.assertIn("WARNING:moonstone.analysis.diversity.base:pval_to_compute='lalala' not valid, \
 set to default (all).", log.output)
@@ -117,7 +135,7 @@ set to default (None).", log.output)
     def test_inconsistent_pval_to_diplay_param(self):
         tested_object_instance = ShannonIndex(self.tested_object)
         with self.assertRaises(ValueError) as cm:
-            tested_object_instance._valid_pval_param("same group_col or group_col2 values", "all")
+            tested_object_instance._valid_pval_param("same group_col or group_col2 values", "all", group_col2=True)
         the_exception = cm.exception
         expected_msg = "pval_to_display='all' not valid, when pval_to_compute='same group_col or group_col2 values'. \
 pval_to_display should be set to: ['same group_col or group_col2 values', 'same group_col values', None]"

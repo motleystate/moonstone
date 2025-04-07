@@ -40,7 +40,7 @@ class StructureRemodelling(object):
             else:
                 print("object stored as an asymmetric dataframe")
                 self._asymmetric_dataframe = data_structure
-    
+
     def _valid_sym_param_init(self, sym: bool):
         if isinstance(sym, bool) or sym is None:
             return sym
@@ -52,7 +52,7 @@ If you're not sure of the symmetry of your data structure, use None.".format(sym
         if isinstance(sym, bool):
             return sym
         raise ValueError("sym='{}' not valid. Valid choices: [True, False].".format(sym))
-    
+
     def _valid_structure_param(self, structure: str):
         choices = ["series", "dataframe"]
         if structure in choices:
@@ -62,7 +62,7 @@ If you're not sure of the symmetry of your data structure, use None.".format(sym
     def get_from_arguments(self, structure: str, sym: bool):
         sym = self._valid_sym_param_get_from_arguments(sym=sym)
         structure = self._valid_structure_param(structure=structure)
-        return getattr(self, self._SYM_BOOL_DIC[sym]+"_"+structure) 
+        return getattr(self, self._SYM_BOOL_DIC[sym]+"_"+structure)
 
     def check_symmetric_series(self, ser):
         return all(ser.get((a, b), None) == ser.get((b, a), None) for a, b in ser.index)

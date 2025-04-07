@@ -18,6 +18,7 @@ from moonstone.plot.graphs.heatmap import HeatmapGraph
 from moonstone.plot.graphs.histogram import Histogram
 from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
 from moonstone.utils.dict_operations import merge_dict
+from moonstone.utils.pandas.remodelling import StructureRemodelling
 
 
 logger = logging.getLogger(__name__)
@@ -152,7 +153,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             graph = GroupViolinGraph(df)
         elif mode == "boxplot":
             graph = GroupBoxGraph(df)
-        graph.plot_one_graph(
+        fig = graph.plot_one_graph(
             self._DIVERSITY_INDEXES_NAME, group_col,
             group_col2=group_col2,
             plotting_options=plotting_options,
@@ -163,18 +164,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             groups2=groups2,
             **kwargs
         )
-
-    def _structure_remodelling(self, datastruct: Union[pd.Series, pd.DataFrame], structure: str, sym: bool):
-        if sym:
-            if isinstance(datastruct, pd.Series):
-                datastruct = pd.concat([datastruct, datastruct.reorder_levels([1, 0])])
-            else:  # ed. pd.DataFrame
-                datastruct = datastruct.fillna(datastruct.transpose())
-        if structure == 'dataframe':
-            datastruct = datastruct.unstack(level=1)
-            datastruct.index.name = None
-            datastruct.columns.name = None
-        return datastruct
+        return fig
 
     def _run_statistical_test_groups(
         self, df: pd.DataFrame, group_col: str, stats_test: str, correction_method: str,
@@ -200,7 +190,7 @@ class DiversityBase(BaseModule, BaseDF, ABC):
                 # corrected_pval = corrected_pval.append(pval[pval.isnull()])
                 corrected_pval = pd.concat([corrected_pval, pval[pval.isnull()]])
             # remodelling of p-values output
-            corrected_pval = self._structure_remodelling(corrected_pval, structure=structure_pval, sym=sym)
+            corrected_pval = StructureRemodelling(corrected_pval).get_from_arguments(structure=structure_pval, sym=sym)
             return corrected_pval
         else:
             pval = statistical_test_groups_comparison(
@@ -222,20 +212,26 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             output_file=output_pval_file
         )
 
-    def _valid_pval_param(self, pval_to_compute, pval_to_display):
-        choices = [
-            "all", "same group_col or group_col2 values", "same group_col values", None
-        ]
+    def _valid_pval_param(self, pval_to_compute, pval_to_display, group_col2: bool):
+        if group_col2 is True:
+            choices = [
+                "all", "same group_col or group_col2 values", "same group_col values", None
+            ]
+            prefix = ""
+        else:
+            choices = ["all", None]
+            prefix = "Without a second group column (group_col2), "
+
         dicpval = {}
         for i in range(len(choices)):
             dicpval[choices[i]] = i
 
         if pval_to_compute not in choices:
-            logger.warning("pval_to_compute='%s' not valid, set to default (all).", pval_to_compute)
+            logger.warning(prefix+"pval_to_compute='%s' not valid, set to default (all).", pval_to_compute)
             pval_to_compute = "all"
 
         if pval_to_display not in choices:
-            logger.warning("pval_to_display='%s' not valid, set to default (None).", pval_to_display)
+            logger.warning(prefix+"pval_to_display='%s' not valid, set to default (None).", pval_to_display)
             pval_to_display = None
         elif dicpval[pval_to_display] < dicpval[pval_to_compute]:
             raise ValueError("pval_to_display='{}' not valid, when pval_to_compute='{}'. \
@@ -387,7 +383,7 @@ pval_to_display should be set to: {}".format(
         t = t.sort_values([group_col, group_col2])
         return list(t[final_group_col])
 
-    def _generate_shapes_annotations_lists(
+    def _generate_shapes_annotations_lists_simple(
         self, pval_series: pd.Series, groups: list, hgt_min: Real
     ):
         """
@@ -413,7 +409,7 @@ pval_to_display should be set to: {}".format(
         # the pvalues need to be ordered so that looking at the cell corresponding to the left edge
         # of the bracket that needs to be added is enough to determine if there is already a
         # bracket there.
-        pval_series = self._order_pval_series(pval_series, groups, dic_gps)
+        pval_series = self._order_pval_series(pval_series, groups, dic_gps=dic_gps)
 
         det = (hgt_min/15)
 
@@ -478,25 +474,32 @@ pval_to_display should be set to: {}".format(
 
         return list_shapes, list_annotations, len(level)
 
-    """
     def _generate_shapes_annotations_lists_supergroup(
-        self, pval_series, groups, supergroups, hgt_min
+        self, pval_series: pd.Series, groups: list, supergroups: dict, hgt_min: Real
     ):
-    #   :param supergroups dictionary with supergroup edges
+        """
+        To generate annotations to represent significant p-values. Methods for group_col and group_col2
+
+        Args:
+            pval_series: series of the p-values to put on the graph (need to be filtered beforehand
+              so that it only contains significant p-values).
+            groups: list of groups displayed in graph.
+            supergroups: dictionary with supergroup edges
+        """
         dic_gps = {}
         for i in range(len(groups)):
-            dic_gps[groups[i]]=i
+            dic_gps[groups[i]] = i
 
         list_shapes = []
         dic_middle = {}
-        supergroups_to_display = set(list(pval_series.index.get_level_values(0)) \
-            + list(pval_series.index.get_level_values(1)))
+        supergroups_to_display = set(list(pval_series.index.get_level_values(0))
+                                     + list(pval_series.index.get_level_values(1)))
         for i in supergroups_to_display:
             if isinstance(supergroups[i], list):
                 list_shapes += [{
-                    'x0':supergroups[i][0], 'y0':hgt_min,
-                    'x1':supergroups[i][1], 'y1':hgt_min,
-                    'line':dict(width=1)
+                    'x0': supergroups[i][0], 'y0': hgt_min,
+                    'x1': supergroups[i][1], 'y1': hgt_min,
+                    'line': dict(width=1)
                 }]
                 dic_middle[i] = (dic_gps[supergroups[i][0]] + dic_gps[supergroups[i][1]])/2
             else:
@@ -506,9 +509,9 @@ pval_to_display should be set to: {}".format(
         i = 0
         for k, v in sorted(dic_middle.items(), key=lambda item: item[1]):
             dic_supergps[k] = i
-            i+=1
+            i += 1
 
-        level=[[0] * (len(dic_supergps))]
+        level = [[0] * (len(dic_supergps))]
         list_annotations = []
         for ind, val in pval_series.items():
             y = 0
@@ -519,21 +522,21 @@ pval_to_display should be set to: {}".format(
                     level[i][dic_supergps[ind[0]]:dic_supergps[ind[1]]+1] = \
                         [1]*(dic_supergps[ind[1]]-dic_supergps[ind[0]]+1)  # or ind
                     list_shapes += [
-                            {'x0':dic_middle[ind[0]], 'y0':hgt_min+i+0.5,
-                             'x1':dic_middle[ind[1]], 'y1':hgt_min+i+0.5, 'line':dict(width=1)},
-                            {'x0':dic_middle[ind[0]], 'x1':dic_middle[ind[0]], 'y1':hgt_min+i+0.5,
-                             #'y0':hgt_min, 'line':dict(width=1, dash="dot")},
-                             'y0':hgt_min+i+0.35, 'line':dict(width=1)},
-                            {'x0':dic_middle[ind[1]], 'x1':dic_middle[ind[1]], 'y1':hgt_min+i+0.5,
-                             #'y0':hgt_min, 'line':dict(width=1, dash="dot")}
-                             'y0':hgt_min+i+0.35, 'line':dict(width=1)}
+                            {'x0': dic_middle[ind[0]], 'y0': hgt_min+i+0.5,
+                             'x1': dic_middle[ind[1]], 'y1': hgt_min+i+0.5, 'line': dict(width=1)},
+                            {'x0': dic_middle[ind[0]], 'x1': dic_middle[ind[0]], 'y1': hgt_min+i+0.5,
+                             # 'y0':hgt_min, 'line':dict(width=1, dash="dot")},
+                             'y0': hgt_min+i+0.35, 'line': dict(width=1)},
+                            {'x0': dic_middle[ind[1]], 'x1': dic_middle[ind[1]], 'y1': hgt_min+i+0.5,
+                             # 'y0':hgt_min, 'line':dict(width=1, dash="dot")}
+                             'y0': hgt_min+i+0.35, 'line': dict(width=1)}
                                    ]
                     if val < 0.01:
-                        list_annotations += [{'text':'**','x':(dic_middle[ind[0]]+dic_middle[ind[1]])/2,
-                                              'y':hgt_min+i+0.65, 'showarrow':False}]
+                        list_annotations += [{'text': '**', 'x': (dic_middle[ind[0]]+dic_middle[ind[1]])/2,
+                                              'y': hgt_min+i+0.65, 'showarrow': False}]
                     else:
-                        list_annotations += [{'text':'*','x':(dic_middle[ind[0]]+dic_middle[ind[1]])/2,
-                                              'y':hgt_min+i+0.65, 'showarrow':False}]
+                        list_annotations += [{'text': '*', 'x': (dic_middle[ind[0]]+dic_middle[ind[1]])/2,
+                                              'y': hgt_min+i+0.65, 'showarrow': False}]
                     y = 1
                     break
             if y == 0:
@@ -542,24 +545,24 @@ pval_to_display should be set to: {}".format(
                 level[i][dic_supergps[ind[0]]:dic_supergps[ind[1]]+1] = \
                     [1]*(dic_supergps[ind[1]]-dic_supergps[ind[0]]+1)  # or ind
                 list_shapes += [
-                            {'x0':dic_middle[ind[0]], 'y0':hgt_min+i+0.5,
-                             'x1':dic_middle[ind[1]], 'y1':hgt_min+i+0.5, 'line':dict(width=1)},
-                            {'x0':dic_middle[ind[0]], 'x1':dic_middle[ind[0]], 'y1':hgt_min+i+0.5,
-                             #'y0':hgt_min, 'line':dict(width=1, dash="dot")},
-                             'y0':hgt_min+i+0.35, 'line':dict(width=1)},
-                            {'x0':dic_middle[ind[1]], 'x1':dic_middle[ind[1]], 'y1':hgt_min+i+0.5,
-                             #'y0':hgt_min, 'line':dict(width=1, dash="dot")}
-                             'y0':hgt_min+i+0.35, 'line':dict(width=1)}
+                            {'x0': dic_middle[ind[0]], 'y0': hgt_min+i+0.5,
+                             'x1': dic_middle[ind[1]], 'y1': hgt_min+i+0.5, 'line': dict(width=1)},
+                            {'x0': dic_middle[ind[0]], 'x1': dic_middle[ind[0]], 'y1': hgt_min+i+0.5,
+                             # 'y0':hgt_min, 'line':dict(width=1, dash="dot")},
+                             'y0': hgt_min+i+0.35, 'line': dict(width=1)},
+                            {'x0': dic_middle[ind[1]], 'x1': dic_middle[ind[1]], 'y1': hgt_min+i+0.5,
+                             # 'y0':hgt_min, 'line':dict(width=1, dash="dot")}
+                             'y0': hgt_min+i+0.35, 'line': dict(width=1)}
                                 ]
                 if val < 0.01:
-                    list_annotations += [{'text':'**','x':(dic_middle[ind[0]]+dic_middle[ind[1]])/2,
-                                              'y':hgt_min+i+0.65, 'showarrow':False}]
+                    list_annotations += [{'text': '**', 'x': (dic_middle[ind[0]]+dic_middle[ind[1]])/2,
+                                          'y': hgt_min+i+0.65, 'showarrow': False}]
                 else:
-                    list_annotations += [{'text':'*','x':(dic_middle[ind[0]]+dic_middle[ind[1]])/2,
-                                              'y':hgt_min+i+0.65, 'showarrow':False}]
+                    list_annotations += [{'text': '*', 'x': (dic_middle[ind[0]]+dic_middle[ind[1]])/2,
+                                          'y': hgt_min+i+0.65, 'showarrow': False}]
 
         return list_shapes, list_annotations, len(level)
-    """
+
     # for now, method above and below in different methods
     # def _generate_dic_shapes_and_annotations(
     #    self, pval_series, dic_lev, hgt_min
@@ -570,7 +573,8 @@ pval_to_display should be set to: {}".format(
 
     def _compute_pval_inside_subgroups(
         self, diversity_index_dataframe: pd.DataFrame, group_col: str, final_group_col: str,
-        stats_test: str, correction_method: str, structure_pval: str, sym: bool
+        stats_test: str, correction_method: str,
+        # structure_pval: str, sym: bool
     ) -> pd.Series:
         pval = pd.Series([], dtype='float64')
         for g in diversity_index_dataframe[group_col].dropna().unique():
@@ -580,12 +584,13 @@ pval_to_display should be set to: {}".format(
                     f"Less than 2 samples in dataframe group {g} in data. P-val can't be computed."
                 )
             else:
+                newpval = self._run_statistical_test_groups(
+                    df_gp, final_group_col, stats_test,
+                    correction_method, structure_pval="series", sym=False
+                )
                 pval = pd.concat([
                     pval,
-                    self._run_statistical_test_groups(
-                        df_gp, final_group_col, stats_test,
-                        correction_method, structure_pval, sym
-                    )
+                    newpval
                 ])
         pval.index = pd.MultiIndex.from_tuples(pval.index, names=('Group1', 'Group2'))
         return pval
@@ -632,8 +637,23 @@ pval_to_display should be set to: {}".format(
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
 
-        pval_to_compute, pval_to_display = self._valid_pval_param(pval_to_compute, pval_to_display)
+        # For now pval_to_display only works if image is static and no group_col2
+        if group_col2 is not None or (
+                output_file is not False and output_file is not None and output_file.split(".")[1] == "html"):
+            print("Sorry but for now pval_to_display only available for cases without a groul_col2 and with a static \
+image")
+            pval_to_display = None
+
         correction_method = self._valid_correction_method_param(correction_method)
+        pval_to_compute, pval_to_display = self._valid_pval_param(pval_to_compute, pval_to_display, bool(group_col2))
+
+        if correction_method is not None or pval_to_compute == "same group_col values" or \
+                pval_to_compute == "same group_col or group_col2 values" or pval_to_display is not None:
+            infct_structure_pval = "series"
+            infct_sym = False
+        else:
+            infct_structure_pval = structure_pval
+            infct_sym = sym
 
         if group_col2:
             final_group_col = group_col+"_"+group_col2
@@ -646,30 +666,34 @@ pval_to_display should be set to: {}".format(
             )
             df = self._get_grouped_df(filtered_metadata_df[[group_col, group_col2, final_group_col]])
 
-            if pval_to_display and (groups or groups2):
-                # list and sort all final_groups possibles respecting the order given by
-                # groups first and then by groups2
-                final_groups = self._generate_ordered_final_groups(
-                    df, final_group_col, group_col, group_col2, groups, groups2
-                )
+            if pval_to_display:
+                if groups or groups2:
+                    # list and sort all final_groups possibles respecting the order given by
+                    # groups first and then by groups2
+                    final_groups = self._generate_ordered_final_groups(
+                        df, final_group_col, group_col, group_col2, groups, groups2
+                    )
+                else:
+                    final_groups = list(filtered_metadata_df[final_group_col].unique())
 
             if pval_to_compute == "all":
                 pval = self._run_statistical_test_groups(
-                    df, final_group_col, stats_test, correction_method, structure_pval, sym
+                    df, final_group_col, stats_test, correction_method, infct_structure_pval, infct_sym
                 )
             elif (pval_to_compute == "same group_col values" or
                   pval_to_compute == "same group_col or group_col2 values"):
                 pval = self._compute_pval_inside_subgroups(
-                    df, group_col, final_group_col, stats_test, correction_method, structure_pval, sym
+                    df, group_col, final_group_col, stats_test, correction_method,
                 )
                 if pval_to_compute == "same group_col or group_col2 values":
                     pval = pd.concat([
                         pval,
                         self._compute_pval_inside_subgroups(
                             df, group_col2, final_group_col,
-                            stats_test, correction_method, structure_pval, sym
+                            stats_test, correction_method,
                         )
                     ])
+                # here pval is a series
 
             if pval_to_display:
                 to_display = self._pval_selection_with_group_col2(pval, final_groups, pval_to_compute, pval_to_display)
@@ -677,28 +701,29 @@ pval_to_display should be set to: {}".format(
         else:
             df = self._get_grouped_df(filtered_metadata_df[group_col])
             pval = self._run_statistical_test_groups(
-                df, group_col, stats_test, correction_method, structure_pval, sym
-                )
-            # pval is in the right structure to be returned
-
-            final_groups = groups   # to remove from here later on
+                df, group_col, stats_test, correction_method, infct_structure_pval, infct_sym
+            )
 
             if pval_to_display:
-                final_groups = groups
                 to_display = self._pval_selection(pval, groups)
+                if groups is not None:
+                    final_groups = groups
+                else:
+                    final_groups = list(metadata_df[group_col].unique())
 
         if pval_to_display and to_display.empty:       # nothing to display
             pval_to_display = None
 
         if pval_to_display:
-            hgt_min = df[self.DIVERSITY_INDEXES_NAME].max()  # + 0.5
+            # print(final_groups)
+            hgt_min = df[self._DIVERSITY_INDEXES_NAME].max()  # + 0.5
             list_shapes, list_annotations, nb_lev = self._generate_shapes_annotations_lists(
                 to_display, final_groups, hgt_min
             )
             if not plotting_options:
                 plotting_options = {}
-            det = (hgt_min/15)
-            hgt_min += det/2
+            # det = (hgt_min/15)
+            # hgt_min += det/2
             # nblevels=to_display.shape[0]
             plotting_options = merge_dict(plotting_options, {
                 'layout': {
@@ -706,6 +731,10 @@ pval_to_display should be set to: {}".format(
                     'annotations': list_annotations,  # idem
                 }
             })
+
+        if infct_structure_pval != structure_pval:
+            # pval is in the right structure to be returned
+            pval = StructureRemodelling(pval).get_from_arguments(structure=structure_pval, sym=sym)
 
         self.last_grouped_df = df
         self.report_data['analyse_groups'] = {
@@ -724,9 +753,12 @@ pval_to_display should be set to: {}".format(
                 df, mode, group_col, group_col2, plotting_options, log_scale, show, output_file,
                 colors, groups, groups2, **kwargs
             )
+            # fig
             if show_pval:
                 if structure_pval != 'dataframe' or not sym:
-                    pval_for_visualization = self._structure_remodelling(pval, 'dataframe', sym=True)
+                    pval_for_visualization = StructureRemodelling(pval).get_from_arguments(
+                        structure='dataframe', sym=True
+                    )
                     self._visualize_pvalue_matrix(pval_for_visualization, output_pval_file)
                 else:
                     self._visualize_pvalue_matrix(pval, output_pval_file)
@@ -769,7 +801,7 @@ class PhylogeneticDiversityBase(DiversityBase):
               the diversity with the OTU IDs that are present in the Tree
         """
         super().__init__(taxonomy_dataframe)
-        if type(taxonomy_tree) == skbio.tree._tree.TreeNode:
+        if isinstance(taxonomy_tree, skbio.tree._tree.TreeNode):
             self.tree = taxonomy_tree
         else:
             raise RuntimeError("taxonomy_tree should be a skbio.TreeNode.")
