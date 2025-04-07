@@ -31,23 +31,29 @@ def normalized_stats(x):
 
 
 class Descriptive(object):
-    def __init__(self, df, outdir):
+    def __init__(self, df):
         self.logger = module_logger
         self.logger.info(f'Starting instance of {__class__.__name__} in {__name__}.')
         self.df = df
-        self.outdir = outdir
 
-    def matrix_stats(self, filename):
-        output_file = self.outdir+'/'+filename
-        df_stats = self.df.describe().transpose()  # Descriptive stats of variables
-        df_stats.to_csv(path_or_buf=output_file)  # The above saved to a file (before filtering)
-        means = np.array(df_stats['mean'])
+    @property
+    def matrix_stats(self):
+        if getattr(self, '_matrix_stats', None) is None:
+            self._matrix_stats = self.df.describe().transpose()  # Descriptive stats of variables
+        return self._matrix_stats
+    
+    def dic_stats(self, print: bool = True):
+        if print is True:
+            print("Descriptive statistics on means:")
+        means = np.array(self.matrix_stats['mean'])
 
-        print(f"Saving variables to {output_file} and running descriptive statistics on means:")
-
+        dic_stats = {}
         properties = ['Number of Variable', 'Min / Max', 'Mean', 'Variance', 'Skewness', 'Kurtosis / Fisher']
         for i in range(len(stats.describe(means))):
-            print(f"\t{properties[i]} = {stats.describe(means)[i]}")
+            mi = stats.describe(means)[i]
+            dic_stats[properties[i]] = mi
+            if print is True:
+                print(f"\t{properties[i]} = {mi}")
 
         # print(stats.describe(means))  # Additional stats available through SCIPY
 
@@ -56,6 +62,7 @@ class Descriptive(object):
         # df_means = pd.DataFrame(df_stats['mean'])
         # df_means.boxplot()
         # plt.show()
+        return dic_stats
 
 
 class FilteringStats(object):

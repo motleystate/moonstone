@@ -10,6 +10,7 @@ import pandas as pd
 from statsmodels.stats.multitest import multipletests
 
 from moonstone.analysis.statistical_test import statistical_test_groups_comparison
+from moonstone.analysis.stats import Descriptive
 from moonstone.core.module_base import BaseModule, BaseDF
 from moonstone.filtering.basics_filtering import NamesFiltering
 from moonstone.plot.graphs.box import GroupBoxGraph, BoxGraph
@@ -51,6 +52,12 @@ class DiversityBase(BaseModule, BaseDF, ABC):
             self._diversity_indexes = self.compute_diversity()
             self._diversity_indexes.name = self._DIVERSITY_INDEXES_NAME
         return self._diversity_indexes
+
+    @property
+    def descriptive_stats(self):
+        if getattr(self, '_descriptive_stats', None) is None:
+            self._descriptive_stats = Descriptive(self.diversity_indexes).dic_stats
+        return self._descriptive_stats
 
     def _get_default_title(self) -> str:
         return f"{self.index_name} {self._DEF_TITLE}"
@@ -371,7 +378,9 @@ class DiversityBase(BaseModule, BaseDF, ABC):
         method that generates a report summurazing the diversity computed
         (parameters, results)
         """
-        return {"title": self.index_name+" diversity", "diversity indexes": self.diversity_indexes}
+        return {"title": self.index_name+" diversity", 
+                "diversity indexes": self.diversity_indexes, 
+                "descriptive_stats": self.descriptive_stats}
 
 
 class PhylogeneticDiversityBase(DiversityBase):

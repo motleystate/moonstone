@@ -86,8 +86,8 @@ def get_count_file(countfile_path, outdir_path):
     num_samples, num_otus = count_df.shape
     print(f'Found {num_samples} samples and {num_otus} OTUs\n')
 
-    run_statistics = stats.Descriptive(count_df, outdir_path)
-    run_statistics.matrix_stats('starting_variables.csv')
+    run_statistics = stats.Descriptive(count_df)
+    run_statistics.matrix_stats.to_csv(path_or_buf='starting_variables.csv')  # saved to a file (before filtering)
     check_sparse = stats.Density(count_df)
     if check_sparse.is_sparse():
         print("Count Table is sparse with %2.3f%s non-zero values." % (check_sparse.percent_non_zeros(), "%"))
@@ -103,8 +103,8 @@ def filter_count_df(count_df, min_read_mean, outdir_path):
     check_sparse = stats.Density(count_df)
     filtering = MeanFiltering(count_df, threshold=min_read_mean)
     count_df = filtering.filtered_df
-    filtered_stats = stats.Descriptive(count_df, outdir_path)
-    filtered_stats.matrix_stats('filtered_variables.csv')
+    filtered_stats = stats.Descriptive(count_df)
+    filtered_stats.matrix_stats.to_csv(path_or_buf='filtered_variables.csv')
     count_df.to_csv(path_or_buf=outdir_path+'/'+'filteredCountFile.csv')
     check_f_sparse = stats.Density(count_df)
     if check_f_sparse.is_sparse():
