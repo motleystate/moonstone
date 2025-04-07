@@ -21,6 +21,7 @@ from moonstone.utils.dict_operations import merge_dict
 from moonstone.utils.pandas.remodelling import StructureRemodelling
 from moonstone.utils.log_messages import reset_warnings_decorator
 from moonstone.utils.dict_operations import merge_dict
+from moonstone.utils.pandas.remodelling import StructureRemodelling
 
 
 logger = logging.getLogger(__name__)
