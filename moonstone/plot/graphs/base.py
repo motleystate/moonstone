@@ -347,6 +347,10 @@ Accepted values: {SymbolValidator().values}"
             groups.sort()
         if colors is None:
             colors = self._gen_default_color_dict(groups)
+        else:
+            missing_from_color = set(groups).difference(colors.keys())
+            if len(missing_from_color) != 0:
+                colors.update(self._gen_default_color_dict(missing_from_color))
 
         if show_counts:
             counts = self.data[group_col].value_counts().to_dict()
@@ -372,15 +376,17 @@ Accepted values: {SymbolValidator().values}"
         **kwargs,
     ) -> go.Figure:
         """
-        :param data_col: column with data to visualize
-        :param group_col: column used to group data
-        :param group_col2: (optional) second column used to group data
-        :param groups: specifically select groups to display among group_col
-        :param groups2: specifically select groups to display among group_col2
-        :param sort_groups: whether to sort groups to display or not
-        :param colors: dictionnary with group_col2 (or group_col if no group_col2) values as keys
-        :param orientation: orientation of the graph. {"v" (or "vertical")(default), "h" (or "horizontal")}
+        Args:
+            data_col: column with data to visualize
+            group_col: column used to group data
+            group_col2: (optional) second column used to group data
+            groups: specifically select groups to display among group_col
+            groups2: specifically select groups to display among group_col2
+            sort_groups: whether to sort groups to display or not
+            colors: dictionnary with group_col2 (or group_col if no group_col2) values as keys
+            orientation: orientation of the graph. {"v" (or "vertical")(default), "h" (or "horizontal")}
         and their associated color as values
+            show_count: write the number of samples in the title (True) or not (False; default)
         """
 
         orientation = self._valid_orientation_param(orientation)
