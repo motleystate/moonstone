@@ -14,7 +14,10 @@ def generate_translation_dictionary(
     level = "species"  # only works with species for now
     new_otu_id_name_ser.index = new_otu_id_name_ser.index.get_level_values(level)
     new_otu_id_name_ser = new_otu_id_name_ser[~new_otu_id_name_ser.index.str.contains("(", regex=False)].astype(str)
+
+    # in newick format, we need to use a single quote to escape a single quote
     new_otu_id_name_ser.index = new_otu_id_name_ser.index.str.replace("'", "''")
+
     dic_translate_tree = new_otu_id_name_ser.reset_index().set_index(new_otu_id_name_ser.name).to_dict()[level]
     return dic_translate_tree
 
