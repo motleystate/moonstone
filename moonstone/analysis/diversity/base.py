@@ -190,7 +190,6 @@ class DiversityBase(BaseModule, BaseDF, ABC):
 
             corrected_pval.index = pval.dropna().index   # postulate that the order hasn't changed
             if pval[pval.isnull()].size > 0:
-                # corrected_pval = corrected_pval.append(pval[pval.isnull()])
                 corrected_pval = pd.concat([corrected_pval, pval[pval.isnull()]])
             # remodelling of p-values output
             corrected_pval = StructureRemodelling(corrected_pval).get_from_arguments(structure=structure_pval, sym=sym)
