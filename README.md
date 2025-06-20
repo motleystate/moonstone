@@ -20,22 +20,39 @@ Please check our [documentation](https://moonstone.readthedocs.io/en/latest/?bad
 
 ## Install moonstone
 
-Set up a Python 3 virtual env, for instance:
+You can install `moonstone` either as a **user** (to use the tool as-is) or as a **developer** (to work directly on the code). We recommend using [Mamba](https://github.com/mamba-org/mamba) (a faster drop-in replacement for Conda) to manage environments.
+
+### 🧪 User Installation
+
+If you only want to use `moonstone` and don't need to edit the source code:
 
 ```bash
-python3 -m virtualenv moonstone
-source moonstone/bin/activate
-(moonstone) $
+# Create and activate a Python 3.10 environment
+mamba create -n moonstone python=3.10 -y
+conda activate moonstone
+
+# Install the latest published version of moonstone from PyPI
+pip install moonstone
 ```
 
-Then simply install the last published version of moonstone:
+### 🛠️ Developer Installation
+
+To work directly with the code and have your changes reflected automatically, follow these steps:
 
 ```bash
-(moonstone) $ pip install moonstone
+# Clone the repository**  
+git clone git@github.com:motleystate/moonstone.git
+cd moonstone
+
+# Create a development environment
+mamba create -n moonstone-dev python=3.10 -y
+conda activate moonstone-dev
+
+# Install Moonstone in editable mode
+pip install -e .
 ```
 
 You can also install dependencies required for development : `pip install -r requirements-dev.txt`.
-
 --------
 
 ## Quickstart with moonstone on the command-line
