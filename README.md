@@ -53,6 +53,7 @@ pip install -e .
 ```
 
 You can also install dependencies required for development : `pip install -r requirements-dev.txt`.
+
 --------
 
 ## Quickstart with moonstone on the command-line
