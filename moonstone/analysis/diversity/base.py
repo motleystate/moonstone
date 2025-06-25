@@ -640,8 +640,8 @@ pval_to_display should be set to: {}".format(
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
 
         # For now pval_to_display only works if image is static and no group_col2
-        if group_col2 is not None or (
-                output_file is not False and output_file is not None and output_file.split(".")[1] == "html"):
+        if pval_to_display is not None and (group_col2 is not None or (
+                output_file is not False and output_file is not None and output_file.split(".")[1] == "html")):
             print("Sorry but for now pval_to_display only available for cases without a groul_col2 and with a static \
 image")
             pval_to_display = None

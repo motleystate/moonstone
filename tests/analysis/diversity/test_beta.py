@@ -116,7 +116,7 @@ class TestBrayCurtis(TestCase):
         })
         expected_object.index = ["A", "B", "C"]
 
-        pval = tested_object_instance._run_statistical_test_groups(
+        pval = self.tested_object_instance._run_statistical_test_groups(
             tested_df, 'Group', stats_test='ttest_independence', correction_method='fdr_bh',
             structure_pval='dataframe', sym=False
             )
