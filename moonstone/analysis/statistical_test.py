@@ -209,7 +209,7 @@ def _compute_contingency_table(
     if na:
         # crosstab doesn't count np.nan as a value
         # so we need to change it to a string for those values to appear in the contingency table
-        binned_series.cat.add_categories("NaN", inplace=True)
+        binned_series = binned_series.cat.add_categories("NaN")
         binned_series.fillna("NaN", inplace=True)
     # creation of the contingency table
     tab = pd.crosstab(binned_series, categorical_series)  # rows -> numerical_series; columns -> categorical_series
@@ -434,7 +434,7 @@ Another statistical test would be more appropriate to compare those 2 groups."
 
     df1 = _add_category_column(series1, defaultname="series1")
     df2 = _add_category_column(series2, defaultname="series2")
-    df = df1.append(df2)
+    df = pd.concat([df1, df2])
 
     if bins == "best pvalue":
         tab, comparison_df = compute_contingency_table(
