@@ -6,7 +6,6 @@ import pandas as pd
 import plotly.io
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.validators.scatter.marker import SymbolValidator
 
 import logging
 
@@ -158,6 +157,43 @@ class GroupBaseGraph(BaseGraph):
         "#9CD08F",
     ]
 
+    DICTIONARY_PLOTLY_MARKER_SYMBOLS = {
+        "circle": 0, "circle-open": 100, "circle-dot": 200, "circle-open-dot": 300, "square": 1, "square-open": 101,
+        "square-dot": 201, "square-open-dot": 301, "diamond": 2, "diamond-open": 102, "diamond-dot": 202,
+        "diamond-open-dot": 302, "cross": 3, "cross-open": 103, "cross-dot": 203, "cross-open-dot": 303, "x": 4,
+        "x-open": 104, "x-dot": 204, "x-open-dot": 304, "triangle-up": 5, "triangle-up-open": 105,
+        "triangle-up-dot": 205, "triangle-up-open-dot": 305, "triangle-down": 6, "triangle-down-open": 106,
+        "triangle-down-dot": 206, "triangle-down-open-dot": 306, "triangle-left": 7, "triangle-left-open": 107,
+        "triangle-left-dot": 207, "triangle-left-open-dot": 307, "triangle-right": 8, "triangle-right-open": 108,
+        "triangle-right-dot": 208, "triangle-right-open-dot": 308, "triangle-ne": 9, "triangle-ne-open": 109,
+        "triangle-ne-dot": 209, "triangle-ne-open-dot": 309, "triangle-se": 10, "triangle-se-open": 110,
+        "triangle-se-dot": 210, "triangle-se-open-dot": 310, "triangle-sw": 11, "triangle-sw-open": 111,
+        "triangle-sw-dot": 211, "triangle-sw-open-dot": 311, "triangle-nw": 12, "triangle-nw-open": 112,
+        "triangle-nw-dot": 212, "triangle-nw-open-dot": 312, "pentagon": 13, "pentagon-open": 113, "pentagon-dot": 213,
+        "pentagon-open-dot": 313, "hexagon": 14, "hexagon-open": 114, "hexagon-dot": 214, "hexagon-open-dot": 314,
+        "hexagon2": 15, "hexagon2-open": 115, "hexagon2-dot": 215, "hexagon2-open-dot": 315, "octagon": 16,
+        "octagon-open": 116, "octagon-dot": 216, "octagon-open-dot": 316, "star": 17, "star-open": 117,
+        "star-dot": 217, "star-open-dot": 317, "hexagram": 18, "hexagram-open": 118, "hexagram-dot": 218,
+        "hexagram-open-dot": 318, "star-triangle-up": 19, "star-triangle-up-open": 119, "star-triangle-up-dot": 219,
+        "star-triangle-up-open-dot": 319, "star-triangle-down": 20, "star-triangle-down-open": 120,
+        "star-triangle-down-dot": 220, "star-triangle-down-open-dot": 320, "star-square": 21, "star-square-open": 121,
+        "star-square-dot": 221, "star-square-open-dot": 321, "star-diamond": 22, "star-diamond-open": 122,
+        "star-diamond-dot": 222, "star-diamond-open-dot": 322, "diamond-tall": 23, "diamond-tall-open": 123,
+        "diamond-tall-dot": 223, "diamond-tall-open-dot": 323, "diamond-wide": 24, "diamond-wide-open": 124,
+        "diamond-wide-dot": 224, "diamond-wide-open-dot": 324, "hourglass": 25, "hourglass-open": 125, "bowtie": 26,
+        "bowtie-open": 126, "circle-cross": 27, "circle-cross-open": 127, "circle-x": 28, "circle-x-open": 128,
+        "square-cross": 29, "square-cross-open": 129, "square-x": 30, "square-x-open": 130, "diamond-cross": 31,
+        "diamond-cross-open": 131, "diamond-x": 32, "diamond-x-open": 132, "cross-thin": 33, "cross-thin-open": 133,
+        "x-thin": 34, "x-thin-open": 134, "asterisk": 35, "asterisk-open": 135, "hash": 36, "hash-open": 136,
+        "hash-dot": 236, "hash-open-dot": 336, "y-up": 37, "y-up-open": 137, "y-down": 38, "y-down-open": 138,
+        "y-left": 39, "y-left-open": 139, "y-right": 40, "y-right-open": 140, "line-ew": 41, "line-ew-open": 141,
+        "line-ns": 42, "line-ns-open": 142, "line-ne": 43, "line-ne-open": 143, "line-nw": 44, "line-nw-open": 144,
+        "arrow-up": 45, "arrow-up-open": 145, "arrow-down": 46, "arrow-down-open": 146, "arrow-left": 47,
+        "arrow-left-open": 147, "arrow-right": 48, "arrow-right-open": 148, "arrow-bar-up": 49,
+        "arrow-bar-up-open": 149, "arrow-bar-down": 50, "arrow-bar-down-open": 150, "arrow-bar-left": 51,
+        "arrow-bar-left-open": 151, "arrow-bar-right": 52, "arrow-bar-right-open": 152, "arrow": 53, "arrow-open": 153,
+        "arrow-wide": 54, "arrow-wide-open": 154}
+
     def __init__(self, *args, **kwargs):
         self.color_counter = 0
         super().__init__(*args, **kwargs)
@@ -170,20 +206,6 @@ class GroupBaseGraph(BaseGraph):
 
     def _get_group_color(self, group: str, group_color: dict):
         return group_color.get(group, self.DEFAULT_COLOR)
-
-    @property
-    def dictionary_marker_symbols(self):
-        """
-        Dictionary of all the symbols accepted by a scatter (or other) plot.
-        key is the name of the symbol and value is its number
-        ex: {'circle': 0, 'circle-open': 100, ...}
-        """
-        if getattr(self, '_dictionary_marker_symbols', None) is None:
-            raw_symbols = SymbolValidator().values
-            self._dictionary_marker_symbols = {}
-            for i in range(0, len(raw_symbols), 3):
-                self._dictionary_marker_symbols[raw_symbols[i+2]] = raw_symbols[i]
-        return self._dictionary_marker_symbols
 
     def _translating_forced_symbols(self, forced_symbols: Union[list, set]) -> set:
         translated_symbols = []
@@ -198,13 +220,13 @@ class GroupBaseGraph(BaseGraph):
 
         if len(txt_symbols) > 0:
             for i in txt_symbols:
-                if i in self.dictionary_marker_symbols.keys():
-                    translated_symbols += [self.dictionary_marker_symbols[i]]
+                if i in self.DICTIONARY_PLOTLY_MARKER_SYMBOLS.keys():
+                    translated_symbols += [self.DICTIONARY_PLOTLY_MARKER_SYMBOLS[i]]
                     # txt_symbols.remove(i)
                 else:
                     # raise error
                     error_message = f"Invalid symbol values: {txt_symbols}.\n\
-Accepted values: {SymbolValidator().values}"
+Accepted values: {', '.join(self.DICTIONARY_PLOTLY_MARKER_SYMBOLS.keys())}"
                     raise ValueError(error_message)
         return set(translated_symbols)
 
@@ -225,7 +247,7 @@ Accepted values: {SymbolValidator().values}"
             return symbols
 
         if len(groups) > 162:
-            list_symbols = list(self.dictionary_marker_symbols.values())
+            list_symbols = list(self.DICTIONARY_PLOTLY_MARKER_SYMBOLS.values())
             dic_symbols = dict(zip(groups, list_symbols * (int(len(groups) / len(list_symbols)) + 1)))
         else:
             if len(groups) <= 72:
@@ -241,7 +263,7 @@ Accepted values: {SymbolValidator().values}"
 
                 list_symbols = [int(prefix + suffix) for prefix in list_fill_pattern for suffix in list_shape[:n]]
             else:
-                list_symbols = self.dictionary_marker_symbols.values()
+                list_symbols = self.DICTIONARY_PLOTLY_MARKER_SYMBOLS.values()
 
             if symbols is not None:
                 to_remove = self._translating_forced_symbols(set(symbols.values()))
