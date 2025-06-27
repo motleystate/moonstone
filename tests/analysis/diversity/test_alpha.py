@@ -53,6 +53,7 @@ class TestShannonIndex(TestCase):
         tested_object_instance.visualize(show=False)
 
     def test_analyse_groups(self):
+        # Simple case: only 1 group_col, pval not displayed on graph
         tested_object_instance = ShannonIndex(self.tested_object)
         expected_df = pd.DataFrame(
             [
@@ -521,6 +522,92 @@ pval_to_display should be set to: ['same group_col or group_col2 values', 'same 
             tested_object_instance._order_pval_series(tested_object, groups),
             expected_ser
         )
+
+    def test_generate_shapes_annotations_lists_simple(self):
+        tested_pval = pd.Series({
+            (1, 2): 0.0005, (1, 3): 0.02, (2, 3): 0.0001, (3, 4): 0.01
+            })
+        tested_pval.index.names = ["Group1", "Group2"]
+
+        tested_object_instance = ShannonIndex(self.tested_object)
+        result_shapes, result_annot, result_nlevels = tested_object_instance._generate_shapes_annotations_lists_simple(
+            tested_pval, [1, 2, 3, 4], 3)
+        self.assertEqual(result_nlevels, 3)
+        self.assertEqual(len(result_annot), 4)
+        self.assertEqual(len(result_shapes), 12)  # 3 * 4 = 12
+
+        # (1, 2)
+        # from Group1 to Group2
+        self.assertDictEqual(result_shapes[0], {'x0': 0, 'y0': 3.1, 'x1': 1, 'y1': 3.1, 'line': {'width': 0.53}})
+        # right edge
+        self.assertDictEqual(
+            result_shapes[1], {'x0': 0, 'y0': 3.0700000000000003, 'x1': 0, 'y1': 3.1, 'line': {'width': 0.53}})
+        # left edge
+        self.assertDictEqual(
+            result_shapes[2], {'x0': 1, 'y0': 3.0700000000000003, 'x1': 1, 'y1': 3.1, 'line': {'width': 0.53}})
+        self.assertEqual(result_annot[0]['text'], "**")
+        self.assertEqual(result_annot[0]['y'], 3.13)
+
+        # (1, 3)
+        self.assertEqual(result_annot[1]['text'], "*")
+        self.assertEqual(result_annot[1]['y'], 3.23)
+
+        # (2, 3)
+        self.assertEqual(result_annot[2]['y'], 3.33)
+
+        # (3, 4)
+        self.assertEqual(result_annot[3]['text'], "**")
+        self.assertEqual(result_annot[3]['y'], 3.13)
+
+    def test_analyse_groups_pval_to_display(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'species1': [4, 0, 0, 0, 4, 7, 0, 6],
+                'species2': [1, 0, 2, 0, 5, 3, 0, 4],
+                'species3': [9, 0, 0, 1, 4, 2, 0, 5],
+                'species4': [8, 3, 0, 0, 9, 1, 0, 1],
+                'species5': [0, 0, 0, 0, 4, 0, 0, 8],
+                'species6': [4, 0, 0, 0, 4, 9, 0, 9],
+                'species7': [6, 1, 0, 0, 7, 8, 0, 7],
+                'species8': [1, 0, 0, 0, 8, 4, 1, 6]
+
+            },
+            orient='index',
+            columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7', 'sample8'])
+
+        metadata_df = pd.DataFrame(
+            [
+                ['F', 2],
+                ['M', 1],
+                ['F', 1],
+                ['M', 1],
+                ['M', 2],
+                ['F', 2],
+                ['F', 1],
+                ['M', 2],
+            ],
+            columns=['sex', 'group'],
+            index=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7', 'sample8'],
+        )
+        tested_object_instance = ShannonIndex(tested_object)
+
+        output = tested_object_instance.analyse_groups(
+            metadata_df, 'group', make_graph=True, show=False, show_pval=False,
+            pval_to_display="all", groups=[1, 2],
+            structure_pval='dataframe', sym=True)
+        self.assertEqual(output['fig'].layout.annotations[0].text, "*")
+        self.assertEqual(len(output['fig'].layout.shapes), 3)
+
+    def test_analyse_groups_pval_to_display_nothing_to_display(self):
+        tested_object_instance = ShannonIndex(self.tested_object)
+
+        output = tested_object_instance.analyse_groups(
+            self.metadata_df, 'group', make_graph=True, show=False, show_pval=False,
+            pval_to_display="all", groups=[1, 2],
+            structure_pval='dataframe', sym=True)
+
+        self.assertEqual(output['pval'].loc[1, 2], 0.3742593192802244)
+        self.assertEqual(len(output['fig'].layout.shapes), 0)
 
 
 class TestSimpsonInverseIndex(TestCase):

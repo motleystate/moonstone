@@ -115,4 +115,3 @@ def super_pop(dic: dict, list_of_keys: list, default):
         else:
             return default
     return dic
-

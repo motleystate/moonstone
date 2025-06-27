@@ -154,9 +154,10 @@ class TestGroupScatterGraph(TestCase):
         tested_symbols = {"A": 0, "B": 1, "C": 101}
         expected_object = {"A": 0, "B": 1, "C": 101}
         np.testing.assert_array_equal(self.ins._symbol_scheme(tested_object, tested_symbols), expected_object)
-    
+
 #    def test_confidence_ellipse(self):
 #
+
 
 class TestGroupScatter3DGraph(TestCase):
 

@@ -170,4 +170,3 @@ class TestFlattenDict(TestCase):
 
         # Case: key that doesn't appear at the first level
         self.assertEqual(super_pop(tested_dict, ["k", "k"], None), None)
-

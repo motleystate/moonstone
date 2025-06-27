@@ -20,9 +20,6 @@ from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
 from moonstone.utils.dict_operations import merge_dict
 from moonstone.utils.pandas.remodelling import StructureRemodelling
 from moonstone.utils.log_messages import reset_warnings_decorator
-from moonstone.utils.dict_operations import merge_dict
-from moonstone.utils.pandas.remodelling import StructureRemodelling
-
 
 logger = logging.getLogger(__name__)
 
@@ -443,7 +440,7 @@ pval_to_display should be set to: {}".format(
                          'x1': right_ind, 'y1': hgt_min+(i*det/2),
                          'line': dict(width=linewidth)}    # right edge of the bracket
                     ]
-                    if val < 0.01:
+                    if val <= 0.01:
                         list_annotations += [{'text': '**', "font": dict(size=fontsize),
                                               'x': (left_ind+right_ind)/2,
                                               'y': hgt_min+(i*det/2)+0.15*det, 'showarrow': False}]
@@ -478,7 +475,7 @@ pval_to_display should be set to: {}".format(
 
     def _generate_shapes_annotations_lists_supergroup(
         self, pval_series: pd.Series, groups: list, supergroups: dict, hgt_min: Real
-    ):
+    ):  # noqa
         """
         To generate annotations to represent significant p-values. Methods for group_col and group_col2
 
@@ -532,7 +529,7 @@ pval_to_display should be set to: {}".format(
                              # 'y0':hgt_min, 'line':dict(width=1, dash="dot")}
                              'y0': hgt_min+i+0.35, 'line': dict(width=1)}
                                    ]
-                    if val < 0.01:
+                    if val <= 0.01:
                         list_annotations += [{'text': '**', 'x': (dic_middle[ind[0]]+dic_middle[ind[1]])/2,
                                               'y': hgt_min+i+0.65, 'showarrow': False}]
                     else:
@@ -668,16 +665,6 @@ image")
             )
             df = self._get_grouped_df(filtered_metadata_df[[group_col, group_col2, final_group_col]])
 
-            if pval_to_display:
-                if groups or groups2:
-                    # list and sort all final_groups possibles respecting the order given by
-                    # groups first and then by groups2
-                    final_groups = self._generate_ordered_final_groups(
-                        df, final_group_col, group_col, group_col2, groups, groups2
-                    )
-                else:
-                    final_groups = list(filtered_metadata_df[final_group_col].unique())
-
             if pval_to_compute == "all":
                 pval = self._run_statistical_test_groups(
                     df, final_group_col, stats_test, correction_method, infct_structure_pval, infct_sym
@@ -697,8 +684,16 @@ image")
                     ])
                 # here pval is a series
 
-            if pval_to_display:
-                to_display = self._pval_selection_with_group_col2(pval, final_groups, pval_to_compute, pval_to_display)
+            # if pval_to_display:  # not ready yet
+            #    if groups or groups2:
+                    # list and sort all final_groups possibles respecting the order given by
+                    # groups first and then by groups2
+            #        final_groups = self._generate_ordered_final_groups(
+            #            df, final_group_col, group_col, group_col2, groups, groups2
+            #        )
+            #    else:
+            #        final_groups = list(filtered_metadata_df[final_group_col].unique())
+            #    to_display = self._pval_selection_with_group_col2(pval, final_groups, pval_to_compute, pval_to_display)
 
         else:
             df = self._get_grouped_df(filtered_metadata_df[group_col])
@@ -736,6 +731,10 @@ image")
                     'annotations': list_annotations,  # idem
                 }
             })
+
+            # forcing groups into string otherwise the pvalue risks to be off
+            df[group_col] = df[group_col].astype(str)
+            groups = [str(g) for g in groups]
 
         if infct_structure_pval != structure_pval:
             # pval is in the right structure to be returned
