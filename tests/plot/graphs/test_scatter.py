@@ -115,8 +115,125 @@ class TestGroupScatterGraph(TestCase):
         expected_object = {"A": 0, "B": 1, "C": 101}
         np.testing.assert_array_equal(self.ins._symbol_scheme(tested_object, tested_symbols), expected_object)
 
-#    def test_confidence_ellipse(self):
-#
+    def test_confidence_ellipse_95(self):
+        tested_x = pd.Series(
+            {'sample1': 4, 'sample2': 3, 'sample3': 6, 'sample4': 8, 'sample5': 5, 'sample6': 8, 'sample7': 9})
+        tested_y = pd.Series(
+            {'sample1': 9, 'sample2': 5, 'sample3': 7, 'sample4': 6, 'sample5': 6, 'sample6': 9, 'sample7': 5})
+        ellipse_trace_data = self.ins._confidence_ellipse(x=tested_x, y=tested_y, q_confidence=0.95, n_points=10)
+        # n_points=10 to not overwhelm this file, so it's enneagone rather than an ellipse
+        np.testing.assert_array_almost_equal(
+            ellipse_trace_data[0],
+            np.array([11.68943495, 10.53366356, 7.32338506, 3.56072442, 1.00627238, 0.85528544, 3.17841206, 6.88863549,
+                      10.24990093, 11.68943495])
+        )
+        np.testing.assert_array_almost_equal(
+            ellipse_trace_data[1],
+            np.array([6.42008503, 9.16380926, 10.7613742, 10.46526146, 8.41402548, 5.56746237, 3.25751065, 2.5650224,
+                      3.81402057, 6.42008503])
+        )
+
+    def test_confidence_ellipse_50(self):
+        tested_x = pd.Series(
+            {'sample1': 4, 'sample2': 3, 'sample3': 6, 'sample4': 8, 'sample5': 5, 'sample6': 8, 'sample7': 9})
+        tested_y = pd.Series(
+            {'sample1': 9, 'sample2': 5, 'sample3': 7, 'sample4': 6, 'sample5': 6, 'sample6': 9, 'sample7': 5})
+        ellipse_trace_data = self.ins._confidence_ellipse(x=tested_x, y=tested_y, q_confidence=0.5, n_points=10)
+        # n_points=10 to not overwhelm this file, so it's enneagone rather than an ellipse
+        np.testing.assert_array_almost_equal(
+            ellipse_trace_data[0],
+            np.array([8.81086031, 8.25491359, 6.71071219, 4.9008051, 3.67206796, 3.59944054, 4.71690602, 6.50158987,
+                      8.11841869, 8.810860315])
+        )
+        np.testing.assert_array_almost_equal(
+            ellipse_trace_data[1],
+            np.array([6.57276992, 7.89255037, 8.66100769, 8.51857216, 7.53189095, 6.16264317, 5.05151506, 4.71841582,
+                      5.31920628, 6.57276992])
+        )
+
+    def test_plot_one_graph_confidence_ellipse(self):
+        tested_object = pd.DataFrame(
+            [
+                [1, 9.3, 2],
+                [12.1, 2.2, 1],
+                [0, 4.5, 1],
+                [9.1, 1.1, 1],
+                [3.0, 5.6, 2],
+                [4.3, 11.2, 2],
+                [9.4, 0.1, 1],
+                [1.8, 0.8, 2],
+                [11.6, 2.3, 1],
+                [5.6, 6.6, 1],
+                [3.2, 8.9, 2],
+                [3.4, 1.2, 2]
+            ],
+            columns=['species1', 'species2', 'group'],
+            index=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7', 'sample8', 'sample9',
+                   'sample10', 'sample11', 'sample12'],
+        )
+        ins = GroupScatterGraph(tested_object)
+        tested_fig = ins.plot_one_graph(
+            first_col="species1", second_col='species2',
+            group_col='group',
+            q_confel=0.95, show=False)
+
+        self.assertEqual(len(tested_fig.data), 4)   # 2 groups + 2 ellipses (one for each group)
+
+        # first group = '2'
+        self.assertEqual(tested_fig.data[0].name, '2')
+        self.assertEqual(tested_fig.data[0].marker.color, '#A63A50')
+        # ... and its associated ellipse
+        self.assertEqual(tested_fig.data[1].hovertext, 'Ellipse 2 [95% confidence]')
+        self.assertEqual(tested_fig.data[1].line, go.scatter.Line({'color': '#A63A50', 'dash': 'dot'}))
+
+        # second/last group = '1'
+        self.assertEqual(tested_fig.data[2].name, '1')
+        self.assertEqual(tested_fig.data[2].marker.color, '#FFBF00')
+        # ... and its associated ellipse
+        self.assertEqual(tested_fig.data[3].hovertext, 'Ellipse 1 [95% confidence]')
+        self.assertEqual(tested_fig.data[3].line, go.scatter.Line({'color': '#FFBF00', 'dash': 'dot'}))
+
+    def test_plot_one_graph_confidence_ellipse_group_col2(self):
+        tested_object = pd.DataFrame(
+            [
+                [1, 9.3, 'F', 2],
+                [12.1, 2.2, 'M', 1],
+                [0, 4.5, 'F', 1],
+                [9.1, 1.1, 'M', 1],
+                [3.0, 5.6, 'M', 2],
+                [4.3, 11.2, 'F', 2],
+                [9.4, 0.1, 'F', 1],
+                [1.8, 0.8, 'M', 2],
+                [11.6, 2.3, 'M', 1],
+                [5.6, 6.6, 'F', 1],
+                [3.2, 8.9, 'F', 2],
+                [3.4, 1.2, 'M', 2]
+            ],
+            columns=['species1', 'species2', 'sex', 'group'],
+            index=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7', 'sample8', 'sample9',
+                   'sample10', 'sample11', 'sample12'],
+        )
+        ins = GroupScatterGraph(tested_object)
+        tested_fig = ins.plot_one_graph(
+            first_col="species1", second_col='species2',
+            group_col2='group', group_col='sex',
+            q_confel=0.95, show=False)
+
+        self.assertEqual(len(tested_fig.data), 8)   # 4 groups + 4 ellipses (one for each group)
+
+        # first group = 'F - 2' (sex = 'F'; group = 2)
+        self.assertEqual(tested_fig.data[0].name, 'F - 2')
+        self.assertEqual(tested_fig.data[0].marker, go.scatter.Marker({'color': '#A63A50', 'symbol': 0}))
+        # ... and its associated ellipse
+        self.assertEqual(tested_fig.data[1].hovertext, 'Ellipse F - 2 [95% confidence]')
+        self.assertEqual(tested_fig.data[1].line, go.scatter.Line({'color': '#A63A50', 'dash': 'dot'}))
+
+        # last group = 'M - 1'
+        self.assertEqual(tested_fig.data[6].name, 'M - 1')
+        self.assertEqual(tested_fig.data[6].marker, go.scatter.Marker({'color': '#FFBF00', 'symbol': 1}))
+        # ... and its associated ellipse
+        self.assertEqual(tested_fig.data[7].hovertext, 'Ellipse M - 1 [95% confidence]')
+        self.assertEqual(tested_fig.data[7].line, go.scatter.Line({'color': '#FFBF00', 'dash': 'dash'}))
 
 
 class TestGroupScatter3DGraph(TestCase):

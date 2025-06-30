@@ -153,7 +153,7 @@ because only one sample in that group")
                                 # computing the data to trace the ellipse of confidence
                                 ell = self._confidence_ellipse(
                                     filtered_df[first_col], filtered_df[second_col],
-                                    q_confidence=q_confel, n_points=100
+                                    q_confidence=q_confel, n_points=kwargs.get("n_points", 100)
                                 )
 
                                 # adding the ellipse of confidence to the figure
@@ -187,7 +187,7 @@ because only one sample in that group")
                     else:
                         ell = self._confidence_ellipse(
                             filtered_df[first_col], filtered_df[second_col],
-                            q_confidence=q_confel, n_points=100
+                            q_confidence=q_confel, n_points=kwargs.get("n_points", 100)
                         )
                         fig.add_trace(go.Scatter(
                             x=ell[0], y=ell[1],
