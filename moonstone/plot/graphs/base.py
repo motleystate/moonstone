@@ -6,7 +6,6 @@ import pandas as pd
 import plotly.io
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.validators.scatter.marker import SymbolValidator
 
 import logging
 
