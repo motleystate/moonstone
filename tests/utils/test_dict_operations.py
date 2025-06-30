@@ -1,9 +1,9 @@
 from unittest import TestCase
 
 from moonstone.utils.dict_operations import (
-    merge_dict,
     filter_dict,
     flatten_dict,
+    merge_dict,
     search_for_key_in_entangled_dictionaries,
     super_pop
 )
@@ -49,6 +49,7 @@ class TestMergeDict(TestCase):
 
 
 class TestFilterDict(TestCase):
+
     def test_with_raisingwarning_keys(self):
         old_dic = {"ananas": 3, "banana": 4, "coconut": 7, "durian": 6}
         authorized_keys = ["ananas", "coconut"]

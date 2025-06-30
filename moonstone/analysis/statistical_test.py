@@ -210,7 +210,7 @@ def _compute_contingency_table(
         # crosstab doesn't count np.nan as a value
         # so we need to change it to a string for those values to appear in the contingency table
         binned_series = binned_series.cat.add_categories("NaN")
-        binned_series.fillna("NaN", inplace=True)
+        binned_series = binned_series.fillna("NaN")
     # creation of the contingency table
     tab = pd.crosstab(binned_series, categorical_series)  # rows -> numerical_series; columns -> categorical_series
     if (

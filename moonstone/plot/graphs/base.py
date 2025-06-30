@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.io
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.validators.scatter.marker import SymbolValidator
 
 import logging
 
@@ -225,7 +226,7 @@ class GroupBaseGraph(BaseGraph):
                     # txt_symbols.remove(i)
                 else:
                     # raise error
-                    error_message = f"Invalid symbol values: {txt_symbols}.\n\
+                    error_message = f"Invalid symbol values among: {txt_symbols}.\n\
 Accepted values: {', '.join(self.DICTIONARY_PLOTLY_MARKER_SYMBOLS.keys())}"
                     raise ValueError(error_message)
         return set(translated_symbols)

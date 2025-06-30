@@ -664,7 +664,6 @@ image")
                 filtered_metadata_df[group_col2].astype(str)
             )
             df = self._get_grouped_df(filtered_metadata_df[[group_col, group_col2, final_group_col]])
-
             if pval_to_compute == "all":
                 pval = self._run_statistical_test_groups(
                     df, final_group_col, stats_test, correction_method, infct_structure_pval, infct_sym
