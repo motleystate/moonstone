@@ -149,8 +149,12 @@ class TestSeriesBinning(TestCase):
         self.assertListEqual(tested_object_instance.bins_values, expected_object)
 
     def test_compute_binned_data_giving_bins_values(self):
-        series = pd.Series([5, 8, 10], index=["i1", "i2", "i3"])
-        expected_object = pd.Series([1, 2], index=["]0, 5]", "]5, 10]"])
+        series = pd.Series(
+            [5, 8, 10], index=['i1', 'i2', 'i3']
+        )
+        expected_object = pd.Series(
+            [1, 2], index=[']0, 5]', ']5, 10]']
+        )
         expected_object.name = "count"
         tested_object_instance = SeriesBinning(series)
         tested_object_instance.bins_values = [0, 5, 10]

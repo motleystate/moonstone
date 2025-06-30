@@ -3,7 +3,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from moonstone.utils.df_reindex import GenesToTaxonomy
+from moonstone.utils.pandas.df_reindex import GenesToTaxonomy
 
 
 class TestGenesToTaxonomy(TestCase):

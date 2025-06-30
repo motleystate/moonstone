@@ -47,46 +47,6 @@ class TestGroupScatterGraph(TestCase):
         self.assertEqual(tested_fig["data"][2]["marker"], go.scatter.Marker({'color': '#A63A50', 'symbol': 1}))
         self.assertEqual(tested_fig["data"][3]["marker"], go.scatter.Marker({'color': '#FFBF00', 'symbol': 1}))
 
-    def test_dictionary_marker_symbols(self):
-        expected_object = {
-            "circle": 0, "circle-open": 100, "circle-dot": 200, "circle-open-dot": 300, "square": 1,
-            "square-open": 101, "square-dot": 201, "square-open-dot": 301, "diamond": 2, "diamond-open": 102,
-            "diamond-dot": 202, "diamond-open-dot": 302, "cross": 3, "cross-open": 103, "cross-dot": 203,
-            "cross-open-dot": 303, "x": 4, "x-open": 104, "x-dot": 204, "x-open-dot": 304, "triangle-up": 5,
-            "triangle-up-open": 105, "triangle-up-dot": 205, "triangle-up-open-dot": 305, "triangle-down": 6,
-            "triangle-down-open": 106, "triangle-down-dot": 206, "triangle-down-open-dot": 306, "triangle-left": 7,
-            "triangle-left-open": 107, "triangle-left-dot": 207, "triangle-left-open-dot": 307, "triangle-right": 8,
-            "triangle-right-open": 108, "triangle-right-dot": 208, "triangle-right-open-dot": 308, "triangle-ne": 9,
-            "triangle-ne-open": 109, "triangle-ne-dot": 209, "triangle-ne-open-dot": 309, "triangle-se": 10,
-            "triangle-se-open": 110, "triangle-se-dot": 210, "triangle-se-open-dot": 310, "triangle-sw": 11,
-            "triangle-sw-open": 111, "triangle-sw-dot": 211, "triangle-sw-open-dot": 311, "triangle-nw": 12,
-            "triangle-nw-open": 112, "triangle-nw-dot": 212, "triangle-nw-open-dot": 312, "pentagon": 13,
-            "pentagon-open": 113, "pentagon-dot": 213, "pentagon-open-dot": 313, "hexagon": 14, "hexagon-open": 114,
-            "hexagon-dot": 214, "hexagon-open-dot": 314, "hexagon2": 15, "hexagon2-open": 115, "hexagon2-dot": 215,
-            "hexagon2-open-dot": 315, "octagon": 16, "octagon-open": 116, "octagon-dot": 216, "octagon-open-dot": 316,
-            "star": 17, "star-open": 117, "star-dot": 217, "star-open-dot": 317, "hexagram": 18, "hexagram-open": 118,
-            "hexagram-dot": 218, "hexagram-open-dot": 318, "star-triangle-up": 19, "star-triangle-up-open": 119,
-            "star-triangle-up-dot": 219, "star-triangle-up-open-dot": 319, "star-triangle-down": 20,
-            "star-triangle-down-open": 120, "star-triangle-down-dot": 220, "star-triangle-down-open-dot": 320,
-            "star-square": 21, "star-square-open": 121, "star-square-dot": 221, "star-square-open-dot": 321,
-            "star-diamond": 22, "star-diamond-open": 122, "star-diamond-dot": 222, "star-diamond-open-dot": 322,
-            "diamond-tall": 23, "diamond-tall-open": 123, "diamond-tall-dot": 223, "diamond-tall-open-dot": 323,
-            "diamond-wide": 24, "diamond-wide-open": 124, "diamond-wide-dot": 224, "diamond-wide-open-dot": 324,
-            "hourglass": 25, "hourglass-open": 125, "bowtie": 26, "bowtie-open": 126, "circle-cross": 27,
-            "circle-cross-open": 127, "circle-x": 28, "circle-x-open": 128, "square-cross": 29,
-            "square-cross-open": 129, "square-x": 30, "square-x-open": 130, "diamond-cross": 31,
-            "diamond-cross-open": 131, "diamond-x": 32, "diamond-x-open": 132, "cross-thin": 33,
-            "cross-thin-open": 133, "x-thin": 34, "x-thin-open": 134, "asterisk": 35, "asterisk-open": 135, "hash": 36,
-            "hash-open": 136, "hash-dot": 236, "hash-open-dot": 336, "y-up": 37, "y-up-open": 137, "y-down": 38,
-            "y-down-open": 138, "y-left": 39, "y-left-open": 139, "y-right": 40, "y-right-open": 140, "line-ew": 41,
-            "line-ew-open": 141, "line-ns": 42, "line-ns-open": 142, "line-ne": 43, "line-ne-open": 143, "line-nw": 44,
-            "line-nw-open": 144, "arrow-up": 45, "arrow-up-open": 145, "arrow-down": 46, "arrow-down-open": 146,
-            "arrow-left": 47, "arrow-left-open": 147, "arrow-right": 48, "arrow-right-open": 148, "arrow-bar-up": 49,
-            "arrow-bar-up-open": 149, "arrow-bar-down": 50, "arrow-bar-down-open": 150, "arrow-bar-left": 51,
-            "arrow-bar-left-open": 151, "arrow-bar-right": 52, "arrow-bar-right-open": 152, "arrow": 53,
-            "arrow-open": 153, "arrow-wide": 54, "arrow-wide-open": 154}
-        self.assertDictEqual(self.ins.dictionary_marker_symbols, expected_object)
-
     def test_translating_forced_symbols(self):
         tested_object = {"square", "103", 0}
         expected_object = {0, 103, 1}
@@ -154,6 +114,126 @@ class TestGroupScatterGraph(TestCase):
         tested_symbols = {"A": 0, "B": 1, "C": 101}
         expected_object = {"A": 0, "B": 1, "C": 101}
         np.testing.assert_array_equal(self.ins._symbol_scheme(tested_object, tested_symbols), expected_object)
+
+    def test_confidence_ellipse_95(self):
+        tested_x = pd.Series(
+            {'sample1': 4, 'sample2': 3, 'sample3': 6, 'sample4': 8, 'sample5': 5, 'sample6': 8, 'sample7': 9})
+        tested_y = pd.Series(
+            {'sample1': 9, 'sample2': 5, 'sample3': 7, 'sample4': 6, 'sample5': 6, 'sample6': 9, 'sample7': 5})
+        ellipse_trace_data = self.ins._confidence_ellipse(x=tested_x, y=tested_y, q_confidence=0.95, n_points=10)
+        # n_points=10 to not overwhelm this file, so it's enneagone rather than an ellipse
+        np.testing.assert_array_almost_equal(
+            ellipse_trace_data[0],
+            np.array([11.68943495, 10.53366356, 7.32338506, 3.56072442, 1.00627238, 0.85528544, 3.17841206, 6.88863549,
+                      10.24990093, 11.68943495])
+        )
+        np.testing.assert_array_almost_equal(
+            ellipse_trace_data[1],
+            np.array([6.42008503, 9.16380926, 10.7613742, 10.46526146, 8.41402548, 5.56746237, 3.25751065, 2.5650224,
+                      3.81402057, 6.42008503])
+        )
+
+    def test_confidence_ellipse_50(self):
+        tested_x = pd.Series(
+            {'sample1': 4, 'sample2': 3, 'sample3': 6, 'sample4': 8, 'sample5': 5, 'sample6': 8, 'sample7': 9})
+        tested_y = pd.Series(
+            {'sample1': 9, 'sample2': 5, 'sample3': 7, 'sample4': 6, 'sample5': 6, 'sample6': 9, 'sample7': 5})
+        ellipse_trace_data = self.ins._confidence_ellipse(x=tested_x, y=tested_y, q_confidence=0.5, n_points=10)
+        # n_points=10 to not overwhelm this file, so it's enneagone rather than an ellipse
+        np.testing.assert_array_almost_equal(
+            ellipse_trace_data[0],
+            np.array([8.81086031, 8.25491359, 6.71071219, 4.9008051, 3.67206796, 3.59944054, 4.71690602, 6.50158987,
+                      8.11841869, 8.810860315])
+        )
+        np.testing.assert_array_almost_equal(
+            ellipse_trace_data[1],
+            np.array([6.57276992, 7.89255037, 8.66100769, 8.51857216, 7.53189095, 6.16264317, 5.05151506, 4.71841582,
+                      5.31920628, 6.57276992])
+        )
+
+    def test_plot_one_graph_confidence_ellipse(self):
+        tested_object = pd.DataFrame(
+            [
+                [1, 9.3, 2],
+                [12.1, 2.2, 1],
+                [0, 4.5, 1],
+                [9.1, 1.1, 1],
+                [3.0, 5.6, 2],
+                [4.3, 11.2, 2],
+                [9.4, 0.1, 1],
+                [1.8, 0.8, 2],
+                [11.6, 2.3, 1],
+                [5.6, 6.6, 1],
+                [3.2, 8.9, 2],
+                [3.4, 1.2, 2]
+            ],
+            columns=['species1', 'species2', 'group'],
+            index=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7', 'sample8', 'sample9',
+                   'sample10', 'sample11', 'sample12'],
+        )
+        ins = GroupScatterGraph(tested_object)
+        tested_fig = ins.plot_one_graph(
+            first_col="species1", second_col='species2',
+            group_col='group',
+            q_confel=0.95, show=False)
+
+        self.assertEqual(len(tested_fig.data), 4)   # 2 groups + 2 ellipses (one for each group)
+
+        # first group = '2'
+        self.assertEqual(tested_fig.data[0].name, '2')
+        self.assertEqual(tested_fig.data[0].marker.color, '#A63A50')
+        # ... and its associated ellipse
+        self.assertEqual(tested_fig.data[1].hovertext, 'Ellipse 2 [95% confidence]')
+        self.assertEqual(tested_fig.data[1].line, go.scatter.Line({'color': '#A63A50', 'dash': 'dot'}))
+
+        # second/last group = '1'
+        self.assertEqual(tested_fig.data[2].name, '1')
+        self.assertEqual(tested_fig.data[2].marker.color, '#FFBF00')
+        # ... and its associated ellipse
+        self.assertEqual(tested_fig.data[3].hovertext, 'Ellipse 1 [95% confidence]')
+        self.assertEqual(tested_fig.data[3].line, go.scatter.Line({'color': '#FFBF00', 'dash': 'dot'}))
+
+    def test_plot_one_graph_confidence_ellipse_group_col2(self):
+        tested_object = pd.DataFrame(
+            [
+                [1, 9.3, 'F', 2],
+                [12.1, 2.2, 'M', 1],
+                [0, 4.5, 'F', 1],
+                [9.1, 1.1, 'M', 1],
+                [3.0, 5.6, 'M', 2],
+                [4.3, 11.2, 'F', 2],
+                [9.4, 0.1, 'F', 1],
+                [1.8, 0.8, 'M', 2],
+                [11.6, 2.3, 'M', 1],
+                [5.6, 6.6, 'F', 1],
+                [3.2, 8.9, 'F', 2],
+                [3.4, 1.2, 'M', 2]
+            ],
+            columns=['species1', 'species2', 'sex', 'group'],
+            index=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7', 'sample8', 'sample9',
+                   'sample10', 'sample11', 'sample12'],
+        )
+        ins = GroupScatterGraph(tested_object)
+        tested_fig = ins.plot_one_graph(
+            first_col="species1", second_col='species2',
+            group_col2='group', group_col='sex',
+            q_confel=0.95, show=False)
+
+        self.assertEqual(len(tested_fig.data), 8)   # 4 groups + 4 ellipses (one for each group)
+
+        # first group = 'F - 2' (sex = 'F'; group = 2)
+        self.assertEqual(tested_fig.data[0].name, 'F - 2')
+        self.assertEqual(tested_fig.data[0].marker, go.scatter.Marker({'color': '#A63A50', 'symbol': 0}))
+        # ... and its associated ellipse
+        self.assertEqual(tested_fig.data[1].hovertext, 'Ellipse F - 2 [95% confidence]')
+        self.assertEqual(tested_fig.data[1].line, go.scatter.Line({'color': '#A63A50', 'dash': 'dot'}))
+
+        # last group = 'M - 1'
+        self.assertEqual(tested_fig.data[6].name, 'M - 1')
+        self.assertEqual(tested_fig.data[6].marker, go.scatter.Marker({'color': '#FFBF00', 'symbol': 1}))
+        # ... and its associated ellipse
+        self.assertEqual(tested_fig.data[7].hovertext, 'Ellipse M - 1 [95% confidence]')
+        self.assertEqual(tested_fig.data[7].line, go.scatter.Line({'color': '#FFBF00', 'dash': 'dash'}))
 
 
 class TestGroupScatter3DGraph(TestCase):

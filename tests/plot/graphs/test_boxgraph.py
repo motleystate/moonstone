@@ -125,8 +125,8 @@ set to default (v).", log.output)
     def test_with_group_col2_with_groups_and_groups2(self):
         tested_df = pd.DataFrame(
             [
-                [1.0, "M", "A"],
-                [3.0, "F", "B"],
+                [1.0, "F", "B"],
+                [3.0, "F", "C"],
                 [9.0, "M", "A"],
                 [6.0, "M", "B"],
                 [2.0, "F", "A"],
@@ -135,7 +135,7 @@ set to default (v).", log.output)
                 [6.0, "M", "B"],
                 [8.0, "M", "C"],
                 [5.0, "F", "C"],
-                [7.0, "M", "C"],
+                [7.0, "M", "A"],
             ],
             index=[
                 "sample1", "sample2", "sample3", "sample4", "sample5",
@@ -144,12 +144,12 @@ set to default (v).", log.output)
             ],
             columns=["data", "sex", "group"],
         )
-        groups = ["F", "M"]    # change order
+        groups = ["M", "F"]    # change order
         groups2 = ["A", "B"]   # don't show group "C" (+ dictate order)
-        expected_x_gpA = ['F', 'F', 'M', 'M']
-        expected_y_gpA = [2.0, 4.0, 1.0, 9.0]
-        expected_x_gpB = ['F', 'M', 'M', 'M']
-        expected_y_gpB = [3.0, 6.0, 2.0, 6.0]
+        expected_x_gpA = ['M', 'M', 'F', 'F']
+        expected_y_gpA = [9.0, 7.0, 2.0, 4.0]
+        expected_x_gpB = ['M', 'M', 'M', 'F']
+        expected_y_gpB = [6.0, 2.0, 6.0, 1.0]
         plot = GroupBoxGraph(tested_df)
         tested_graph = plot.plot_one_graph(
             data_col="data", group_col="sex", group_col2="group",

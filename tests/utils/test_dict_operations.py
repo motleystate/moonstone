@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from moonstone.utils.dict_operations import (
     filter_dict,
-    merge_dict,
     flatten_dict,
+    merge_dict,
     search_for_key_in_entangled_dictionaries,
     super_pop
 )

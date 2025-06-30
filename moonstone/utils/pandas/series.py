@@ -144,7 +144,7 @@ class SeriesBinning:
 
     @bins_values.setter
     def bins_values(self, bins_values):
-        if type(bins_values) is list and check_list_type(
+        if isinstance(bins_values, list) and check_list_type(
             bins_values, (int, float, np.integer)
         ):
             self._bins_values = bins_values

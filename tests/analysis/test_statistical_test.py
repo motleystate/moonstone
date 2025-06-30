@@ -154,8 +154,8 @@ class TestStatisticalTestFunction(TestCase):
                 )
         else:
             stat, pval = mann_whitney_u(
-                    self.test_df.iloc[:2], self.test_df.iloc[2:], nan_policy="propagate"
-                )
+                self.test_df.iloc[:2], self.test_df.iloc[2:], nan_policy="propagate"
+            )
 
         self.assertEqual(stat, 4.0)
         self.assertEqual(pval, 0.7670968684102772)

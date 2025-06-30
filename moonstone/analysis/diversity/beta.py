@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Union
 
 import numpy as np
+from packaging import version
 import pandas as pd
 import plotly.graph_objects as go
 import skbio.diversity
@@ -97,7 +98,7 @@ class BetaDiversity(DiversityBase, ABC):
         return pd.concat(df_list).dropna()
 
     def _get_grouped_df(self, metadata_df):
-        if type(metadata_df) is pd.core.series.Series:
+        if isinstance(metadata_df, pd.Series):
             return self._get_grouped_df_series(metadata_df)
         else:
             return self._get_grouped_df_dataframe(metadata_df)
@@ -226,8 +227,10 @@ class BetaDiversity(DiversityBase, ABC):
         mode: str = 'scatter',
         proportions: bool = False, x_pc: int = 1, y_pc: int = 2, z_pc: int = 3,
         show: bool = True, output_file: Union[bool, str] = False,
-        colors: dict = None, groups: list = None, groups2: list = None,
+        colors: dict = None, symbols: dict = None,
+        groups: list = None, groups2: list = None,
         n_biplot_features: int = 0, plotting_options: dict = None,
+        q_confel: float = 0,
     ):
         """
         Args:
@@ -236,7 +239,13 @@ class BetaDiversity(DiversityBase, ABC):
             group_col2: (optional) column from metadata_df to use for.
             mode: type of graph to visualize the PCoA. { 'scatter' (default), 'scatter3d' }.
             proportions: write proportion explained for each PC in the x/y labels.
-            n_biplot_features: add arrows showing the n most explanatory features per axis direction
+            colors: dictionary to impose specific colors to one or more groups of group_col.
+            symbols: dictionary to impose specific symbols to one or more groups of group_col2.
+            groups: select specific groups to display among group_col.
+            groups2: select specific groups to display among group_col2.
+            n_biplot_features: add arrows showing the n most explanatory features per axis direction.
+            q_confel: proportion (between 0 and 1) of confidence intervals to represent with ellipses on the graph.
+              NB: 0 = no ellipse. Only available with mode="scatter" (2D).
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
         if group_col2:
@@ -282,6 +291,9 @@ class BetaDiversity(DiversityBase, ABC):
             )
             graph = GroupScatter3DGraph(df)
             args_for_plot = [xvar, yvar, zvar, group_col]
+            if q_confel != 0:
+                logger.info("Ellipses are not available for mode='scatter3d' (yet).")
+                # @TODO: eventually try to compute ellipse of confidence for 3D plot
         fig = graph.plot_one_graph(
             *args_for_plot,
             group_col2=group_col2,
@@ -289,8 +301,10 @@ class BetaDiversity(DiversityBase, ABC):
             show=tmp_show,
             output_file=tmp_output_file,
             colors=colors,
+            symbols=symbols,
             groups=groups,
-            groups2=groups2
+            groups2=groups2,
+            q_confel=q_confel
         )
 
         if n_biplot_features > 0:
@@ -344,16 +358,21 @@ class WeightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
             if not self.force_computation:
                 raise RuntimeError(f"INCOMPLETE TREE: missing {missing_ids}.")
             else:
-                #logger.warning(f"INCOMPLETE TREE: missing {missing_ids}.\n\
-#Computation of the Weighted UniFrac diversity using only the OTU IDs present in the Tree.")
                 warn_once(logger, f"INCOMPLETE TREE: missing {missing_ids}.\n\
 Computation of the Weighted UniFrac diversity using only the OTU IDs present in the Tree.")
                 otu_ids = list(set(otu_ids) - set(missing_ids))
 
-        return skbio.diversity.beta_diversity(
-            "weighted_unifrac", df.loc[otu_ids].transpose(), df.columns,
-            validate=self.validate, otu_ids=otu_ids, tree=self.tree,
-            )
+        skbio_version = version.parse(skbio.__version__)
+        if skbio_version >= version.parse("0.6.0"):
+            return skbio.diversity.beta_diversity(
+                "weighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
+                validate=self.validate, taxa=otu_ids, tree=self.tree,
+                )
+        else:
+            return skbio.diversity.beta_diversity(
+                "weighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
+                validate=self.validate, otu_ids=otu_ids, tree=self.tree,
+                )
 
 
 class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
@@ -373,7 +392,15 @@ class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
 Computation of the Unweighted UniFrac diversity using only the OTU IDs present in the Tree.")
                 otu_ids = list(set(otu_ids) - set(missing_ids))
 
-        return skbio.diversity.beta_diversity(
-            "unweighted_unifrac", df.loc[otu_ids].transpose(), df.columns,
-            validate=self.validate, otu_ids=otu_ids, tree=self.tree,
-            )
+        # df = counts dataframe
+        skbio_version = version.parse(skbio.__version__)
+        if skbio_version >= version.parse("0.6.0"):
+            return skbio.diversity.beta_diversity(
+                "unweighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
+                validate=self.validate, taxa=otu_ids, tree=self.tree,
+                )
+        else:
+            return skbio.diversity.beta_diversity(
+                "unweighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
+                validate=self.validate, otu_ids=otu_ids, tree=self.tree,
+                )

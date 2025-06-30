@@ -1,7 +1,10 @@
+import itertools
 import logging
-from typing import Union
-
+import numpy as np
+from numpy.linalg import eig
 import plotly.graph_objects as go
+from scipy.stats import chi2
+from typing import Union
 
 from moonstone.plot.graphs.base import BaseGraph, GroupBaseGraph
 
@@ -60,6 +63,31 @@ class GroupScatterGraph(GroupBaseGraph):
             marker=marker,
         )
 
+    def _confidence_ellipse(
+        self, x, y, q_confidence: float = 0.95, n_points: int = 100
+    ):
+        """
+        Args:
+            x: array of the x data.
+            y: array of the y data.
+            q_confidence: proportion (between 0 and 1) of confidence of the desired ellipses.
+            n_points: number of points to trace the ellipse. It will change the smoothness of the curve,
+              but not it's shape or size.
+        """
+        cov = np.cov(x, y)
+        mean = np.mean(x), np.mean(y)
+        vals, vecs = eig(cov)
+        order = vals.argsort()[::-1]
+        vals, vecs = vals[order], vecs[:, order]
+
+        theta = np.linspace(0, 2*np.pi, n_points)
+        unit_circle = np.array([np.cos(theta), np.sin(theta)])
+        scale = np.sqrt(chi2.ppf(q_confidence, df=2))
+        ellipse = vecs @ np.diag(np.sqrt(vals)) @ unit_circle * scale
+        ellipse[0, :] += mean[0]
+        ellipse[1, :] += mean[1]
+        return ellipse
+
     def plot_one_graph(
         self,
         first_col: str,
@@ -73,12 +101,21 @@ class GroupScatterGraph(GroupBaseGraph):
         symbols: dict = None,
         groups: list = None,
         groups2: list = None,
+        q_confel: float = 0,
         **kwargs
     ) -> go.Figure:
         """
-        :param first_col: col name for x data
-        :param second_col: col name for y data
-        :param group_col: column used to group data
+        Args:
+            first_col: col name for x data.
+            second_col: col name for y data.
+            group_col: column used to group data (differentiated by color).
+            group_col2: second columns used to group data (differentiated by symbols).
+            colors: dictionary to impose specific colors to one or more groups of group_col.
+            symbols: dictionary to impose specific symbols to one or more groups of group_col2.
+            groups: select specific groups to display among group_col.
+            groups2: select specific groups to display among group_col2.
+            q_confel: proportion (between 0 and 1) of confidence intervals to represent with ellipses on the graph.
+              NB: 0 = no ellipse.
         """
         if groups is None:
             groups = list(self.data[group_col].unique())
@@ -91,7 +128,9 @@ class GroupScatterGraph(GroupBaseGraph):
 
         if group_col2:
             dic_symbol = self._symbol_scheme(groups2, symbols)
-            for gp2 in groups2:
+            for gp2, linetype in zip(
+                groups2, itertools.cycle(["dot", "dash", "dashdot", "longdash", "longdashdot", "solid"])
+            ):
                 gp2_filtered_df = self.data[self.data[group_col2] == gp2]
                 for gp1 in groups:
                     filtered_df = gp2_filtered_df[gp2_filtered_df[group_col] == gp1]
@@ -106,6 +145,27 @@ class GroupScatterGraph(GroupBaseGraph):
                                 marker=dict(symbol=dic_symbol[gp2]),
                             )
                         )
+                        if bool(q_confel):
+                            if filtered_df.shape[0] < 2:
+                                logger.warning(f"Cannot compute an ellipse of confidence for group {gp1} - {gp2}, \
+because only one sample in that group")
+                            else:
+                                # computing the data to trace the ellipse of confidence
+                                ell = self._confidence_ellipse(
+                                    filtered_df[first_col], filtered_df[second_col],
+                                    q_confidence=q_confel, n_points=kwargs.get("n_points", 100)
+                                )
+
+                                # adding the ellipse of confidence to the figure
+                                fig.add_trace(go.Scatter(
+                                    x=ell[0], y=ell[1],
+                                    mode='lines',
+                                    name=f'Ellipse {gp1} - {gp2}',
+                                    line=dict(color=self._get_group_color(gp1, colors), dash=linetype),
+                                    showlegend=False,
+                                    hovertext=f'Ellipse {gp1} - {gp2} [{int(q_confel*100)}% confidence]',
+                                    hoverinfo="text",
+                                ))
         else:       # = if group_col2 is None
             for group in groups:
                 filtered_df = self.data[self.data[group_col] == group]
@@ -120,6 +180,24 @@ class GroupScatterGraph(GroupBaseGraph):
                         # is already supposed to get the stuff done
                     )
                 )
+                if bool(q_confel):
+                    if filtered_df.shape[0] < 2:
+                        logger.warning(f"Cannot compute an ellipse of confidence for group {group}, \
+because only one sample in that group")
+                    else:
+                        ell = self._confidence_ellipse(
+                            filtered_df[first_col], filtered_df[second_col],
+                            q_confidence=q_confel, n_points=kwargs.get("n_points", 100)
+                        )
+                        fig.add_trace(go.Scatter(
+                            x=ell[0], y=ell[1],
+                            mode='lines',
+                            name=f'Ellipse {group}',
+                            line=dict(color=self._get_group_color(group, colors), dash="dot"),
+                            showlegend=False,
+                            hovertext=f'Ellipse {group} [{int(q_confel*100)}% confidence]',
+                            hoverinfo="text",
+                        ))
 
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)
@@ -203,11 +281,20 @@ class GroupScatter3DGraph(GroupBaseGraph):
         **kwargs
     ) -> go.Figure:
         """
-        :param first_col: col name for x data
-        :param second_col: col name for y data
-        :param third_col: col name for z data
-        :param group_col: column used to group data
+        Args:
+            first_col: col name for x data
+            second_col: col name for y data
+            third_col: col name for z data
+            group_col: column used to group data (differentiated by color).
+            group_col2: second columns used to group data (differentiated by symbols).
+            colors: dictionary to impose specific colors to one or more groups of group_col.
+            symbols: dictionary to impose specific symbols to one or more groups of group_col2.
+            groups: select specific groups to display among group_col.
+            groups2: select specific groups to display among group_col2.
         """
+        kwargs.pop("q_confel", None)
+        # @TODO: eventually try to compute ellipse of confidence for 3D plot
+
         if groups is None:
             groups = list(self.data[group_col].unique())
         if colors is None:
