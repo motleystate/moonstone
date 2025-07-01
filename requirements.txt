@@ -40,7 +40,7 @@ kiwisolver>=1.2.0
     # via matplotlib
 lockfile>=0.12.2
     # via scikit-bio
-matplotlib>=3.3.0
+matplotlib>=3.10.0
     # via
     #   moonstone (setup.py)
     #   scikit-bio
@@ -48,7 +48,7 @@ msgpack>=1.0.0
     # via cachecontrol
 natsort>=7.0.1
     # via scikit-bio
-numpy>=1.24.3
+numpy>=1.26.4
     # via
     #   hdmedians
     #   matplotlib
@@ -106,7 +106,7 @@ scikit-learn>=1.3.1
     # via
     #   moonstone (setup.py)
     #   scikit-bio
-scipy>=1.9.0
+scipy>=1.9.0,<1.16.0
     # via
     #   scikit-bio
     #   scikit-learn
