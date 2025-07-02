@@ -263,67 +263,48 @@ class TestPlotTaxonomyCounts(TestCase):
             expected_df,
         )
 
-    def test_prevalence_series(self):
-        expected_ser = pd.Series(
-            {
-                (
-                    "Bacteria",
-                    "Actinobacteria",
-                    "Actinobacteria",
-                    "Actinomycetales",
-                    "Actinomycetaceae",
-                    "Actinobaculum",
-                    "Actinobaculum_massiliense",
-                ): 50.0,
-                (
-                    "Bacteria",
-                    "Firmicutes",
-                    "Bacilli",
-                    "Lactobacillales",
-                    "Lactobacillaceae",
-                    "Lactobacillus",
-                    "Lactobacillus (genus)",
-                ): 75.0,
-                (
-                    "Bacteria",
-                    "Firmicutes",
-                    "Bacilli",
-                    "Lactobacillales",
-                    "Streptococcaceae",
-                    "Streptococcus",
-                    "Streptococcus (genus)",
-                ): 75.0,
-                (
-                    "Bacteria",
-                    "Firmicutes",
-                    "Bacilli",
-                    "Lactobacillales",
-                    "Streptococcaceae",
-                    "Streptococcus",
-                    "Streptococcus_thermophilus",
-                ): 100.0,
-                (
-                    "Bacteria",
-                    "Firmicutes",
-                    "Bacilli",
-                    "Lactobacillales",
-                    "Streptococcaceae",
-                    "Streptococcus",
-                    "Streptococcus_salivarius",
-                ): 75.0,
-            }
-        )
-        expected_ser.index.names = [
-            "kingdom",
-            "phylum",
-            "class",
-            "order",
-            "family",
-            "genus",
-            "species",
-        ]
+    def test_prevalence_series_species(self):
+        expected_ser = pd.Series({
+            "Actinobaculum_massiliense": 50.0,
+            "Lactobacillus (genus)": 75.0,
+            "Streptococcus (genus)": 75.0,
+            "Streptococcus_salivarius": 75.0,
+            "Streptococcus_thermophilus": 100.0,
+            })
+        expected_ser.index.name = "species"
         pd.testing.assert_series_equal(
-            self.tested_instance.prevalence_series,
+            self.tested_instance.compute_prevalence_series("species"),
+            expected_ser,
+        )
+    
+    def test_prevalence_series_genus(self):
+        tested_object = pd.DataFrame.from_dict({
+                ('genusA', 'species1'): [0, 4, 7, 5, 0, 1, 3, 0, 0, 0],
+                ('genusA', 'species2'): [1, 0, 2, 7, 2, 7, 0, 0, 1, 0],
+                ('genusB', 'species3'): [0, 0, 8, 4, 1, 3, 1, 0, 0, 0],
+                ('genusC', 'species4'): [0, 1, 4, 1, 0, 3, 1, 0, 0, 1],
+                ('genusC', 'species5'): [0, 3, 7, 9, 1, 5, 1, 0, 0, 0],
+                ('genusA', 'species6'): [1, 0, 5, 2, 0, 8, 0, 2, 1, 9],
+                ('genusC', 'species7'): [0, 0, 6, 8, 1, 6, 0, 0, 0, 0],
+                ('genusC', 'species8'): [0, 1, 2, 3, 2, 4, 1, 0, 2, 3],
+            },
+            orient='index', columns=['sample1', 'sample2', 'sample3', 'sample4', 'sample5', 'sample6', 'sample7',
+                                     'sample8', 'sample9', 'sample10']
+        )
+        tested_object.index = pd.MultiIndex.from_tuples(tested_object.index)
+        tested_object.index.names = ["genus", "species"]
+
+        expected_ser = pd.Series({
+            "genusA": 100.0,
+            "genusB": 50.0,
+            "genusC": 80.0
+        })
+        expected_ser.index.name = "genus"
+
+        tested_instance = PlotTaxonomyCounts(tested_object)
+
+        pd.testing.assert_series_equal(
+            tested_instance.compute_prevalence_series("genus"),
             expected_ser,
         )
 
