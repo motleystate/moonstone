@@ -13,17 +13,21 @@ class TestTaxonomyCountsBase(TestCase):
     def test_fill_none(self):
         taxa_df = pd.DataFrame(
             [
-                ['Bacteria', 'Bacteroidetes'],
-                ['Bacteria', None]
+                ['Bacteria', 'Bacillota', 'Bacilli'],
+                ['Bacteria', None, None],
+                ['Bacteria', 'Firmicutes', None],
+                ['Bacteria', None, 'Deltaproteobacteria']
             ],
-            columns=['kingdom', 'phylum']
+            columns=['kingdom', 'phylum', 'class']
         )
         expected_df = pd.DataFrame(
             [
-                ['Bacteria', 'Bacteroidetes'],
-                ['Bacteria', 'Bacteria (kingdom)']
+                ['Bacteria', 'Bacillota', 'Bacilli'],
+                ['Bacteria', 'Bacteria (kingdom)', 'Bacteria (kingdom)'],
+                ['Bacteria', 'Firmicutes', 'Firmicutes (phylum)'],
+                ['Bacteria', 'Bacteria (kingdom)', 'Deltaproteobacteria']
             ],
-            columns=['kingdom', 'phylum']
+            columns=['kingdom', 'phylum', 'class']
         )
         tested_df = self.taxonomy_instance._fill_none(taxa_df)
         pd.testing.assert_frame_equal(tested_df, expected_df)

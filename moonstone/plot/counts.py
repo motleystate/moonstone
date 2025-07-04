@@ -85,15 +85,9 @@ class PlotTaxonomyCounts:
         else:
             self.df = taxonomy_dataframe
 
-    def compute_prevalence_series(self) -> pd.Series:
-        return (self.df != 0).sum(axis=1) / self.df.shape[1] * 100
-
-    @property
-    def prevalence_series(self):
-        # call compute_prevalence_series and store into self._prevalence_series
-        if getattr(self, "_prevalence_series", None) is None:
-            self._prevalence_series = self.compute_prevalence_series()
-        return self._prevalence_series
+    def compute_prevalence_series(self, level) -> pd.Series:
+        df = self.df.groupby(level).sum()
+        return (df != 0).sum(axis=1) / df.shape[1] * 100
 
     def compute_relative_abundance_dataframe(self) -> pd.DataFrame:
         return self.df * 100 / self.df.sum()
@@ -287,7 +281,7 @@ class PlotTaxonomyCounts:
 
         mean_relab_ser_taxa = relab_df_taxa.mean(axis=1)
 
-        prev_ser_taxa = self.prevalence_series.groupby(taxa_level).mean()
+        prev_ser_taxa = self.compute_prevalence_series(taxa_level)
 
         top_ab = self._generate_list_species_to_plot(
             mean_relab_ser_taxa,
@@ -405,7 +399,7 @@ class PlotTaxonomyCounts:
         # if taxa is the lowest taxonomical level, it drops the higher taxonomical levels in index
         # MultiIndex -> (single) Index
 
-        prev_ser_taxa = self.prevalence_series.groupby(taxa_level).mean()
+        prev_ser_taxa = self.compute_prevalence_series(taxa_level)
 
         if what == "abundant":
             mean_relab_ser_taxa = relab_df_taxa.mean(axis=1)
@@ -524,10 +518,7 @@ of the cohort"
         ascending = bool(1 - ascending)
         title = ""
 
-        prev_ser_taxa = self.prevalence_series.groupby(taxa_level).mean()
-        # if taxa isn't the lowest taxonomical level, it sums up all counts of the same taxa
-        # if taxa is the lowest taxonomical level, it drops the higher taxonomical levels in index
-        # MultiIndex -> (single) Index
+        prev_ser_taxa = self.compute_prevalence_series(taxa_level)
 
         mean_counts_ser_taxa = self.df.groupby(taxa_level).sum().mean(axis=1)
 

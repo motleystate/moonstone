@@ -50,7 +50,7 @@ class GeometricMeanNormalization(BaseNormalization):
         return non_zero_dataf
 
     def log_df(self, df):
-        return df.applymap(lambda x: math.log(x, self.log_number))
+        return df.map(lambda x: math.log(x, self.log_number))
 
     @property
     def removed_zero_df(self):
