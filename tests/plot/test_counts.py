@@ -43,6 +43,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     4.2,
                     0.0,
                     2.0,
+                    0.0
                 ],
                 [
                     "Bacteria",
@@ -56,6 +57,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     16.0,
                     8.0,
                     9.0,
+                    1.0,
                 ],
                 [
                     "Bacteria",
@@ -69,6 +71,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     0.4,
                     0.0,
                     3.0,
+                    0.0
                 ],
                 [
                     "Bacteria",
@@ -82,6 +85,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     0.2,
                     0.7,
                     0.1,
+                    0.7,
                 ],
                 [
                     "Bacteria",
@@ -95,6 +99,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     1.2,
                     0.0,
                     2.3,
+                    0.0
                 ],
             ],
             columns=[
@@ -109,6 +114,7 @@ class TestPlotTaxonomyCounts(TestCase):
                 "SAMPLE_2",
                 "SAMPLE_3",
                 "SAMPLE_4",
+                "SAMPLE_5"
             ],
         )
         self.tested_object = self.tested_object.set_index(
@@ -140,9 +146,9 @@ class TestPlotTaxonomyCounts(TestCase):
         # -------------
         df_add = pd.DataFrame(
             data={
-                "SAMPLE_5": [0.0, 21.0, 1.4, 3.1, 0.0],
                 "SAMPLE_6": [1.0, 12.0, 0.0, 0.0, 0.0],
                 "SAMPLE_7": [0.0, 8.9, 0.0, 0.0, 1.3],
+                "SAMPLE_8": [0.0, 21.0, 1.4, 3.1, 0.0],
             },
             index=self.tested_object.index,
         )
@@ -158,6 +164,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     "SAMPLE_5": "no",
                     "SAMPLE_6": "no",
                     "SAMPLE_7": "yes",
+                    "SAMPLE_8": "no",
                 },
                 "GROUP": {
                     "SAMPLE_1": "A",
@@ -167,6 +174,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     "SAMPLE_5": "C",
                     "SAMPLE_6": "B",
                     "SAMPLE_7": "A",
+                    "SAMPLE_8": "C",
                 },
             }
         )
@@ -186,6 +194,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     19.090909,
                     0.0,
                     12.195122,
+                    0.0
                 ],
                 [
                     "Bacteria",
@@ -199,6 +208,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     72.727273,
                     91.954023,
                     54.878049,
+                    58.8235529
                 ],
                 [
                     "Bacteria",
@@ -212,6 +222,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     1.818182,
                     0.0,
                     18.292683,
+                    0.0
                 ],
                 [
                     "Bacteria",
@@ -225,6 +236,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     0.909091,
                     8.045977,
                     0.609756,
+                    41.176471
                 ],
                 [
                     "Bacteria",
@@ -238,6 +250,7 @@ class TestPlotTaxonomyCounts(TestCase):
                     5.454545,
                     0.0,
                     14.024390,
+                    0.0
                 ],
             ],
             columns=[
@@ -252,6 +265,7 @@ class TestPlotTaxonomyCounts(TestCase):
                 "SAMPLE_2",
                 "SAMPLE_3",
                 "SAMPLE_4",
+                "SAMPLE_5"
             ],
         )
         expected_df = expected_df.set_index(
@@ -265,10 +279,10 @@ class TestPlotTaxonomyCounts(TestCase):
 
     def test_prevalence_series_species(self):
         expected_ser = pd.Series({
-            "Actinobaculum_massiliense": 50.0,
-            "Lactobacillus (genus)": 75.0,
-            "Streptococcus (genus)": 75.0,
-            "Streptococcus_salivarius": 75.0,
+            "Actinobaculum_massiliense": 40.0,
+            "Lactobacillus (genus)": 80.0,
+            "Streptococcus (genus)": 60.0,
+            "Streptococcus_salivarius": 60.0,
             "Streptococcus_thermophilus": 100.0,
             })
         expected_ser.index.name = "species"
@@ -443,15 +457,15 @@ class TestPlotTaxonomyCounts(TestCase):
         taxa_level = "species"
         expected_df = pd.DataFrame(
             [
-                [61.111111, 5.454545, 0.0, 14.02439],
+                [14.814815, 0.909091, 8.045977, 0.609756, 41.176471],
             ],
-            index=["Streptococcus_salivarius"],
-            columns=["SAMPLE_1", "SAMPLE_2", "SAMPLE_3", "SAMPLE_4"],
+            index=["Streptococcus_thermophilus"],
+            columns=["SAMPLE_1", "SAMPLE_2", "SAMPLE_3", "SAMPLE_4", "SAMPLE_5"],
         )
         expected_df.columns.name = "sample"
         expected_df.index.name = taxa_level
 
-        expected_ser = pd.Series({"Streptococcus_salivarius": 20.14751170238975})
+        expected_ser = pd.Series({"Streptococcus_thermophilus": 13.111222})
         expected_ser.index.name = taxa_level
 
         (
@@ -461,9 +475,9 @@ class TestPlotTaxonomyCounts(TestCase):
         ) = self.tested_instance._compute_relative_abundances_taxa_dataframe(
             taxa_level=taxa_level,
             taxa_number=2,  # skipped
-            average_relative_abundance_threshold=7.0,
-            higher_classification=False,
-            prevalence_threshold=60,
+            average_relative_abundance_threshold=7.0,   # remove A. massiliense
+            higher_classification=False,                # remove Streptococcus (genus) + Lactobacillus (genus)
+            prevalence_threshold=70,                    # remove (A. m. + Streptococcus (genus)) + S. salivarius
             ascending=False,
         )
 
@@ -475,17 +489,17 @@ class TestPlotTaxonomyCounts(TestCase):
         taxa_level = "genus"
         expected_df = pd.DataFrame(
             [
-                [0.0, 72.727273, 91.954023, 54.878049],
-                [100.0, 8.181818, 8.045977, 32.926829],
+                [0.0, 72.727273, 91.954023, 54.878049, 58.823529],
+                [100.0, 8.181818, 8.045977, 32.926829, 41.176471],
             ],
             index=["Lactobacillus", "Streptococcus"],
-            columns=["SAMPLE_1", "SAMPLE_2", "SAMPLE_3", "SAMPLE_4"],
+            columns=["SAMPLE_1", "SAMPLE_2", "SAMPLE_3", "SAMPLE_4", "SAMPLE_5"],
         )
         expected_df.columns.name = "sample"
         expected_df.index.name = taxa_level
 
         expected_ser = pd.Series(
-            {"Lactobacillus": 54.889836124066576, "Streptococcus": 37.28865611540128}
+            {"Lactobacillus": 55.676575, "Streptococcus": 38.066219}
         )
         expected_ser.index.name = taxa_level
 
@@ -576,9 +590,9 @@ class TestPlotTaxonomyCounts(TestCase):
         fig = self.tested_instance._plot_most_abundant_taxa_bargraph(
             taxa_number=3, prevalence_threshold=None, ascending=False, show=False
         )
-        expected_x = (11.04623470477129, 20.14751170238975, 54.889836124066576)
+        expected_x = (13.111221884239251, 16.1180093619118, 55.6765747816062)
         expected_y = (
-            "<i>Streptococcus</i> (genus)",
+            "<i>Streptococcus thermophilus</i>",
             "<i>Streptococcus salivarius</i>",
             "<i>Lactobacillus</i> (genus)",
         )
@@ -592,11 +606,11 @@ class TestPlotTaxonomyCounts(TestCase):
         fig = self.tested_instance._plot_most_abundant_taxa_bargraph(
             taxa_number=3, ascending=True, show=False
         )
-        expected_x = (54.889836124066576, 20.14751170238975, 11.04623470477129)
+        expected_x = (55.6765747816062, 16.1180093619118, 13.111221884239251)
         expected_y = (
             "<i>Lactobacillus</i> (genus)",
             "<i>Streptococcus salivarius</i>",
-            "<i>Streptococcus</i> (genus)",
+            "<i>Streptococcus thermophilus</i>",
         )
 
         self.assertTupleEqual(fig["data"][0]["x"], expected_x)
@@ -604,16 +618,16 @@ class TestPlotTaxonomyCounts(TestCase):
 
     def test_plot_most_abundant_taxa_bargraph_prevalence_threshold(self):
         fig = self.tested_instance._plot_most_abundant_taxa_bargraph(
-            taxa_number=3, prevalence_threshold=80, show=False
+            taxa_number=3, prevalence_threshold=90, show=False
         )
-        expected_x = tuple([6.0949097082402375])
+        expected_x = tuple([13.111221884239251])
         expected_y = tuple(["<i>Streptococcus thermophilus</i>"])
 
         self.assertTupleEqual(fig["data"][0]["x"], expected_x)
         self.assertTupleEqual(fig["data"][0]["y"], expected_y)
         self.assertEqual(
             fig["layout"]["title"]["text"],
-            "1 most abundant species (present in at least 80% of samples)",
+            "1 most abundant species (present in at least 90% of samples)",
         )
 
     def test_plot_most_abundant_taxa_boxplot(self):
@@ -621,15 +635,17 @@ class TestPlotTaxonomyCounts(TestCase):
             "abundant", "boxplot", taxa_number=2, show=False
         )
 
-        expected_x_Ss = [61.11111111, 5.45454545, 0.0, 14.02439024]
+        expected_x_Ss = [61.11111111, 5.45454545, 0.0, 14.02439024, 0.0]
         expected_y_Ss = [
             "<i>Streptococcus salivarius</i>",
             "<i>Streptococcus salivarius</i>",
             "<i>Streptococcus salivarius</i>",
             "<i>Streptococcus salivarius</i>",
+            "<i>Streptococcus salivarius</i>",
         ]
-        expected_x_L = [0.0, 72.72727273, 91.95402299, 54.87804878]
+        expected_x_L = [0.0, 72.72727273, 91.95402299, 54.87804878, 58.82352941]
         expected_y_L = [
+            "<i>Lactobacillus</i> (genus)",
             "<i>Lactobacillus</i> (genus)",
             "<i>Lactobacillus</i> (genus)",
             "<i>Lactobacillus</i> (genus)",
@@ -651,12 +667,13 @@ of the cohort",
             "abundant",
             "violin",
             taxa_number=2,
-            threshold_on_other_variable=80,
+            threshold_on_other_variable=90,     # only keep S. thermophilus
             show=False,
         )
 
-        expected_x_St = [14.81481481, 0.90909091, 8.04597701, 0.6097561]
+        expected_x_St = [14.81481481, 0.90909091, 8.04597701, 0.6097561, 41.176470588]
         expected_y_St = [
+            "<i>Streptococcus thermophilus</i>",
             "<i>Streptococcus thermophilus</i>",
             "<i>Streptococcus thermophilus</i>",
             "<i>Streptococcus thermophilus</i>",
@@ -668,7 +685,7 @@ of the cohort",
         self.assertEqual(
             fig["layout"]["title"]["text"],
             "Relative abundance of the 1 most abundant microbial genomes among individuals \
-of the cohort (present in at least 80% of samples)",
+of the cohort (present in at least 90% of samples)",
         )
 
     def test_plot_most_prevalent_taxa_boxplot_mean_threshold_mean_info(self):
@@ -681,12 +698,13 @@ of the cohort (present in at least 80% of samples)",
             show=False,
         )
 
-        expected_x_L = [0.0, 72.72727273, 91.95402299, 54.87804878]
+        expected_x_L = [0.0, 72.72727273, 91.95402299, 54.87804878, 58.82352941]
         expected_y_L = [
-            "<i>Lactobacillus</i> (genus) (mean=8.25)",
-            "<i>Lactobacillus</i> (genus) (mean=8.25)",
-            "<i>Lactobacillus</i> (genus) (mean=8.25)",
-            "<i>Lactobacillus</i> (genus) (mean=8.25)",
+            "<i>Lactobacillus</i> (genus) (mean=6.80)",
+            "<i>Lactobacillus</i> (genus) (mean=6.80)",
+            "<i>Lactobacillus</i> (genus) (mean=6.80)",
+            "<i>Lactobacillus</i> (genus) (mean=6.80)",
+            "<i>Lactobacillus</i> (genus) (mean=6.80)"
         ]
 
         np.testing.assert_allclose(fig["data"][0]["x"], expected_x_L)
@@ -699,11 +717,13 @@ of the cohort (with mean among samples > 2.0)",
 
     def test_plot_most_prevalent_taxa_bargraph_mean_threshold_mean_info(self):
         fig = self.tested_instance._plot_most_prevalent_taxa_bargraph(
-            taxa_number=2, mean_threshold=2.0, mean_info=True, show=False
+            taxa_number=2, 
+            mean_threshold=2.0,     # keep only Lactobacillus (genus)
+            mean_info=True, show=False
         )
 
-        expected_x = [75.0]
-        expected_y = ["<i>Lactobacillus</i> (genus) (mean=8.25)"]
+        expected_x = [80.0]
+        expected_y = ["<i>Lactobacillus</i> (genus) (mean=6.80)"]
 
         np.testing.assert_allclose(fig["data"][0]["x"], expected_x)
         np.testing.assert_array_equal(fig["data"][0]["y"], expected_y)
@@ -720,9 +740,9 @@ of the cohort (with mean among samples > 2.0)",
             plotting_options={"xaxes": {"type": "log"}},
         )
 
-        expected_x = [75.0, 100.0]
+        expected_x = [80.0, 100.0]
         expected_y = [
-            "<i>Lactobacillus</i> (genus)",  # with Streptococcus_salivarius and Streptococcus (genus) all at 75%
+            "<i>Lactobacillus</i> (genus)",
             "<i>Streptococcus thermophilus</i>",
         ]
 
@@ -753,16 +773,16 @@ You may want to try to lower your threshold(s).",
 
     def test_plot_most_abundant_taxa_invalidmode(self):
         # If the mode is invalid, the graph will be plotted as a bargraph, which is the default mode
-        expected_x = [20.14751170238975, 7.8215077605321515]
+        expected_x = [16.1180093619118, 13.111221884239251]
         expected_y = [
             "<i>Streptococcus salivarius</i>",
-            "<i>Actinobaculum massiliense</i>",
+            "<i>Streptococcus thermophilus</i>",
         ]
 
         with self.assertLogs("moonstone.plot.counts", level="WARNING") as log:
             fig = self.tested_instance.plot_most_abundant_taxa(
                 taxa_number=2,
-                higher_classification=False,
+                higher_classification=False,    # remove Lactobacillus (genus) + Streptococcus (genus)
                 ascending=True,
                 show=False,
                 mode="invalidmode",
@@ -786,15 +806,17 @@ You may want to try to lower your threshold(s).",
             plotting_options={"xaxes": {"type": "linear"}},
         )
 
-        expected_x_L = [0.0, 72.72727273, 91.95402299, 54.87804878]
+        expected_x_L = [0.0, 72.72727273, 91.95402299, 54.87804878, 58.823529412]
         expected_y_L = [
             "<i>Lactobacillus</i>",
             "<i>Lactobacillus</i>",
             "<i>Lactobacillus</i>",
             "<i>Lactobacillus</i>",
+            "<i>Lactobacillus</i>",
         ]
-        expected_x_S = [100.0, 8.18181818, 8.04597701, 32.92682927]
+        expected_x_S = [100.0, 8.18181818, 8.04597701, 32.92682927, 41.176470588]
         expected_y_S = [
+            "<i>Streptococcus</i>",
             "<i>Streptococcus</i>",
             "<i>Streptococcus</i>",
             "<i>Streptococcus</i>",
@@ -824,15 +846,17 @@ of the cohort",
             "SAMPLE_5",
             "SAMPLE_6",
             "SAMPLE_7",
+            "SAMPLE_8"
         ]
         expected_y_L = [
             0.0,
             72.72727273,
             91.95402299,
             54.87804878,
-            82.35294118,
+            58.82352941,
             92.30769231,
             87.25490196,
+            82.35294118,
         ]
         expected_y_Ss = [
             61.11111111,
@@ -842,15 +866,17 @@ of the cohort",
             0.0,
             0.0,
             12.74509804,
+            0.0
         ]
         expected_y_Others = [
             38.88888889,
             21.81818182,
             8.04597701,
             31.09756098,
-            17.64705882,
+            41.17647059,
             7.69230769,
             0.0,
+            17.64705882,
         ]
         np.testing.assert_array_equal(fig["data"][0]["x"], expected_x)
         np.testing.assert_allclose(fig["data"][0]["y"], expected_y_L)
@@ -868,39 +894,43 @@ of the cohort",
 
         expected_x = [
             "SAMPLE_1",
-            "SAMPLE_4",
             "SAMPLE_7",
             "SAMPLE_2",
-            "SAMPLE_5",
+            "SAMPLE_8",
             "SAMPLE_3",
             "SAMPLE_6",
+            "SAMPLE_4",
+            "SAMPLE_5",
         ]
         expected_y_L = [
             0.0,
-            54.87804878,
             87.25490196,
             72.72727273,
             82.35294118,
             91.95402299,
             92.30769231,
+            54.87804878,
+            58.82352941
         ]
         expected_y_Ss = [
             61.11111111,
-            14.02439024,
             12.74509804,
             5.45454545,
             0.0,
             0.0,
             0.0,
+            14.02439024,
+            0.0
         ]
         expected_y_Others = [
             38.88888889,
-            31.09756098,
             0.0,
             21.81818182,
             17.64705882,
             8.04597701,
             7.69230769,
+            31.09756098,
+            41.17647059
         ]
         np.testing.assert_array_equal(fig["data"][0]["x"], expected_x)
         np.testing.assert_allclose(fig["data"][0]["y"], expected_y_L)
@@ -908,7 +938,7 @@ of the cohort",
         np.testing.assert_allclose(fig["data"][2]["y"], expected_y_Others)
 
     def test_plot_sample_composition_most_abundant_samples_order(self):
-        samples_order = ["SAMPLE_1", "SAMPLE_3", "SAMPLE_5", "SAMPLE_7"]
+        samples_order = ["SAMPLE_1", "SAMPLE_3", "SAMPLE_8", "SAMPLE_7"]
         fig = self.samples_compo_instance.plot_sample_composition_most_abundant_taxa(
             taxa_number=2,
             cluster_samples=True,  # skipped by samples_order
@@ -959,37 +989,41 @@ of the cohort",
             "SAMPLE_1",
             "SAMPLE_2",
             "SAMPLE_7",
-            "SAMPLE_4",
-            "SAMPLE_5",
+            "SAMPLE_8",
             "SAMPLE_3",
             "SAMPLE_6",
+            "SAMPLE_4",
+            "SAMPLE_5",
         ]
         expected_y_L = [
             0.0,
             72.72727273,
             87.25490196,
-            54.87804878,
             82.35294118,
             91.95402299,
             92.30769231,
+            54.87804878,
+            58.82352941
         ]
         expected_y_Ss = [
             61.11111111,
             5.45454545,
             12.74509804,
+            0.0,
+            0.0,
+            0.0,
             14.02439024,
-            0.0,
-            0.0,
             0.0,
         ]
         expected_y_Others = [
             38.88888889,
             21.81818182,
             0.0,
-            31.09756098,
             17.64705882,
             8.04597701,
             7.69230769,
+            31.09756098,
+            41.17647059
         ]
         np.testing.assert_array_equal(fig["data"][0]["x"], expected_x)
         np.testing.assert_allclose(fig["data"][0]["y"], expected_y_L)
@@ -1013,6 +1047,7 @@ of the cohort",
             "SAMPLE_4",
             "SAMPLE_5",
             "SAMPLE_6",
+            "SAMPLE_8"
         ]
         expected_y_L = [
             0.0,
@@ -1020,8 +1055,9 @@ of the cohort",
             87.25490196,
             91.95402299,
             54.87804878,
-            82.35294118,
+            58.82352941,
             92.30769231,
+            82.35294118,
         ]
         expected_y_Ss = [
             61.11111111,
@@ -1031,6 +1067,7 @@ of the cohort",
             14.02439024,
             0.0,
             0.0,
+            0.0
         ]
         expected_y_Others = [
             38.88888889,
@@ -1038,8 +1075,9 @@ of the cohort",
             0.0,
             8.04597701,
             31.09756098,
-            17.64705882,
+            41.17647059,
             7.69230769,
+            17.64705882,
         ]
         np.testing.assert_array_equal(fig["data"][0]["x"], expected_x)
         np.testing.assert_allclose(fig["data"][0]["y"], expected_y_L)
