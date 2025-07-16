@@ -40,7 +40,7 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
 
     # Taxa curve
     # Sort by percent present descending
-    sorted_metrics = taxa_metrics.sort_values(by='percent present', ascending=False).reset_index(drop=True)
+    sorted_metrics = taxa_metrics.sort_values(by='mean reads', ascending=False).reset_index(drop=True)
     x_taxa = np.arange(1, len(sorted_metrics) + 1)
     y_taxa = sorted_metrics['percent present'].values
     
@@ -56,9 +56,9 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
     taxa_r_squared = 1 - (ss_res / ss_tot)
     
     # Reads curve
-    sorted_metrics = taxa_metrics.sort_values(by='percent present').reset_index(drop=True)
+    sorted_metrics = taxa_metrics.sort_values(by='mean reads').reset_index(drop=True)
     x_reads = np.arange(0, total_taxa + 1)
-    y_reads_raw = np.concatenate(([0], sorted_metrics['total reads'].cumsum().values))
+    y_reads_raw = np.concatenate(([0], sorted_metrics['mean reads'].cumsum().values))
     y_reads_pct = y_reads_raw / y_reads_raw[-1] * 100
     popt_sig, _ = curve_fit(generalized_sigmoid, x_reads, y_reads_pct, p0=[100, -0.01, total_taxa/2, 0], maxfev=5000)
     reads_fit = generalized_sigmoid(x_reads, *popt_sig)
@@ -76,7 +76,7 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
     exceed_idx = np.where(reads_derivative > species_loss_rate)[0][0]
     species_pct_removed = (exceed_idx / total_taxa) * 100
     reads_pct_removed = y_reads_pct[exceed_idx]
-    min_reads_retained = sorted_metrics.iloc[exceed_idx:]['total reads'].min()
+    min_reads_retained = sorted_metrics.iloc[exceed_idx:]['mean reads'].min()
 
     _stats = {
         'species_removed': exceed_idx,
