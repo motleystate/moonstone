@@ -110,7 +110,7 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
         plt.axvline(exceed_idx, color='black', linestyle='--', label=f'Threshold: {exceed_idx} species')
         plt.scatter([exceed_idx], [reads_derivative[exceed_idx]], color='black', zorder=5)
         plt.title('Derivative of Read Removal Curve as a function of Taxa')
-        plt.xlabel('Number of Least Prevalent Species Removed')
+        plt.xlabel('NNumber of Low-Abundance Species Removed')
         plt.ylabel('Rate of Change (%)')
         plt.legend()
         plt.grid(True)
