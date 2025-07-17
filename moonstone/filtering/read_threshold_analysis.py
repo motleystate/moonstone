@@ -33,8 +33,8 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
     df = grouped.pivot(index=['species', 'NCBI_taxonomy_ID'], columns='Sample', values='Abundance').fillna(0)
 
     taxa_metrics = pd.DataFrame({"percent present": 100 * (1 - (df == 0).astype(int).sum(axis=1) / df.shape[1]),
-                            "mean reads": df.mean(axis=1),
-                            "total reads": df.sum(axis=1)})
+                                "mean reads": df.mean(axis=1),
+                                "total reads": df.sum(axis=1)})
     
     total_taxa = len(taxa_metrics)
 
@@ -78,6 +78,9 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
     reads_pct_removed = y_reads_pct[exceed_idx]
     min_reads_retained = sorted_metrics.iloc[exceed_idx:]['mean reads'].min()
 
+    # Make a filtered version of the `taxa_metrics` DataFrame
+
+    # Prepare stats dictionary
     _stats = {
         'species_removed': exceed_idx,
         'species_pct_removed': species_pct_removed,
@@ -128,7 +131,7 @@ if __name__ == "__main__":
 
     threshold, stats = analyze_normalized_reads(args.input_file, save_plots=args.save_plots)
     print(f"Recommended filtering threshold: {stats['min_reads_retained']:.1f}")
-    print(f"Species removed: {stats['species_pct_removed']:.2f}% ({threshold/stats['total_taxa'] * 100:.2f}%)")
+    print(f"Species removed: {stats['species_removed']} out of {stats['total_taxa']} ({threshold/stats['total_taxa'] * 100:.2f}%)")
     print(f"Reads removed: {stats['reads_pct_removed']:.2f}%")
-    print(f"Minimum reads among retained species: {stats['min_reads_retained']:.1f}")
+    print(f"Minimum mean reads among retained species: {stats['min_reads_retained']:.1f}")
 
