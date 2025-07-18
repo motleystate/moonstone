@@ -108,6 +108,22 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False, s
         plt.plot(x_reads, y_reads_pct, 'o', markersize=3, alpha=0.6, label='Reads (%)')
         plt.plot(x_reads, reads_fit, label=f'Fitted Reads Sigmoid (R² = {reads_r_squared:.4f})')
         plt.legend()
+
+         # Add equations as text
+        L_log, a_log, b_log = popt_log
+        taxa_eq = rf'$y = \frac{{{L_log:.1f}}}{{1 + {a_log:.2e} \cdot x^{{{b_log:.2f}}}}}$'
+        
+        L_sig, k_sig, x0_sig, c_sig = popt_sig
+        reads_eq = rf'$y = \frac{{{L_sig:.1f}}}{{1 + e^{{-{k_sig:.3f}(x - {x0_sig:.1f})}}}} + {c_sig:.2f}$'
+        
+        # Position equations in upper right corner
+        plt.text(0.98, 0.98, 'Species: ' + taxa_eq, transform=plt.gca().transAxes, 
+                fontsize=12, verticalalignment='top', horizontalalignment='right',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+        plt.text(0.98, 0.88, 'Reads: ' + reads_eq, transform=plt.gca().transAxes, 
+                fontsize=12, verticalalignment='top', horizontalalignment='right',
+                bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.5))
+
         plt.title('Species and Reads Curves')
         plt.xlabel('Number of Least Prevalent Species Removed')
         plt.ylabel('Cumulative Percentage (%)')
@@ -121,6 +137,12 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False, s
         plt.plot(x_reads, reads_derivative, label='Reads Derivative')
         plt.axvline(exceed_idx, color='black', linestyle='--', label=f'Threshold: {exceed_idx} species')
         plt.scatter([exceed_idx], [reads_derivative[exceed_idx]], color='black', zorder=5)
+
+        # Add derivative equation
+        deriv_eq = rf'$\frac{{dy}}{{dx}} = \frac{{{L_sig:.1f} \cdot {k_sig:.3f} \cdot e^{{-{k_sig:.3f}(x - {x0_sig:.1f})}}}}{{(1 + e^{{-{k_sig:.3f}(x - {x0_sig:.1f})}})^2}}$'
+        plt.text(0.02, 0.98, deriv_eq, transform=plt.gca().transAxes, 
+                fontsize=14, verticalalignment='top', bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.5))
+
         plt.title('Derivative of Read Removal Curve as a function of Taxa')
         plt.xlabel('NNumber of Low-Abundance Species Removed')
         plt.ylabel('Rate of Change (%)')
