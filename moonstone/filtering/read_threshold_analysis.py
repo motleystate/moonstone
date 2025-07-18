@@ -17,7 +17,7 @@ def generalized_sigmoid_derivative(x, L, k, x0, c):
     exp_term = np.exp(-k * (x - x0))
     return (L * k * exp_term) / ((1 + exp_term) ** 2)
 
-def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
+def analyze_normalized_reads(input_file, group_by='species', save_plots=False, save_filtered=False):
     df = pd.read_csv(input_file)
     # Melt the dataframe
     melted = df.melt(
@@ -78,8 +78,6 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
     reads_pct_removed = y_reads_pct[exceed_idx]
     min_reads_retained = sorted_metrics.iloc[exceed_idx:]['mean reads'].min()
 
-    # Make a filtered version of the `taxa_metrics` DataFrame
-
     # Prepare stats dictionary
     _stats = {
         'species_removed': exceed_idx,
@@ -90,6 +88,17 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
         'reads_model_params': popt_sig,
         'total_taxa': total_taxa
     }
+    # Make a filtered version of the `taxa_metrics` DataFrame
+    filtered_taxa = pd.DataFrame({"Taxon": df.index.get_level_values('species'),
+                                "NCBI_taxonomy_ID": df.index.get_level_values('NCBI_taxonomy_ID'),
+                                "percent present": 100 * (1 - (df == 0).astype(int).sum(axis=1) / df.shape[1]),
+                                "mean reads": df.mean(axis=1),
+                                "total reads": df.sum(axis=1)})
+    filtered_taxa = filtered_taxa.query('`mean reads` >= @_stats["min_reads_retained"]').reset_index(drop=True)
+
+    if save_filtered:
+        filtered_taxa.to_csv("filtered_taxa.csv", index=True)
+
 
     if save_plots:
         # Plot 1: Species and Reads fits
@@ -121,15 +130,18 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False):
         plt.savefig("removal_derivatives.png")
         plt.close()
 
-    return exceed_idx, _stats
+    return exceed_idx, _stats, filtered_taxa
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Determine filtering threshold based on species prevalence and read abundance.")
     parser.add_argument("input_file", help="Path to normalized read counts CSV file (species x samples)")
     parser.add_argument("--save-plots", action="store_true", help="Save output plots (default: no plots)")
+    parser.add_argument("--save-filtered", action="store_true", help="Save filtered taxa to CSV file (default: no)")
     args = parser.parse_args()
 
-    threshold, stats = analyze_normalized_reads(args.input_file, save_plots=args.save_plots)
+    threshold, stats, filtered_taxa = analyze_normalized_reads(args.input_file, 
+                                                               save_plots=args.save_plots,
+                                                               save_filtered=args.save_filtered)
     print(f"Recommended filtering threshold: {stats['min_reads_retained']:.1f}")
     print(f"Species removed: {stats['species_removed']} out of {stats['total_taxa']} ({threshold/stats['total_taxa'] * 100:.2f}%)")
     print(f"Reads removed: {stats['reads_pct_removed']:.2f}%")
