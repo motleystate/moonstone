@@ -65,13 +65,13 @@ def add_default_titles_to_plotting_options_3d(
     return plotting_options
 
 
-def add_groups_annotations(
+def add_groups_annotations_vertical(
     fig, x_coor: list, y_coor: tuple, groups: list,
     color_bg=["#FFFFFF", "#a7bcdb"],
 ) -> go.Figure:
     """
-    Add labels annotations, in the form of rectangles for the label with text annotations and a line separating the
-    groups going from the bottom of the rectangle to the bottom of the data.
+    Add labels annotations to a vertical bar graph, in the form of rectangles for the label with text annotations and a
+    line separating the groups going from the bottom of the rectangle to the bottom of the data.
 
     Args
         fig: The figure to which you want to add labels annotation above the data.
@@ -114,6 +114,69 @@ def add_groups_annotations(
                 x1=x_coor[i][2],
                 y1=y_coor[0],
                 line=dict(width=1, dash="solid", color="white"),
+            )
+        i += 1
+    return fig
+
+
+def add_groups_annotations_horizontal(
+    fig, x_coor: tuple, y_coor: list, groups: list,
+    row: int, col: int,
+    color_bg=["#FFFFFF", "#a7bcdb"],
+) -> go.Figure:
+    """
+    Add labels annotations to a horizontal bar graph, in the form of rectangles for the label with text annotations and
+    a line separating the groups going from the bottom of the rectangle to the bottom of the data.
+
+    Args
+        fig: The figure to which you want to add labels annotation above the data.
+        x_coor: List of x coordinates triplet [(x start of background, x of text annotation, x end of background)].
+        y_coor: Tuple of 3 y coordinates : (y bottom of line, y bottom of rectangle, y top of rectangle)
+        groups: List of groups' name, should be in the same order as x_coor.
+    """
+    if col == 1:
+        txtangle = -90
+    else:
+        txtangle = 90
+    i = 0
+    x_med = (x_coor[1] + x_coor[2])/2
+    n_cbg = len(color_bg)
+    while i < len(groups):
+        # adding background color
+        fig.add_shape(
+            type="rect",
+            x0=x_coor[1],
+            y0=y_coor[i][0],
+            x1=x_coor[2],
+            y1=y_coor[i][2],
+            line=dict(
+                width=0,
+            ),
+            fillcolor=color_bg[i % n_cbg],
+            row=row, col=col
+        )
+        # adding text annotation (group name)
+        fig.add_annotation(
+            x=x_med,
+            y=y_coor[i][1],
+            xref="x",
+            yref="y",
+            text=groups[i],
+            textangle=txtangle,
+            showarrow=False,
+            font=dict(family="Arial", size=14),
+            row=row, col=col
+        )
+        if i < (len(groups) - 1):
+            # adding line separating groups
+            fig.add_shape(
+                type="line",
+                x0=x_coor[1],
+                y0=y_coor[i][2],
+                x1=x_coor[0],
+                y1=y_coor[i][2],
+                line=dict(width=1, dash="solid", color="white"),
+                row=row, col=col
             )
         i += 1
     return fig

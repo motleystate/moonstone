@@ -79,9 +79,23 @@ class BaseGraph(ABC):
             final_colors.update(**colors)
         return final_colors
 
-    def _valid_orientation_param(self, orientation: str) -> str:
+    def _valid_orientation_param(
+        self, orientation: str, hplus: bool = False,
+    ) -> str:
+        """
+        Args:
+            hplus: for an horizontal orientation can left or right be specified
+        """
         if orientation == "v" or orientation == "vertical":
             return "v"
+        if hplus:
+            o = orientation.split("-")
+            if o[0] == "h" or o[0] == "horizontal":
+                if len(o) == 1 or o[1] == "l" or o[1] == "left":
+                    # default behavior: "h" = "h-l" if hplus
+                    return "h-l"
+                elif o[1] == "r" or o[1] == "right":
+                    return "h-r"
         elif orientation == "h" or orientation == "horizontal":
             return "h"
         logger.warning("orientation=%s not valid, set to default (v).", orientation)

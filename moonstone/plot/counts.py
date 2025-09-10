@@ -14,7 +14,8 @@ from moonstone.utils.dict_operations import merge_dict
 from moonstone.utils.plot import (
     add_x_to_plotting_options,
     add_default_titles_to_plotting_options,
-    add_groups_annotations,
+    add_groups_annotations_vertical,
+    add_groups_annotations_horizontal
 )
 from moonstone.utils.pandas.series import SeriesBinning
 
@@ -690,6 +691,7 @@ of the cohort"
         color_df: pd.DataFrame = None,
         sep_series: pd.Series = None,
         sep_how: str = None,
+        orientation: str = "v",
         **kwargs,
     ) -> go.Figure:
         """
@@ -744,15 +746,27 @@ samples"
         if prevalence_threshold is not None:
             title += f" (present in at least {prevalence_threshold}% of samples)"
 
-        default_plotting_options = {
-            "layout": {
-                "title": title,
-                "xaxis_title": "Samples",
-                "yaxis_title": "Relative abundance",
-                "legend": {"traceorder": "normal"},
-                "legend_title_text": "species",
+        orientation = graph._valid_orientation_param(orientation, hplus=True)
+        if orientation == "v":
+            default_plotting_options = {
+                "layout": {
+                    "title": title,
+                    "xaxis_title": "Samples",
+                    "yaxis_title": "Relative abundance",
+                    "legend": {"traceorder": "normal"},
+                    "legend_title_text": "species",
+                }
             }
-        }
+        else:
+            default_plotting_options = {
+                "layout": {
+                    "title": title,
+                    "xaxis_title": "Relative abundance",
+                    "yaxis_title": "Samples",
+                    "legend": {"traceorder": "normal"},
+                    "legend_title_text": "species",
+                }
+            }
 
         plotting_options = merge_dict(kwargs.pop("plotting_options", {}), default_plotting_options)
 
@@ -760,15 +774,23 @@ samples"
             show = kwargs.pop("show", True)
             output_file = kwargs.pop("output_file", False)
             if color_df is None:
-                fig = graph.plot_one_graph(plotting_options=plotting_options, **kwargs, show=False)
+                fig = graph.plot_one_graph(plotting_options=plotting_options, orientation=orientation, **kwargs, show=False)
             else:
-                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, **kwargs, show=False)
-            fig = add_groups_annotations(fig, x_coor, (0, 100, 104), subgps)
+                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, orientation=orientation, **kwargs, show=False)
+
+            # adding separating labels
+            if orientation == "v":
+                fig = add_groups_annotations_vertical(fig, x_coor, (0, 100, 104), subgps)
+            elif orientation == "h-l":
+                fig = add_groups_annotations_horizontal(fig, (0, 100, 104), x_coor, subgps, 1, 2)
+            else:
+                fig = add_groups_annotations_horizontal(fig, (0, 100, 104), x_coor, subgps, 1, 1)
+
             graph._handle_output_plotly(fig, show, output_file)
         else:
             if color_df is None:
-                fig = graph.plot_one_graph(plotting_options=plotting_options, **kwargs)
+                fig = graph.plot_one_graph(plotting_options=plotting_options, orientation=orientation, **kwargs)
             else:
-                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, **kwargs)
+                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, orientation=orientation, **kwargs)
 
         return fig
