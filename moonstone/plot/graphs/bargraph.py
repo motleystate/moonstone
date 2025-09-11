@@ -186,7 +186,8 @@ class MatrixBarGraph(BaseGraph):
         """
         Args:
             colors: Selected colors for a group.
-            orientation: orientation of the graph. {"v" (or "vertical")(default), "h-l" (or "horizontal-left"), "h-r" (or "horizontal-right"}.
+            orientation: orientation of the graph. {"v" (or "vertical")(default), "h-l" (or "horizontal-left"),
+              "h-r" (or "horizontal-right"}.
         """
         orientation = self._valid_orientation_param(orientation, hplus=True)
         
@@ -219,7 +220,8 @@ class MatrixBarGraph(BaseGraph):
         Args:
             metadata: pandas dataframe or series with the metadata relevant to show below/side-to-side to the bar graph.
             colors: Selected colors for a group in the bar graph part of the graph.
-            orientation: orientation of the bar graph. {"v" (or "vertical")(default), "h" (or "horizontal")}.
+            orientation: orientation of the graph. {"v" (or "vertical")(default), "h-l" (or "horizontal-left"),
+              "h-r" (or "horizontal-right"}.
         """
         # metadata = samples (row) * metadata (col)
         # data = species * samples
@@ -279,21 +281,35 @@ class MatrixBarGraph(BaseGraph):
             fig = self._gen_traces_metadata_legends_subplots(
                 fig, metadata, final_colors_metadata, orientation
             )
-
+        
         if "layout" in plotting_options.keys():
-            xaxis_title = plotting_options["layout"].pop("xaxis_title", "Samples")
-            if "legend" in plotting_options["layout"].keys():
-                plotting_options["layout"]["legend"].pop("traceorder", None)
+            xaxis_title = plotting_options["layout"].pop("xaxis_title", None)
+            fig.update_layout(
+                xaxis2=dict(  # xaxis of the 2nd subplot (to not have "samples" * 2)
+                    title_text=xaxis_title,
+                )
+            )
+        print("here6")
+        if orientation == "v":
+            fig.update_layout(
+                yaxis2=dict(showticklabels=False),  # yaxis of the 2nd subplot
+            )
         else:
-            xaxis_title = "Samples"
+            # horizontal
+            if orientation == "h-l":
+                fig.update_layout(
+                    xaxis1=dict(showticklabels=False),  # xaxis of the 1st subplot
+                )
+            else:
+                # h-r
+                fig.update_layout(
+                    xaxis2=dict(showticklabels=False),  # xaxis of the 2nd subplot
+                )
 
-        fig.update_layout(
-            xaxis2=dict(  # xaxis of the 2nd subplot (to not have "samples" * 2)
-                title_text=xaxis_title,
-            ),
-            yaxis2=dict(showticklabels=False),  # yaxis of the 2nd subplot
-            barmode="stack",
-        )
+        if "layout" in plotting_options.keys() and "legend" in plotting_options["layout"].keys():
+            plotting_options["layout"]["legend"].pop("traceorder", None)
+            # traceorder: "normal" given by `plot_sample_composition_most_abundant_taxa`
+        fig.update_layout(barmode="stack")
 
         if plotting_options is not None:
             fig = self._handle_plotting_options_plotly(fig, plotting_options)

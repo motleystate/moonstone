@@ -711,6 +711,8 @@ of the cohort"
             sep_series: Metadata used to order samples into subgroups (skipped by samples_order).
             sep_how: { None (default), 'color', 'labels' } Graphical way of showing the separation of the different
               subgroups (skipped if sep_series is empty/None).
+            orientation: orientation of the graph. {"v" (or "vertical")(default), "h-l" (or "horizontal-left"),
+              "h-r" (or "horizontal-right"}.
         """
         data_df, taxa_number = self._compute_relative_abundances_taxa_dataframe(
             taxa_level=taxa_level,
