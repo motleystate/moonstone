@@ -76,14 +76,14 @@ def add_groups_annotations_vertical(
     Args
         fig: The figure to which you want to add labels annotation above the data.
         x_coor: List of x coordinates triplet [(x start of background, x of text annotation, x end of background)].
-        y_coor: Tuple of 3 y coordinates : (y bottom of line, y bottom of rectangle, y top of rectangle)
+        y_coor: Tuple of 3 y coordinates : (y bottom of line, y bottom of rectangle, y top of rectangle).
         groups: List of groups' name, should be in the same order as x_coor.
     """
     i = 0
     y_med = (y_coor[1] + y_coor[2])/2
     n_cbg = len(color_bg)
     while i < len(groups):
-        # adding background color
+        # adding rectangle that will contain the text
         fig.add_shape(
             type="rect",
             x0=x_coor[i][0],
@@ -93,7 +93,7 @@ def add_groups_annotations_vertical(
             line=dict(
                 width=0,
             ),
-            fillcolor=color_bg[i % n_cbg],
+            fillcolor=color_bg[i % n_cbg],  # alternating the color of the rectangle for visibility
         )
         # adding text annotation (group name)
         fig.add_annotation(
@@ -127,12 +127,15 @@ def add_groups_annotations_horizontal(
     """
     Add labels annotations to a horizontal bar graph, in the form of rectangles for the label with text annotations and
     a line separating the groups going from the bottom of the rectangle to the bottom of the data.
+    when orientation="horizontal-right", bottom of the data means right of the bar graph and top means left.
+    when orientation="horizontal-left", bottom of the data means left of the bar graph and top means right.
+    Please read the arguments with that in mind.
 
     Args
         fig: The figure to which you want to add labels annotation above the data.
-        x_coor: List of x coordinates triplet [(x start of background, x of text annotation, x end of background)].
-        y_coor: Tuple of 3 y coordinates : (y bottom of line, y bottom of rectangle, y top of rectangle)
-        groups: List of groups' name, should be in the same order as x_coor.
+        x_coor: Tuple of 3 x coordinates : (x bottom of line, x bottom of rectangle, x top of rectangle).
+        y_coor: List of y coordinates triplet [(y start of background, y of text annotation, y end of background)].
+        groups: List of groups' name, should be in the same order as y_coor.
     """
     if col == 1:
         txtangle = -90
@@ -142,7 +145,7 @@ def add_groups_annotations_horizontal(
     x_med = (x_coor[1] + x_coor[2])/2
     n_cbg = len(color_bg)
     while i < len(groups):
-        # adding background color
+        # adding rectangle that will contain the text
         fig.add_shape(
             type="rect",
             x0=x_coor[1],
@@ -152,7 +155,7 @@ def add_groups_annotations_horizontal(
             line=dict(
                 width=0,
             ),
-            fillcolor=color_bg[i % n_cbg],
+            fillcolor=color_bg[i % n_cbg],  # alternating the color of the rectangle for visibility
             row=row, col=col
         )
         # adding text annotation (group name)

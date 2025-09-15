@@ -289,7 +289,7 @@ class MatrixBarGraph(BaseGraph):
                     title_text=xaxis_title,
                 )
             )
-        print("here6")
+
         if orientation == "v":
             fig.update_layout(
                 yaxis2=dict(showticklabels=False),  # yaxis of the 2nd subplot
