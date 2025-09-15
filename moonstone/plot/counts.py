@@ -14,7 +14,8 @@ from moonstone.utils.dict_operations import merge_dict
 from moonstone.utils.plot import (
     add_x_to_plotting_options,
     add_default_titles_to_plotting_options,
-    add_groups_annotations,
+    add_groups_annotations_vertical,
+    add_groups_annotations_horizontal
 )
 from moonstone.utils.pandas.series import SeriesBinning
 
@@ -85,15 +86,9 @@ class PlotTaxonomyCounts:
         else:
             self.df = taxonomy_dataframe
 
-    def compute_prevalence_series(self) -> pd.Series:
-        return (self.df != 0).sum(axis=1) / self.df.shape[1] * 100
-
-    @property
-    def prevalence_series(self):
-        # call compute_prevalence_series and store into self._prevalence_series
-        if getattr(self, "_prevalence_series", None) is None:
-            self._prevalence_series = self.compute_prevalence_series()
-        return self._prevalence_series
+    def compute_prevalence_series(self, level) -> pd.Series:
+        df = self.df.groupby(level).sum()
+        return (df != 0).sum(axis=1) / df.shape[1] * 100
 
     def compute_relative_abundance_dataframe(self) -> pd.DataFrame:
         return self.df * 100 / self.df.sum()
@@ -287,7 +282,7 @@ class PlotTaxonomyCounts:
 
         mean_relab_ser_taxa = relab_df_taxa.mean(axis=1)
 
-        prev_ser_taxa = self.prevalence_series.groupby(taxa_level).mean()
+        prev_ser_taxa = self.compute_prevalence_series(taxa_level)
 
         top_ab = self._generate_list_species_to_plot(
             mean_relab_ser_taxa,
@@ -405,7 +400,7 @@ class PlotTaxonomyCounts:
         # if taxa is the lowest taxonomical level, it drops the higher taxonomical levels in index
         # MultiIndex -> (single) Index
 
-        prev_ser_taxa = self.prevalence_series.groupby(taxa_level).mean()
+        prev_ser_taxa = self.compute_prevalence_series(taxa_level)
 
         if what == "abundant":
             mean_relab_ser_taxa = relab_df_taxa.mean(axis=1)
@@ -524,10 +519,7 @@ of the cohort"
         ascending = bool(1 - ascending)
         title = ""
 
-        prev_ser_taxa = self.prevalence_series.groupby(taxa_level).mean()
-        # if taxa isn't the lowest taxonomical level, it sums up all counts of the same taxa
-        # if taxa is the lowest taxonomical level, it drops the higher taxonomical levels in index
-        # MultiIndex -> (single) Index
+        prev_ser_taxa = self.compute_prevalence_series(taxa_level)
 
         mean_counts_ser_taxa = self.df.groupby(taxa_level).sum().mean(axis=1)
 
@@ -699,6 +691,7 @@ of the cohort"
         color_df: pd.DataFrame = None,
         sep_series: pd.Series = None,
         sep_how: str = None,
+        orientation: str = "v",
         **kwargs,
     ) -> go.Figure:
         """
@@ -718,6 +711,8 @@ of the cohort"
             sep_series: Metadata used to order samples into subgroups (skipped by samples_order).
             sep_how: { None (default), 'color', 'labels' } Graphical way of showing the separation of the different
               subgroups (skipped if sep_series is empty/None).
+            orientation: orientation of the graph. {"v" (or "vertical")(default), "h-l" (or "horizontal-left"),
+              "h-r" (or "horizontal-right"}.
         """
         data_df, taxa_number = self._compute_relative_abundances_taxa_dataframe(
             taxa_level=taxa_level,
@@ -753,15 +748,27 @@ samples"
         if prevalence_threshold is not None:
             title += f" (present in at least {prevalence_threshold}% of samples)"
 
-        default_plotting_options = {
-            "layout": {
-                "title": title,
-                "xaxis_title": "Samples",
-                "yaxis_title": "Relative abundance",
-                "legend": {"traceorder": "normal"},
-                "legend_title_text": "species",
+        orientation = graph._valid_orientation_param(orientation, hplus=True)
+        if orientation == "v":
+            default_plotting_options = {
+                "layout": {
+                    "title": title,
+                    "xaxis_title": "Samples",
+                    "yaxis_title": "Relative abundance",
+                    "legend": {"traceorder": "normal"},
+                    "legend_title_text": "species",
+                }
             }
-        }
+        else:
+            default_plotting_options = {
+                "layout": {
+                    "title": title,
+                    "xaxis_title": "Relative abundance",
+                    "yaxis_title": "Samples",
+                    "legend": {"traceorder": "normal"},
+                    "legend_title_text": "species",
+                }
+            }
 
         plotting_options = merge_dict(kwargs.pop("plotting_options", {}), default_plotting_options)
 
@@ -769,15 +776,23 @@ samples"
             show = kwargs.pop("show", True)
             output_file = kwargs.pop("output_file", False)
             if color_df is None:
-                fig = graph.plot_one_graph(plotting_options=plotting_options, **kwargs, show=False)
+                fig = graph.plot_one_graph(plotting_options=plotting_options, orientation=orientation, **kwargs, show=False)
             else:
-                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, **kwargs, show=False)
-            fig = add_groups_annotations(fig, x_coor, (0, 100, 104), subgps)
+                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, orientation=orientation, **kwargs, show=False)
+
+            # adding separating labels
+            if orientation == "v":
+                fig = add_groups_annotations_vertical(fig, x_coor, (0, 100, 104), subgps)
+            elif orientation == "h-l":
+                fig = add_groups_annotations_horizontal(fig, (0, 100, 104), x_coor, subgps, 1, 2)
+            else:
+                fig = add_groups_annotations_horizontal(fig, (0, 100, 104), x_coor, subgps, 1, 1)
+
             graph._handle_output_plotly(fig, show, output_file)
         else:
             if color_df is None:
-                fig = graph.plot_one_graph(plotting_options=plotting_options, **kwargs)
+                fig = graph.plot_one_graph(plotting_options=plotting_options, orientation=orientation, **kwargs)
             else:
-                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, **kwargs)
+                fig = graph.plot_complex_graph(color_df, plotting_options=plotting_options, orientation=orientation, **kwargs)
 
         return fig
