@@ -67,7 +67,7 @@ class ScatterTrendlines(BaseGraph):
             color_dic = {}
             for el in u:
                 if not isinstance(el, numbers.Number) and not is_color_like(el):
-                    # NB: pd.NA is not a number but np.nan is
+                    # pd.NA is not considered a number
                     for i in range(0, len(u)):
                         color_dic[u[i]] = i
                     datapoints_color_ser = datapoints_color_ser.replace(color_dic)
@@ -226,9 +226,10 @@ class ScatterTrendlines(BaseGraph):
         chunks_list = [dataframe.iloc[pos] for pos in np.array_split(np.arange(dataframe.shape[0]), n)]
         group_ser_prec = pd.Series()
         for c in range(len(chunks_list)):
-            group_ser_prec = pd.concat(
-                [group_ser_prec, pd.Series([c]*len(chunks_list[c].index), index=chunks_list[c].index)]
-            )
+            if not group_ser_prec.empty:
+                group_ser_prec = pd.concat(
+                    [group_ser_prec, pd.Series([c]*len(chunks_list[c].index), index=chunks_list[c].index)]
+                )
         i = 1
         stable = False
         while i <= nb_iter:
@@ -239,7 +240,7 @@ class ScatterTrendlines(BaseGraph):
                     p, y_tl = self._compute_trendline(
                         chunks_list[c][x_col], chunks_list[c][y_col], log_x=log_x, log_y=log_y, y_trendline=True
                     )  # if outliers == 'trim', outliers not used to compute trendline... [1/2]
-                    list_params += [(p[0], p[1], c)]
+                    list_params += [(p.iloc[0], p.iloc[1], c)]
                     trendlines += [
                         (pd.DataFrame({"x": chunks_list[c][x_col], "y": y_tl}), c)
                         # x = same x as dot/sample, y = projection of x on trendline

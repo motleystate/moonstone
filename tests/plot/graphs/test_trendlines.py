@@ -312,7 +312,7 @@ set to default (keep).",
         np.testing.assert_array_equal(
             tested_fig["data"][0]["marker"]["color"], [1, 2, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2])
 
-        # Case #2: color series contains a np.nan
+        # Case #2a: color series contains a np.nan
         color_ser = pd.Series(
             [1, 2, 2, np.nan, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1, np.nan], index=samples)
         tested_fig = self.ins.scatter_plot(
@@ -325,7 +325,7 @@ set to default (keep).",
             tested_fig["data"][0]["marker"]["color"],
             [1., 2., 2., np.nan, 1., 1., 2., 1., 2., 2., 2., 1., 2., 1., np.nan])
 
-        # Case #3a: color series contains a pd.NA
+        # Case #2b: color series contains a pd.NA
         # -> pd.NA not accepted by plotly so everything need to be converted in number
         color_ser = pd.Series(
             [1, 2, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1, pd.NA], index=samples)
@@ -338,7 +338,20 @@ set to default (keep).",
         np.testing.assert_array_equal(
             tested_fig["data"][0]["marker"]["color"], [0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 2])
 
-        # Case #4: color series made of non-color strings
+        # Case #2c: color series contains both pd.NA and np.nan
+        # We want the same color for both
+        color_ser = pd.Series(
+            [1, 2, 2, 1, 1, 1, 2, np.nan, 2, 2, 2, 1, 2, 1, pd.NA], index=samples)
+        tested_fig = self.ins.scatter_plot(
+           x_ser=sp1_ser, y_ser=sp2_ser,
+           trendlines=trendlines,
+           datapoints_color_ser=color_ser,
+           show=False
+           )
+        np.testing.assert_array_equal(
+            tested_fig["data"][0]["marker"]["color"], [0, 1, 1, 0, 0, 0, 1, 2, 1, 1, 1, 0, 1, 0, 2])
+
+        # Case #3: color series made of non-color strings
         color_ser = pd.Series(
             ['C', 'C', 'B', 'B', 'C', 'A', 'A', 'A', 'A', 'C', 'B', 'A', 'A', 'A', 'B'], index=samples)
         tested_fig = self.ins.scatter_plot(
@@ -350,7 +363,7 @@ set to default (keep).",
         np.testing.assert_array_equal(
             tested_fig["data"][0]["marker"]["color"], [0, 0, 1, 1, 0, 2, 2, 2, 2, 0, 1, 2, 2, 2, 1])
 
-        # Case #5: color series made of non-color strings and np.nan values
+        # Case #4: color series made of non-color strings and np.nan values
         color_ser = pd.Series(
             ['C', 'C', 'B', 'B', 'C', 'A', 'A', 'A', 'A', np.nan, 'B', 'A', 'A', 'A', np.nan], index=samples)
 
