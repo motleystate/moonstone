@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 
-from moonstone.analysis import classify
+from moonstone.utils.pandas.df_merge import MergeDF
 
 module_logger = logging.getLogger(__name__)
 
@@ -24,11 +24,9 @@ class RandomForest(object):
         self.variable = variable
         self.outdir = outdir
 
-    # Can use the merging function in 'classify'
     def get_matrix(self):
         self.logger.info('Building the merged data-frame from count data and selected variable')
-        merged_df = classify.SVM(self.countfile, self.metadata, self.outdir)
-        df = merged_df.merge(self.variable)
+        df = MergeDF(self.countfile, self.metadata, self.variable).merged_df
         self.logger.info('Done. Returning merged dataframe.')
         return df
 
@@ -55,7 +53,7 @@ class RandomForest(object):
         # Setup the different classifiers. Decision tree and a 'forest' of tress are obvious choices.
         # Also included are two type of boosting.
         dt = DecisionTreeClassifier()
-        rf = RandomForestClassifier(n_estimators=100, max_features="auto", random_state=33)
+        rf = RandomForestClassifier(n_estimators=100, max_features="sqrt", random_state=33)
         ab = AdaBoostClassifier(n_estimators=100, random_state=33)
         gb = GradientBoostingClassifier(n_estimators=100, random_state=33)
 
@@ -108,8 +106,8 @@ class RandomForest(object):
 
         # Gradient Boost, TTS and then combined results of samples folds
         self.logger.info("Running Gradient Boost Analysis")
-        ab.fit(x_train, y_train)
-        y_predict_tts = ab.predict(x_test)
+        gb.fit(x_train, y_train)
+        y_predict_tts = gb.predict(x_test)
         print("Gradient Boost:\n\tTrain/Test Split Accuracy: %2.1f%s"
               % (accuracy_score(y_test, y_predict_tts) * 100, "%"))
         i = 0
@@ -148,7 +146,7 @@ class RandomForest(object):
         plt.title(f"Random Forest Feature Importance: {self.variable}", fontsize=12)
         plt.bar(range(features_to_print), importance[indices][:features_to_print], color="r",
                 yerr=standard_deviations[indices][:features_to_print])
-        plt.xticks(range(features_to_print), features, rotation=90, fontsize=3)
+        plt.xticks(range(features_to_print), features[:features_to_print], rotation=90, fontsize=3)
         plt.xlim([-1, features_to_print])
         # plt.show()
         plt.savefig(self.outdir+"/"+self.variable+'_rfFeatures.pdf', format='pdf', dpi=150)
