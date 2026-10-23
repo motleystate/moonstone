@@ -59,7 +59,7 @@ numpy==1.26.4
     #   scikit-learn
     #   scipy
     #   statsmodels
-pandas>=2.0.2
+pandas>=2.2.0
     # via
     #   moonstone (setup.py)
     #   scikit-bio
