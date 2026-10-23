@@ -1,5 +1,60 @@
+"""
+Choose which taxa to keep from the data itself, using prevalence and abundance together.
+
+Each taxon is scored as ``s = p * log10(r + 1)``, where ``p`` is the fraction of samples in
+which the taxon is present and ``r`` its mean reads across all samples. Taxa are kept when
+their score is above the knee of the sorted scores: the point where the score starts rising
+faster than its average rate of change (see :func:`rate_threshold_index`).
+
+Input data
+----------
+
+A CSV file in wide format: **one row per taxon, one column per sample**.
+
+* **Required columns:** ``species`` and ``NCBI_taxonomy_ID``. Together they identify a taxon.
+* **Optional taxonomy columns:** ``kingdom``, ``phylum``, ``class``, ``order``, ``family``
+  and ``genus``. They are ignored.
+* **Every other column is a sample.** Sample columns must be numeric and non-negative. Any
+  other descriptive column (for example ``subspecies`` or ``domain``) must be removed first,
+  otherwise it is read as a sample and rejected as non-numeric.
+* **Values are read counts**, raw or normalized, at species level (for example Bracken counts
+  normalized by geometric mean). They must stay on a read-count scale: **do not use relative
+  abundances** (proportions or percentages). ``log10(r + 1)`` assumes counts; on values
+  between 0 and 1 it is close to linear and the scores lose their meaning. A warning is raised
+  when every sample sums to 100 or less.
+* ``0`` means the taxon is absent from the sample; empty cells are treated as ``0``.
+* Rows sharing the same ``species`` and ``NCBI_taxonomy_ID`` are summed.
+
+Example::
+
+    kingdom,phylum,...,genus,species,NCBI_taxonomy_ID,sample_1,sample_2,sample_3
+    Bacteria,Proteobacteria,...,Serratia,Serratia_marcescens,615,1520.4,0,88.1
+    Bacteria,Bacillota,...,Lactobacillus,Lactobacillus_crispatus,47770,250311.9,180044.2,0
+
+Outputs
+-------
+
+* The retained taxa with their prevalence and read metrics (``filtered_taxa.csv``).
+* Optionally, three plots: the sorted score and its knee, the derivative criterion, and
+  prevalence against abundance with the decision boundary.
+
+Usage
+-----
+
+From the command line::
+
+    python -m moonstone.filtering.read_threshold_analysis counts.csv \\
+        --save-filtered --save-plots --output-dir results/
+
+From Python::
+
+    from moonstone.filtering.read_threshold_analysis import analyze_normalized_reads
+
+    stats, filtered_taxa = analyze_normalized_reads("counts.csv")
+"""
 import argparse
 import os
+import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -70,13 +125,37 @@ def _equation_box(ax, text, x=0.02, y=0.96, ha='left', va='top', fontsize=12):
 
 
 def load_species_table(input_file):
-    """Read a taxonomy x samples CSV and collapse it to a species x samples table."""
+    """Read a taxonomy x samples CSV and collapse it to a species x samples table.
+
+    See the module documentation for the expected input format.
+    """
     df = pd.read_csv(input_file)
+
+    missing = [col for col in ('species', 'NCBI_taxonomy_ID') if col not in df.columns]
+    if missing:
+        raise ValueError(f"Input is missing required column(s): {', '.join(missing)}. "
+                         "Expected one row per taxon with 'species' and 'NCBI_taxonomy_ID' columns.")
+
     sample_columns = [col for col in df.columns if col not in TAXONOMY_COLUMNS]
+    if not sample_columns:
+        raise ValueError("Input has no sample columns: every column other than the taxonomy "
+                         "columns is read as a sample.")
+    non_numeric = [col for col in sample_columns if not pd.api.types.is_numeric_dtype(df[col])]
+    if non_numeric:
+        raise ValueError(f"Sample columns must be numeric, but these are not: {', '.join(non_numeric[:5])}"
+                         f"{' ...' if len(non_numeric) > 5 else ''}. Remove any descriptive columns "
+                         f"other than {', '.join(TAXONOMY_COLUMNS)}.")
+    if (df[sample_columns] < 0).any().any():
+        raise ValueError("Sample columns must not contain negative values: expected read counts.")
+    if (df[sample_columns].sum() <= 100).all():
+        warnings.warn("Every sample sums to 100 or less, which looks like relative abundances. "
+                      "This method expects read counts (raw or normalized).")
+
     return df.groupby(['species', 'NCBI_taxonomy_ID'])[sample_columns].sum().fillna(0)
 
 
 def compute_taxa_metrics(df):
+    """Per-taxon prevalence (percent of samples with reads > 0), mean reads and total reads."""
     return pd.DataFrame({"percent present": 100 * (df > 0).sum(axis=1) / df.shape[1],
                          "mean reads": df.mean(axis=1),
                          "total reads": df.sum(axis=1)})
@@ -232,6 +311,15 @@ def plot_combined_score(taxa_metrics, keep, sorted_score, knee_idx, score_slope,
 
 
 def analyze_normalized_reads(input_file, save_plots=False, save_filtered=False, output_dir="."):
+    """Load a counts CSV, score every taxon and keep those above the knee.
+
+    :param input_file: path to a CSV in the format described in the module documentation
+    :param save_plots: write the three diagnostic plots to ``output_dir``
+    :param save_filtered: write the retained taxa to ``output_dir/filtered_taxa.csv``
+    :param output_dir: directory for the outputs, created if needed
+    :return: a dictionary of threshold statistics, and a dataframe of the retained taxa
+        with their prevalence and read metrics
+    """
     df = load_species_table(input_file)
     taxa_metrics = compute_taxa_metrics(df)
 
