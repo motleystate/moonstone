@@ -1,7 +1,12 @@
 import importlib
+import os
 import subprocess
 import sys
+import tempfile
 from unittest import TestCase
+
+import numpy as np
+import pandas as pd
 
 
 class TestCommandLineSmoke(TestCase):
@@ -31,3 +36,23 @@ class TestCommandLineSmoke(TestCase):
         self.assertNotIn('Traceback', result.stderr)
         self.assertIn('the following arguments are required', result.stderr)
         self.assertEqual(result.returncode, 1)
+
+    def test_random_forest(self):
+        tmpdir = tempfile.mkdtemp()
+        rng = np.random.default_rng(0)
+        samples = [f's{i}' for i in range(40)]
+        counts = pd.DataFrame(rng.poisson(20, (12, 40)), index=[f'taxon{i}' for i in range(12)], columns=samples)
+        counts.index.name = 'OTU'
+        counts.to_csv(os.path.join(tmpdir, 'counts.csv'))
+        metadata = pd.DataFrame({'group': ['A'] * 20 + ['B'] * 20}, index=pd.Index(samples, name='sample'))
+        metadata.to_csv(os.path.join(tmpdir, 'metadata.csv'))
+        outdir = os.path.join(tmpdir, 'output')
+
+        result = self.run_moonstone(os.path.join(tmpdir, 'counts.csv'), os.path.join(tmpdir, 'metadata.csv'),
+                                    outdir, '--random_forest', 'group')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('Gradient Boost:', result.stdout)
+        for output_file in ['rf_Allfeatures.csv', 'group_rfFeatures.pdf']:
+            with self.subTest(output_file=output_file):
+                self.assertTrue(os.path.isfile(os.path.join(outdir, output_file)))
