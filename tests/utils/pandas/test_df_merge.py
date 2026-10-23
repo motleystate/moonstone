@@ -71,7 +71,8 @@ class TestMergeDF(TestCase):
             merged_df = MergeDF(self.d1, d2, 'sex').merged_df
             self.assertEqual(len(log.output), 2)
             self.assertIn(
-                "WARNING:moonstone.utils.pandas.df_merge:Index types do not match: int64 and object.",
+                "WARNING:moonstone.utils.pandas.df_merge:Index types do not match: "
+                f"int64 and {d2.index.dtype}.",
                 log.output
             )
         pd.testing.assert_frame_equal(merged_df, df_expected)

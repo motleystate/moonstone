@@ -43,6 +43,6 @@ class Inputs(object):
 
         df.rename_axis("", axis="columns", inplace=True)  # Should remove extraneous column axis name
         df.rename_axis("sample", inplace=True)  # Gives the row axis the proper 'sample' name
-        df = df.applymap(float)  # Converts all values to floats in preparation of analysis
+        df = df.map(float)  # Converts all values to floats in preparation of analysis
         self.logger.info('Success!')
         return df

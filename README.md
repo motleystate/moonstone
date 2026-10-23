@@ -24,35 +24,43 @@ You can install `moonstone` either as a **user** (to use the tool as-is) or as a
 
 ### 🧪 User Installation
 
-If you only want to use `moonstone` and don't need to edit the source code:
+Moonstone requires **Python 3.13**. If you only want to use `moonstone` and don't need to edit the source code:
 
 ```bash
-# Create and activate a Python 3.10 environment
-mamba create -n moonstone python=3.10 -y
+# Create and activate a Python 3.13 environment
+mamba create -n moonstone python=3.13 -y
 conda activate moonstone
 
-# Install the latest published version of moonstone from PyPI
-pip install moonstone
+# Install the latest version of moonstone from GitHub
+pip install "git+https://github.com/motleystate/moonstone.git"
+
+# Check the installation
+moonstone --help
 ```
+
+> The version on the Python Package Index (PyPI, `pip install moonstone`) is 1.0.0, which predates Python 3.13 support and does not install on Python 3.13. Use the GitHub install above until a newer release is published on PyPI.
 
 ### 🛠️ Developer Installation
 
 To work directly with the code and have your changes reflected automatically, follow these steps:
 
 ```bash
-# Clone the repository**  
-git clone git@github.com:motleystate/moonstone.git
+# Clone the repository
+git clone https://github.com/motleystate/moonstone.git
 cd moonstone
 
 # Create a development environment
-mamba create -n moonstone-dev python=3.10 -y
+mamba create -n moonstone-dev python=3.13 -y
 conda activate moonstone-dev
 
-# Install Moonstone in editable mode
-pip install -e .
+# Install Moonstone in editable mode, with the development tools
+pip install -e . -r requirements-dev.txt
+
+# Run the test suite
+pytest
 ```
 
-You can also install dependencies required for development : `pip install -r requirements-dev.txt`.
+Without Mamba or Conda, a standard virtual environment works too: `python3.13 -m venv .venv && source .venv/bin/activate`, then run the same `pip install` command.
 
 --------
 
@@ -64,26 +72,48 @@ Moonstone is directly callable from your terminal for available built-in analysi
 
 ```bash
 (moonstone) $ moonstone --help
-usage: moonstone [-h] [-f filtering] [-p] [-k clusters] [-s variable]
-                 [-sr variable] [-sc variable] [-rf variable]
-                 countfile metadata
+usage: moonstone countfile, metadata file, output directory [options]
 
 Microbiota Analysis Scripts for Machine LEarning
 
 positional arguments:
-  countfile     Normalized count file input
-  metadata      Clinical data input file
+  countfile             Normalized count file input
+  metadata              Clinical data input file
+  outdir                Output files directory
 
-optional arguments:
-  -h, --help    show this help message and exit
-  -f filtering  Minimum mean reads per variable: use a float >0
-  -p            Generates PCA plot of data
-  -k clusters   Runs K-Means clustering. Provide number of clusters
-  -s variable   Run SVMachine Classification
-  -sr variable  SVM Classifier with ROC Analysis
-  -sc variable  SVM and output Classifier Components
-  -rf variable  Random Forest Analysis, using supplied variable
+options:
+  -h, --help            show this help message and exit
+  -os, --skip_prompt    Suppress output directory exists prompt.
+  -f, --filtering min_mean_read
+                        Minimum mean reads per variable: use a float >0
+  -p, --pca_plot        Generates PCA plot of data
+  -k, --k_means nb_clusters
+                        Runs K-Means clustering. Provide number of clusters
+  -c, --classify variable
+                        Cross-validated classification of a metadata variable
+                        from the counts
+  --model {svm,random_forest} [{svm,random_forest} ...]
+                        Classifier(s) for --classify: Support Vector Machine
+                        and/or random forest (default: svm)
+  --kernel {linear,poly,rbf,sigmoid,auto}
+                        Support Vector Machine kernel; auto picks one by
+                        nested cross-validation (default: linear)
+  --explore_kernels     With --classify, compare Support Vector Machine
+                        kernels (exploratory scores)
+  --folds FOLDS         Number of cross-validation folds (default: 5)
+  --seed SEED           Random seed for folds and models (default: 0)
+  --group_column column
+                        Metadata column naming the subject of each sample;
+                        keeps a subject in one fold
+  --roc                 With --classify, plot Receiver Operating
+                        Characteristic curves
+  --feature_selection   With --classify, select features by nested recursive
+                        feature elimination
 ```
+
+For example, `moonstone counts.csv metadata.csv output --classify disease --model svm random_forest --roc`
+runs a 5-fold stratified cross-validation of both classifiers. Scores are balanced accuracy and the area under the
+Receiver Operating Characteristic (ROC) curve, measured on samples the model did not see during training.
 
 --------
 

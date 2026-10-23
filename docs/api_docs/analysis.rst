@@ -4,6 +4,13 @@
 Analysis
 ********
 
+Classification
+==============
+
+.. automodule:: moonstone.analysis.classification
+    :members:
+    :special-members: __init__
+
 Differential Analysis
 =====================
 

@@ -12,6 +12,19 @@ from moonstone.analysis.diversity.beta import (
 )
 
 
+def assert_axis_almost_equal(actual, expected, decimal=8):
+    """
+    Compare coordinates along one PCoA axis up to a sign flip.
+
+    Each principal coordinate is an eigenvector, and -v is as valid as v: the sign chosen depends on the
+    numerical library (NumPy, BLAS) and its version. Distances between samples, and so the analysis, are the same.
+    """
+    actual = np.asarray(actual, dtype=float)
+    expected = np.asarray(expected, dtype=float)
+    sign = -1.0 if np.dot(actual, expected) < 0 else 1.0
+    np.testing.assert_array_almost_equal(sign * actual, expected, decimal=decimal)
+
+
 class TestBrayCurtis(TestCase):
 
     def setUp(self):
@@ -258,9 +271,11 @@ class TestBrayCurtis(TestCase):
             },
             orient='index', columns=['PC1', 'PC2', 'PC3']
         )
-        pd.testing.assert_frame_equal(
-            self.tested_object_instance.pcoa.samples, expected_pcoa_samples,
-        )
+        samples = self.tested_object_instance.pcoa.samples
+        self.assertListEqual(list(samples.columns), list(expected_pcoa_samples.columns))
+        self.assertListEqual(list(samples.index), list(expected_pcoa_samples.index))
+        for axis in expected_pcoa_samples.columns:
+            assert_axis_almost_equal(samples[axis], expected_pcoa_samples[axis], decimal=5)
 
         expected_pcoa_proportions_explained = pd.Series(
             [0.975623, 0.024377, 0], index=["PC1", "PC2", "PC3"],
@@ -488,10 +503,8 @@ class TestBrayCurtis(TestCase):
         self.assertEqual(result_fig.layout["yaxis"]["title"]["text"], "PC2")
 
         self.assertEqual(result_fig["data"][1]["name"], "F")
-        np.testing.assert_array_almost_equal(
-            result_fig["data"][1]["x"], [-0.43138279,  0.56791829], decimal=8)
-        np.testing.assert_array_almost_equal(
-            result_fig["data"][1]["y"], [-0.06428938, -0.02690815], decimal=8)
+        assert_axis_almost_equal(result_fig["data"][1]["x"], [-0.43138279,  0.56791829], decimal=8)
+        assert_axis_almost_equal(result_fig["data"][1]["y"], [-0.06428938, -0.02690815], decimal=8)
 
         # PC2 vs PC3
         result_fig = self.tested_object_instance.visualize_pcoa(metadata_df, "sex", x_pc=2, y_pc=3, show=False)
@@ -499,8 +512,7 @@ class TestBrayCurtis(TestCase):
         self.assertEqual(result_fig.layout["yaxis"]["title"]["text"], "PC3")
 
         self.assertEqual(result_fig["data"][1]["name"], "F")
-        np.testing.assert_array_almost_equal(
-            result_fig["data"][1]["x"], [-0.06428938, -0.02690815], decimal=8)
+        assert_axis_almost_equal(result_fig["data"][1]["x"], [-0.06428938, -0.02690815], decimal=8)
         np.testing.assert_array_equal(
             result_fig["data"][1]["y"], [0, 0])
 
@@ -574,10 +586,8 @@ set to default (scatter).",
         self.assertEqual(result_fig.data[0].marker.symbol, 0)
         self.assertEqual(result_fig.data[0].marker.color, '#A63A50')
         self.assertEqual(result_fig.data[0].name, "M - A")
-        np.testing.assert_array_almost_equal(
-            result_fig.data[0].x, [-0.24953334,  0.07681437], decimal=8)
-        np.testing.assert_array_almost_equal(
-            result_fig.data[0].y, [-0.26419982,  0.31054222], decimal=8)
+        assert_axis_almost_equal(result_fig.data[0].x, [-0.24953334,  0.07681437], decimal=8)
+        assert_axis_almost_equal(result_fig.data[0].y, [-0.26419982,  0.31054222], decimal=8)
 
     def test_visualize_pcoa_scatter_biplot(self):
         metadata_df = pd.DataFrame.from_dict(
@@ -606,9 +616,9 @@ set to default (scatter).",
 
         # checking one annotation
         self.assertTrue(result_fig.layout.annotations[0].showarrow)
-        self.assertAlmostEqual(result_fig.layout.annotations[0].x, -0.4313827918950854, places=15)
-        self.assertAlmostEqual(result_fig.layout.annotations[0].y, 0.09119753638724884, places=15)
-        # see explanation for the use of the AlmostEqual in test_pcoa
+        # arrows follow the orientation of their axis, so compare up to a sign flip (see assert_axis_almost_equal)
+        self.assertAlmostEqual(abs(result_fig.layout.annotations[0].x), 0.4313827918950854, places=15)
+        self.assertAlmostEqual(abs(result_fig.layout.annotations[0].y), 0.09119753638724884, places=15)
 
     def test_visualize_pcoa_scatter3d_1groupcol_nobiplot_noproportion(self):
         metadata_df = pd.DataFrame.from_dict(
@@ -629,10 +639,8 @@ set to default (scatter).",
         self.assertEqual(result_fig.layout["scene"]["zaxis"]["title"]["text"], "PC3")
 
         self.assertEqual(result_fig["data"][1]["name"], "F")
-        np.testing.assert_array_almost_equal(
-            result_fig["data"][1]["x"], [-0.43138279,  0.56791829], decimal=8)
-        np.testing.assert_array_almost_equal(
-            result_fig["data"][1]["y"], [-0.06428938, -0.02690815], decimal=8)
+        assert_axis_almost_equal(result_fig["data"][1]["x"], [-0.43138279,  0.56791829], decimal=8)
+        assert_axis_almost_equal(result_fig["data"][1]["y"], [-0.06428938, -0.02690815], decimal=8)
         np.testing.assert_array_equal(
             result_fig["data"][1]["z"], [0.0, 0.0])
 

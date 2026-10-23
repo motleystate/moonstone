@@ -209,6 +209,7 @@ List
 .. autosummary::
    :nosignatures:
 
+   classification.Classification
    differential_analysis.DifferentialAnalysis
    diversity.alpha.ShannonIndex
    diversity.alpha.SimpsonInverseIndex

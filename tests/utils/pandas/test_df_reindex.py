@@ -93,7 +93,7 @@ f__Enterococcaceae; g__Enterococcus; s__faecium']
         reindexation_instance = GenesToTaxonomy(df, df_taxo)
         reindexed_df = reindexation_instance.reindexed_df
         pd.testing.assert_frame_equal(reindexed_df, df_expected)
-        pd.testing.assert_index_equal(reindexation_instance.without_info_index, pd.Index(['gene_2'], dtype='object'))
+        pd.testing.assert_index_equal(reindexation_instance.without_info_index, pd.Index(['gene_2']))
 
     def test_reindex_with_taxonomy_missing_infos_kept(self):
         df = pd.DataFrame(
@@ -142,7 +142,7 @@ f__Enterococcaceae; g__Enterococcus; s__faecium']
         pd.testing.assert_frame_equal(reindexed_df, df_expected)
         pd.testing.assert_index_equal(
             reindexation_instance.without_info_index,
-            pd.Index(['gene_2', 'gene_4'], dtype='object')
+            pd.Index(['gene_2', 'gene_4'])
         )
 
     def test_reindex_with_taxonomy_missing_infos_summed(self):

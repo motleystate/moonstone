@@ -41,7 +41,7 @@ class TaxonomyCountsBase():
         value            Bacteria Bacteroidetes ... Tannerellaceae Tannerellaceae (family)
         """
         taxa_df_with_rank = taxa_df.apply(lambda x: x + " ({})".format(x.name))
-        taxa_df_with_rank_filled_none = taxa_df_with_rank.fillna(method='ffill', axis=1)
+        taxa_df_with_rank_filled_none = taxa_df_with_rank.ffill(axis=1)
         taxa_df_filled_none = taxa_df.combine_first(taxa_df_with_rank_filled_none)
         return taxa_df_filled_none
 
@@ -51,14 +51,14 @@ class TaxonomyCountsBase():
             """
             :param genus_and_species: list of 2 items
             """
-            if genus_and_species[1] is None:
+            if pd.isna(genus_and_species[1]):
                 return None
-            elif genus_and_species[0] is None:
+            elif pd.isna(genus_and_species[0]):
                 return genus_and_species[1]
             else:
                 return '_'.join(genus_and_species)
 
-        taxa_df['species'] = taxa_df[['genus', 'species']].apply(lambda x: join_genus_species(x), axis=1)
+        taxa_df['species'] = taxa_df[['genus', 'species']].apply(lambda x: join_genus_species(list(x)), axis=1)
         return taxa_df
 
     def split_taxa_fill_none(self, df: pd.DataFrame, sep: str = ";",  taxo_prefix: str = "__",
@@ -68,7 +68,7 @@ class TaxonomyCountsBase():
         """
 
         def remove_taxo_prefix(string):
-            if string is None:
+            if pd.isna(string):
                 return None
             else:
                 term = string.split(taxo_prefix)[-1]
@@ -83,9 +83,9 @@ class TaxonomyCountsBase():
             self.rank_level = len(taxa_columns.columns)
 
         taxa_columns.columns = self.taxonomical_names[:self.rank_level]
-        taxa_columns = taxa_columns.applymap(lambda x: remove_taxo_prefix(x))
+        taxa_columns = taxa_columns.map(lambda x: remove_taxo_prefix(x))
         if terms_to_remove is not None:
-            taxa_columns = taxa_columns.replace(terms_to_remove, None)
+            taxa_columns = taxa_columns.mask(taxa_columns.isin(terms_to_remove))  # keeps the column dtype
         if merge_genus_species:
             taxa_columns = self._merge_genus_species(taxa_columns)
         taxa_columns = self._fill_none(taxa_columns)

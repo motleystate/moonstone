@@ -2,9 +2,7 @@ from unittest import TestCase
 
 from math import isnan
 import numpy as np
-from packaging import version
 import pandas as pd
-import scipy
 
 from moonstone.analysis.statistical_test import (
     statistical_test_groups_comparison,
@@ -136,26 +134,9 @@ class TestStatisticalTestFunction(TestCase):
         pd.testing.assert_series_equal(matrix, expected_df, check_dtype=False)
 
     def test_mann_whitney_u_authorized_keys(self):
-        """
-        depending on the version of scipy check different things
-        """
-        scipy_version = version.parse(scipy.__version__)
-        if scipy_version < version.parse("1.8.0"):
-            with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
-                stat, pval = mann_whitney_u(
-                    self.test_df.iloc[:2], self.test_df.iloc[2:], nan_policy="propagate"
-                )
-
-                self.assertEqual(len(log.output), 1)
-                self.assertIn(
-                    f"WARNING:moonstone.analysis.statistical_test:['nan_policy'] not available with version \
-{scipy_version} of scipy.",
-                    log.output,
-                )
-        else:
-            stat, pval = mann_whitney_u(
-                self.test_df.iloc[:2], self.test_df.iloc[2:], nan_policy="propagate"
-            )
+        stat, pval = mann_whitney_u(
+            self.test_df.iloc[:2], self.test_df.iloc[2:], nan_policy="propagate"
+        )
 
         self.assertEqual(stat, 4.0)
         self.assertEqual(pval, 0.7670968684102772)
@@ -186,46 +167,17 @@ class TestStatisticalTestFunction(TestCase):
         pd.testing.assert_frame_equal(matrix, expected_df, check_dtype=False)
 
     def test_ttest_independence(self):
-        """
-        depending on the version of scipy check different things
-        """
-        scipy_version = version.parse(scipy.__version__)
-        if scipy_version < version.parse("1.7.0"):
-            with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
-                stat, pval = ttest_independence(
-                    self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
-                )
-                self.assertEqual(len(log.output), 1)
-                self.assertIn(
-                    f"WARNING:moonstone.analysis.statistical_test:['trim'] not available with version {scipy_version} \
-of scipy.",
-                    log.output,
-                )
-        else:
-            stat, pval = ttest_independence(
-                self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
-            )
+        stat, pval = ttest_independence(
+            self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
+        )
 
         self.assertEqual(stat, -0.176164072157316)
         self.assertEqual(pval, 0.8733823222145742)
 
     def test_wrong_stat_test_groups(self):
-        scipy_version = version.parse(scipy.__version__)
-        if scipy_version < version.parse("1.7.0"):
-            with self.assertLogs("moonstone.analysis.statistical_test", level="WARNING") as log:
-                stat, pval = ttest_independence(
-                    self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
-                )
-                self.assertEqual(len(log.output), 1)
-                self.assertIn(
-                    f"WARNING:moonstone.analysis.statistical_test:['trim'] not available with version {scipy_version} \
-of scipy.",
-                    log.output,
-                )
-        else:
-            stat, pval = ttest_independence(
-                self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
-            )
+        stat, pval = ttest_independence(
+            self.test_df.iloc[:2], self.test_df.iloc[2:], trim=0
+        )
 
         self.assertEqual(stat, -0.176164072157316)
         self.assertEqual(pval, 0.8733823222145742)
@@ -459,7 +411,7 @@ Another statistical test would be more appropriate to compare these groups.",
         ii = pd.IntervalIndex.from_tuples([(0.982, 10.0), (10.0, 19.0)])
         ci = pd.CategoricalIndex(ii, ordered=True)
         ci = ci.add_categories("NaN")
-        ci = ci.append(pd.Index(["NaN"]))
+        ci = ci.append(pd.CategoricalIndex(["NaN"], categories=ci.categories, ordered=True))
         ci.name = "numerical_series"
         expected_tab.index = ci
         expected_tab.columns.name = "categorical_series"

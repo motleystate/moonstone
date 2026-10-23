@@ -7,6 +7,29 @@ Changelogs
 Summary of developments of moonstone library.
 
 
+Unreleased
+==========
+
+* Requires Python 3.13 and pandas >= 3.0 (support for Python 3.9 to 3.12 and for pandas 2 is dropped).
+  Minimum scikit-bio raised to 0.6.0. (https://github.com/motleystate/moonstone/pull/118)
+* Compatibility with pandas 3 (https://github.com/motleystate/moonstone/pull/118)
+* Command-line tool starts again with recent SciPy versions (``scipy.interp`` replaced by ``numpy.interp``);
+  ``moonstone --help`` now exits with status 0. New dependency: ``filetype>=1.2.0``. (https://github.com/motleystate/moonstone/pull/117)
+* Install instructions updated for Python 3.13; install from GitHub until a release newer than 1.0.0 is on PyPI.
+* **Breaking change:** the command-line flags ``-s/--svm``, ``-sr/--svm_roc``, ``-sc/--svm_classifier`` and
+  ``-rf/--random_forest`` are removed and stop with an error naming their replacement, ``--classify VARIABLE``
+  (with ``--roc``, ``--feature_selection`` or ``--model random_forest``). Output file names change, and the decision
+  tree, AdaBoost and gradient boosting runs are removed. See :ref:`classification`.
+  (https://github.com/motleystate/moonstone/pull/123)
+* Classifiers rewritten as one module, ``moonstone.analysis.classification``, replacing ``classify.py`` and
+  ``randomForest.py``. New options ``--model``, ``--kernel``, ``--explore_kernels``, ``--folds``, ``--seed`` and
+  ``--group_column``. Support Vector Machine scaling now happens inside each training fold, folds are stratified and
+  seeded, groups are class-weighted and scored with balanced accuracy, feature selection is nested inside the
+  cross-validation, and feature importance is permutation importance on the test folds. ``--explore_kernels``
+  compares kernels (exploratory) and ``--kernel auto`` chooses the kernel by nested cross-validation. Minimum
+  scikit-learn raised to 1.5. (https://github.com/motleystate/moonstone/pull/123)
+
+
 v1.1
 ====
 
@@ -88,7 +111,7 @@ v0.4.0
   * ``visualize_groups`` method allows visualization with violin plot based on metadata grouped by a chosen column
 
 * There is now definition of ``index_col`` for ``MetadataParser`` to define which column to use as the index for the metadata (https://github.com/motleystate/moonstone/pull/42)
-* class ``GenesToTaxonomy``to go from gene counts to taxonomy df (https://github.com/motleystate/moonstone/pull/36)
+* class ``GenesToTaxonomy`` to go from gene counts to taxonomy df (https://github.com/motleystate/moonstone/pull/36)
 * add ``TaxonomyRandomSelection`` to allow random selection on multiindexed dataframe (https://github.com/motleystate/moonstone/pull/32)
 * Classe ``AlphaDiversity`` and child classes ``ShannonIndex`` and ``SimpsonInverseIndex`` (https://github.com/motleystate/moonstone/pull/29)
 * add ``RandomSelection`` to ``normalization`` module (https://github.com/motleystate/moonstone/pull/28)

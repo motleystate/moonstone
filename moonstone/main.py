@@ -4,7 +4,8 @@ import sys
 import logging
 
 from moonstone.parsers import (handleCounts, handleMetadata)
-from moonstone.analysis import (classify, clustering, randomForest, stats)
+from moonstone.analysis import (clustering, stats)
+from moonstone.analysis.classification import Classification, KERNELS, MODELS
 from moonstone.filtering.mean_filtering import MeanFiltering
 
 
@@ -16,6 +17,17 @@ The program englobes the following functionalities:
     > Unsupervised clustering algorithms: PCA (other is development)
     > Supervised clustering (in development)
     > Classifier and biomarker discovery (in development)"""
+
+
+class RemovedFlag(argparse.Action):
+    """A classifier flag that was replaced by --classify: fail and name its replacement."""
+
+    def __init__(self, option_strings, dest, replacement, **kwargs):
+        self.replacement = replacement
+        super().__init__(option_strings, dest, help=argparse.SUPPRESS, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.error(f'{option_string} has been removed. Use: {self.replacement.format(variable=values)}')
 
 
 def parse_arguments():
@@ -35,16 +47,34 @@ def parse_arguments():
     parser.add_argument('-p', '--pca_plot', help='Generates PCA plot of data', action='store_true')
     parser.add_argument('-k', '--k_means', metavar='nb_clusters', type=int,
                         help="Runs K-Means clustering. Provide number of clusters")
-    parser.add_argument('-s', '--svm', metavar='variable', type=str, help='Run SVMachine Classification')
-    parser.add_argument('-sr', '--svm_roc', metavar='variable', type=str, help='SVM Classifier with ROC Analysis')
-    parser.add_argument('-sc', '--svm_classifier', metavar='variable', type=str,
-                        help='SVM and output Classifier Components')
-    parser.add_argument('-rf', '--random_forest', metavar='variable', type=str,
-                        help="Random Forest Analysis, using supplied variable")
+    parser.add_argument('-c', '--classify', metavar='variable', type=str,
+                        help='Cross-validated classification of a metadata variable from the counts')
+    parser.add_argument('--model', nargs='+', choices=MODELS, default=['svm'],
+                        help='Classifier(s) for --classify: Support Vector Machine and/or random forest '
+                             '(default: svm)')
+    parser.add_argument('--kernel', choices=KERNELS + ('auto',), default='linear',
+                        help='Support Vector Machine kernel; auto picks one by nested cross-validation '
+                             '(default: linear)')
+    parser.add_argument('--explore_kernels', action='store_true',
+                        help='With --classify, compare Support Vector Machine kernels (exploratory scores)')
+    parser.add_argument('--folds', type=int, default=5, help='Number of cross-validation folds (default: 5)')
+    parser.add_argument('--seed', type=int, default=0, help='Random seed for folds and models (default: 0)')
+    parser.add_argument('--group_column', metavar='column', type=str,
+                        help='Metadata column naming the subject of each sample; keeps a subject in one fold')
+    parser.add_argument('--roc', action='store_true',
+                        help='With --classify, plot Receiver Operating Characteristic curves')
+    parser.add_argument('--feature_selection', action='store_true',
+                        help='With --classify, select features by nested recursive feature elimination')
+    for flags, replacement in [(['-s', '--svm'], '--classify {variable}'),
+                               (['-sr', '--svm_roc'], '--classify {variable} --roc'),
+                               (['-sc', '--svm_classifier'], '--classify {variable} --feature_selection'),
+                               (['-rf', '--random_forest'], '--classify {variable} --model random_forest')]:
+        parser.add_argument(*flags, action=RemovedFlag, replacement=replacement, metavar='variable')
     try:
         return parser.parse_args()
-    except SystemExit:
-        sys.exit(1)
+    except SystemExit as exit_error:
+        # --help exits with 0; argument errors exit with 1.
+        sys.exit(0 if exit_error.code == 0 else 1)
 
 
 def handle_output_directory(outdir_path, suppress_outdir_prompt):
@@ -166,21 +196,24 @@ def run():
         kmeans = clustering.Unsupervised(count_df, metadata_df, outdir)
         kmeans.kmeans('metaData_withKClusters.csv', n_clusters=args.k_means)
 
-    if args.svm:
-        svm = classify.ML(count_df, metadata_df, outdir)
-        svm.svm(variable=args.svm)
-
-    if args.svm_roc:
-        roc = classify.ML(count_df, metadata_df, outdir)
-        roc.roc_analysis(variable=args.svm_roc)
-
-    if args.svm_classifier:
-        scomponents = classify.ML(count_df, metadata_df, outdir)
-        scomponents.feature_analysis(variable=args.svm_classifier)
-
-    if args.random_forest:
-        forest = randomForest.RandomForest(count_df, metadata_df, outdir, variable=args.random_forest)
-        forest.forest('rf_Allfeatures.csv')
+    if args.classify:
+        if args.explore_kernels:
+            exploration = Classification(count_df, metadata_df, args.classify, outdir, model='svm',
+                                         n_folds=args.folds, seed=args.seed, group_column=args.group_column)
+            try:
+                exploration.explore_kernels()
+            except ValueError as error:
+                logger.error(str(error))
+                raise SystemExit(f'Kernel exploration failed: {error}')
+        for model in args.model:
+            classification = Classification(count_df, metadata_df, args.classify, outdir, model=model,
+                                            kernel=args.kernel, n_folds=args.folds, seed=args.seed,
+                                            group_column=args.group_column)
+            try:
+                classification.run(roc=args.roc, feature_selection=args.feature_selection)
+            except ValueError as error:
+                logger.error(str(error))
+                raise SystemExit(f'Classification failed: {error}')
 
 
 if __name__ == "__main__":

@@ -53,8 +53,8 @@ class DifferentialAnalysis:
         pvalue = []
         variance_group1 = []
         variance_group2 = []
-        cat1 = self.full_table[self.full_table[feature] == self.full_table[feature][0]]
-        cat2 = self.full_table[self.full_table[feature] != self.full_table[feature][0]]
+        cat1 = self.full_table[self.full_table[feature] == self.full_table[feature].iloc[0]]
+        cat2 = self.full_table[self.full_table[feature] != self.full_table[feature].iloc[0]]
         for family in range(self.number_columns_to_skip, self.full_table.shape[1]):
             s1 = cat1[self.full_table.columns[family]].astype(float)
             s2 = cat2[self.full_table.columns[family]].astype(float)
