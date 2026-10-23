@@ -2,7 +2,6 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy import interp
 from sklearn import preprocessing, svm
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.metrics import roc_curve, auc
@@ -85,7 +84,7 @@ class ML(object):
             probabilities = clf.predict_proba(x[test])
             # Compute ROC curve and area the curve
             fpr, tpr, thresholds = roc_curve(y[test], probabilities[:, 1])
-            tprs.append(interp(mean_fpr, fpr, tpr))
+            tprs.append(np.interp(mean_fpr, fpr, tpr))
             tprs[-1][0] = 0.0
             roc_auc = auc(fpr, tpr)
             aucs.append(roc_auc)
