@@ -43,8 +43,9 @@ def parse_arguments():
                         help="Random Forest Analysis, using supplied variable")
     try:
         return parser.parse_args()
-    except SystemExit:
-        sys.exit(1)
+    except SystemExit as exit_error:
+        # --help exits with 0; argument errors exit with 1.
+        sys.exit(0 if exit_error.code == 0 else 1)
 
 
 def handle_output_directory(outdir_path, suppress_outdir_prompt):

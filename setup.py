@@ -20,7 +20,8 @@ setup(
         'scikit-learn>=1.3.1',
         'hdmedians>=0.14.2',
         'cython>=0.29.21',
-        'scipy>=1.9.0'
+        'scipy>=1.9.0',
+        'filetype>=1.2.0'
     ],
     packages=find_packages(),
     entry_points={'console_scripts': ['moonstone=moonstone.main:run']},
