@@ -77,7 +77,8 @@ g__Actinobaculum', 1.0, 2.0]
         expected_df = expected_df.set_index(['OTU ID'])
 
         observed_df = self.base_metaphlan_parser.rows_differences(df1, df2)
-        pd.testing.assert_frame_equal(observed_df, expected_df, check_dtype=False)
+        # both frames are empty; the dtype of an empty text index differs between pandas 2 and 3
+        pd.testing.assert_frame_equal(observed_df, expected_df, check_dtype=False, check_index_type=False)
 
     def test_rows_differences_missing_row(self):
         df1 = pd.DataFrame(
@@ -140,7 +141,8 @@ g__Actinobaculum', 1.0, 2.0]
         expected_df = expected_df.set_index(['OTU ID'])
 
         observed_df = self.base_metaphlan_parser.rows_differences(df1, df2)
-        pd.testing.assert_frame_equal(observed_df, expected_df, check_dtype=False)
+        # both frames are empty; the dtype of an empty text index differs between pandas 2 and 3
+        pd.testing.assert_frame_equal(observed_df, expected_df, check_dtype=False, check_index_type=False)
 
     def test_compare_difference_between_two_levels(self):
         df1 = pd.DataFrame(

@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def pandas_to_python_type(pandas_dtype):
     """
     Return the name of type for Python from pandas dtype
@@ -6,7 +9,7 @@ def pandas_to_python_type(pandas_dtype):
     if the type exists, return the python type with pandas dtype between brackets
     """
     python_type = None
-    if pandas_dtype == 'object':
+    if pandas_dtype == 'object' or isinstance(pandas_dtype, pd.StringDtype):
         python_type = 'str'
     elif pandas_dtype == 'int64':
         python_type = 'int'

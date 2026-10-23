@@ -137,15 +137,16 @@ class ScatterTrendlines(BaseGraph):
         X = sm.add_constant(X)
         model = sm.OLS(Y, X, missing="drop")
         results = model.fit()
+        params = np.asarray(results.params)  # positional access: [constant, slope]
         if y_trendline:
             y_tl = results.predict()
 
             if log_y:
                 y_tl = np.power(10, y_tl)
-            return results.params, y_tl
+            return params, y_tl
 
         else:
-            return results.params
+            return params
 
     def _distance_point_to_line(self, x, y, a, cst):
         d = abs(-a*x+y-cst)/np.sqrt(np.power(-a, 2)+1)
@@ -221,7 +222,8 @@ class ScatterTrendlines(BaseGraph):
 
         # random first split of the samples into n groups
         dataframe = self.data.sample(frac=1, random_state=random_state)  # shuffles dataframe's rows
-        chunks_list = np.array_split(dataframe, n)
+        # split row positions rather than the dataframe: np.array_split returns arrays on recent pandas
+        chunks_list = [dataframe.iloc[pos] for pos in np.array_split(np.arange(dataframe.shape[0]), n)]
         group_ser_prec = pd.Series()
         for c in range(len(chunks_list)):
             group_ser_prec = pd.concat(

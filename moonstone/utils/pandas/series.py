@@ -11,11 +11,18 @@ class SeriesStatsBuilder:
     def __init__(self, series):
         self.series = series
 
+    @property
+    def dtype_name(self):
+        # pandas 3 stores text as a str dtype; report it as 'object' like pandas 2 does
+        if isinstance(self.series.dtype, pd.StringDtype):
+            return "object"
+        return str(self.series.dtype)
+
     def _build_base_stats(self):
         repartition = self.series.value_counts()
         return {
             "col_name": self.series.name,
-            "col_type": str(self.series.dtype),
+            "col_type": self.dtype_name,
             "python_col_type": pandas_to_python_type(self.series.dtype),
             "n_values": self.series.size,
             "n_uniq_values": len(self.series.value_counts()),
@@ -38,7 +45,7 @@ class SeriesStatsBuilder:
 
     def build_stats(self):
         return getattr(
-            self, f"_build_{str(self.series.dtype)}_stats", self._build_base_stats
+            self, f"_build_{self.dtype_name}_stats", self._build_base_stats
         )()
 
 

@@ -80,6 +80,7 @@ class TestMetadataParser(TestCase):
         expected_df = pd.DataFrame(
             {"col_2": ["13.3", "15.3", "19.1"], "col_3": ["M", "F", "M"]}
         )
+        expected_df["col_2"] = expected_df["col_2"].astype(object)  # forced by parsing_options below
         expected_df.index = pd.Index(["s1", "s2", "s3"], name="col_1")
         parsing_options = {"dtype": {"col_2": "object"}}
         parser = MetadataParser(
@@ -185,7 +186,8 @@ class TestYAMLBasedMetadataParser(TestCase):
         expected_df = pd.DataFrame(
             {
                 "age": ["29", "48", "36", "25"],
-            }
+            },
+            dtype=object,  # forced by config.yaml
         )
         expected_df.index = pd.Index(["s1", "s2", "s3", "s4"], name="sample")
         pd.testing.assert_frame_equal(parser.metadata_parser.dataframe, expected_df)

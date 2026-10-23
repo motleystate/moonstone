@@ -51,9 +51,9 @@ class TaxonomyCountsBase():
             """
             :param genus_and_species: list of 2 items
             """
-            if genus_and_species[1] is None:
+            if pd.isna(genus_and_species[1]):
                 return None
-            elif genus_and_species[0] is None:
+            elif pd.isna(genus_and_species[0]):
                 return genus_and_species[1]
             else:
                 return '_'.join(genus_and_species)
@@ -68,7 +68,7 @@ class TaxonomyCountsBase():
         """
 
         def remove_taxo_prefix(string):
-            if string is None:
+            if pd.isna(string):
                 return None
             else:
                 term = string.split(taxo_prefix)[-1]
@@ -83,9 +83,9 @@ class TaxonomyCountsBase():
             self.rank_level = len(taxa_columns.columns)
 
         taxa_columns.columns = self.taxonomical_names[:self.rank_level]
-        taxa_columns = taxa_columns.applymap(lambda x: remove_taxo_prefix(x))
+        taxa_columns = taxa_columns.map(lambda x: remove_taxo_prefix(x))
         if terms_to_remove is not None:
-            taxa_columns = taxa_columns.replace(terms_to_remove, None)
+            taxa_columns = taxa_columns.mask(taxa_columns.isin(terms_to_remove))  # keeps the column dtype
         if merge_genus_species:
             taxa_columns = self._merge_genus_species(taxa_columns)
         taxa_columns = self._fill_none(taxa_columns)
