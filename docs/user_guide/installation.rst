@@ -5,7 +5,7 @@ Installation
 Pre-requisites
 ==============
 
-moonstone currently works with version of Python 3.6 and 3.7.
+moonstone requires Python 3.13.
 
 .. Note::
     We highly recommend the use of a virtual environment such as `virtualenv`_, `pyenv`_ or `conda`_.
@@ -14,6 +14,13 @@ moonstone currently works with version of Python 3.6 and 3.7.
 .. _pyenv: https://github.com/pyenv/pyenv
 .. _conda: http://docs.readthedocs.io/en/latest/conda.html
 
+For example, with conda (or mamba):
+
+.. code-block:: bash
+
+    conda create -n moonstone python=3.13 -y
+    conda activate moonstone
+
 
 Installation procedure
 ======================
@@ -21,11 +28,22 @@ Installation procedure
 Pip
 ---
 
-You can use pip to install moonstone of the latest stable version published on pypi:
+Install the latest version of moonstone from the Github repository:
 
 .. code-block:: bash
 
-    pip install moonstone
+    pip install "git+https://github.com/motleystate/moonstone.git"
+
+.. Warning::
+    The version published on the Python Package Index (PyPI) with ``pip install moonstone`` is 1.0.0.
+    It predates Python 3.13 support and does not install on Python 3.13.
+    Use the command above until a newer release is published on PyPI.
+
+Check the installation with:
+
+.. code-block:: bash
+
+    moonstone --help
 
 Manually
 --------
@@ -42,16 +60,28 @@ Clone the repository and install moonstone with the following commands:
     cd moonstone
     pip install .     # you can use -e option to make an editable install
 
+To also install the development tools and run the test suite:
+
+.. code-block:: bash
+
+    pip install -e . -r requirements-dev.txt
+    pytest
+
 .. Note::
-    Installing moonstone will install the following dependencies :
-        - pandas (==1.0.1)
-        - scikit-learn (==0.21.3)
+    Installing moonstone will install the following dependencies:
+        - pandas (>=3.0.0)
+        - numpy (>=1.26.4)
+        - scipy (>=1.9.0, <1.16.0)
+        - scikit-learn (>=1.3.1)
+        - scikit-bio (>=0.6.0)
+        - statsmodels (>=0.14.0)
         - matplotlib
         - plotly
-        - statsmodels
         - python-slugify
         - pyaml
-        - numpy (==1.18.1)
+        - hdmedians
+        - cython
+        - filetype
 
 Uninstallation procedure
 =========================

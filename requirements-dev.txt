@@ -8,3 +8,5 @@ black
 pydocstyle
 mypy
 odfpy
+openpyxl
+xlrd
