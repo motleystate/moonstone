@@ -132,7 +132,7 @@ class ML(object):
 
         clf.fit(x, y)
         df_coef = pd.DataFrame(clf.coef_.transpose(),
-                               index=df_final.drop([variable], 1).columns,
+                               index=df_final.drop([variable], axis=1).columns,
                                columns=['Coef'])
         df_coef.sort_values(by=['Coef']).plot.barh()
         plt.savefig(self.outdir + '/' + variable + '_variable_coefs.pdf', format='pdf', dpi=150)
@@ -150,13 +150,16 @@ class ML(object):
         logger.info('Full component list for %s being written to %s'
                     % (variable, self.outdir+'/'+variable+'_SVM_components.csv'))
 
-        df_rank.sort_values(by=['Coef'], ascending=[bool])\
+        df_rank.sort_values(by=['Coef'], ascending=True)\
             .to_csv(path_or_buf=self.outdir+'/'+variable+'_SVM_components.csv', sep=',')
 
         plt.figure()
         plt.xlabel("Number of features selected")
         plt.ylabel("Cross validation score (nb of correct classifications)")
-        plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
+        # cv_results_['mean_test_score'] replaces grid_scores_ (removed in scikit-learn 1.2): the mean
+        # cross-validation score for 1, 2, ... features, as grid_scores_ held.
+        mean_scores = rfecv.cv_results_['mean_test_score']
+        plt.plot(range(1, len(mean_scores) + 1), mean_scores)
         plt.savefig(self.outdir + '/' + variable + '_rfecv.pdf', format='pdf', dpi=150)
         logger.info('RFECV Figure for SVM Linear kernel saved to ' + variable + '_rfecv.pdf')
         logger.info('SVM feature importance analysis for %s completed' % variable)
