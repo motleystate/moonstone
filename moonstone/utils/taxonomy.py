@@ -41,7 +41,7 @@ class TaxonomyCountsBase():
         value            Bacteria Bacteroidetes ... Tannerellaceae Tannerellaceae (family)
         """
         taxa_df_with_rank = taxa_df.apply(lambda x: x + " ({})".format(x.name))
-        taxa_df_with_rank_filled_none = taxa_df_with_rank.fillna(method='ffill', axis=1)
+        taxa_df_with_rank_filled_none = taxa_df_with_rank.ffill(axis=1)
         taxa_df_filled_none = taxa_df.combine_first(taxa_df_with_rank_filled_none)
         return taxa_df_filled_none
 
@@ -58,7 +58,7 @@ class TaxonomyCountsBase():
             else:
                 return '_'.join(genus_and_species)
 
-        taxa_df['species'] = taxa_df[['genus', 'species']].apply(lambda x: join_genus_species(x), axis=1)
+        taxa_df['species'] = taxa_df[['genus', 'species']].apply(lambda x: join_genus_species(list(x)), axis=1)
         return taxa_df
 
     def split_taxa_fill_none(self, df: pd.DataFrame, sep: str = ";",  taxo_prefix: str = "__",

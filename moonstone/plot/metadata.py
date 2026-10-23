@@ -106,7 +106,7 @@ class PlotMetadataStats:
             )
 
         graph = BarGraph(
-            pd.value_counts(self.metadata_df[sex_col]),
+            self.metadata_df[sex_col].value_counts(),
         )
         fig = graph.plot_one_graph(
             plotting_options=plotting_options,
@@ -158,7 +158,7 @@ class PlotMetadataStats:
             )
 
         graph = BarGraph(
-            pd.value_counts(self.metadata_df[column_name]),
+            self.metadata_df[column_name].value_counts(),
         )
         # if reset_xnames_dic is not None:
         #     bar_fig.reset_xnames(reset_xnames_dic)

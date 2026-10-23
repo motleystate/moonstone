@@ -176,7 +176,7 @@ class SeriesBinning:
             binned_df = pd.cut(
                 self.data, bins=bins
             )  # put every items in the appropriate bin
-        data = pd.value_counts(binned_df)
+        data = binned_df.value_counts()
         data = data.reindex(binned_df.cat.categories)
         new_xnames = list(data.index.astype(str))
         tmp = new_xnames[0].split(",")
