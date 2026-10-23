@@ -1,0 +1,242 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,urlcolor=blue!50!black,linkcolor=black]{hyperref}
+\setlist{itemsep=2pt,topsep=3pt}
+\newcommand{\code}[1]{\texttt{\small #1}}
+\sloppy
+
+\title{Moonstone: Audit Pass}
+\author{Static review of \code{motleystate/moonstone}, with test-run confirmation}
+\date{23 October 2026 (confirmation run added the same day)}
+
+\begin{document}
+\maketitle
+
+\section*{Update: confirmation run}
+
+After the static review, the package was installed and the findings were executed. Summary:
+
+\begin{itemize}
+  \item \textbf{Every ``to confirm'' finding is confirmed.} Each one raises the error the review predicted
+        (Section~2.1 now carries the exact messages).
+  \item \textbf{The whole command-line interface (CLI) is dead on a fresh install.} \code{moonstone -{}-help} fails with
+        \code{ImportError: cannot import name 'interp' from 'scipy'}, so no option works, including PCA and k-means.
+  \item \textbf{New, larger finding: pandas 3.} The declared bound \code{pandas>=2.0.2} lets a fresh install pick up
+        pandas 3.1.0, under which 69 of 339 tests fail. With pandas 2.3.3 pinned, 6 tests fail.
+  \item \textbf{The Principal Coordinates Analysis (PCoA) tests fail on axis sign only.} Five tests in
+        \code{test\_beta.py} expect coordinates whose signs are flipped relative to scikit-bio 0.7.4's output; magnitudes match.
+\end{itemize}
+
+\paragraph{Environment.} Linux, CPython 3.12.3, clean virtual environments created with \code{uv}, package installed with
+\code{pip install -e .} from \code{master} at commit \code{3930974}. Resolved versions:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+ & \textbf{Environment A (fresh install)} & \textbf{Environment B (pandas pinned)}\\
+\midrule
+pandas & 3.1.0 & 2.3.3\\
+scikit-learn & 1.9.1 & 1.9.1\\
+SciPy & 1.15.3 & 1.15.3\\
+NumPy & 2.4.6 & 2.4.6\\
+scikit-bio & 0.7.4 & 0.7.4\\
+\midrule
+\code{pytest} result & \textbf{69 failed, 270 passed} & \textbf{6 failed, 333 passed}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The classifier findings were exercised by \code{audit/probe\_findings.py}, which calls each library behaviour directly
+and then runs \code{ML.svm}, \code{ML.roc\_analysis}, \code{ML.feature\_analysis} and \code{RandomForest.forest} on a
+synthetic 40-sample, two-class table. To get past the import error, the probe sets \code{scipy.interp = numpy.interp}
+in its own process; no repository code was changed. Results were identical in both environments.
+
+\paragraph{Status at merge (23 October 2026, later the same day).} The findings below describe \code{master} at
+\code{3930974}. Since then, pull requests \#113 (prevalence fix) and \#118 (pandas 3 support, and PCoA tests compared up to
+axis sign) were merged. On \code{master} at \code{f95b2cb}, the full suite passes in both environments
+(340 passed with pandas 3.1.0 and with pandas 2.3.3, optional readers \code{odfpy}, \code{openpyxl} and \code{xlrd}
+installed as in CI). Still open: the SciPy import (the CLI still fails at start-up; fix in pull request \#117),
+\code{-{}-svm\_classifier} and \code{-{}-random\_forest} (fix-list items 3 and 4), and the classifier rewrite.
+
+\section*{Scope and limits}
+
+This is a first audit pass over the repository \href{https://github.com/motleystate/moonstone}{motleystate/moonstone}
+(shallow clone of the default branch, about 16,500 lines of Python, packaged as version 1.1.0).
+It aims to answer three questions: what the pipeline looks like, what is likely to work, and where the
+machine learning code departs from good practice.
+
+\paragraph{Important limitation (original pass; now lifted, see the update above).} The code was \emph{read, not executed}. Installing the package and running the test
+suite was not permitted in this session, because \code{pip install -e .} runs the repository's own
+\code{setup.py}. Every finding below comes from reading the source against the dependency versions the project
+declares. Findings that depend on library behaviour are marked \emph{to confirm}; the first step of the next session
+should be to install in a clean environment and run \code{pytest}, which will confirm or refute them quickly.
+
+\section{What the repository is}
+
+Moonstone is a Python library and command-line interface (CLI) for metagenomics count tables. Its layout:
+
+\begin{itemize}
+  \item \code{parsers/}: readers for count tables (Kraken2, MetaPhlAn 2 and 3, QIIME, PICRUSt2) and metadata.
+  \item \code{filtering/}, \code{normalization/}: cleaning, filtering and normalization steps that record their history.
+  \item \code{analysis/}: diversity (alpha and beta, including Principal Coordinates Analysis, PCoA), statistical tests,
+        differential analysis, clustering, and the classifiers (\code{classify.py}, \code{randomForest.py}).
+  \item \code{plot/}: bar, box, violin, scatter, heatmap and trendline graphs built on Plotly and Matplotlib.
+  \item \code{main.py}: the \code{moonstone} CLI, which dispatches to PCA, k-means, SVM, ROC and random forest.
+\end{itemize}
+
+The Kraken2 support is a single parser, \code{SunbeamKraken2Parser}, for the merged table produced by the Sunbeam
+pipeline. It does not read native Kraken2 report files directly.
+
+\section{Findings}
+
+\subsection{Code paths that look broken under the declared dependencies}
+
+The project requires pandas $\geq$ 2.0.2 and scikit-learn $\geq$ 1.3.1. Several calls in the classifier modules were
+removed in those versions or never existed.
+
+The \textbf{Status} column records the confirmation run (environments A and B gave the same result for every row).
+
+\begin{longtable}{@{}P{3.35cm}P{4.5cm}P{1.7cm}P{5.6cm}@{}}
+\toprule
+\textbf{Location} & \textbf{Problem} & \textbf{Original confidence} & \textbf{Status and actual error}\\
+\midrule
+\endhead
+\code{randomForest.py:30} & Calls \code{classify.SVM(...)} and then \code{.merge(...)}. The only class in \code{classify.py} is \code{ML}, and it has no \code{merge} method. The \code{-{}-random\_forest} option cannot work. & Certain (grep) & \textbf{Confirmed.} \code{AttributeError: module 'moonstone.analysis.classify' has no attribute 'SVM'}\\
+\code{randomForest.py:58} & \code{max\_features="auto"} was removed from \code{RandomForestClassifier} in scikit-learn 1.3. & To confirm & \textbf{Confirmed} (raised at \code{fit}, line 86, once line 30 is bypassed). \code{InvalidParameterError: The 'max\_features' parameter of RandomForestClassifier must be \ldots{} a str among \{'log2', 'sqrt'\} or None. Got 'auto' instead.}\\
+\code{classify.py:5} & \code{from scipy import interp} relies on an alias that recent SciPy releases removed. Because \code{main.py} imports \code{classify} at module level, this would break the \emph{whole} CLI at start-up, not only the ROC command. & To confirm (check SciPy version) & \textbf{Confirmed} on SciPy 1.15.3, the newest version the package allows. \code{ImportError: cannot import name 'interp' from 'scipy'}. \code{moonstone -{}-help} fails with this error.\\
+\code{classify.py:160} & \code{rfecv.grid\_scores\_} was removed in scikit-learn 1.2 and replaced by \code{cv\_results\_}. & To confirm & \textbf{Confirmed} (library call; not reached end-to-end because line 136 fails first). \code{AttributeError: 'RFECV' object has no attribute 'grid\_scores\_'}\\
+\code{classify.py:136} & \code{DataFrame.drop([variable], 1)} passes the axis positionally; pandas 2.0 removed that. & To confirm & \textbf{Confirmed}, pandas 2.3.3 and 3.1.0. \code{TypeError: DataFrame.drop() takes from 1 to 2 positional arguments but 3 were given}. This is the first error \code{-{}-svm\_classifier} hits.\\
+\code{classify.py:154} & \code{ascending=[bool]} passes the Python type \code{bool}, not a boolean value. & Certain & \textbf{Confirmed} (library call). \code{ValueError: For argument "ascending" expected type bool, received type type.}\\
+\bottomrule
+\end{longtable}
+
+\noindent\code{ML.svm} and \code{ML.roc\_analysis} ran to completion once the import was shimmed; their problems are the
+methodological ones in Section~2.3, not crashes.
+
+\subsection{New findings from the test run}
+
+\begin{longtable}{@{}P{2.8cm}P{12.5cm}@{}}
+\toprule
+\textbf{Area} & \textbf{Finding (all observed in the run)}\\
+\midrule
+\endhead
+pandas 3 compatibility & \code{pyproject.toml} allows pandas 3, which a fresh install selects. 63 extra test failures follow, from
+removed APIs: \code{DataFrame.applymap} (28 failures; used in \code{parsers/handleCounts.py:46},
+\code{normalization/counts/geometric\_mean.py:53}, \code{utils/taxonomy.py:86}), \code{pd.value\_counts} (5;
+\code{plot/metadata.py:109,161}, \code{utils/pandas/series.py:179}), \code{fillna(method=...)} (\code{utils/taxonomy.py:44}),
+\code{stack(dropna=...)} (3), and the new default string dtype (several assertion mismatches).
+\code{handleCounts.py:46} is on the CLI's count-file path, so under pandas 3 the CLI would still fail after the SciPy fix.\\
+PCoA tests & 5 failures in \code{tests/analysis/diversity/test\_beta.py} (both environments). Expected and actual coordinates
+differ only in sign, e.g.\ expected $(-0.0643, -0.0269)$, got $(0.0643, 0.0269)$. Axis sign in PCoA is arbitrary, so the
+tests are brittle rather than the method wrong; this matters for the comparison against the R reference (step 4).\\
+Taxa bar-graph test & 1 failure in \code{tests/plot/test\_counts.py} (both environments): the expected first taxon is
+\textit{Lactobacillus}, the actual is \textit{Streptococcus}. Likely a tie in ordering; cause \emph{not yet investigated}.\\
+\bottomrule
+\end{longtable}
+
+\subsection{Code that runs but gives misleading results}
+
+\begin{enumerate}
+  \item \textbf{Wrong model evaluated.} In \code{randomForest.py} lines 111--112, the block labelled ``Gradient Boost''
+        fits and scores \code{ab} (AdaBoost) instead of \code{gb}. The printed train/test accuracy is AdaBoost's, a second time.
+  \item \textbf{Preprocessing leakage.} Scaling is fitted on the whole dataset before cross-validation or splitting
+        (\code{classify.py:36--37, 57, 127}; \code{randomForest.py:41}). The held-out folds therefore influence the scaling
+        parameters. Scaling should sit inside a scikit-learn \code{Pipeline} so it is refitted on each training fold.
+  \item \textbf{Optimistic feature-selection estimate.} Recursive Feature Elimination with Cross-Validation (RFECV) and the final
+        Support Vector Machine (SVM) coefficients are computed on all samples, and the cross-validation score reported comes from
+        the same data that chose the features. Honest performance needs an outer cross-validation loop around the selection.
+  \item \textbf{No handling of class imbalance.} Accuracy is the only metric, there is no \code{class\_weight}, and
+        \code{train\_test\_split} in \code{randomForest.py:64} is not stratified. With unbalanced cohorts, accuracy can look high
+        for a classifier that mostly predicts the majority class. Balanced accuracy, the Area Under the Receiver Operating
+        Characteristic Curve (ROC AUC), and precision/recall per class would be more informative.
+  \item \textbf{Not reproducible.} The ROC folds (\code{classify.py:75}), the train/test split, the decision tree, and the
+        \code{cross\_val\_score} calls are unseeded. The seeded splitter \code{sf} defined at \code{randomForest.py:63} is not
+        used by \code{cross\_val\_score} at line 91.
+  \item \textbf{Possible sample dependence (risk).} No grouped splitting is used. If several samples come from the same subject,
+        site or sequencing batch, ordinary k-fold lets near-duplicates sit in both training and test folds. Whether this applies
+        depends on the cohort; \code{GroupKFold} would remove the risk.
+  \item \textbf{Biased importances.} Random forest importances are impurity-based and computed on the 75\% training split only.
+        Permutation importance on held-out data is more trustworthy for ranking taxa.
+\end{enumerate}
+
+\subsection{PCoA biplot}
+
+The biplot is built in \code{analysis/diversity/beta.py} from scikit-bio's \code{pcoa} and \code{pcoa\_biplot}. The helper
+\code{\_scale\_biplot} rescales and shifts each axis separately so that feature arrows fit the range of the sample cloud.
+This is a reasonable visual overlay, but it changes the angles between arrows and does not place them at the origin, so the
+arrows are not true biplot vectors. The method should be documented as an overlay, or replaced by a single common scaling.
+(The function also edits its input DataFrame in place; this is harmless today because the caller only uses the index afterwards,
+but it is fragile.)
+
+\subsection{Tests and continuous integration}
+
+Twenty source modules have no matching test file, including exactly the ones with the defects above:
+\code{classify.py}, \code{randomForest.py}, \code{clustering.py}, \code{main.py}, the MetaPhlAn parser, and the box, violin,
+heatmap and histogram graphs. That explains how broken calls survived. Continuous integration runs \code{pytest} on Python 3.9
+and 3.13 and only fails the lint step on syntax errors and undefined names, so a missing attribute such as \code{classify.SVM}
+passes unnoticed.
+
+\subsection{Packaging}
+
+Dependencies are declared twice, in \code{pyproject.toml} and \code{setup.py}, with different bounds (for example numpy
+$\geq$ 1.26.4 versus $\geq$ 1.24.3, and SciPy with and without an upper limit). \code{requirements.txt} is a
+\code{pip-compile} output that includes macOS-only and obsolete packages (\code{appnope}, \code{backcall}). One source of
+truth would remove this ambiguity.
+
+\section{Ranked fix list (after the confirmation run)}
+
+Ranked by how much each fix unblocks, then by effort. Costs are \emph{rough} estimates of agent usage at Claude Opus 5.5
+list prices (\$4 per million input tokens, \$20 per million output, \$0.20 per million cached input); they are not measured,
+the mapping from these prices to your cloud credit is not known to me, and real cost can easily be twice the estimate if a
+fix needs several review rounds.
+
+\begin{longtable}{@{}P{0.4cm}P{9.6cm}P{2.2cm}P{2.5cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Fix} & \textbf{Size} & \textbf{Rough cost}\\
+\midrule
+\endhead
+1 & Replace \code{scipy.interp} with \code{numpy.interp} (\code{classify.py:5,88}); add a CLI smoke test that runs
+\code{moonstone -{}-help}. Restores the whole CLI under pandas 2. & One line plus one test & \$1--3\\
+2 & pandas 3: fix the call sites listed in Section~2.2 and the string-dtype test expectations, \emph{or} cap
+\code{pandas<3} as a stop-gap. Fixing is better; capping changes a dependency bound and should be your call. Add pandas 3 to
+the continuous integration (CI) matrix. & Moderate & \$5--12 (fix) or \$1--2 (cap)\\
+3 & \code{-{}-svm\_classifier}: \code{drop(..., axis=1)} at line 136, \code{ascending=True} at line 154,
+\code{cv\_results\_["mean\_test\_score"]} at line 160; one test per method. & Small & \$3--6\\
+4 & \code{-{}-random\_forest}: use \code{MergeDF} in \code{get\_matrix}, \code{max\_features="sqrt"} (the old
+\code{"auto"} meant \code{"sqrt"} for classifiers, so results stay comparable), fit and score \code{gb} not \code{ab} at lines
+111--112; one test. & Small & \$3--6\\
+5 & PCoA tests: compare coordinates up to sign per axis, so they pass on any scikit-bio version. Natural to fold into step 4
+of the project (R reference). & Small & \$2--4\\
+6 & Single source of truth for dependencies (drop \code{install\_requires} from \code{setup.py}); this is what let pandas 3 in
+unnoticed. & Small & \$1--3\\
+7 & Classifier rewrite (project step 3): pipeline, stratified/grouped seeded splits, class weights, balanced accuracy, nested
+cross-validation, permutation importance, tests. & Large & \$25--60\\
+\bottomrule
+\end{longtable}
+
+Items 1--6 together: roughly \$15--35. With item 7: roughly \$40--95. This confirmation step itself was a mid-sized session
+on the same scale as items 2--4 combined.
+
+\section{Suggested next steps, in order (original pass)}
+
+\begin{enumerate}
+  \item In a clean Python 3.11--3.13 environment, install the package and run \code{pytest}; record which ``to confirm'' items
+        above are real.
+  \item Fix the import-time and attribute errors (Section 2.1) and add one smoke test per CLI option so they cannot regress.
+  \item Rewrite the classifiers around one shared, tested module: \code{Pipeline} with scaling inside, stratified and
+        seeded splits, optional grouping, class weights, balanced accuracy and ROC AUC, nested cross-validation for feature
+        selection, and permutation importance.
+  \item Add tests for the PCoA biplot against the R reference output you already have.
+  \item Write a short methods page for biologists: what each metric means, why the splits are done this way, and what a
+        trustworthy result looks like.
+\end{enumerate}
+
+\end{document}
