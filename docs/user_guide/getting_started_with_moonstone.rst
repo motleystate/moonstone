@@ -19,6 +19,9 @@ Please refer to the help section of the command-line tool for more information:
 
     $ moonstone --help
 
+Classification of samples with a Support Vector Machine or a random forest (``--classify``) is described in
+:ref:`classification`.
+
 In Python
 =========
 
