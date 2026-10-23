@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from moonstone.filtering.read_threshold_analysis import (
-    combined_score_threshold, compute_taxa_metrics, knee_index
+    combined_score_threshold, compute_taxa_metrics, rate_threshold_index
 )
 
 
@@ -22,10 +22,20 @@ class TestReadThresholdAnalysis(TestCase):
         self.assertListEqual(metrics['mean reads'].tolist(), [3.0, 4.0])
         self.assertListEqual(metrics['total reads'].tolist(), [12, 16])
 
-    def test_knee_index(self):
-        # Flat then sharply rising: knee is the last point before the rise
+    def test_rate_threshold_index(self):
+        # Flat then sharply rising: threshold is the last point before the rise
         y = [0, 0, 0, 0, 0, 0, 0, 0, 1, 10]
-        self.assertEqual(knee_index(y), 8)
+        idx, slope, average_rate = rate_threshold_index(y)
+        self.assertEqual(idx, 8)
+        self.assertEqual(average_rate, 10 / 9)
+        self.assertListEqual(slope.tolist(), [0, 0, 0, 0, 0, 0, 0, 1, 9])
+
+    def test_rate_threshold_index_ignores_early_noisy_step(self):
+        # One early step above the average rate should not set the threshold
+        y = [0, 0, 3, 3, 3, 3, 3, 3, 4, 20]
+        idx, slope, average_rate = rate_threshold_index(y)
+        self.assertGreater(slope[1], average_rate)
+        self.assertEqual(idx, 8)
 
     def test_combined_score_requires_prevalence_and_abundance(self):
         taxa_metrics = pd.DataFrame(

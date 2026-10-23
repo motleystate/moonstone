@@ -38,12 +38,23 @@ def compute_taxa_metrics(df):
                          "total reads": df.sum(axis=1)})
 
 
-def knee_index(y):
-    """Index of the knee of a sorted curve: the point farthest from the chord joining its ends."""
+def rate_threshold_index(y):
+    """Index where the slope of a sorted curve overtakes its average rate of change.
+
+    This is the same criterion as the reads-derivative method (reads lost per species
+    removed > the uniform rate), applied to the discrete data instead of a fitted curve.
+    Single noisy steps can exceed the average rate early, so the slope is compared on
+    balance: the threshold is where the running sum of (average rate - slope) peaks,
+    i.e. the last point before which the curve has risen more slowly than average.
+    Geometrically this is the knee, the point farthest below the chord joining the ends.
+
+    Returns the index, the discrete slope and the average rate.
+    """
     y = np.asarray(y, dtype=float)
-    x_norm = np.linspace(0, 1, len(y))
-    y_norm = (y - y[0]) / (y[-1] - y[0])
-    return int(np.argmax(np.abs(y_norm - x_norm)))
+    slope = np.diff(y)
+    average_rate = (y[-1] - y[0]) / (len(y) - 1)
+    rate_deficit = np.concatenate(([0], np.cumsum(average_rate - slope)))
+    return int(np.argmax(rate_deficit)), slope, average_rate
 
 
 def combined_score_threshold(taxa_metrics, save_plots=False, output_dir="."):
@@ -57,7 +68,7 @@ def combined_score_threshold(taxa_metrics, save_plots=False, output_dir="."):
     score = taxa_metrics['percent present'] / 100 * np.log10(taxa_metrics['mean reads'] + 1)
 
     sorted_score = np.sort(score.values)
-    knee_idx = knee_index(sorted_score)
+    knee_idx, score_slope, average_rate = rate_threshold_index(sorted_score)
     score_threshold = sorted_score[knee_idx]
     keep = score > score_threshold
 
@@ -90,7 +101,23 @@ def combined_score_threshold(taxa_metrics, save_plots=False, output_dir="."):
         plt.savefig(os.path.join(output_dir, "combined_score_knee.png"))
         plt.close()
 
-        # Plot 2: Prevalence vs abundance, coloured by retained/removed
+        # Plot 2: Derivative of the sorted score against its average rate
+        plt.figure(figsize=(10, 6))
+        plt.plot(np.arange(1, total_taxa), score_slope, linewidth=0.8, label='Score slope (per species)')
+        plt.axhline(average_rate, color='tab:red', linestyle=':', label=f'Average rate: {average_rate:.2e}')
+        plt.axvline(knee_idx, color='black', linestyle='--',
+                    label=f'Threshold: {_stats["species_removed"]} species removed')
+        plt.yscale('log')
+        plt.title('Derivative of Combined Score as a function of Taxa')
+        plt.xlabel('Number of Lowest-Scoring Species Removed')
+        plt.ylabel('Rate of Change (log scale)')
+        plt.legend()
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_dir, "combined_score_derivative.png"))
+        plt.close()
+
+        # Plot 3: Prevalence vs abundance, coloured by retained/removed
         plt.figure(figsize=(10, 6))
         plt.scatter(taxa_metrics.loc[~keep, 'mean reads'], taxa_metrics.loc[~keep, 'percent present'],
                     s=4, alpha=0.4, color='grey', label=f'Removed ({(~keep).sum()})')
