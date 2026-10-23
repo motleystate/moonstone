@@ -59,6 +59,13 @@ and then runs \code{ML.svm}, \code{ML.roc\_analysis}, \code{ML.feature\_analysis
 synthetic 40-sample, two-class table. To get past the import error, the probe sets \code{scipy.interp = numpy.interp}
 in its own process; no repository code was changed. Results were identical in both environments.
 
+\paragraph{Status at merge (23 October 2026, later the same day).} The findings below describe \code{master} at
+\code{3930974}. Since then, pull requests \#113 (prevalence fix) and \#118 (pandas 3 support, and PCoA tests compared up to
+axis sign) were merged. On \code{master} at \code{f95b2cb}, the full suite passes in both environments
+(340 passed with pandas 3.1.0 and with pandas 2.3.3, optional readers \code{odfpy}, \code{openpyxl} and \code{xlrd}
+installed as in CI). Still open: the SciPy import (the CLI still fails at start-up; fix in pull request \#117),
+\code{-{}-svm\_classifier} and \code{-{}-random\_forest} (fix-list items 3 and 4), and the classifier rewrite.
+
 \section*{Scope and limits}
 
 This is a first audit pass over the repository \href{https://github.com/motleystate/moonstone}{motleystate/moonstone}
