@@ -1,5 +1,4 @@
 import numpy as np
-from packaging import version
 import pandas as pd
 import scipy
 from typing import List, Union, Tuple, Optional
@@ -150,19 +149,8 @@ def mann_whitney_u(
     series1: pd.Series, series2: pd.Series, alternative: str = "two-sided", **kwargs
 ):
     # alternative = None is deprecated
-    authorized_keys = ["use_continuity"]
-    scipy_version = version.parse(scipy.__version__)
-    if scipy_version >= version.parse("1.7.0"):
-        authorized_keys += ["method", "axis"]
-    if scipy_version >= version.parse("1.8.0"):
-        authorized_keys += ["nan_policy"]
-    kwargs, raisewarning = filter_dict(
-        kwargs, authorized_keys, ["method", "axis", "nan_policy"]
-    )
-    if raisewarning:
-        logger.warning(
-            f"{raisewarning} not available with version {scipy_version} of scipy."
-        )
+    authorized_keys = ["use_continuity", "method", "axis", "nan_policy"]
+    kwargs = filter_dict(kwargs, authorized_keys)
     return scipy.stats.mannwhitneyu(series1, series2, alternative=alternative, **kwargs)
 
 
@@ -171,21 +159,9 @@ def ttest_independence(
 ):
     # equal_var = False is Welch's t-test, which does not assume equal population variance
     authorized_keys = [
-        "nan_policy",
-        "axis",
+        "nan_policy", "axis", "alternative", "permutations", "random_state", "trim",
     ]
-    scipy_version = version.parse(scipy.__version__)
-    if scipy_version >= version.parse("1.6.0"):
-        authorized_keys += ["alternative"]
-    if scipy_version >= version.parse("1.7.0"):
-        authorized_keys += ["permutations", "random_state", "trim"]
-    kwargs, raisewarning = filter_dict(
-        kwargs, authorized_keys, ["alternative", "permutations", "random_state", "trim"]
-    )
-    if raisewarning:
-        logger.warning(
-            f"{raisewarning} not available with version {scipy_version} of scipy."
-        )
+    kwargs = filter_dict(kwargs, authorized_keys)
     return scipy.stats.ttest_ind(series1, series2, equal_var=equal_var, **kwargs)
 
 
