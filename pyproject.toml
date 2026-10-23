@@ -21,7 +21,7 @@ readme = "README.md"
 license = { text = "MIT" }
 
 dependencies = [
-    "pandas>=2.0.2",
+    "pandas>=2.2.0",
     "matplotlib>=3.3.0",
     "plotly>=5.17.0",
     "statsmodels>=0.14.0",

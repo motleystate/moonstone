@@ -119,7 +119,10 @@ If you're not sure of the symmetry of your data structure, use None.".format(sym
             onself: whether to keep values on self (True) or not (False).
                     Example of value on self: ("A", "A")
         """
-        ser = df.stack(dropna=dropna)
+        # built by hand because stack(dropna=...) was removed in pandas 3
+        ser = pd.Series(df.to_numpy().ravel(), index=pd.MultiIndex.from_product([df.index, df.columns]))
+        if dropna:
+            ser = ser.dropna()
         if onself is True:
             return ser
         else:  # onself is False

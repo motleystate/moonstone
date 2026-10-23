@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import skbio.diversity
 from skbio.stats.distance import DistanceMatrix
-from skbio.stats.ordination import pcoa, pcoa_biplot
+from skbio.stats.ordination import pcoa
 
 from moonstone.analysis.diversity.base import (
     DiversityBase, PhylogeneticDiversityBase
@@ -120,6 +120,31 @@ class BetaDiversity(DiversityBase, ABC):
         """
         z = x/y * scale
         return z
+
+    @staticmethod
+    def _pcoa_biplot_features(ordination, features_df) -> pd.DataFrame:
+        """
+        Same computation as skbio.stats.ordination.pcoa_biplot (Legendre & Legendre 1998, chapter 9),
+        returning the projected features only.
+
+        skbio's version writes into a read-only view of the coordinates under pandas 3 (copy-on-write)
+        and raises "output array is read-only", so the computation is done here on writable numpy copies.
+        """
+        coordinates = ordination.samples
+        eigvals = np.array(ordination.eigvals, dtype=np.float64)
+        n_samples = coordinates.shape[0]
+        y = features_df.reindex(coordinates.index)
+
+        coords = np.array(coordinates, dtype=np.float64)
+        std = coords.std(axis=0, ddof=1)
+        std[std == 0] = 1.0
+        scaled_coords = (coords - coords.mean(axis=0)) / std
+
+        spc = (1 / (n_samples - 1)) * np.asarray(y, dtype=np.float64).T.dot(scaled_coords)
+        inv_sqrt_eigvals = np.zeros_like(eigvals)
+        np.power(eigvals, -0.5, out=inv_sqrt_eigvals, where=eigvals > 0)
+        uproj = np.sqrt(n_samples - 1) * spc.dot(np.diag(inv_sqrt_eigvals))
+        return pd.DataFrame(uproj, index=y.columns.copy(), columns=coordinates.columns.copy()).fillna(0.0)
 
     def _scale_biplot(self, pcoa_biplot_features_df, pcoa_sample_coordinates_df) -> pd.DataFrame:
         """
@@ -308,8 +333,7 @@ class BetaDiversity(DiversityBase, ABC):
         )
 
         if n_biplot_features > 0:
-            my_pcoa_biplot = pcoa_biplot(self.pcoa, self.df.transpose())
-            d_bf = my_pcoa_biplot.features                           # DF of PCoA feature contributions
+            d_bf = self._pcoa_biplot_features(self.pcoa, self.df.transpose())  # DF of PCoA feature contributions
             d_sbf = self._scale_biplot(d_bf, self.pcoa.samples)      # DF of SCALLED PCoA features contribution
             loadings = d_sbf.transpose().values
             pcx = loadings[x_pc-1, :]

@@ -9,7 +9,7 @@ setup(
     author='Kenzo-Hugo Hillion, Agnès Baud, Mariela Furstenheim, Sean Kennedy',
     author_email='kehillio@pasteur.fr',
     install_requires=[
-        'pandas>=2.0.2',
+        'pandas>=2.2.0',
         'matplotlib>=3.3.0',
         'plotly>=5.17.0',
         'statsmodels>=0.14.0',

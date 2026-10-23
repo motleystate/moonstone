@@ -459,7 +459,7 @@ Another statistical test would be more appropriate to compare these groups.",
         ii = pd.IntervalIndex.from_tuples([(0.982, 10.0), (10.0, 19.0)])
         ci = pd.CategoricalIndex(ii, ordered=True)
         ci = ci.add_categories("NaN")
-        ci = ci.append(pd.Index(["NaN"]))
+        ci = ci.append(pd.CategoricalIndex(["NaN"], categories=ci.categories, ordered=True))
         ci.name = "numerical_series"
         expected_tab.index = ci
         expected_tab.columns.name = "categorical_series"
