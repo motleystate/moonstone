@@ -7,6 +7,14 @@ Changelogs
 Summary of developments of moonstone library.
 
 
+Unreleased
+==========
+
+* Requires Python 3.13 and pandas >= 3.0 (support for Python 3.9 to 3.12 and for pandas 2 is dropped).
+  Minimum scikit-bio raised to 0.6.0. (https://github.com/motleystate/moonstone/pull/118)
+* Compatibility with pandas 3 (https://github.com/motleystate/moonstone/pull/118)
+
+
 v1.1
 ====
 

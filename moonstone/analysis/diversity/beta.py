@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from typing import Union
 
 import numpy as np
-from packaging import version
 import pandas as pd
 import plotly.graph_objects as go
 import skbio.diversity
@@ -386,17 +385,10 @@ class WeightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
 Computation of the Weighted UniFrac diversity using only the OTU IDs present in the Tree.")
                 otu_ids = list(set(otu_ids) - set(missing_ids))
 
-        skbio_version = version.parse(skbio.__version__)
-        if skbio_version >= version.parse("0.6.0"):
-            return skbio.diversity.beta_diversity(
-                "weighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
-                validate=self.validate, taxa=otu_ids, tree=self.tree,
-                )
-        else:
-            return skbio.diversity.beta_diversity(
-                "weighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
-                validate=self.validate, otu_ids=otu_ids, tree=self.tree,
-                )
+        return skbio.diversity.beta_diversity(
+            "weighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
+            validate=self.validate, taxa=otu_ids, tree=self.tree,
+        )
 
 
 class UnweightedUniFrac(BetaDiversity, PhylogeneticDiversityBase):
@@ -417,14 +409,7 @@ Computation of the Unweighted UniFrac diversity using only the OTU IDs present i
                 otu_ids = list(set(otu_ids) - set(missing_ids))
 
         # df = counts dataframe
-        skbio_version = version.parse(skbio.__version__)
-        if skbio_version >= version.parse("0.6.0"):
-            return skbio.diversity.beta_diversity(
-                "unweighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
-                validate=self.validate, taxa=otu_ids, tree=self.tree,
-                )
-        else:
-            return skbio.diversity.beta_diversity(
-                "unweighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
-                validate=self.validate, otu_ids=otu_ids, tree=self.tree,
-                )
+        return skbio.diversity.beta_diversity(
+            "unweighted_unifrac", counts=df.loc[otu_ids].transpose(), ids=df.columns,
+            validate=self.validate, taxa=otu_ids, tree=self.tree,
+        )

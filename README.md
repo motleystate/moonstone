@@ -27,8 +27,8 @@ You can install `moonstone` either as a **user** (to use the tool as-is) or as a
 If you only want to use `moonstone` and don't need to edit the source code:
 
 ```bash
-# Create and activate a Python 3.10 environment
-mamba create -n moonstone python=3.10 -y
+# Create and activate a Python 3.13 environment
+mamba create -n moonstone python=3.13 -y
 conda activate moonstone
 
 # Install the latest published version of moonstone from PyPI
@@ -45,7 +45,7 @@ git clone git@github.com:motleystate/moonstone.git
 cd moonstone
 
 # Create a development environment
-mamba create -n moonstone-dev python=3.10 -y
+mamba create -n moonstone-dev python=3.13 -y
 conda activate moonstone-dev
 
 # Install Moonstone in editable mode
