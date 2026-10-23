@@ -1,7 +1,9 @@
 import argparse
-import pandas as pd
-import numpy as np
+import os
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from scipy.optimize import curve_fit
 
 # Define the bounded logistic model (taxa model)
@@ -17,7 +19,7 @@ def generalized_sigmoid_derivative(x, L, k, x0, c):
     exp_term = np.exp(-k * (x - x0))
     return (L * k * exp_term) / ((1 + exp_term) ** 2)
 
-def analyze_normalized_reads(input_file, group_by='species', save_plots=False, save_filtered=False):
+def analyze_normalized_reads(input_file, save_plots=False, save_filtered=False, output_dir="."):
     df = pd.read_csv(input_file)
     # Melt the dataframe
     melted = df.melt(
@@ -39,7 +41,7 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False, s
     total_taxa = len(taxa_metrics)
 
     # Taxa curve
-    # Sort by percent present descending
+    # Sort by mean reads descending
     sorted_metrics = taxa_metrics.sort_values(by='mean reads', ascending=False).reset_index(drop=True)
     x_taxa = np.arange(1, len(sorted_metrics) + 1)
     y_taxa = sorted_metrics['percent present'].values
@@ -96,8 +98,11 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False, s
                                 "total reads": df.sum(axis=1)})
     filtered_taxa = filtered_taxa.query('`mean reads` >= @_stats["min_reads_retained"]').reset_index(drop=True)
 
+    if save_filtered or save_plots:
+        os.makedirs(output_dir, exist_ok=True)
+
     if save_filtered:
-        filtered_taxa.to_csv("filtered_taxa.csv", index=True)
+        filtered_taxa.to_csv(os.path.join(output_dir, "filtered_taxa.csv"), index=True)
 
 
     if save_plots:
@@ -125,11 +130,11 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False, s
                 bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.5))
 
         plt.title('Species and Reads Curves')
-        plt.xlabel('Number of Least Prevalent Species Removed')
+        plt.xlabel('Number of Lowest-Abundance Species Removed')
         plt.ylabel('Cumulative Percentage (%)')
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig("removal_curves.png")
+        plt.savefig(os.path.join(output_dir, "removal_curves.png"))
         plt.close()
 
         # Plot 2: Derivative
@@ -144,12 +149,12 @@ def analyze_normalized_reads(input_file, group_by='species', save_plots=False, s
                 fontsize=14, verticalalignment='top', bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.5))
 
         plt.title('Derivative of Read Removal Curve as a function of Taxa')
-        plt.xlabel('NNumber of Low-Abundance Species Removed')
+        plt.xlabel('Number of Lowest-Abundance Species Removed')
         plt.ylabel('Rate of Change (%)')
         plt.legend()
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig("removal_derivatives.png")
+        plt.savefig(os.path.join(output_dir, "removal_derivatives.png"))
         plt.close()
 
     return exceed_idx, _stats, filtered_taxa
@@ -159,11 +164,13 @@ if __name__ == "__main__":
     parser.add_argument("input_file", help="Path to normalized read counts CSV file (species x samples)")
     parser.add_argument("--save-plots", action="store_true", help="Save output plots (default: no plots)")
     parser.add_argument("--save-filtered", action="store_true", help="Save filtered taxa to CSV file (default: no)")
+    parser.add_argument("--output-dir", default=".", help="Directory for saved plots and CSV (default: current directory)")
     args = parser.parse_args()
 
     threshold, stats, filtered_taxa = analyze_normalized_reads(args.input_file, 
                                                                save_plots=args.save_plots,
-                                                               save_filtered=args.save_filtered)
+                                                               save_filtered=args.save_filtered,
+                                                               output_dir=args.output_dir)
     print(f"Recommended filtering threshold: {stats['min_reads_retained']:.1f}")
     print(f"Species removed: {stats['species_removed']} out of {stats['total_taxa']} ({threshold/stats['total_taxa'] * 100:.2f}%)")
     print(f"Reads removed: {stats['reads_pct_removed']:.2f}%")
