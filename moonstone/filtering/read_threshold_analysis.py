@@ -4,7 +4,6 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.optimize import curve_fit
 
 TAXONOMY_COLUMNS = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species', 'NCBI_taxonomy_ID']
 
@@ -70,22 +69,6 @@ def _equation_box(ax, text, x=0.02, y=0.96, ha='left', va='top', fontsize=12):
             bbox=dict(boxstyle='round,pad=0.6', facecolor='white', edgecolor=COLORS['grid'], linewidth=1))
 
 
-# Define the bounded logistic model (taxa model)
-def bounded_logistic(x, L, a, b):
-    return L / (1 + a * x**b)
-
-
-# Define generalized sigmoid function (reads model)
-def generalized_sigmoid(x, L, k, x0, c):
-    return L / (1 + np.exp(-k * (x - x0))) + c
-
-
-# Define derivative of the generalized sigmoid function
-def generalized_sigmoid_derivative(x, L, k, x0, c):
-    exp_term = np.exp(-k * (x - x0))
-    return (L * k * exp_term) / ((1 + exp_term) ** 2)
-
-
 def load_species_table(input_file):
     """Read a taxonomy x samples CSV and collapse it to a species x samples table."""
     df = pd.read_csv(input_file)
@@ -102,8 +85,8 @@ def compute_taxa_metrics(df):
 def rate_threshold_index(y):
     """Index where the slope of a sorted curve overtakes its average rate of change.
 
-    This is the same criterion as the reads-derivative method (reads lost per species
-    removed > the uniform rate), applied to the discrete data instead of a fitted curve.
+    The criterion is that removing one more taxon changes the curve faster than the
+    uniform rate, computed on the discrete data rather than on a fitted curve.
     Single noisy steps can exceed the average rate early, so the slope is compared on
     balance: the threshold is where the running sum of (average rate - slope) peaks,
     i.e. the last point before which the curve has risen more slowly than average.
@@ -136,7 +119,6 @@ def combined_score_threshold(taxa_metrics, save_plots=False, output_dir="."):
     total_taxa = len(taxa_metrics)
     total_reads = taxa_metrics['mean reads'].sum()
     _stats = {
-        'method': 'combined',
         'score_threshold': score_threshold,
         'species_removed': int((~keep).sum()),
         'species_pct_removed': 100 * (~keep).sum() / total_taxa,
@@ -249,131 +231,14 @@ def plot_combined_score(taxa_metrics, keep, sorted_score, knee_idx, score_slope,
         plt.close(fig)
 
 
-def reads_derivative_threshold(taxa_metrics, save_plots=False, output_dir="."):
-    """Keep taxa above the point where the fitted reads-loss rate exceeds the species-loss rate."""
-    total_taxa = len(taxa_metrics)
-
-    # Taxa curve
-    # Sort by mean reads descending
-    sorted_metrics = taxa_metrics.sort_values(by='mean reads', ascending=False).reset_index(drop=True)
-    x_taxa = np.arange(1, len(sorted_metrics) + 1)
-    y_taxa = sorted_metrics['percent present'].values
-
-    # Set dynamic bounds for L based on data max, fit and predict
-    max_present = y_taxa.max()
-    bounds_dynamic = ([max_present - 10, 0, -np.inf], [max_present + 10, np.inf, np.inf])
-    popt_log, _ = curve_fit(bounded_logistic, x_taxa, y_taxa, bounds=bounds_dynamic, maxfev=5000)
-    taxa_fit = bounded_logistic(x_taxa, *popt_log)
-
-    # Calculate Taxa Curve R²
-    ss_res = np.sum((y_taxa - taxa_fit) ** 2)
-    ss_tot = np.sum((y_taxa - np.mean(y_taxa)) ** 2)
-    taxa_r_squared = 1 - (ss_res / ss_tot)
-
-    # Reads curve
-    sorted_metrics = taxa_metrics.sort_values(by='mean reads').reset_index(drop=True)
-    x_reads = np.arange(0, total_taxa + 1)
-    y_reads_raw = np.concatenate(([0], sorted_metrics['mean reads'].cumsum().values))
-    y_reads_pct = y_reads_raw / y_reads_raw[-1] * 100
-    popt_sig, _ = curve_fit(generalized_sigmoid, x_reads, y_reads_pct, p0=[100, -0.01, total_taxa/2, 0], maxfev=5000)
-    reads_fit = generalized_sigmoid(x_reads, *popt_sig)
-
-    # Calculate Read Curve R²
-    ss_res_final = np.sum((y_reads_pct - reads_fit) ** 2)
-    ss_tot_final = np.sum((y_reads_pct - np.mean(y_reads_pct)) ** 2)
-    reads_r_squared = 1 - (ss_res_final / ss_tot_final)
-
-    # Calculate Derivative of read sigmoid function
-    reads_derivative = generalized_sigmoid_derivative(x_reads, *popt_sig)
-
-    # Threshold: when reads loss > species loss per unit
-    species_loss_rate = 100 / total_taxa
-    exceed_idx = np.where(reads_derivative > species_loss_rate)[0][0]
-    species_pct_removed = (exceed_idx / total_taxa) * 100
-    reads_pct_removed = y_reads_pct[exceed_idx]
-    min_reads_retained = sorted_metrics.iloc[exceed_idx:]['mean reads'].min()
-    keep = taxa_metrics['mean reads'] >= min_reads_retained
-
-    # Prepare stats dictionary
-    _stats = {
-        'method': 'reads',
-        'species_removed': int(exceed_idx),
-        'species_pct_removed': species_pct_removed,
-        'reads_pct_removed': reads_pct_removed,
-        'min_reads_retained': min_reads_retained,
-        'min_prevalence_retained': taxa_metrics.loc[keep, 'percent present'].min(),
-        'species_model_params': popt_log,
-        'reads_model_params': popt_sig,
-        'total_taxa': total_taxa
-    }
-
-    if save_plots:
-        L_log, a_log, b_log = popt_log
-        L_sig, k_sig, x0_sig, c_sig = popt_sig
-        summary = (f'Keeps {total_taxa - exceed_idx:,} of {total_taxa:,} taxa, '
-                   f'holding {100 - reads_pct_removed:.1f}% of reads')
-        with plt.rc_context(PLOT_STYLE):
-            # Plot 1: Species and Reads fits
-            fig, ax = plt.subplots(figsize=(10, 6))
-            ax.plot(x_taxa, y_taxa, 'o', markersize=3, alpha=0.35, color=COLORS['primary'],
-                    markeredgewidth=0, label='Species prevalence (%)')
-            ax.plot(x_taxa, taxa_fit, color=COLORS['primary'],
-                    label=f'Fitted species logistic ($R^2 = {taxa_r_squared:.3f}$)')
-            ax.plot(x_reads, y_reads_pct, 'o', markersize=3, alpha=0.35, color=COLORS['secondary'],
-                    markeredgewidth=0, label='Cumulative reads removed (%)')
-            ax.plot(x_reads, reads_fit, color=COLORS['secondary'],
-                    label=f'Fitted reads sigmoid ($R^2 = {reads_r_squared:.3f}$)')
-            _equation_box(ax, 'Species:  ' + rf'$y = \dfrac{{{L_log:.1f}}}{{1 + {_sci(a_log)} \, x^{{{b_log:.2f}}}}}$',
-                          x=0.98, y=0.96, ha='right', fontsize=12)
-            _equation_box(ax, 'Reads:  '
-                          + rf'$y = \dfrac{{{L_sig:.1f}}}{{1 + e^{{-({k_sig:.3f})(x - {x0_sig:.1f})}}}} + {c_sig:.2f}$',
-                          x=0.98, y=0.80, ha='right', fontsize=12)
-            _titles(ax, 'Species and Reads Curves', summary)
-            ax.set_xlabel('Number of Lowest-Abundance Species Removed ($x$)')
-            ax.set_ylabel('Percentage (%)')
-            ax.legend(loc='center right')
-            fig.tight_layout()
-            fig.savefig(os.path.join(output_dir, "removal_curves.png"))
-            plt.close(fig)
-
-            # Plot 2: Derivative
-            fig, ax = plt.subplots(figsize=(10, 6))
-            ax.plot(x_reads, reads_derivative, color=COLORS['secondary'], label=r'$dy/dx$ of fitted reads sigmoid')
-            ax.axhline(species_loss_rate, color=COLORS['primary'], linewidth=1.5, linestyle=':',
-                       label=rf'Uniform rate $100/N = {_sci(species_loss_rate)}$')
-            ax.axvline(exceed_idx, color=COLORS['text_secondary'], linewidth=1, linestyle='--')
-            ax.plot([exceed_idx], [reads_derivative[exceed_idx]], 'o', markersize=9, color=COLORS['secondary'],
-                    markeredgecolor=COLORS['surface'], markeredgewidth=2, zorder=5)
-            ax.annotate(f'$x^* = {_num(exceed_idx)}$', xy=(exceed_idx, reads_derivative[exceed_idx]),
-                        xytext=(-14, 30), textcoords='offset points', ha='right', fontsize=12,
-                        arrowprops=dict(arrowstyle='-', color=COLORS['text_secondary'], linewidth=0.8))
-            _equation_box(ax, r'$\dfrac{dy}{dx} = \dfrac{L k \, e^{-k(x - x_0)}}{(1 + e^{-k(x - x_0)})^2}$'
-                          + '\n' + r'$x^* = \min \{ x : dy/dx > 100/N \}$', fontsize=13)
-            _titles(ax, 'Derivative of Read Removal Curve', summary)
-            ax.set_xlabel('Number of Lowest-Abundance Species Removed ($x$)')
-            ax.set_ylabel('Rate of change (% of reads per species)')
-            ax.legend(loc='center left')
-            fig.tight_layout()
-            fig.savefig(os.path.join(output_dir, "removal_derivatives.png"))
-            plt.close(fig)
-
-    return keep, _stats
-
-
-METHODS = {
-    'combined': combined_score_threshold,
-    'reads': reads_derivative_threshold,
-}
-
-
-def analyze_normalized_reads(input_file, method='combined', save_plots=False, save_filtered=False, output_dir="."):
+def analyze_normalized_reads(input_file, save_plots=False, save_filtered=False, output_dir="."):
     df = load_species_table(input_file)
     taxa_metrics = compute_taxa_metrics(df)
 
     if save_filtered or save_plots:
         os.makedirs(output_dir, exist_ok=True)
 
-    keep, _stats = METHODS[method](taxa_metrics, save_plots=save_plots, output_dir=output_dir)
+    keep, _stats = combined_score_threshold(taxa_metrics, save_plots=save_plots, output_dir=output_dir)
 
     # Retained taxa with their metrics
     filtered_taxa = taxa_metrics[keep].reset_index().rename(columns={'species': 'Taxon'})
@@ -388,9 +253,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Determine filtering threshold based on species prevalence and read abundance.")
     parser.add_argument("input_file", help="Path to normalized read counts CSV file (species x samples)")
-    parser.add_argument("--method", choices=METHODS.keys(), default="combined",
-                        help="combined: knee of a prevalence x log abundance score (default); "
-                             "reads: derivative of the fitted cumulative reads-loss curve")
     parser.add_argument("--save-plots", action="store_true", help="Save output plots (default: no plots)")
     parser.add_argument("--save-filtered", action="store_true", help="Save filtered taxa to CSV file (default: no)")
     parser.add_argument("--output-dir", default=".",
@@ -398,13 +260,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     stats, filtered_taxa = analyze_normalized_reads(args.input_file,
-                                                    method=args.method,
                                                     save_plots=args.save_plots,
                                                     save_filtered=args.save_filtered,
                                                     output_dir=args.output_dir)
-    print(f"Method: {stats['method']}")
-    if stats['method'] == 'combined':
-        print(f"Combined score threshold: {stats['score_threshold']:.4f}")
+    print(f"Combined score threshold: {stats['score_threshold']:.4f}")
     print(f"Species removed: {stats['species_removed']} out of {stats['total_taxa']} "
           f"({stats['species_pct_removed']:.2f}%)")
     print(f"Reads removed: {stats['reads_pct_removed']:.2f}%")
