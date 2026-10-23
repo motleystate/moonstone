@@ -13,6 +13,9 @@ Unreleased
 * Requires Python 3.13 and pandas >= 3.0 (support for Python 3.9 to 3.12 and for pandas 2 is dropped).
   Minimum scikit-bio raised to 0.6.0. (https://github.com/motleystate/moonstone/pull/118)
 * Compatibility with pandas 3 (https://github.com/motleystate/moonstone/pull/118)
+* Command-line tool starts again with recent SciPy versions (``scipy.interp`` replaced by ``numpy.interp``);
+  ``moonstone --help`` now exits with status 0. New dependency: ``filetype>=1.2.0``. (https://github.com/motleystate/moonstone/pull/117)
+* Install instructions updated for Python 3.13; install from GitHub until a release newer than 1.0.0 is on PyPI.
 
 
 v1.1
