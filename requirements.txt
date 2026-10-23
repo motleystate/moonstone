@@ -22,6 +22,8 @@ decorator>=4.4.2
     # via
     #   ipython
     #   scikit-bio
+filetype>=1.2.0
+    # via moonstone (setup.py)
 hdmedians>=0.14.2
     # via
     #   moonstone (setup.py)
