@@ -17,7 +17,7 @@ setup(
         'pyaml>=20.4.0',
         'numpy>=1.26.4',
         'scikit-bio>=0.6.0',
-        'scikit-learn>=1.3.1',
+        'scikit-learn>=1.5.0',
         'hdmedians>=0.14.2',
         'cython>=0.29.21',
         'scipy>=1.9.0',

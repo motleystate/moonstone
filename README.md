@@ -89,14 +89,31 @@ options:
   -p, --pca_plot        Generates PCA plot of data
   -k, --k_means nb_clusters
                         Runs K-Means clustering. Provide number of clusters
-  -s, --svm variable    Run SVMachine Classification
-  -sr, --svm_roc variable
-                        SVM Classifier with ROC Analysis
-  -sc, --svm_classifier variable
-                        SVM and output Classifier Components
-  -rf, --random_forest variable
-                        Random Forest Analysis, using supplied variable
+  -c, --classify variable
+                        Cross-validated classification of a metadata variable
+                        from the counts
+  --model {svm,random_forest} [{svm,random_forest} ...]
+                        Classifier(s) for --classify: Support Vector Machine
+                        and/or random forest (default: svm)
+  --kernel {linear,poly,rbf,sigmoid,auto}
+                        Support Vector Machine kernel; auto picks one by
+                        nested cross-validation (default: linear)
+  --explore_kernels     With --classify, compare Support Vector Machine
+                        kernels (exploratory scores)
+  --folds FOLDS         Number of cross-validation folds (default: 5)
+  --seed SEED           Random seed for folds and models (default: 0)
+  --group_column column
+                        Metadata column naming the subject of each sample;
+                        keeps a subject in one fold
+  --roc                 With --classify, plot Receiver Operating
+                        Characteristic curves
+  --feature_selection   With --classify, select features by nested recursive
+                        feature elimination
 ```
+
+For example, `moonstone counts.csv metadata.csv output --classify disease --model svm random_forest --roc`
+runs a 5-fold stratified cross-validation of both classifiers. Scores are balanced accuracy and the area under the
+Receiver Operating Characteristic (ROC) curve, measured on samples the model did not see during training.
 
 --------
 

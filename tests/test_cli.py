@@ -13,7 +13,7 @@ class TestCommandLineSmoke(TestCase):
     """Check that the command line starts on a fresh install."""
 
     def test_modules_imported_by_main_load(self):
-        for module in ['moonstone.main', 'moonstone.analysis.classify', 'moonstone.analysis.randomForest',
+        for module in ['moonstone.main', 'moonstone.analysis.classification',
                        'moonstone.normalization.reads.read_downsize', 'moonstone.normalization.reads.downsize_dir']:
             with self.subTest(module=module):
                 importlib.import_module(module)
@@ -28,7 +28,8 @@ class TestCommandLineSmoke(TestCase):
         result = self.run_moonstone('--help')
         self.assertNotIn('Traceback', result.stderr)
         self.assertIn('usage: moonstone', result.stdout)
-        self.assertIn('--random_forest', result.stdout)
+        self.assertIn('--classify', result.stdout)
+        self.assertNotIn('--random_forest', result.stdout)
         self.assertEqual(result.returncode, 0)
 
     def test_missing_arguments_exit_1(self):
@@ -37,7 +38,7 @@ class TestCommandLineSmoke(TestCase):
         self.assertIn('the following arguments are required', result.stderr)
         self.assertEqual(result.returncode, 1)
 
-    def test_random_forest(self):
+    def write_inputs(self):
         tmpdir = tempfile.mkdtemp()
         rng = np.random.default_rng(0)
         samples = [f's{i}' for i in range(40)]
@@ -46,32 +47,58 @@ class TestCommandLineSmoke(TestCase):
         counts.to_csv(os.path.join(tmpdir, 'counts.csv'))
         metadata = pd.DataFrame({'group': ['A'] * 20 + ['B'] * 20}, index=pd.Index(samples, name='sample'))
         metadata.to_csv(os.path.join(tmpdir, 'metadata.csv'))
-        outdir = os.path.join(tmpdir, 'output')
+        return os.path.join(tmpdir, 'counts.csv'), os.path.join(tmpdir, 'metadata.csv'), os.path.join(tmpdir, 'output')
 
-        result = self.run_moonstone(os.path.join(tmpdir, 'counts.csv'), os.path.join(tmpdir, 'metadata.csv'),
-                                    outdir, '--random_forest', 'group')
+    def test_classify_both_models(self):
+        counts, metadata, outdir = self.write_inputs()
+        # Feature selection with the random forest is slow, so it is covered in the module tests.
+        result = self.run_moonstone(counts, metadata, outdir, '--classify', 'group', '--model', 'svm',
+                                    'random_forest', '--roc')
         self.assertNotIn('Traceback', result.stderr)
         self.assertEqual(result.returncode, 0)
-        self.assertIn('Gradient Boost:', result.stdout)
-        for output_file in ['rf_Allfeatures.csv', 'group_rfFeatures.pdf']:
+        self.assertIn('Balanced accuracy on test folds', result.stdout)
+        for model in ['svm', 'random_forest']:
+            for suffix in ['cv_scores.csv', 'permutation_importance.csv', 'permutation_importance.pdf', 'roc.pdf']:
+                with self.subTest(model=model, suffix=suffix):
+                    self.assertTrue(os.path.isfile(os.path.join(outdir, f'group_{model}_{suffix}')))
+
+    def test_classify_svm_feature_selection(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--classify', 'group', '--feature_selection')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('Features kept per fold', result.stdout)
+        for suffix in ['selected_features.csv', 'rfecv.pdf']:
+            with self.subTest(suffix=suffix):
+                self.assertTrue(os.path.isfile(os.path.join(outdir, f'group_svm_{suffix}')))
+
+    def test_explore_kernels_then_auto_kernel(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--classify', 'group', '--explore_kernels',
+                                    '--kernel', 'auto')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('Exploratory SVM kernel comparison', result.stdout)
+        self.assertIn('Kernel chosen per fold', result.stdout)
+        for output_file in ['group_svm_kernel_comparison.csv', 'group_svm_cv_scores.csv']:
             with self.subTest(output_file=output_file):
                 self.assertTrue(os.path.isfile(os.path.join(outdir, output_file)))
 
-    def test_svm_classifier(self):
-        tmpdir = tempfile.mkdtemp()
-        rng = np.random.default_rng(0)
-        samples = [f's{i}' for i in range(40)]
-        counts = pd.DataFrame(rng.poisson(20, (12, 40)), index=[f'taxon{i}' for i in range(12)], columns=samples)
-        counts.index.name = 'OTU'
-        counts.to_csv(os.path.join(tmpdir, 'counts.csv'))
-        metadata = pd.DataFrame({'group': ['A'] * 20 + ['B'] * 20}, index=pd.Index(samples, name='sample'))
-        metadata.to_csv(os.path.join(tmpdir, 'metadata.csv'))
-        outdir = os.path.join(tmpdir, 'output')
-
-        result = self.run_moonstone(os.path.join(tmpdir, 'counts.csv'), os.path.join(tmpdir, 'metadata.csv'),
-                                    outdir, '--svm_classifier', 'group')
+    def test_classify_error_exits_1(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--classify', 'group', '--kernel', 'rbf',
+                                    '--feature_selection')
         self.assertNotIn('Traceback', result.stderr)
-        self.assertEqual(result.returncode, 0)
-        for output_file in ['group_variable_coefs.pdf', 'group_SVM_components.csv', 'group_rfecv.pdf']:
-            with self.subTest(output_file=output_file):
-                self.assertTrue(os.path.isfile(os.path.join(outdir, output_file)))
+        self.assertIn('linear kernel', result.stderr)
+        self.assertEqual(result.returncode, 1)
+
+    def test_removed_flags_name_replacement(self):
+        counts, metadata, outdir = self.write_inputs()
+        for flag, replacement in [('--svm', '--classify group'), ('-sr', '--classify group --roc'),
+                                  ('--svm_classifier', '--classify group --feature_selection'),
+                                  ('-rf', '--classify group --model random_forest')]:
+            with self.subTest(flag=flag):
+                result = self.run_moonstone(counts, metadata, outdir, flag, 'group')
+                self.assertNotIn('Traceback', result.stderr)
+                self.assertIn(f'{flag} has been removed. Use: {replacement}', result.stderr)
+                self.assertEqual(result.returncode, 1)

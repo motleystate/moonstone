@@ -16,6 +16,14 @@ Unreleased
 * Command-line tool starts again with recent SciPy versions (``scipy.interp`` replaced by ``numpy.interp``);
   ``moonstone --help`` now exits with status 0. New dependency: ``filetype>=1.2.0``. (https://github.com/motleystate/moonstone/pull/117)
 * Install instructions updated for Python 3.13; install from GitHub until a release newer than 1.0.0 is on PyPI.
+* Classifiers rewritten as one module, ``moonstone.analysis.classification``, replacing ``classify.py`` and
+  ``randomForest.py``. Command line: ``--svm``, ``--svm_roc``, ``--svm_classifier`` and ``--random_forest`` are replaced
+  by ``--classify VARIABLE`` with ``--model``, ``--kernel``, ``--folds``, ``--seed``, ``--group_column``, ``--roc`` and
+  ``--feature_selection``; ``--explore_kernels`` compares Support Vector Machine kernels (exploratory) and
+  ``--kernel auto`` chooses the kernel by nested cross-validation. Scaling now happens inside each training fold, folds are stratified and seeded, groups are
+  class-weighted and scored with balanced accuracy, feature selection is nested inside the cross-validation, and
+  feature importance is permutation importance on the test folds. Output file names change. Minimum scikit-learn
+  raised to 1.5.
 
 
 v1.1
