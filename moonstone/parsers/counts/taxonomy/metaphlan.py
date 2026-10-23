@@ -54,14 +54,16 @@ class BaseMetaphlanParser(BaseTaxonomyCountsParser):
     def remove_duplicates(self, df) -> pd.DataFrame:
         """
         Metaphlan3 results are by level therefore we need to remove the duplicated informations
-        Example:
-        We have:
+
+        Example::
+
+          We have:
             ...|g_GenusA    50.0
             ...|g_GenusA|s_Species1 30.0
             ...|g_GenusB    50.0
             ...|g_GenusB|s_Species2 50.0
             Sum = 180.0 =/= 100.0 (while it's relative abundance -> but same problem with other analysis type)
-        We want:
+          We want:
             ...|g_GenusA|s_GenusA (genus)   20.0    # unspecified species
             ...|g_GenusA|s_Species1 30.0
             ...|g_GenusB|s_Species2 50.0
