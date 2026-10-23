@@ -111,7 +111,7 @@ v0.4.0
   * ``visualize_groups`` method allows visualization with violin plot based on metadata grouped by a chosen column
 
 * There is now definition of ``index_col`` for ``MetadataParser`` to define which column to use as the index for the metadata (https://github.com/motleystate/moonstone/pull/42)
-* class ``GenesToTaxonomy``to go from gene counts to taxonomy df (https://github.com/motleystate/moonstone/pull/36)
+* class ``GenesToTaxonomy`` to go from gene counts to taxonomy df (https://github.com/motleystate/moonstone/pull/36)
 * add ``TaxonomyRandomSelection`` to allow random selection on multiindexed dataframe (https://github.com/motleystate/moonstone/pull/32)
 * Classe ``AlphaDiversity`` and child classes ``ShannonIndex`` and ``SimpsonInverseIndex`` (https://github.com/motleystate/moonstone/pull/29)
 * add ``RandomSelection`` to ``normalization`` module (https://github.com/motleystate/moonstone/pull/28)
