@@ -958,6 +958,23 @@ class TestPermanova(TestCase):
         self.assertEqual(screen.loc["mostly_missing", "skipped"], "fewer than 2 groups with at least 2 samples")
         self.assertTrue(any("mostly_missing: not tested" in line for line in log.output))
 
+    def test_mostly_missing_variable_warns_without_filling(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["half"] = ["x", "y"] * 7 + [np.nan] * 16
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            res = BrayCurtis(counts).permanova(metadata, "half", permutations=9)
+        self.assertTrue(any("16 of 30 samples (53%) have no value" in line for line in log.output))
+        self.assertEqual(res["n_samples"], 14)
+        self.assertEqual(res["n_missing"], 16)
+        self.assertEqual(res["n_groups"], 2)
+
+    def test_half_missing_does_not_warn_as_mostly_missing(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["half"] = ["x", "y"] * 8 + [np.nan] * 14
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            BrayCurtis(counts).permanova(metadata, "half", permutations=9)
+        self.assertFalse(any("have no value" in line for line in log.output))
+
     def test_unused_categories_not_reported(self):
         counts, metadata = self.make_counts(0.2, 0.2)
         metadata["group"] = pd.Categorical(metadata["group"], categories=["A", "B", "unused"])

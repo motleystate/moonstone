@@ -6,6 +6,7 @@ import logging
 from moonstone.parsers import (handleCounts, handleMetadata)
 from moonstone.analysis import (clustering, stats)
 from moonstone.analysis.classification import Classification, KERNELS, MODELS
+from moonstone.analysis.diversity.beta import MISSING_WARNING_FRACTION
 from moonstone.analysis.permanova import TAXA_LEVELS, read_taxonomy_counts, run_permanova
 from moonstone.filtering.mean_filtering import MeanFiltering
 
@@ -210,9 +211,11 @@ def permanova(args, outdir, logger):
     for (level, warnings) in results[['level', 'warnings']].drop_duplicates().itertuples(index=False):
         if warnings:
             print(f'Warning ({level}): {warnings}')
-    n_missing = results.groupby('variable', sort=False)['n_missing'].max()
-    for variable, count in n_missing[n_missing > 0].items():
-        print(f'{variable}: {int(count)} sample(s) with a missing value left out')
+    missing = results.groupby('variable', sort=False)[['n_samples', 'n_missing']].max()
+    for variable, row in missing[missing['n_missing'] > 0].iterrows():
+        share = row.n_missing / (row.n_missing + row.n_samples)
+        check = ' - mostly missing, check and clean this variable' if share > MISSING_WARNING_FRACTION else ''
+        print(f'{variable}: {int(row.n_missing)} sample(s) with a missing value left out{check}')
     significant = results[results['p_value_corrected'] < 0.05]
     print(f'\n{significant.shape[0]} of {results["p_value"].notna().sum()} tests significant after '
           f'false discovery rate correction (p < 0.05).')

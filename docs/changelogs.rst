@@ -40,7 +40,8 @@ Unreleased
   test only (complete-case), for PERMANOVA and PERMDISP alike. Empty and whitespace-only values now count as missing
   instead of forming a group. New ``n_missing`` column in the results of ``permanova``, ``permanova_screen``,
   ``run_permanova`` and ``permanova.csv``; the count is logged as a warning and printed by ``--permanova``. Skipped
-  variables are logged as warnings.
+  variables are logged as warnings, and so is a variable with no value for more than half of the samples (missing
+  values are never filled in).
 
 
 v1.1

@@ -109,8 +109,12 @@ Missing values
 
     Missing means an empty cell, a cell holding only spaces, or a value pandas reads as missing (``NA``, ``N/A``,
     ``NaN``, ``null`` and similar). Words such as ``missing``, ``unknown`` or ``-`` are real values and form a
-    group, so leave those cells empty instead. If many samples are missing a variable, check that the samples with
-    a value are not a special subset (for example only the patients seen at one clinic).
+    group, so leave those cells empty instead.
+
+    Missing values are never filled in or recoded. If a blank actually means something (for example "not
+    detected"), recode it in the metadata before the analysis. When more than half of the samples have no value
+    for a variable, a warning is logged and ``--permanova`` flags the variable: check that the samples with a value
+    are not a special subset (for example only the patients seen at one clinic).
 
 Limits
 ======

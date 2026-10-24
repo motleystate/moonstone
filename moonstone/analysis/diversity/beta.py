@@ -18,6 +18,9 @@ from moonstone.utils.log_messages import warn_once, reset_warnings_decorator
 
 logger = logging.getLogger(__name__)
 
+# PERMANOVA: warn when more than this share of the samples lack a value for the tested variable
+MISSING_WARNING_FRACTION = 0.5
+
 
 class BetaDiversity(DiversityBase, ABC):
     _DIVERSITY_INDEXES_NAME = "beta_index"
@@ -369,6 +372,12 @@ class BetaDiversity(DiversityBase, ABC):
         n_missing = int(grouping.isna().sum())
         if n_missing:
             logger.warning("%s: %i sample(s) with a missing value are left out.", group_col, n_missing)
+        if n_missing > MISSING_WARNING_FRACTION * grouping.shape[0]:
+            logger.warning(
+                "%s: %i of %i samples (%.0f%%) have no value. Missing values are not filled in: check and clean "
+                "this variable before trusting the result.",
+                group_col, n_missing, grouping.shape[0], 100 * n_missing / grouping.shape[0]
+            )
         # as strings before counting, so unused categories of a categorical column are not reported as groups
         grouping = grouping.dropna().astype(str)
         group_sizes = grouping.value_counts()
