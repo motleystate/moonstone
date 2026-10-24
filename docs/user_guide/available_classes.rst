@@ -93,6 +93,37 @@ List
 .. Note::
     More details on API documentation for :ref:`api_filtering`.
 
+Choosing a threshold from the data
+"""""""""""""""""""""""""""""""""""""""""
+
+``read_threshold_analysis`` chooses which taxa to keep without a hand-picked threshold. Each
+taxon is scored as ``prevalence x log10(mean reads + 1)``, and taxa above the knee of the sorted
+scores are kept, so a taxon must be both prevalent and abundant to pass.
+
+It reads a CSV file directly, in wide format with **one row per taxon and one column per
+sample**:
+
+* required columns ``species`` and ``NCBI_taxonomy_ID``; optional ``kingdom``, ``phylum``,
+  ``class``, ``order``, ``family`` and ``genus`` (ignored);
+* every other column is a sample and must be numeric and non-negative;
+* values are species-level **read counts**, raw or normalized (for example Bracken counts
+  normalized by geometric mean), **not relative abundances**;
+* ``0`` or an empty cell means the taxon is absent from the sample.
+
+.. code-block:: bash
+
+    python -m moonstone.filtering.read_threshold_analysis counts.csv \
+        --save-filtered --save-plots --output-dir results/
+
+.. code-block:: python
+
+    from moonstone.filtering.read_threshold_analysis import analyze_normalized_reads
+
+    stats, filtered_taxa = analyze_normalized_reads("counts.csv")
+
+.. Note::
+    The full input specification is in the API documentation for :ref:`api_filtering`.
+
 .. _av_normalization:
 
 Normalization
