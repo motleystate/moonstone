@@ -31,6 +31,11 @@ Unreleased
 * New ``permanova`` and ``permanova_screen`` methods on all beta-diversity classes: Permutational Multivariate
   Analysis of Variance (PERMANOVA) with a dispersion check (PERMDISP), seeded permutations, and false discovery rate
   correction across variables. See :ref:`permanova`. (https://github.com/motleystate/moonstone/issues/129)
+* New command-line flag ``--permanova [VARIABLE ...]`` with ``--taxa_level`` (``species`` by default, or ``all``),
+  ``--no_read_threshold`` and ``--permutations``, and the matching function
+  ``moonstone.analysis.permanova.run_permanova``. Reads a normalized count table with taxonomy columns, sums it to
+  each level, filters taxa with the read-threshold knee, and corrects all tests of a run together. Existing flags
+  are unchanged. (https://github.com/motleystate/moonstone/issues/131)
 
 
 v1.1

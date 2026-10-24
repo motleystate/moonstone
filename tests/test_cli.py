@@ -102,3 +102,59 @@ class TestCommandLineSmoke(TestCase):
                 self.assertNotIn('Traceback', result.stderr)
                 self.assertIn(f'{flag} has been removed. Use: {replacement}', result.stderr)
                 self.assertEqual(result.returncode, 1)
+
+
+class TestCommandLinePermanova(TestCase):
+
+    def run_moonstone(self, *args):
+        return subprocess.run(
+            [sys.executable, '-c', 'from moonstone.main import run; run()', *args],
+            capture_output=True, text=True, timeout=300,
+        )
+
+    def write_inputs(self):
+        from tests.analysis.test_permanova import make_taxonomy_counts
+        tmpdir = tempfile.mkdtemp()
+        counts_df, metadata = make_taxonomy_counts()
+        counts_df.reset_index().to_csv(os.path.join(tmpdir, 'counts.tsv'), sep='\t', index=False)
+        metadata.index.name = 'sample'
+        metadata.to_csv(os.path.join(tmpdir, 'metadata.csv'))
+        return os.path.join(tmpdir, 'counts.tsv'), os.path.join(tmpdir, 'metadata.csv'), os.path.join(tmpdir, 'out')
+
+    def test_permanova_default_species(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', '--permutations', '199')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('species / group', result.stdout)
+        table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
+        self.assertEqual(list(table['variable']), ['group', 'random'])
+        self.assertEqual(set(table['level']), {'species'})
+
+    def test_permanova_all_levels_one_variable(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', 'group', '--taxa_level', 'all',
+                                    '--permutations', '99')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('Warning (genus)', result.stdout)
+        table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
+        self.assertEqual(table.shape[0], 7)
+        self.assertTrue(table.loc[table['level'] != 'species', 'warnings'].str.contains('species level only').all())
+        self.assertEqual(table.loc[table['level'] == 'kingdom', 'skipped'].iloc[0],
+                         'fewer than 2 taxa, composition cannot be compared')
+
+    def test_permanova_no_read_threshold(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', 'group', '--no_read_threshold',
+                                    '--permutations', '9')
+        self.assertEqual(result.returncode, 0)
+        table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
+        self.assertEqual(table.loc[0, 'taxa_kept'], table.loc[0, 'taxa_total'])
+
+    def test_permanova_rejects_other_analyses(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', '-f', '5')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('cannot be combined with -f/--filtering', result.stderr)
