@@ -37,7 +37,7 @@ MIN_TAXA_FOR_KNEE = 3
 MAX_READS_PCT_REMOVED = 10
 
 RESULT_COLUMNS = [
-    'level', 'variable', 'n_samples', 'n_groups', 'pseudo_F', 'R2', 'p_value', 'p_value_corrected',
+    'level', 'variable', 'n_samples', 'n_missing', 'n_groups', 'pseudo_F', 'R2', 'p_value', 'p_value_corrected',
     'permdisp_F', 'permdisp_p_value', 'permdisp_p_value_corrected', 'permutations', 'skipped',
     'taxa_total', 'taxa_kept', 'reads_pct_kept', 'warnings',
 ]
