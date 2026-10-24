@@ -337,7 +337,8 @@ def analyze_normalized_reads(input_file, save_plots=False, save_filtered=False, 
     return _stats, filtered_taxa
 
 
-if __name__ == "__main__":
+def main(argv=None):
+    """Command-line entry point."""
     parser = argparse.ArgumentParser(
         description="Determine filtering threshold based on species prevalence and read abundance.")
     parser.add_argument("input_file", help="Path to normalized read counts CSV file (species x samples)")
@@ -345,7 +346,7 @@ if __name__ == "__main__":
     parser.add_argument("--save-filtered", action="store_true", help="Save filtered taxa to CSV file (default: no)")
     parser.add_argument("--output-dir", default=".",
                         help="Directory for saved plots and CSV (default: current directory)")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     stats, filtered_taxa = analyze_normalized_reads(args.input_file,
                                                     save_plots=args.save_plots,
@@ -357,3 +358,7 @@ if __name__ == "__main__":
     print(f"Reads removed: {stats['reads_pct_removed']:.2f}%")
     print(f"Minimum mean reads among retained species: {stats['min_reads_retained']:.1f}")
     print(f"Minimum prevalence among retained species: {stats['min_prevalence_retained']:.2f}%")
+
+
+if __name__ == "__main__":
+    main()
