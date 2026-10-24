@@ -7,15 +7,26 @@ Changelogs
 Summary of developments of moonstone library.
 
 
-Unreleased
-==========
+v1.5
+====
 
+v1.5.0
+------
+
+First release on PyPI since 1.0.0: version 1.1.0 was tagged but never published there, so this release also
+contains the changes listed under v1.1.0 below.
+
+* Data-driven taxa filtering: ``moonstone.filtering.read_threshold_analysis`` scores each taxon as
+  ``prevalence x log10(mean reads + 1)`` and keeps the taxa above the knee of the sorted scores, chosen where the
+  score's slope overtakes its average rate of change. Usable from Python (``analyze_normalized_reads``) or the
+  command line (``python -m moonstone.filtering.read_threshold_analysis``), with diagnostic plots and validation of
+  the input CSV. (https://github.com/motleystate/moonstone/pull/125)
 * Requires Python 3.13 and pandas >= 3.0 (support for Python 3.9 to 3.12 and for pandas 2 is dropped).
   Minimum scikit-bio raised to 0.6.0. (https://github.com/motleystate/moonstone/pull/118)
 * Compatibility with pandas 3 (https://github.com/motleystate/moonstone/pull/118)
 * Command-line tool starts again with recent SciPy versions (``scipy.interp`` replaced by ``numpy.interp``);
   ``moonstone --help`` now exits with status 0. New dependency: ``filetype>=1.2.0``. (https://github.com/motleystate/moonstone/pull/117)
-* Install instructions updated for Python 3.13; install from GitHub until a release newer than 1.0.0 is on PyPI.
+* Install instructions updated for Python 3.13.
 * **Breaking change:** the command-line flags ``-s/--svm``, ``-sr/--svm_roc``, ``-sc/--svm_classifier`` and
   ``-rf/--random_forest`` are removed and stop with an error naming their replacement, ``--classify VARIABLE``
   (with ``--roc``, ``--feature_selection`` or ``--model random_forest``). Output file names change, and the decision

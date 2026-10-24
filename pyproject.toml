@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "moonstone"
-version = "1.1.0"
+version = "1.5.0"
 description = "Utilities for metagenomics data analysis using machine learning."
 authors = [
     { name = "Kenzo-Hugo Hillion" },

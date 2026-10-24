@@ -28,16 +28,20 @@ Installation procedure
 Pip
 ---
 
-Install the latest version of moonstone from the Github repository:
+Install the latest release of moonstone from the Python Package Index (PyPI):
+
+.. code-block:: bash
+
+    pip install moonstone
+
+To try changes that are not released yet, install from the Github repository instead:
 
 .. code-block:: bash
 
     pip install "git+https://github.com/motleystate/moonstone.git"
 
-.. Warning::
-    The version published on the Python Package Index (PyPI) with ``pip install moonstone`` is 1.0.0.
-    It predates Python 3.13 support and does not install on Python 3.13.
-    Use the command above until a newer release is published on PyPI.
+.. Note::
+    Releases from 1.5.0 onwards require Python 3.13. On older Python versions, pip installs moonstone 1.0.0.
 
 Check the installation with:
 
