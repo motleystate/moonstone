@@ -6,7 +6,7 @@ import logging
 from moonstone.parsers import (handleCounts, handleMetadata)
 from moonstone.analysis import (clustering, stats)
 from moonstone.analysis.classification import Classification, KERNELS, MODELS
-from moonstone.analysis.diversity.beta import MISSING_WARNING_FRACTION
+from moonstone.analysis.diversity.beta import DEFAULT_PERMUTATIONS, MISSING_WARNING_FRACTION
 from moonstone.analysis.permanova import TAXA_LEVELS, read_taxonomy_counts, run_permanova
 from moonstone.filtering.mean_filtering import MeanFiltering
 
@@ -76,8 +76,11 @@ def parse_arguments():
                         help='With --permanova, taxonomic level to sum the counts to, or all (default: species)')
     parser.add_argument('--no_read_threshold', action='store_true',
                         help='With --permanova, do not filter taxa by the read-threshold knee at each level')
-    parser.add_argument('--permutations', type=int, default=999,
-                        help='With --permanova, number of permutations (default: 999)')
+    parser.add_argument('--permutations', type=int, default=DEFAULT_PERMUTATIONS,
+                        help=f'With --permanova, number of permutations (default: {DEFAULT_PERMUTATIONS})')
+    parser.add_argument('--threads', type=int, default=0,
+                        help='With --permanova, number of tests run in parallel, one per processor core; 0 uses '
+                             'every available core. Results do not depend on it (default: 0)')
     for flags, replacement in [(['-s', '--svm'], '--classify {variable}'),
                                (['-sr', '--svm_roc'], '--classify {variable} --roc'),
                                (['-sc', '--svm_classifier'], '--classify {variable} --feature_selection'),
@@ -202,6 +205,7 @@ def permanova(args, outdir, logger):
         results = run_permanova(
             counts_df, metadata_df, columns=args.permanova or None, taxa_level=args.taxa_level,
             read_threshold=not args.no_read_threshold, permutations=args.permutations, seed=args.seed,
+            n_jobs=args.threads,
         )
     except ValueError as error:
         logger.error(str(error))

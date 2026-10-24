@@ -37,8 +37,16 @@ plus a metadata file with one row per sample:
     moonstone normalized_counts.tsv metadata.csv results --permanova treatment site --taxa_level all
 
 Put ``--permanova`` after the three file arguments. The results go to ``results/permanova.csv``, one row per level
-and variable. Other options: ``--no_read_threshold``, ``--permutations`` (999 by default) and ``--seed``
-(0 by default). ``--permanova`` cannot be combined with ``-f``, ``-p``, ``-k`` or ``-c``.
+and variable. Other options: ``--no_read_threshold``, ``--permutations`` (9,999 by default), ``--seed``
+(0 by default) and ``--threads`` (number of tests run at the same time, one per processor core; 0, the default, uses
+every core available to Moonstone). ``--permanova`` cannot be combined with ``-f``, ``-p``, ``-k`` or ``-c``.
+
+Most of the run time is the PERMDISP dispersion check. As a guide, measured on synthetic data with one core
+(unverified on real data): one variable at 9,999 permutations took about 8 s with 100 samples, 18 s with 300 and
+2 minutes with 1,000. ``--threads`` runs the variables (and levels) in parallel, so 4 cores make a screen of many
+variables about 3.5 times faster. The results are identical whatever the number of cores, because every test uses
+the same seed whichever core runs it. From Python, pass ``n_jobs`` to ``run_permanova`` or ``permanova_screen``
+(1 by default).
 
 The same analysis from Python:
 
@@ -75,7 +83,8 @@ How the test works
 
 PERMANOVA compares the distances between groups with the distances within groups, and summarises them in a
 pseudo-F statistic (like the F of an ordinary analysis of variance). To get a p-value, the group labels are shuffled
-many times (999 by default) and the test counts how often a shuffled pseudo-F is at least as large as the real one.
+many times (9,999 by default) and the test counts how often a shuffled pseudo-F is at least as large as the real
+one: p = (1 + number at least as large) / (1 + number of shuffles).
 ``R2`` is the share of the variation between samples that the groups explain.
 
 Reading the results
@@ -92,8 +101,23 @@ Multiple testing
     effect. ``permanova_screen`` corrects the p-values with the Benjamini-Hochberg false discovery rate (FDR) by
     default (``correction_method="fdr_bh"``); read ``p_value_corrected`` and ``permdisp_p_value_corrected``.
 
+Precision of the p-values
+    A permutation p-value is an estimate. ``p_value_se`` and ``permdisp_p_value_se`` give its standard error,
+    sqrt(p (1 - p) / N) for N permutations: rerunning with another seed would usually move the p-value by less than
+    about twice this. With 9,999 permutations, a p-value of 0.05 has a standard error of about 0.002; with 999, about
+    0.007. The smallest possible p-value is 1 / (N + 1), for example 0.0001 with 9,999 permutations.
+
+Enough permutations for the correction
+    With m tests corrected together, a single real effect can only reach a corrected p-value of m / (N + 1). If
+    that is not below 0.05, nothing can be significant however strong the effect, so a warning is logged and added
+    to the ``warnings`` column with the number of permutations needed. With 9,999 permutations this happens beyond
+    499 tests; with 999, beyond 49 (for example 50 variables at one level, or 7 levels x 8 variables).
+
 Reproducibility
-    The shuffles are seeded (``seed=0`` by default), so the same call gives the same p-values.
+    The shuffles are seeded (``seed=0`` by default), so the same call gives the same p-values. The seed gives
+    repeatability, not accuracy: a different seed gives p-values that differ by about their standard error, and
+    neither is more correct. More permutations, not a particular seed, make the p-values more accurate. Report the
+    number of permutations and the seed with the results.
 
 Which samples are used
     Samples without metadata and groups with fewer than ``min_group_size`` samples (2 by default) are left out, and

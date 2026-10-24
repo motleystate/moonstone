@@ -121,7 +121,7 @@ class TestRunPermanova(TestCase):
 
     def test_all_levels_corrected_together(self):
         counts_df, metadata = make_taxonomy_counts()
-        results = run_permanova(counts_df, metadata, taxa_level='all', permutations=99)
+        results = run_permanova(counts_df, metadata, taxa_level='all', permutations=299)
         self.assertEqual(list(results['level'].unique()),
                          ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species'])
         tested = results.dropna(subset=['p_value'])
@@ -145,11 +145,42 @@ class TestRunPermanova(TestCase):
 
     def test_no_read_threshold(self):
         counts_df, metadata = make_taxonomy_counts()
-        results = run_permanova(counts_df, metadata, read_threshold=False, permutations=9)
+        results = run_permanova(counts_df, metadata, read_threshold=False, permutations=49)
         row = results.iloc[0]
         self.assertEqual(row['taxa_kept'], row['taxa_total'])
         self.assertEqual(row['reads_pct_kept'], 100.0)
         self.assertEqual(row['warnings'], '')
+
+    def test_p_value_standard_error(self):
+        counts_df, metadata = make_taxonomy_counts()
+        results = run_permanova(counts_df, metadata, permutations=199)
+        np.testing.assert_allclose(results['p_value_se'],
+                                   np.sqrt(results['p_value'] * (1 - results['p_value']) / 199))
+        np.testing.assert_allclose(results['permdisp_p_value_se'],
+                                   np.sqrt(results['permdisp_p_value'] * (1 - results['permdisp_p_value']) / 199))
+
+    def test_too_few_permutations_for_correction_warned(self):
+        counts_df, metadata = make_taxonomy_counts()
+        with self.assertLogs('moonstone.analysis.permanova', level='WARNING') as log:
+            results = run_permanova(counts_df, metadata, taxa_level='all', permutations=99)
+        message = '99 permutations are too few for 10 tests'
+        self.assertTrue(any(message in line for line in log.output))
+        self.assertTrue(results['warnings'].str.contains(message).all())
+        self.assertIn('Use at least 200 permutations', results['warnings'].iloc[0])
+        # no warning without correction
+        results = run_permanova(counts_df, metadata, taxa_level='all', permutations=99, correction_method=None)
+        self.assertFalse(results['warnings'].str.contains('permutations are too few').any())
+
+    def test_default_permutations(self):
+        counts_df, metadata = make_taxonomy_counts()
+        results = run_permanova(counts_df, metadata, columns=['group'])
+        self.assertEqual(results.loc[0, 'permutations'], 9999)
+
+    def test_parallel_matches_serial(self):
+        counts_df, metadata = make_taxonomy_counts()
+        serial = run_permanova(counts_df, metadata, taxa_level='all', permutations=299, n_jobs=1)
+        parallel = run_permanova(counts_df, metadata, taxa_level='all', permutations=299, n_jobs=2)
+        pd.testing.assert_frame_equal(serial, parallel)
 
     def test_selected_columns_and_seed(self):
         counts_df, metadata = make_taxonomy_counts()

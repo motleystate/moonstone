@@ -21,7 +21,9 @@ setup(
         'hdmedians>=0.14.2',
         'cython>=0.29.21',
         'scipy>=1.9.0',
-        'filetype>=1.2.0'
+        'filetype>=1.2.0',
+        'joblib>=1.3.0',
+        'threadpoolctl>=3.1.0'
     ],
     python_requires='>=3.13,<3.14',
     packages=find_packages(),

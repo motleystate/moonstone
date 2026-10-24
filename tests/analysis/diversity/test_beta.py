@@ -8,7 +8,8 @@ from plotly.graph_objs._cone import Cone
 from skbio import TreeNode
 
 from moonstone.analysis.diversity.beta import (
-    BrayCurtis, Jaccard, WeightedUniFrac, UnweightedUniFrac
+    BrayCurtis, Jaccard, WeightedUniFrac, UnweightedUniFrac,
+    permutation_p_value_se, resolve_n_jobs, too_few_permutations_warning
 )
 
 
@@ -942,7 +943,7 @@ class TestPermanova(TestCase):
         counts, metadata = self.make_counts(0.2, 0.2)
         metadata.loc["s0", "group"] = np.nan
         with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
-            BrayCurtis(counts).permanova_screen(metadata, permutations=9)
+            BrayCurtis(counts).permanova_screen(metadata, permutations=99)
         self.assertEqual(log.output, ["WARNING:moonstone.analysis.diversity.beta:group: 1 sample(s) with a missing "
                                       "value are left out."])
 
@@ -1019,6 +1020,46 @@ class TestPermanova(TestCase):
         counts, metadata = self.make_counts(0.2, 0.2)
         screen = BrayCurtis(counts).permanova_screen(metadata, correction_method=None, permutations=9)
         self.assertNotIn("p_value_corrected", screen.columns)
+
+    def test_screen_parallel_matches_serial(self):
+        counts, metadata = self.make_counts(0.2, 0.4, shift_b=2.0)
+        rng = np.random.default_rng(0)
+        for i in range(3):
+            metadata[f"null{i}"] = rng.choice(["x", "y", "z"], 30)
+        metadata["constant"] = "same"
+        div = BrayCurtis(counts)
+        serial = div.permanova_screen(metadata, permutations=199, n_jobs=1)
+        parallel = div.permanova_screen(metadata, permutations=199, n_jobs=3)
+        pd.testing.assert_frame_equal(serial, parallel)
+
+    def test_screen_warns_when_permutations_too_few(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["other"] = ["x", "y"] * 15
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            BrayCurtis(counts).permanova_screen(metadata, permutations=19)
+        self.assertTrue(any("19 permutations are too few for 2 tests" in line for line in log.output))
+
+    def test_default_permutations_and_se(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        res = BrayCurtis(counts).permanova(metadata, "group", dispersion=False)
+        self.assertEqual(res["permutations"], 9999)
+        self.assertAlmostEqual(res["p_value_se"], np.sqrt(res["p_value"] * (1 - res["p_value"]) / 9999))
+        self.assertTrue(np.isnan(res["permdisp_p_value_se"]))
+
+    def test_permutation_helpers(self):
+        self.assertAlmostEqual(permutation_p_value_se(0.05, 9999), np.sqrt(0.05 * 0.95 / 9999))
+        self.assertTrue(np.isnan(permutation_p_value_se(0.5, 0)))
+        # 1 / (N + 1) times the number of tests must be below 0.05
+        self.assertEqual(too_few_permutations_warning(499, 9999), "")
+        self.assertIn("too few for 500 tests", too_few_permutations_warning(500, 9999))
+        self.assertIn("too few for 50 tests", too_few_permutations_warning(50, 999))
+        self.assertIn("Use at least 1000 permutations", too_few_permutations_warning(50, 999))
+        self.assertEqual(too_few_permutations_warning(0, 9), "")
+        self.assertEqual(resolve_n_jobs(3), 3)
+        self.assertGreaterEqual(resolve_n_jobs(0), 1)
+        self.assertEqual(resolve_n_jobs(-1), resolve_n_jobs(0))
+        with self.assertRaises(ValueError):
+            resolve_n_jobs(-2)
 
     def test_works_for_jaccard(self):
         counts, metadata = self.make_counts(0.2, 0.2)
