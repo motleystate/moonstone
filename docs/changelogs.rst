@@ -28,6 +28,9 @@ Unreleased
   cross-validation, and feature importance is permutation importance on the test folds. ``--explore_kernels``
   compares kernels (exploratory) and ``--kernel auto`` chooses the kernel by nested cross-validation. Minimum
   scikit-learn raised to 1.5. (https://github.com/motleystate/moonstone/pull/123)
+* New ``permanova`` and ``permanova_screen`` methods on all beta-diversity classes: Permutational Multivariate
+  Analysis of Variance (PERMANOVA) with a dispersion check (PERMDISP), seeded permutations, and false discovery rate
+  correction across variables. See :ref:`permanova`. (https://github.com/motleystate/moonstone/issues/129)
 
 
 v1.1

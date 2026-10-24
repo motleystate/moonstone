@@ -840,3 +840,112 @@ class TestUnweightedUniFrac(TestCase):
             self.assertEqual(len(log.output), 1)
             self.assertIn("WARNING:moonstone.analysis.diversity.beta:INCOMPLETE TREE: missing ['species6'].\n\
 Computation of the Unweighted UniFrac diversity using only the OTU IDs present in the Tree.", log.output)
+
+
+class TestPermanova(TestCase):
+    """PERMANOVA and PERMDISP on synthetic counts with known structure."""
+
+    @staticmethod
+    def make_counts(spread_a, spread_b, shift_b=1.0, n=15, n_taxa=20, seed=1):
+        rng = np.random.default_rng(seed)
+        base = rng.gamma(2, 50, size=n_taxa)
+        shifted = base.copy()
+        shifted[:5] *= shift_b
+        a = [rng.poisson(base * rng.lognormal(0, spread_a, n_taxa)) for _ in range(n)]
+        b = [rng.poisson(shifted * rng.lognormal(0, spread_b, n_taxa)) for _ in range(n)]
+        samples = [f"s{i}" for i in range(2 * n)]
+        counts = pd.DataFrame(np.vstack(a + b).T, index=[f"t{i}" for i in range(n_taxa)], columns=samples)
+        metadata = pd.DataFrame({"group": ["A"] * n + ["B"] * n}, index=samples)
+        return counts, metadata
+
+    def test_location_difference_detected(self):
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        res = BrayCurtis(counts).permanova(metadata, "group")
+        self.assertLess(res["p_value"], 0.01)
+        self.assertEqual(res["n_samples"], 30)
+        self.assertEqual(res["n_groups"], 2)
+        self.assertEqual(res.name, "group")
+
+    def test_dispersion_difference_flagged_by_permdisp(self):
+        counts, metadata = self.make_counts(0.1, 1.0)
+        res = BrayCurtis(counts).permanova(metadata, "group")
+        self.assertLess(res["permdisp_p_value"], 0.01)
+
+    def test_no_dispersion(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        res = BrayCurtis(counts).permanova(metadata, "group", dispersion=False)
+        self.assertTrue(np.isnan(res["permdisp_p_value"]))
+
+    def test_seed_reproducible(self):
+        counts, metadata = self.make_counts(0.3, 0.3)
+        metadata["random"] = np.random.default_rng(3).choice(["x", "y"], 30)
+        div = BrayCurtis(counts)
+        first = div.permanova(metadata, "random", permutations=99, seed=5)
+        second = div.permanova(metadata, "random", permutations=99, seed=5)
+        pd.testing.assert_series_equal(first, second)
+
+    def test_r2_by_hand(self):
+        counts = pd.DataFrame(
+            {"s1": [10, 0, 5], "s2": [8, 1, 6], "s3": [9, 2, 4], "s4": [0, 10, 3], "s5": [1, 9, 2], "s6": [2, 7, 5]},
+            index=["t1", "t2", "t3"],
+        )
+        metadata = pd.DataFrame({"g": ["a", "a", "a", "b", "b", "b"]}, index=counts.columns)
+        div = BrayCurtis(counts)
+        res = div.permanova(metadata, "g", permutations=9)
+        d2 = div.beta_diversity.data ** 2
+        ss_total = d2[np.triu_indices(6, 1)].sum() / 6
+        ss_within = sum(d2[np.ix_(idx, idx)][np.triu_indices(3, 1)].sum() / 3 for idx in ([0, 1, 2], [3, 4, 5]))
+        self.assertAlmostEqual(res["R2"], 1 - ss_within / ss_total)
+        self.assertAlmostEqual(res["pseudo_F"], ((ss_total - ss_within) / 1) / (ss_within / 4))
+
+    def test_missing_and_unmatched_samples_left_out(self):
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        metadata.loc["s0", "group"] = np.nan
+        metadata = metadata.drop("s1")
+        metadata.loc["not_sequenced", "group"] = "A"
+        res = BrayCurtis(counts).permanova(metadata, "group", permutations=99)
+        self.assertEqual(res["n_samples"], 28)
+
+    def test_small_groups_left_out(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata.loc["s0", "group"] = "C"
+        res = BrayCurtis(counts).permanova(metadata, "group", permutations=9, min_group_size=2)
+        self.assertEqual(res["n_groups"], 2)
+        self.assertEqual(res["n_samples"], 29)
+
+    def test_one_group_raises(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["group"] = "A"
+        with self.assertRaises(ValueError):
+            BrayCurtis(counts).permanova(metadata, "group")
+
+    def test_screen_corrects_and_skips(self):
+        from statsmodels.stats.multitest import multipletests
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        rng = np.random.default_rng(0)
+        for i in range(5):
+            metadata[f"null{i}"] = rng.choice(["x", "y"], 30)
+        metadata["constant"] = "same"
+        metadata["continuous"] = rng.normal(size=30)
+        screen = BrayCurtis(counts).permanova_screen(metadata, permutations=199)
+        self.assertEqual(list(screen.index), list(metadata.columns))
+        self.assertEqual(screen.loc["constant", "skipped"], "fewer than 2 groups with at least 2 samples")
+        self.assertEqual(screen.loc["continuous", "skipped"], "more than 15 groups")
+        tested = screen[screen["skipped"] == ""]
+        self.assertEqual(len(tested), 6)
+        np.testing.assert_allclose(
+            tested["p_value_corrected"], multipletests(tested["p_value"], method="fdr_bh")[1]
+        )
+        self.assertTrue(screen.loc[["constant", "continuous"], "p_value_corrected"].isna().all())
+        self.assertLess(screen.loc["group", "p_value_corrected"], 0.05)
+
+    def test_screen_without_correction(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        screen = BrayCurtis(counts).permanova_screen(metadata, correction_method=None, permutations=9)
+        self.assertNotIn("p_value_corrected", screen.columns)
+
+    def test_works_for_jaccard(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        counts[counts < 100] = 0    # Jaccard uses presence/absence only, so some absences are needed
+        res = Jaccard(counts).permanova(metadata, "group", permutations=9)
+        self.assertEqual(res["n_samples"], 30)
