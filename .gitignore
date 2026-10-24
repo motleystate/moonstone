@@ -27,3 +27,6 @@ stubs/
 
 # local notebooks
 notebooks/
+
+# local data files (not tracked)
+data/
