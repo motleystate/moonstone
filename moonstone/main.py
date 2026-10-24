@@ -6,6 +6,7 @@ import logging
 from moonstone.parsers import (handleCounts, handleMetadata)
 from moonstone.analysis import (clustering, stats)
 from moonstone.analysis.classification import Classification, KERNELS, MODELS
+from moonstone.analysis.permanova import TAXA_LEVELS, read_taxonomy_counts, run_permanova
 from moonstone.filtering.mean_filtering import MeanFiltering
 
 
@@ -58,20 +59,39 @@ def parse_arguments():
     parser.add_argument('--explore_kernels', action='store_true',
                         help='With --classify, compare Support Vector Machine kernels (exploratory scores)')
     parser.add_argument('--folds', type=int, default=5, help='Number of cross-validation folds (default: 5)')
-    parser.add_argument('--seed', type=int, default=0, help='Random seed for folds and models (default: 0)')
+    parser.add_argument('--seed', type=int, default=0,
+                        help='Random seed for folds and models, and for PERMANOVA permutations (default: 0)')
     parser.add_argument('--group_column', metavar='column', type=str,
                         help='Metadata column naming the subject of each sample; keeps a subject in one fold')
     parser.add_argument('--roc', action='store_true',
                         help='With --classify, plot Receiver Operating Characteristic curves')
     parser.add_argument('--feature_selection', action='store_true',
                         help='With --classify, select features by nested recursive feature elimination')
+    parser.add_argument('--permanova', metavar='variable', nargs='*',
+                        help='PERMANOVA with a dispersion check (PERMDISP) for the given metadata variables, or all '
+                             'variables if none are given. The count file must then be a normalized table with '
+                             'taxonomy columns (kingdom ... species). Place this flag after the file arguments')
+    parser.add_argument('--taxa_level', choices=TAXA_LEVELS + ['all'], default='species',
+                        help='With --permanova, taxonomic level to sum the counts to, or all (default: species)')
+    parser.add_argument('--no_read_threshold', action='store_true',
+                        help='With --permanova, do not filter taxa by the read-threshold knee at each level')
+    parser.add_argument('--permutations', type=int, default=999,
+                        help='With --permanova, number of permutations (default: 999)')
     for flags, replacement in [(['-s', '--svm'], '--classify {variable}'),
                                (['-sr', '--svm_roc'], '--classify {variable} --roc'),
                                (['-sc', '--svm_classifier'], '--classify {variable} --feature_selection'),
                                (['-rf', '--random_forest'], '--classify {variable} --model random_forest')]:
         parser.add_argument(*flags, action=RemovedFlag, replacement=replacement, metavar='variable')
     try:
-        return parser.parse_args()
+        args = parser.parse_args()
+        if args.permanova is not None:
+            others = [flag for flag, used in [('-f/--filtering', args.filtering), ('-p/--pca_plot', args.pca_plot),
+                                              ('-k/--k_means', args.k_means), ('-c/--classify', args.classify)]
+                      if used]
+            if others:
+                parser.error(f"--permanova reads a count table with taxonomy and cannot be combined with "
+                             f"{', '.join(others)}. Run them separately.")
+        return args
     except SystemExit as exit_error:
         # --help exits with 0; argument errors exit with 1.
         sys.exit(0 if exit_error.code == 0 else 1)
@@ -167,6 +187,39 @@ def get_metadata_file(metadata_path, count_df, outdir):
     return metadata_df
 
 
+def permanova(args, outdir, logger):
+    """
+    Run PERMANOVA from a normalized count table with taxonomy and write permanova.csv to the output directory.
+    """
+    print(f"\nOpening {args.countfile} which should contain normalized counts with taxonomy columns\n")
+    counts_df = read_taxonomy_counts(args.countfile)
+    print(f'Found {counts_df.shape[1]} samples and {counts_df.shape[0]} taxa')
+    metadata_df = handleMetadata.Inputs(args.metadata).openmeta(outdir)
+    n_common = len(set(counts_df.columns) & set(metadata_df.index))
+    print(f'{n_common} samples in both the count and metadata files.\n')
+    try:
+        results = run_permanova(
+            counts_df, metadata_df, columns=args.permanova or None, taxa_level=args.taxa_level,
+            read_threshold=not args.no_read_threshold, permutations=args.permutations, seed=args.seed,
+        )
+    except ValueError as error:
+        logger.error(str(error))
+        raise SystemExit(f'PERMANOVA failed: {error}')
+    output_file = os.path.join(outdir, 'permanova.csv')
+    results.to_csv(output_file, index=False)
+    for (level, warnings) in results[['level', 'warnings']].drop_duplicates().itertuples(index=False):
+        if warnings:
+            print(f'Warning ({level}): {warnings}')
+    significant = results[results['p_value_corrected'] < 0.05]
+    print(f'\n{significant.shape[0]} of {results["p_value"].notna().sum()} tests significant after '
+          f'false discovery rate correction (p < 0.05).')
+    for row in significant.itertuples(index=False):
+        dispersion = ' (groups also differ in spread)' if row.permdisp_p_value_corrected < 0.05 else ''
+        print(f'  {row.level} / {row.variable}: R2 = {row.R2:.3f}, corrected p = {row.p_value_corrected:.3g}'
+              f'{dispersion}')
+    print(f'Results written to {output_file}')
+
+
 def run():
     args = parse_arguments()
     outdir = handle_output_directory(args.outdir, args.skip_prompt)
@@ -179,6 +232,10 @@ def run():
     error_log = logging.StreamHandler()
     error_log.setLevel(logging.WARNING)
     logger.addHandler(error_log)
+
+    if args.permanova is not None:
+        permanova(args, outdir, logger)
+        return
 
     # Parse input files
     logger.info('Starting handleCounts module, get_count_file function to import count data.')

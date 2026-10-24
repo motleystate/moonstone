@@ -21,6 +21,13 @@ Differential Analysis
     :inherited-members:
 
 
+PERMANOVA
+=========
+
+.. automodule:: moonstone.analysis.permanova
+    :members:
+
+
 Diversity
 =========
 

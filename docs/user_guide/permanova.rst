@@ -21,6 +21,55 @@ matrix, so it is available on every beta-diversity class (``BrayCurtis``, ``Jacc
     # many variables, with correction for multiple testing
     screen = bray_curtis.permanova_screen(metadata_df)
 
+From the command line
+=====================
+
+Start from a normalized count table with one row per taxon, the taxonomy in columns named ``kingdom``, ``phylum``,
+``class``, ``order``, ``family``, ``genus`` and ``species``, and one column per sample (tab- or comma-separated),
+plus a metadata file with one row per sample:
+
+.. code-block:: bash
+
+    # every metadata variable, species level
+    moonstone normalized_counts.tsv metadata.csv results --permanova
+
+    # two variables, every taxonomic level
+    moonstone normalized_counts.tsv metadata.csv results --permanova treatment site --taxa_level all
+
+Put ``--permanova`` after the three file arguments. The results go to ``results/permanova.csv``, one row per level
+and variable. Other options: ``--no_read_threshold``, ``--permutations`` (999 by default) and ``--seed``
+(0 by default). ``--permanova`` cannot be combined with ``-f``, ``-p``, ``-k`` or ``-c``.
+
+The same analysis from Python:
+
+.. code-block:: python
+
+    from moonstone.analysis.permanova import read_taxonomy_counts, run_permanova
+
+    counts = read_taxonomy_counts("normalized_counts.tsv")
+    results = run_permanova(counts, metadata_df, taxa_level="all")
+
+For each taxonomic level:
+
+1. The counts are summed to that level. Summing comes first, so a genus made of many rare species is judged on all
+   of its reads.
+2. Unless ``--no_read_threshold`` is given, only the taxa above the knee of the read-threshold score
+   (prevalence x log10(mean reads + 1), see ``moonstone.filtering.read_threshold_analysis``) are kept. This
+   filter never looks at the groups, so it does not bias the test.
+3. PERMANOVA and PERMDISP are run for each variable.
+
+The p-values of every test in the run (all levels and variables) are corrected together.
+
+The ``warnings`` column
+    The read-threshold knee has been checked at species level only, so every other level carries a warning
+    (see https://github.com/motleystate/moonstone/issues/132). A warning is also added when the filter removes more
+    than 10% of the reads, when taxa without a name at that level are pooled as ``unclassified``, and when samples
+    with no reads are left out. Read the warnings before the p-values.
+
+Levels with a single taxon
+    With one taxon (often the kingdom), Bray-Curtis only compares total reads, not community composition, so the
+    level is skipped.
+
 How the test works
 ==================
 
