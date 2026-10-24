@@ -96,10 +96,21 @@ Reproducibility
     The shuffles are seeded (``seed=0`` by default), so the same call gives the same p-values.
 
 Which samples are used
-    Samples without metadata, samples with a missing value in the tested variable, and groups with fewer than
-    ``min_group_size`` samples (2 by default) are left out, and this is logged. ``permanova_screen`` skips variables
-    with fewer than 2 usable groups or more than ``max_groups`` (15 by default) distinct values, which are usually
-    continuous variables, and says why in the ``skipped`` column.
+    Samples without metadata and groups with fewer than ``min_group_size`` samples (2 by default) are left out, and
+    this is logged. ``permanova_screen`` skips variables with fewer than 2 usable groups or more than ``max_groups``
+    (15 by default) distinct values, which are usually continuous variables, logs a warning, and says why in the
+    ``skipped`` column.
+
+Missing values
+    A missing value is treated as unknown, not as a group of its own. Each variable is tested on the samples that
+    have a value for it (complete-case), so different variables can use different samples. PERMANOVA and PERMDISP
+    always use the same samples. ``n_missing`` gives the number of samples left out for a missing value, and
+    ``n_samples`` the number tested; the count is also logged, and printed by ``--permanova``.
+
+    Missing means an empty cell, a cell holding only spaces, or a value pandas reads as missing (``NA``, ``N/A``,
+    ``NaN``, ``null`` and similar). Words such as ``missing``, ``unknown`` or ``-`` are real values and form a
+    group, so leave those cells empty instead. If many samples are missing a variable, check that the samples with
+    a value are not a special subset (for example only the patients seen at one clinic).
 
 Limits
 ======

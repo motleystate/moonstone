@@ -166,6 +166,18 @@ class TestRunPermanova(TestCase):
         self.assertEqual(results.loc[0, 'n_samples'], 29)
         self.assertIn('no reads left out', results.loc[0, 'warnings'])
 
+    def test_missing_values_counted_at_every_level(self):
+        counts_df, metadata = make_taxonomy_counts()
+        metadata.loc[['s0', 's20'], 'group'] = [np.nan, '']
+        results = run_permanova(counts_df, metadata, columns=['group', 'random'], taxa_level='all',
+                                read_threshold=False, permutations=9)
+        group = results[results['variable'] == 'group'].set_index('level')
+        tested = group['skipped'] == ''
+        self.assertTrue((group.loc[tested, 'n_missing'] == 2).all())
+        self.assertTrue((group.loc[tested, 'n_samples'] == 28).all())
+        random = results[(results['variable'] == 'random') & (results['skipped'] == '')]
+        self.assertTrue((random['n_missing'] == 0).all())
+
     def test_unknown_level_raises(self):
         counts_df, metadata = make_taxonomy_counts()
         with self.assertRaises(ValueError):

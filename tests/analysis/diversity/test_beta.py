@@ -906,6 +906,65 @@ class TestPermanova(TestCase):
         res = BrayCurtis(counts).permanova(metadata, "group", permutations=99)
         self.assertEqual(res["n_samples"], 28)
 
+    def test_missing_values_counted_not_grouped(self):
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        complete = [s for s in counts.columns if s not in ("s0", "s1", "s15", "s16")]
+        expected = BrayCurtis(counts[complete]).permanova(metadata.loc[complete], "group", permutations=99)
+        missing_values = {
+            "nan": np.nan, "None": None, "pd.NA": pd.NA, "empty": "", "space": " ",
+        }
+        for dtype in [object, "string", "category"]:
+            for name, value in missing_values.items():
+                with self.subTest(dtype=dtype, missing=name):
+                    meta = metadata.copy()
+                    meta["group"] = meta["group"].astype(object)
+                    meta.loc[["s0", "s1", "s15", "s16"], "group"] = value
+                    meta["group"] = meta["group"].astype(dtype)
+                    res = BrayCurtis(counts).permanova(meta, "group", permutations=99)
+                    self.assertEqual(res["n_samples"], 26)
+                    self.assertEqual(res["n_missing"], 4)
+                    self.assertEqual(res["n_groups"], 2)
+                    self.assertEqual(res["pseudo_F"], expected["pseudo_F"])
+                    self.assertEqual(res["permdisp_F"], expected["permdisp_F"])
+
+    def test_missing_values_in_numeric_column(self):
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        for dtype, value in [(float, np.nan), ("Float64", pd.NA)]:
+            with self.subTest(dtype=dtype):
+                meta = pd.DataFrame({"visit": [1.0] * 15 + [2.0] * 15}, index=metadata.index).astype(dtype)
+                meta.loc[["s0", "s15", "s16"], "visit"] = value
+                res = BrayCurtis(counts).permanova(meta, "visit", permutations=9)
+                self.assertEqual(res["n_samples"], 27)
+                self.assertEqual(res["n_missing"], 3)
+                self.assertEqual(res["n_groups"], 2)
+
+    def test_missing_values_logged_once(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata.loc["s0", "group"] = np.nan
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            BrayCurtis(counts).permanova_screen(metadata, permutations=9)
+        self.assertEqual(log.output, ["WARNING:moonstone.analysis.diversity.beta:group: 1 sample(s) with a missing "
+                                      "value are left out."])
+
+    def test_screen_reports_missing_and_skips_with_warning(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["mostly_missing"] = [np.nan] * 28 + ["x", "y"]
+        metadata.loc["s3", "group"] = None
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            screen = BrayCurtis(counts).permanova_screen(metadata, permutations=9)
+        self.assertEqual(screen.loc["group", "n_missing"], 1)
+        self.assertEqual(screen.loc["group", "n_samples"], 29)
+        self.assertEqual(screen.loc["mostly_missing", "n_missing"], 28)
+        self.assertEqual(screen.loc["mostly_missing", "skipped"], "fewer than 2 groups with at least 2 samples")
+        self.assertTrue(any("mostly_missing: not tested" in line for line in log.output))
+
+    def test_unused_categories_not_reported(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["group"] = pd.Categorical(metadata["group"], categories=["A", "B", "unused"])
+        with self.assertNoLogs("moonstone.analysis.diversity.beta", level="INFO"):
+            res = BrayCurtis(counts).permanova(metadata, "group", permutations=9)
+        self.assertEqual(res["n_groups"], 2)
+
     def test_small_groups_left_out(self):
         counts, metadata = self.make_counts(0.2, 0.2)
         metadata.loc["s0", "group"] = "C"

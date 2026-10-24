@@ -152,6 +152,20 @@ class TestCommandLinePermanova(TestCase):
         table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
         self.assertEqual(table.loc[0, 'taxa_kept'], table.loc[0, 'taxa_total'])
 
+    def test_permanova_blank_metadata_is_missing(self):
+        counts, metadata, outdir = self.write_inputs()
+        lines = open(metadata).read().splitlines()
+        lines[1] = lines[1].replace(',A,', ',,', 1)     # s0: blank group
+        lines[2] = lines[2].replace(',A,', ',NA,', 1)   # s1: NA group
+        open(metadata, 'w').write('\n'.join(lines) + '\n')
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', 'group', '--permutations', '9')
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('group: 2 sample(s) with a missing value left out', result.stdout)
+        table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
+        self.assertEqual(table.loc[0, 'n_missing'], 2)
+        self.assertEqual(table.loc[0, 'n_samples'], 28)
+        self.assertEqual(table.loc[0, 'n_groups'], 2)
+
     def test_permanova_rejects_other_analyses(self):
         counts, metadata, outdir = self.write_inputs()
         result = self.run_moonstone(counts, metadata, outdir, '--permanova', '-f', '5')

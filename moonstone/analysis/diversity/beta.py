@@ -347,10 +347,15 @@ class BetaDiversity(DiversityBase, ABC):
             graph._handle_output_plotly(fig, show, output_file)
         return fig
 
-    def _permanova_grouping(self, metadata_df: pd.DataFrame, group_col: str, min_group_size: int) -> pd.Series:
+    def _permanova_grouping(self, metadata_df: pd.DataFrame, group_col: str, min_group_size: int) -> tuple:
         """
         Return the group of each sample usable for PERMANOVA: samples present in both the counts and the metadata,
-        with a value in group_col, and in a group of at least min_group_size samples.
+        with a value in group_col, and in a group of at least min_group_size samples. Empty or whitespace-only
+        values count as missing.
+
+        Returns:
+            The grouping (a Series of strings indexed by sample) and the number of samples left out because their
+            value is missing.
         """
         not_in_metadata = [s for s in self.df.columns if s not in metadata_df.index]
         if not_in_metadata:
@@ -359,10 +364,13 @@ class BetaDiversity(DiversityBase, ABC):
                 group_col, len(not_in_metadata), ", ".join(map(str, not_in_metadata))
             )
         grouping = metadata_df.loc[[s for s in self.df.columns if s in metadata_df.index], group_col]
+        blank = grouping.notna() & grouping.astype(str).str.strip().eq('')
+        grouping = grouping.mask(blank)
         n_missing = int(grouping.isna().sum())
         if n_missing:
-            logger.info("%s: %i sample(s) with a missing value are left out.", group_col, n_missing)
-        grouping = grouping.dropna()
+            logger.warning("%s: %i sample(s) with a missing value are left out.", group_col, n_missing)
+        # as strings before counting, so unused categories of a categorical column are not reported as groups
+        grouping = grouping.dropna().astype(str)
         group_sizes = grouping.value_counts()
         too_small = group_sizes[group_sizes < min_group_size].index
         if len(too_small) > 0:
@@ -371,7 +379,7 @@ class BetaDiversity(DiversityBase, ABC):
                 group_col, min_group_size, ", ".join(map(str, too_small))
             )
             grouping = grouping[~grouping.isin(too_small)]
-        return grouping.astype(str).rename(group_col)
+        return grouping.rename(group_col), n_missing
 
     def permanova(
         self, metadata_df: pd.DataFrame, group_col: str,
@@ -387,8 +395,9 @@ class BetaDiversity(DiversityBase, ABC):
         (PERMDISP, Anderson 2006; R vegan::betadisper) is run on the same samples. A small PERMDISP p-value means
         the groups differ in spread, so a significant PERMANOVA may reflect spread rather than composition.
 
-        Samples without metadata or with a missing value in group_col are left out (logged), as are groups with
-        fewer than min_group_size samples.
+        Samples without metadata or with a missing value in group_col (NaN, None, pd.NA, or an empty or
+        whitespace-only string) are left out and counted, as are groups with fewer than min_group_size samples.
+        PERMANOVA and PERMDISP use the same samples.
 
         Args:
             metadata_df: dataframe of metadata, indexed by sample.
@@ -401,16 +410,25 @@ class BetaDiversity(DiversityBase, ABC):
               or 'centroid'.
 
         Returns:
-            Series named after group_col with: n_samples, n_groups, pseudo_F, R2 (share of the variation
-            explained by the groups), p_value, permdisp_F, permdisp_p_value (NaN when dispersion=False),
-            and permutations.
+            Series named after group_col with: n_samples, n_missing (samples left out for a missing value),
+            n_groups, pseudo_F, R2 (share of the variation explained by the groups), p_value, permdisp_F,
+            permdisp_p_value (NaN when dispersion=False), and permutations.
 
         Note:
             PERMDISP works on Principal Coordinates Analysis (PCoA) axes. All axes with a positive eigenvalue are
             used. Non-Euclidean distances such as Bray-Curtis also give negative eigenvalues; scikit-bio leaves
             those axes out, whereas vegan::betadisper includes them, so PERMDISP values can differ slightly from R.
         """
-        grouping = self._permanova_grouping(metadata_df, group_col, min_group_size)
+        grouping, n_missing = self._permanova_grouping(metadata_df, group_col, min_group_size)
+        return self._permanova_on_grouping(
+            grouping, n_missing, min_group_size, permutations, seed, dispersion, dispersion_test
+        )
+
+    def _permanova_on_grouping(
+        self, grouping: pd.Series, n_missing: int, min_group_size: int, permutations: int, seed: int,
+        dispersion: bool, dispersion_test: str,
+    ) -> pd.Series:
+        group_col = grouping.name
         n_groups = grouping.nunique()
         if n_groups < 2:
             raise ValueError(
@@ -439,6 +457,7 @@ class BetaDiversity(DiversityBase, ABC):
         return pd.Series(
             {
                 'n_samples': n_samples,
+                'n_missing': n_missing,
                 'n_groups': n_groups,
                 'pseudo_F': pseudo_f,
                 'R2': r2,
@@ -479,8 +498,9 @@ class BetaDiversity(DiversityBase, ABC):
             columns = list(metadata_df.columns)
         rows = []
         for col in columns:
-            n_values = metadata_df.loc[metadata_df.index.isin(self.df.columns), col].nunique()
-            grouping = self._permanova_grouping(metadata_df, col, min_group_size)
+            grouping, n_missing = self._permanova_grouping(metadata_df, col, min_group_size)
+            values = metadata_df.loc[metadata_df.index.isin(self.df.columns), col]
+            n_values = values.mask(values.astype(str).str.strip().eq('')).nunique()
             n_groups = grouping.nunique()
             skipped = ''
             if n_values > max_groups:
@@ -490,18 +510,18 @@ class BetaDiversity(DiversityBase, ABC):
             elif n_groups == grouping.shape[0]:
                 skipped = 'every sample in its own group'
             if skipped:
-                rows.append(pd.Series({'n_samples': grouping.shape[0], 'n_groups': n_groups, 'skipped': skipped},
-                                      name=col))
+                logger.warning("%s: not tested, %s.", col, skipped)
+                rows.append(pd.Series({'n_samples': grouping.shape[0], 'n_missing': n_missing, 'n_groups': n_groups,
+                                       'skipped': skipped}, name=col))
                 continue
-            row = self.permanova(
-                metadata_df, col, permutations=permutations, seed=seed, min_group_size=min_group_size,
-                dispersion=dispersion, dispersion_test=dispersion_test,
+            row = self._permanova_on_grouping(
+                grouping, n_missing, min_group_size, permutations, seed, dispersion, dispersion_test
             )
             row['skipped'] = ''
             rows.append(row)
 
         columns_order = [
-            'n_samples', 'n_groups', 'pseudo_F', 'R2', 'p_value', 'permdisp_F', 'permdisp_p_value',
+            'n_samples', 'n_missing', 'n_groups', 'pseudo_F', 'R2', 'p_value', 'permdisp_F', 'permdisp_p_value',
             'permutations', 'skipped'
         ]
         screen = pd.DataFrame(rows).reindex(columns=columns_order)

@@ -36,6 +36,11 @@ Unreleased
   ``moonstone.analysis.permanova.run_permanova``. Reads a normalized count table with taxonomy columns, sums it to
   each level, filters taxa with the read-threshold knee, and corrects all tests of a run together. Existing flags
   are unchanged. (https://github.com/motleystate/moonstone/issues/131)
+* PERMANOVA missing values: samples with a missing value in the tested variable are left out of that variable's
+  test only (complete-case), for PERMANOVA and PERMDISP alike. Empty and whitespace-only values now count as missing
+  instead of forming a group. New ``n_missing`` column in the results of ``permanova``, ``permanova_screen``,
+  ``run_permanova`` and ``permanova.csv``; the count is logged as a warning and printed by ``--permanova``. Skipped
+  variables are logged as warnings.
 
 
 v1.1

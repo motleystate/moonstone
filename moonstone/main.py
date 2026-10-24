@@ -210,6 +210,9 @@ def permanova(args, outdir, logger):
     for (level, warnings) in results[['level', 'warnings']].drop_duplicates().itertuples(index=False):
         if warnings:
             print(f'Warning ({level}): {warnings}')
+    n_missing = results.groupby('variable', sort=False)['n_missing'].max()
+    for variable, count in n_missing[n_missing > 0].items():
+        print(f'{variable}: {int(count)} sample(s) with a missing value left out')
     significant = results[results['p_value_corrected'] < 0.05]
     print(f'\n{significant.shape[0]} of {results["p_value"].notna().sum()} tests significant after '
           f'false discovery rate correction (p < 0.05).')
