@@ -48,7 +48,8 @@ def read_taxonomy_counts(path: str) -> pd.DataFrame:
     """
     Read a normalized count table with one row per taxon and one column per sample, where the taxonomy is given
     in columns named after the levels (kingdom, phylum, class, order, family, genus, species). Tab- or
-    comma-separated. An NCBI_taxonomy_ID column, if present, is ignored.
+    comma-separated. An NCBI_taxonomy_ID column, if present, is ignored. Blank count cells stop the run: fill them
+    in (with 0 if the taxon was not found) beforehand.
 
     Returns:
         Dataframe indexed by the taxonomy levels found (a MultiIndex), with one numeric column per sample.
@@ -64,7 +65,13 @@ def read_taxonomy_counts(path: str) -> pd.DataFrame:
     if non_numeric:
         raise ValueError(f"{path}: sample columns must be numeric, but these are not: {', '.join(non_numeric[:5])}"
                          f"{' ...' if len(non_numeric) > 5 else ''}.")
-    return df.set_index(levels)[sample_columns].fillna(0)
+    blank = df[sample_columns].isna()
+    if blank.any().any():
+        samples = [str(col) for col in sample_columns if blank[col].any()]
+        raise ValueError(f"{path}: {int(blank.sum().sum())} blank count cell(s) in sample(s) {', '.join(samples[:5])}"
+                         f"{' ...' if len(samples) > 5 else ''}. Fill them in (with 0 if the taxon was not "
+                         "found) before running.")
+    return df.set_index(levels)[sample_columns]
 
 
 def sum_to_level(counts_df: pd.DataFrame, level: str) -> tuple:

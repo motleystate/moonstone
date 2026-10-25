@@ -22,8 +22,10 @@ A CSV file in wide format: **one row per taxon, one column per sample**.
   abundances** (proportions or percentages). ``log10(r + 1)`` assumes counts; on values
   between 0 and 1 it is close to linear and the scores lose their meaning. A warning is raised
   when every sample sums to 100 or less.
-* ``0`` means the taxon is absent from the sample; empty cells are treated as ``0``.
-* Rows sharing the same ``species`` and ``NCBI_taxonomy_ID`` are summed.
+* ``0`` means the taxon is absent from the sample.
+* Rows sharing the same ``species`` and ``NCBI_taxonomy_ID`` are summed. Rows with a blank ``species`` or
+  ``NCBI_taxonomy_ID`` are kept (with a warning), grouped by the values they do have.
+* Blank count cells stop the run: fill them in (with 0 if the taxon was not found) beforehand.
 
 Example::
 
@@ -151,7 +153,18 @@ def load_species_table(input_file):
         warnings.warn("Every sample sums to 100 or less, which looks like relative abundances. "
                       "This method expects read counts (raw or normalized).")
 
-    return df.groupby(['species', 'NCBI_taxonomy_ID'])[sample_columns].sum().fillna(0)
+    blank = df[sample_columns].isna()
+    if blank.any().any():
+        samples = [str(col) for col in sample_columns if blank[col].any()]
+        raise ValueError(f"{int(blank.sum().sum())} blank count cell(s) in sample(s) {', '.join(samples[:5])}"
+                         f"{' ...' if len(samples) > 5 else ''}. Fill them in (with 0 if the taxon was not "
+                         "found) before running.")
+    unnamed = df[['species', 'NCBI_taxonomy_ID']].isna().any(axis=1)
+    if unnamed.any():
+        warnings.warn(f"{int(unnamed.sum())} row(s) with a blank species or NCBI_taxonomy_ID are kept, "
+                      "grouped by the values they do have.")
+
+    return df.groupby(['species', 'NCBI_taxonomy_ID'], dropna=False)[sample_columns].sum()
 
 
 def compute_taxa_metrics(df):

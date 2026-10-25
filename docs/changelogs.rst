@@ -10,6 +10,13 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* **Breaking change:** blank count cells now stop the PERMANOVA loader (``read_taxonomy_counts``, used by
+  ``--permanova``) and the read-threshold loader with an error naming the samples, instead of being read as 0.
+  Fill them in (with 0 if the taxon was not found) beforehand. (https://github.com/motleystate/moonstone/issues/143)
+* The count filters stop with a clear error when counts are text (for example ``12,5``), and warn about negative
+  and blank counts. ``MeanFiltering`` removes rows with no values at all, with a warning; before, they passed.
+  ``TaxonomyMeanFiltering`` and the read-threshold loader keep rows with no name (or no ``NCBI_taxonomy_ID``) at
+  the chosen level, with a warning, instead of dropping them. (https://github.com/motleystate/moonstone/issues/143)
 * **Breaking change (Python interface):** ``NoCountsFiltering`` now removes both taxa (rows) and samples (columns)
   with no counts by default. Its ``axis`` argument now means the same as in the other filters (0 = rows only,
   1 = columns only); before, ``axis=0`` removed columns. ``DifferentialAnalysis`` therefore no longer tests taxa

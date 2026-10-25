@@ -58,10 +58,11 @@ class TestReadTaxonomyCounts(TestCase):
         with self.assertRaisesRegex(ValueError, 'sample columns must be numeric.*s2'):
             read_taxonomy_counts(path)
 
-    def test_blank_counts_read_as_zero(self):
+    def test_blank_counts_raise(self):
         path = os.path.join(tempfile.mkdtemp(), 'counts.csv')
         pd.DataFrame({'species': ['a', 'b'], 's1': [1, None]}).to_csv(path, index=False)
-        self.assertEqual(list(read_taxonomy_counts(path)['s1']), [1.0, 0.0])
+        with self.assertRaisesRegex(ValueError, '1 blank count cell.*s1'):
+            read_taxonomy_counts(path)
 
 
 class TestSumAndFilter(TestCase):
