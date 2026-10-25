@@ -347,6 +347,33 @@ pval_to_display should be set to: {}".format(
         pval_series = pval_series.set_index([names[0], names[1]])
         return pval_series[0]
 
+    def _grouped_box_positions(self, groups: list, groups2: list, plotting_options: dict = None):
+        """
+        To list the boxes of a graph with group_col2, in the order they are drawn, and their x position.
+        Each group_col value is a cluster centred on its index; inside it, each group_col2 value has its own slot
+        (Plotly keeps the slot even when there is no data for this combination).
+
+        Args:
+            groups: ordered list of groups from group_col displayed in graph.
+            groups2: ordered list of groups from group_col2 displayed in graph.
+            plotting_options: plotly plotting_options, read for a custom gap between clusters.
+
+        Returns:
+            final_groups: list of "{group_col value} - {group_col2 value}", in the order they are drawn.
+            positions: dictionary with the x position of each element of final_groups.
+        """
+        layout = (plotting_options or {}).get('layout', {})
+        width = 1 - layout.get('boxgap', layout.get('violingap', 0.3))   # Plotly's default gap is 0.3
+        slot = width / len(groups2)
+        final_groups = []
+        positions = {}
+        for i, group in enumerate(groups):
+            for k, group2 in enumerate(groups2):
+                name = f"{group} - {group2}"
+                final_groups.append(name)
+                positions[name] = i - width/2 + (k + 0.5) * slot
+        return final_groups, positions
+
     def _generate_ordered_final_groups(
         self, metadata_df: pd.DataFrame, final_group_col: str, group_col: str, group_col2: str,
         groups: list, groups2: list
@@ -381,15 +408,18 @@ pval_to_display should be set to: {}".format(
         return list(t[final_group_col])
 
     def _generate_shapes_annotations_lists_simple(
-        self, pval_series: pd.Series, groups: list, hgt_min: Real
+        self, pval_series: pd.Series, groups: list, hgt_min: Real, positions: dict = None
     ):
         """
-        To generate annotations to represent significant p-values. Methods for group_col only (not group_col2).
+        To generate annotations to represent significant p-values.
 
         Args:
             pval_series: series of the p-values to put on the graph (need to be filtered beforehand
               so that it only contains significant p-values).
-            groups: list of groups displayed in graph.
+            groups: list of groups displayed in graph, in the order they are drawn.
+            hgt_min: height of the lowest bracket.
+            positions: x position of each group on the graph. Default: the group's index in `groups`
+              (one box per category). With group_col2, the position of each box inside its cluster.
         """
         # SPREAD/NOT TIGHT = 2 brackets sharing a same edge as left and right edges respectively
         # are not allowed on the same line.
@@ -415,61 +445,39 @@ pval_to_display should be set to: {}".format(
         fontsize = int(12+det)
         linewidth = 0.5+0.15*det
 
+        if positions is None:
+            positions = dic_gps
+
         level = [[0] * (len(groups))]
         list_shapes = []
         list_annotations = []
 
         for ind, val in pval_series.items():
-            y = 0
-
-            left_ind = dic_gps[ind[0]]  # -> could be directly ind (Group name) for shapes
-            # but /!\ not for the annotations. So using a numerical value
+            left_ind = dic_gps[ind[0]]  # numerical index of the groups, used to fill `level`
             right_ind = dic_gps[ind[1]]
+            left_x = positions[ind[0]]
+            right_x = positions[ind[1]]
 
+            # first level (row) where the left edge of the bracket is free, or a new level
             for i in range(len(level)):
                 if level[i][left_ind] == 0:
-                    level[i][left_ind:right_ind+1] = [1]*(right_ind-left_ind+1)
-                    list_shapes += [
-                        {'x0': left_ind, 'y0': hgt_min+(i*det/2),
-                         'x1': right_ind, 'y1': hgt_min+(i*det/2),
-                         'line': dict(width=linewidth)},   # from Group1 to Group2
-                        {'x0': left_ind, 'y0': hgt_min+(i*det/2)-0.15*det,
-                         'x1': left_ind, 'y1': hgt_min+(i*det/2),
-                         'line': dict(width=linewidth)},   # left edge of the bracket
-                        {'x0': right_ind, 'y0': hgt_min+(i*det/2)-0.15*det,
-                         'x1': right_ind, 'y1': hgt_min+(i*det/2),
-                         'line': dict(width=linewidth)}    # right edge of the bracket
-                    ]
-                    if val <= 0.01:
-                        list_annotations += [{'text': '**', "font": dict(size=fontsize),
-                                              'x': (left_ind+right_ind)/2,
-                                              'y': hgt_min+(i*det/2)+0.15*det, 'showarrow': False}]
-                    else:
-                        list_annotations += [{'text': '*', "font": dict(size=fontsize),
-                                              'x': (left_ind+right_ind)/2,
-                                              'y': hgt_min+(i*det/2)+0.15*det, 'showarrow': False}]
-                    y = 1
                     break
-            if y == 0:
-                # we need to add another level
-                i += 1
+            else:
                 level += [[0] * (len(groups))]
-                level[i][left_ind:right_ind+1] = [1]*(right_ind-left_ind+1)  # or ind
-                list_shapes += [
-                    {'x0': left_ind, 'y0': hgt_min+(i*det/2),
-                     'x1': right_ind, 'y1': hgt_min+(i*det/2), 'line': dict(width=linewidth)},
-                    {'x0': left_ind, 'y0': hgt_min+(i*det/2)-0.15*det,
-                     'x1': left_ind, 'y1': hgt_min+(i*det/2), 'line': dict(width=linewidth)},
-                    {'x0': right_ind, 'y0': hgt_min+(i*det/2)-0.15*det,
-                     'x1': right_ind, 'y1': hgt_min+(i*det/2), 'line': dict(width=linewidth)}]
-                if val < 0.01:
-                    list_annotations += [{'text': '**', "font": dict(size=fontsize),
-                                          'x': (left_ind+right_ind)/2,
-                                          'y': hgt_min+(i*det/2)+0.15*det, 'showarrow': False}]
-                else:
-                    list_annotations += [{'text': '*', "font": dict(size=fontsize),
-                                          'x': (left_ind+right_ind)/2,
-                                          'y': hgt_min+(i*det/2)+0.15*det, 'showarrow': False}]
+                i = len(level) - 1
+            level[i][left_ind:right_ind+1] = [1]*(right_ind-left_ind+1)
+
+            y = hgt_min+(i*det/2)
+            list_shapes += [
+                {'x0': left_x, 'y0': y, 'x1': right_x, 'y1': y,
+                 'line': dict(width=linewidth)},   # from Group1 to Group2
+                {'x0': left_x, 'y0': y-0.15*det, 'x1': left_x, 'y1': y,
+                 'line': dict(width=linewidth)},   # left edge of the bracket
+                {'x0': right_x, 'y0': y-0.15*det, 'x1': right_x, 'y1': y,
+                 'line': dict(width=linewidth)}    # right edge of the bracket
+            ]
+            list_annotations += [{'text': '**' if val <= 0.01 else '*', "font": dict(size=fontsize),
+                                  'x': (left_x+right_x)/2, 'y': y+0.15*det, 'showarrow': False}]
 
         return list_shapes, list_annotations, len(level)
 
@@ -636,11 +644,10 @@ pval_to_display should be set to: {}".format(
         """
         filtered_metadata_df = self._get_filtered_df_from_metadata(metadata_df)
 
-        # For now pval_to_display only works if image is static and no group_col2
-        if pval_to_display is not None and (group_col2 is not None or (
-                output_file is not False and output_file is not None and output_file.split(".")[1] == "html")):
-            print("Sorry but for now pval_to_display only available for cases without a groul_col2 and with a static \
-image")
+        # For now pval_to_display only works if image is static
+        if pval_to_display is not None and (
+                output_file is not False and output_file is not None and output_file.split(".")[1] == "html"):
+            print("Sorry but for now pval_to_display only available with a static image")
             pval_to_display = None
 
         correction_method = self._valid_correction_method_param(correction_method)
@@ -683,16 +690,19 @@ image")
                     ])
                 # here pval is a series
 
-            # if pval_to_display:  # not ready yet
-            #    if groups or groups2:
-                    # list and sort all final_groups possibles respecting the order given by
-                    # groups first and then by groups2
-            #        final_groups = self._generate_ordered_final_groups(
-            #            df, final_group_col, group_col, group_col2, groups, groups2
-            #        )
-            #    else:
-            #        final_groups = list(filtered_metadata_df[final_group_col].unique())
-            #    to_display = self._pval_selection_with_group_col2(pval, final_groups, pval_to_compute, pval_to_display)
+            if pval_to_display:
+                # the groups plotted, in the order the graph draws them (clusters of group_col values,
+                # and inside each cluster, one box per group_col2 value)
+                if groups is None:
+                    groups = list(df[group_col].unique())
+                    if kwargs.get("sort_groups"):
+                        groups = sorted(groups, key=str)
+                if groups2 is None:
+                    groups2 = list(df[group_col2].unique())
+                if kwargs.get("sort_groups"):
+                    groups2 = sorted(groups2, key=str)
+                final_groups, positions = self._grouped_box_positions(groups, groups2, plotting_options)
+                to_display = self._pval_selection_with_group_col2(pval, final_groups, pval_to_compute, pval_to_display)
 
         else:
             df = self._get_grouped_df(filtered_metadata_df[group_col])
@@ -717,11 +727,11 @@ image")
         if pval_to_display:
             # print(final_groups)
             hgt_min = df[self._DIVERSITY_INDEXES_NAME].max()  # + 0.5
-            # if not group_col2:  # always the case right now
+            if not group_col2:
+                positions = None
             list_shapes, list_annotations, nb_lev = self._generate_shapes_annotations_lists_simple(
-                to_display, final_groups, hgt_min
+                to_display, final_groups, hgt_min, positions=positions
             )
-            # else: self._generate_shapes_annotations_lists_supergroups
 
             if not plotting_options:
                 plotting_options = {}
@@ -737,7 +747,16 @@ image")
 
             # forcing groups into string otherwise the pvalue risks to be off
             df[group_col] = df[group_col].astype(str)
-            groups = [str(g) for g in final_groups]
+            if group_col2:
+                df[group_col2] = df[group_col2].astype(str)
+                groups = [str(g) for g in groups]
+                groups2 = [str(g) for g in groups2]
+                # fix the order of the clusters on the x axis, the brackets depend on it
+                plotting_options = merge_dict(plotting_options, {
+                    'layout': {'xaxis': {'categoryorder': 'array', 'categoryarray': groups}}
+                })
+            else:
+                groups = [str(g) for g in final_groups]
 
         if infct_structure_pval != structure_pval:
             # pval is in the right structure to be returned

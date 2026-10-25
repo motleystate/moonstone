@@ -453,7 +453,7 @@ Accepted values: {', '.join(self.DICTIONARY_PLOTLY_MARKER_SYMBOLS.keys())}"
                     **kwargs,
                 )
 
-            fig.update_layout(boxmode="group", legend_title_text=group_col2)
+            fig.update_layout(boxmode="group", violinmode="group", legend_title_text=group_col2)
         else:
             groups, colors, names = self._prep_for_plot_one_graph(
                 group_col, groups, colors, show_counts, sort_groups
