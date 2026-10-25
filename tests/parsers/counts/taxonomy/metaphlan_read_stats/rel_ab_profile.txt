@@ -1,0 +1,5 @@
+#mpa_vOct22_CHOCOPhlAnSGB_202403
+#/usr/local/bin/metaphlan s.fastq.gz -t rel_ab
+#SampleID	sample_D
+#clade_name	clade_taxid	relative_abundance	additional_species
+k__Bacteria	2	100.0	
