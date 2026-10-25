@@ -27,25 +27,25 @@ def make_annotations(df_info) -> str:
     """Generates a string to be used for annotation the graph. Data is generated from the `describe` function
     in Pandas, and then parsed from the new dataframe.
     The annotation string is interpreted as HTML in the Plotly output."""
-    total_reads = df_info.sum()
-    ds = df_info.describe(percentiles=[.05, .1, .25, .5, .75])
+    total_reads = df_info['reads'].sum()
+    ds = df_info['reads'].describe(percentiles=[.05, .1, .25, .5, .75])
 
-    sample_number = ds.loc['count'][0]
-    mean_reads = ds.loc['mean'][0]
-    std = ds.loc['std'][0]
-    min_reads = ds.loc['min'][0]
-    max_reads = ds.loc['max'][0]
-    ninety_five = ds.loc['5%']
-    ninety = ds.loc['10%']
-    seventy_five = ds.loc['25%']
-    fifty = ds.loc['50%']
-    twenty_five = ds.loc['75%']
+    sample_number = ds['count']
+    mean_reads = ds['mean']
+    std = ds['std']
+    min_reads = ds['min']
+    max_reads = ds['max']
+    ninety_five = ds['5%']
+    ninety = ds['10%']
+    seventy_five = ds['25%']
+    fifty = ds['50%']
+    twenty_five = ds['75%']
 
     annotation = 'Number of Samples = %i<br>Total Reads = %i<br>' \
                  'Mean Reads = %i<br>Standard Deviation = %i<br>Min Reads = %i<br>' \
                  'Max Reads = %i<br><br>95%% of samples have at least %i reads<br>90%% of samples have at least %i' \
-                 'reads<br>75%% of samples have at least %i reads<br>50%% of samples have at least %i reads<br>25%%' \
-                 'of samples have at least %i reads<br>' \
+                 ' reads<br>75%% of samples have at least %i reads<br>50%% of samples have at least %i reads<br>25%%' \
+                 ' of samples have at least %i reads<br>' \
                  % (sample_number, total_reads, mean_reads, std, min_reads, max_reads, ninety_five,
                     ninety, seventy_five, fifty, twenty_five)
     return annotation

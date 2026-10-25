@@ -711,6 +711,22 @@ class TestFaithsPhylogeneticDiversity(TestCase):
             tested_object_instance.compute_diversity(), expected_object
             )
 
+    def test_compute_alpha_diversity_multiindex_summed_to_last_level(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
+        tested_object = self.tested_object.copy()
+        tested_object.index = pd.MultiIndex.from_tuples(
+            [('genus1', 'species1'), ('genus1', 'species2'), ('genus2', 'species3'), ('genus2', 'species4')],
+            names=['genus', 'species'])
+        for force_computation in [False, True]:
+            with self.subTest(force_computation=force_computation):
+                tested_object_instance = FaithsPhylogeneticDiversity(tested_object, tree, validate=False,
+                                                                     force_computation=force_computation)
+                expected_object = pd.Series({
+                    'sample1': 1.75, 'sample2': 3.00, 'sample3': 1.50, 'sample4': 2.50, 'sample5': 4.25
+                })
+                pd.testing.assert_series_equal(tested_object_instance.compute_diversity(), expected_object)
+
     def test_compute_alpha_diversity_incomplete_tree(self):
         tree = TreeNode.read(StringIO(
             u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species6:0.5,species5:0.5):1.0)root;'))

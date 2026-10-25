@@ -21,6 +21,25 @@ Unreleased
   (with ``--roc``, ``--feature_selection`` or ``--model random_forest``). Output file names change, and the decision
   tree, AdaBoost and gradient boosting runs are removed. See :ref:`classification`.
   (https://github.com/motleystate/moonstone/pull/123)
+* Fix: ``-f/--filtering`` on the command line now removes taxa whose mean read count is below the threshold,
+  as documented. It used to remove samples instead, which usually stopped the run with a sample-number mismatch.
+* Fix: Faith's phylogenetic diversity and UniFrac now sum a multi-level taxonomy table to its last level as intended.
+  Before, such a table raised a misleading "INCOMPLETE TREE" error, or gave 0 for every sample with
+  ``force_computation=True``.
+* Fix: ``GeometricMeanNormalization`` raises an error naming samples without reads, instead of looping forever.
+* Fix: the command-line count-file warning gives the real number of unnamed taxa removed.
+* Fixes to FASTQ read downsizing (``moonstone.normalization.reads``):
+
+  * Reads are drawn without replacement, so each output pair has exactly the requested number of different reads.
+    Before, repeated draws and an off-by-one error (the first read could never be picked) could give fewer reads,
+    for example 987 when downsizing 1,000 reads to 1,000. **With the same seed, different reads are now selected.**
+  * Asking for more reads than a file has raises an error; ``DownsizeDir`` leaves such pairs out with a warning.
+  * ``DownsizePair`` no longer fails on uncompressed FASTQ without ``read_info``, and finds its input in ``in_dir``.
+  * Files that are not FASTQ (a README, an image) are skipped with a warning instead of stopping the run, and files
+    without a pair are reported.
+  * Pairs are matched on the whole first read header, so a header that starts another sample's header no longer
+    pairs files from different samples.
+  * The reads-per-sample plot summary works with pandas 3.
 * **Breaking change:** the command-line flags ``-p/--pca_plot`` and ``-k/--k_means`` are removed, with the module
   ``moonstone.analysis.clustering`` behind them. Both were broken: ``--pca_plot`` drew an empty figure and saved nothing,
   and ``--k_means`` wrote a metadata file with no rows. The flags now stop with an error saying they were removed.
