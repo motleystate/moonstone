@@ -828,3 +828,92 @@ class TestAnalyseGroupsPvalToDisplay(TestCase):
         self.assertEqual(
             self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
         )
+
+
+class TestAnalyseGroupsPvalToDisplayGroupCol2(TestCase):
+    """Significance brackets drawn by analyse_groups(pval_to_display=...) with a group_col2."""
+
+    def setUp(self):
+        # 40 samples: site X or Y, sex F or M (10 per combination). "X - F" has 3 species, the others 20,
+        # with the same count for every species present. So only the comparisons with "X - F" are significant.
+        combos = [("X", "F"), ("X", "M"), ("Y", "F"), ("Y", "M")]
+        samples = [f"s{i}" for i in range(40)]
+        site = {s: combos[i % 4][0] for i, s in enumerate(samples)}
+        sex = {s: combos[i % 4][1] for i, s in enumerate(samples)}
+        richness = {s: 3 if (site[s], sex[s]) == ("X", "F") else 20 for s in samples}
+        self.count_df = pd.DataFrame(
+            {s: [10] * richness[s] + [0] * (20 - richness[s]) for s in samples},
+            index=[f"species{j}" for j in range(20)]
+        )
+        self.metadata_df = pd.DataFrame({"site": site, "sex": sex})
+        # with 2 sexes, the boxes of a site are 0.35 wide and sit at -0.175 and +0.175 from its centre
+        self.x = {"X - F": -0.175, "X - M": 0.175, "Y - F": 0.825, "Y - M": 1.175}
+
+    def _analyse(self, **kwargs):
+        return ShannonIndex(self.count_df).analyse_groups(
+            self.metadata_df, group_col="site", group_col2="sex", show=False, show_pval=False, **kwargs
+        )
+
+    @staticmethod
+    def _brackets(fig):
+        # each bracket is 3 shapes (bar + 2 edges)
+        return {(round(shape.x0, 3), round(shape.x1, 3)) for shape in fig.layout.shapes[::3]}
+
+    def _expected(self, *pairs):
+        return {(round(self.x[a], 3), round(self.x[b], 3)) for a, b in pairs}
+
+    def test_all(self):
+        output = self._analyse(pval_to_display="all")
+        self.assertEqual(
+            self._brackets(output["fig"]),
+            self._expected(("X - F", "X - M"), ("X - F", "Y - F"), ("X - F", "Y - M"))
+        )
+        self.assertEqual(len(output["fig"].layout.annotations), 3)
+        self.assertEqual([trace.name for trace in output["fig"].data], ["F", "M"])
+        self.assertEqual(list(output["fig"].layout.xaxis.categoryarray), ["X", "Y"])
+
+    def test_same_group_col_values(self):
+        output = self._analyse(pval_to_display="same group_col values")
+        self.assertEqual(self._brackets(output["fig"]), self._expected(("X - F", "X - M")))
+
+    def test_same_group_col_or_group_col2_values(self):
+        output = self._analyse(
+            pval_to_compute="same group_col or group_col2 values",
+            pval_to_display="same group_col or group_col2 values"
+        )
+        self.assertEqual(
+            self._brackets(output["fig"]), self._expected(("X - F", "X - M"), ("X - F", "Y - F"))
+        )
+
+    def test_groups_order_and_sort_groups(self):
+        # clusters in the given order, sexes sorted by sort_groups
+        output = self._analyse(
+            pval_to_display="same group_col values", groups=["Y", "X"], groups2=["M", "F"], sort_groups=True
+        )
+        self.assertEqual([trace.name for trace in output["fig"].data], ["F", "M"])
+        self.assertEqual(list(output["fig"].layout.xaxis.categoryarray), ["Y", "X"])
+        # X is now the second cluster: F at 1 - 0.175, M at 1 + 0.175
+        self.assertEqual(self._brackets(output["fig"]), {(0.825, 1.175)})
+
+    def test_violin(self):
+        output = self._analyse(pval_to_display="same group_col values", mode="violin")
+        self.assertEqual(output["fig"].layout.violinmode, "group")
+        self.assertEqual(self._brackets(output["fig"]), self._expected(("X - F", "X - M")))
+
+    def test_pval_unchanged(self):
+        # displaying p-values does not change the p-values returned
+        with_display = self._analyse(pval_to_display="all", structure_pval="series", sym=False)
+        without_display = self._analyse(structure_pval="series", sym=False)
+        pd.testing.assert_series_equal(with_display["pval"], without_display["pval"])
+
+    def test_grouped_box_positions(self):
+        # a third group_col2 value: 3 slots per cluster, kept even when a combination has no data
+        final_groups, positions = ShannonIndex(self.count_df)._grouped_box_positions(["X", "Y"], ["F", "M", "U"])
+        self.assertEqual(final_groups, ["X - F", "X - M", "X - U", "Y - F", "Y - M", "Y - U"])
+        expected = [-0.7/3, 0, 0.7/3, 1-0.7/3, 1, 1+0.7/3]
+        for name, x in zip(final_groups, expected):
+            self.assertAlmostEqual(positions[name], x)
+        # custom gap between clusters
+        _, positions = ShannonIndex(self.count_df)._grouped_box_positions(["X"], ["F", "M"], {"layout": {"boxgap": 0.5}})
+        self.assertAlmostEqual(positions["X - F"], -0.125)
+        self.assertAlmostEqual(positions["X - M"], 0.125)

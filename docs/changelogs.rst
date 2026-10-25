@@ -53,6 +53,11 @@ Unreleased
   that is only in the metadata no longer adds an empty box. With ``sort_groups=True``, the brackets are now placed
   after the groups are sorted; before, they could mark the wrong pairs of groups.
   (https://github.com/motleystate/moonstone/issues/101)
+* ``analyse_groups(pval_to_display=...)`` now draws the significance brackets when ``group_col2`` is used (it was
+  ignored with a message before), for the three choices ``"all"``, ``"same group_col values"`` and
+  ``"same group_col or group_col2 values"``. Each bracket ends on its box inside the group cluster. P-values are
+  still drawn on static images only. With ``mode="violin"``, the ``group_col2`` violins are now drawn side by side
+  instead of on top of each other. (https://github.com/motleystate/moonstone/issues/101)
 
 
 v1.1
