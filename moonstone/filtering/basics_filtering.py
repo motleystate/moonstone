@@ -12,14 +12,32 @@ logger = logging.getLogger(__name__)
 
 class NoCountsFiltering(BothAxisFiltering, CountsFiltering):
     """
-    Remove rows (default) or columns with no counts.
+    Remove rows (taxa) and columns (samples) with no counts.
+
+    By default both are removed. Use ``axis=0`` to remove only empty rows, or ``axis=1`` to remove
+    only empty columns, as in the other filters of this module.
     """
 
+    def __init__(self, dataframe: pd.DataFrame, axis: Union[int, None] = None):
+        """
+        :param axis: None (default) for both rows and columns, 0 for rows only, 1 for columns only
+        """
+        super().__init__(dataframe, axis=axis)
+
+    def _validate_parameters(self):
+        if self.axis not in [None, 0, 1]:
+            raise ValueError("axis needs to be None (rows and columns), 0 (index) or 1 (columns)")
+
     def filter(self) -> pd.DataFrame:
-        indices = self.df.sum(axis=self.axis) != 0.0
-        if self.axis == 1:
-            return self.df.loc[indices]
-        return self.df.loc[:, indices]
+        # Removing empty rows does not change column sums and vice versa, so one pass is enough.
+        rows = self.df.sum(axis=1) != 0.0 if self.axis in [None, 0] else slice(None)
+        columns = self.df.sum(axis=0) != 0.0 if self.axis in [None, 1] else slice(None)
+        filtered_df = self.df.loc[rows, columns]
+        removed_rows = self.df.shape[0] - filtered_df.shape[0]
+        removed_columns = self.df.shape[1] - filtered_df.shape[1]
+        if removed_rows or removed_columns:
+            logger.info("%i row(s) and %i column(s) with no counts removed", removed_rows, removed_columns)
+        return filtered_df
 
 
 class NamesFiltering(BothAxisFiltering):
@@ -126,21 +144,11 @@ class NumberOfDifferentValuesFiltering(BothAxisFiltering):
         super().__init__(dataframe, axis=axis)
 
     def filter(self) -> pd.DataFrame:
-        new_df = self.df
+        # Returns a new dataframe; the input dataframe is left unchanged.
+        n_values = self.df.nunique(axis=1 - self.axis, dropna=not self.na)
+        keep = (n_values >= self.min_number_values) & (n_values <= self.max_number_values)
+        name = "rows" if self.axis == 0 else "columns"
+        logger.info("%s/%s %s dropped", int((~keep).sum()), len(keep), name)
         if self.axis == 0:
-            for row in self.df.index:
-                x = pd.Series(new_df.loc[row].unique())
-                if not self.na:
-                    x = x.dropna()
-                if len(x) < self.min_number_values or len(x) > self.max_number_values:
-                    new_df.drop(row, inplace=True, axis=0)
-            logger.info("%s/%s rows dropped", new_df.shape[0], self.df.shape[0])
-            return new_df
-        for col in self.df.columns:
-            x = pd.Series(new_df[col].unique())
-            if not self.na:
-                x = x.dropna()
-            if len(x) < self.min_number_values or len(x) > self.max_number_values:
-                new_df.drop(col, inplace=True, axis=1)
-        logger.info("%s/%s columns dropped", new_df.shape[1], self.df.shape[1])
-        return new_df
+            return self.df.loc[keep]
+        return self.df.loc[:, keep]

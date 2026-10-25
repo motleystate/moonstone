@@ -190,3 +190,11 @@ class TestTaxonomyMeanFiltering(TestCase):
         expected_df.index.set_names(['genus', 'species'], inplace=True)
         tested_filtering = TaxonomyMeanFiltering(self.test_df, mean_value, level="genus")
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
+    def test_mean_equal_to_value_kept(self):
+        # specie_1 has a mean of exactly 1.5
+        tested_filtering = TaxonomyMeanFiltering(self.test_df, 1.5, level="species")
+        self.assertEqual(
+            list(tested_filtering.filtered_df.index.get_level_values('species')),
+            ['specie_1', 'specie_2', 'specie_4']
+        )

@@ -10,6 +10,14 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* **Breaking change (Python interface):** ``NoCountsFiltering`` now removes both taxa (rows) and samples (columns)
+  with no counts by default. Its ``axis`` argument now means the same as in the other filters (0 = rows only,
+  1 = columns only); before, ``axis=0`` removed columns. ``DifferentialAnalysis`` therefore no longer tests taxa
+  with no reads. (https://github.com/motleystate/moonstone/issues/140)
+* ``TaxonomyMeanFiltering`` keeps taxa whose mean equals the threshold, like ``MeanFiltering``.
+  (https://github.com/motleystate/moonstone/issues/140)
+* ``MeanFiltering`` and ``NumberOfDifferentValuesFiltering`` return a new table and no longer modify the one they
+  are given. (https://github.com/motleystate/moonstone/issues/140)
 * Requires Python 3.13 and pandas >= 3.0 (support for Python 3.9 to 3.12 and for pandas 2 is dropped).
   Minimum scikit-bio raised to 0.6.0. (https://github.com/motleystate/moonstone/pull/118)
 * Compatibility with pandas 3 (https://github.com/motleystate/moonstone/pull/118)

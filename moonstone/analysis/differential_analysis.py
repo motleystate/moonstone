@@ -32,7 +32,7 @@ class DifferentialAnalysis:
     def __init__(self, metadata_dataframe, read_count_dataframe):
         self.read_count_df = read_count_dataframe
         self.metadata_df = metadata_dataframe
-        logger.info('removing rows with only zeros')
+        logger.info('removing taxa and samples with only zeros')
         filtering_instance = NoCountsFiltering(self.read_count_df)
         self.read_count_df = filtering_instance.filtered_df
         instance = MergeCountsAndMetadata(self.metadata_df, self.read_count_df)
