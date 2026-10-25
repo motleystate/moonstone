@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+import numpy as np
 import pandas as pd
 
 from moonstone.filtering.mean_filtering import (
@@ -157,3 +158,26 @@ class TestMeanFiltering(TestCase):
         filtered_df = MeanFiltering(tested_object, threshold=1).filtered_df
         self.assertEqual(list(filtered_df.index), ['specie_1'])
         pd.testing.assert_frame_equal(tested_object, original)
+
+    def test_row_with_no_values_removed(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'specie_1': [5.0, 5.0],
+                'specie_2': [np.nan, np.nan],
+            },
+            orient='index', columns=['1', '2'])
+        with self.assertLogs('moonstone.filtering.mean_filtering', level='WARNING') as logs:
+            filtered_df = MeanFiltering(tested_object, threshold=1).filtered_df
+        self.assertEqual(list(filtered_df.index), ['specie_1'])
+        self.assertIn('specie_2', logs.output[0])
+
+    def test_text_counts_raise_clear_error(self):
+        tested_object = pd.DataFrame({'1': ['10', '12,5'], '2': [1.0, 2.0]}, index=['specie_1', 'specie_2'])
+        with self.assertRaisesRegex(ValueError, 'Counts must be numbers.*1'):
+            MeanFiltering(tested_object, threshold=1)
+
+    def test_negative_counts_warn(self):
+        tested_object = pd.DataFrame({'1': [-1.0, 2.0], '2': [1.0, 2.0]}, index=['specie_1', 'specie_2'])
+        with self.assertLogs('moonstone.filtering.base', level='WARNING') as logs:
+            MeanFiltering(tested_object, threshold=1)
+        self.assertIn('1 negative count', logs.output[0])

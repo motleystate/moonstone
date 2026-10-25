@@ -198,3 +198,17 @@ class TestTaxonomyMeanFiltering(TestCase):
             list(tested_filtering.filtered_df.index.get_level_values('species')),
             ['specie_1', 'specie_2', 'specie_4']
         )
+
+    def test_rows_without_name_at_level_kept(self):
+        test_df = pd.DataFrame.from_dict(
+            {
+                ('genus_1', 'specie_1'): {'1': 10, '2': 10},
+                ('genus_1', np.nan): {'1': 50, '2': 50},
+                ('genus_2', 'specie_2'): {'1': 1, '2': 1},
+            },
+            orient='index')
+        test_df.index.set_names(['genus', 'species'], inplace=True)
+        with self.assertLogs('moonstone.filtering.taxonomy_filtering', level='WARNING'):
+            filtered_df = TaxonomyMeanFiltering(test_df, 5, level="species").filtered_df
+        self.assertEqual(filtered_df.shape[0], 2)
+        self.assertEqual(filtered_df.sum().sum(), 120)

@@ -65,7 +65,12 @@ class MeanFiltering(CountsFiltering):
             self.compute_threshold_best_n_percent()
         logger.info("Filtering with threshold set to %.2f..." % self.threshold)
         # Items whose mean equals the threshold are kept. Returns a new dataframe; the input is left unchanged.
-        filtered_df = self.df.loc[~(self.df.mean(axis=1) < self.threshold)]
+        means = self.df.mean(axis=1)
+        no_values = means.isna()
+        if no_values.any():
+            logger.warning("%i item(s) with no values removed: %s", int(no_values.sum()),
+                           ", ".join(map(str, self.df.index[no_values][:5])) + (" ..." if no_values.sum() > 5 else ""))
+        filtered_df = self.df.loc[means >= self.threshold]
         self.remaining_items_number = filtered_df.shape[0]
         self.remaining_reads_number = filtered_df.sum().sum()
         logger.info(
