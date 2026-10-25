@@ -103,6 +103,21 @@ class TestCommandLineSmoke(TestCase):
                 self.assertIn(f'{flag} has been removed. Use: {replacement}', result.stderr)
                 self.assertEqual(result.returncode, 1)
 
+    def test_removed_pca_and_kmeans_flags(self):
+        counts, metadata, outdir = self.write_inputs()
+        for args in [('-p',), ('--pca_plot',), ('-k', '3'), ('--k_means', '3')]:
+            with self.subTest(flag=args[0]):
+                result = self.run_moonstone(counts, metadata, outdir, *args)
+                self.assertNotIn('Traceback', result.stderr)
+                self.assertIn(f'{args[0]} has been removed.', result.stderr)
+                self.assertEqual(result.returncode, 1)
+                self.assertFalse(os.path.exists(os.path.join(outdir, 'metaData_withKClusters.csv')))
+
+    def test_help_does_not_list_removed_flags(self):
+        result = self.run_moonstone('--help')
+        self.assertNotIn('--pca_plot', result.stdout)
+        self.assertNotIn('--k_means', result.stdout)
+
 
 class TestCommandLinePermanova(TestCase):
 

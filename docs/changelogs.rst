@@ -21,6 +21,9 @@ Unreleased
   (with ``--roc``, ``--feature_selection`` or ``--model random_forest``). Output file names change, and the decision
   tree, AdaBoost and gradient boosting runs are removed. See :ref:`classification`.
   (https://github.com/motleystate/moonstone/pull/123)
+* **Breaking change:** the command-line flags ``-p/--pca_plot`` and ``-k/--k_means`` are removed, with the module
+  ``moonstone.analysis.clustering`` behind them. Both were broken: ``--pca_plot`` drew an empty figure and saved nothing,
+  and ``--k_means`` wrote a metadata file with no rows. The flags now stop with an error saying they were removed.
 * Classifiers rewritten as one module, ``moonstone.analysis.classification``, replacing ``classify.py`` and
   ``randomForest.py``. New options ``--model``, ``--kernel``, ``--explore_kernels``, ``--folds``, ``--seed`` and
   ``--group_column``. Support Vector Machine scaling now happens inside each training fold, folds are stratified and
