@@ -9,6 +9,7 @@ from moonstone.analysis.classification import Classification, KERNELS, MODELS
 from moonstone.analysis.diversity.beta import DEFAULT_PERMUTATIONS, MISSING_WARNING_FRACTION
 from moonstone.analysis.permanova import TAXA_LEVELS, read_taxonomy_counts, run_permanova
 from moonstone.filtering.mean_filtering import MeanFiltering
+from moonstone.validation.sample_matching import match_samples
 
 
 """ Moonstone is designed as a means of enabling machine learning analysis of metagenomic sequencing data.
@@ -182,13 +183,25 @@ def get_metadata_file(metadata_path, count_df, outdir):
     print("\nOpening {} which is expected to contain clinical metadata.".format(metadata_path))
     metadata_read = handleMetadata.Inputs(metadata_path)
     metadata_df = metadata_read.openmeta(outdir)
-    if count_df.shape[0] != metadata_df.shape[0]:
-        print('Count samples: {} does not equal sample number in metadata file {}'.format(count_df.shape[0],
-                                                                                          metadata_df.shape[0]))
-        raise SystemExit("Count and Metadata sample numbers don't match...disaster!")
-    else:
-        print(f'Nice! {count_df.shape[0]} samples in count AND metadata files.\n')
+    report_sample_matching(count_df.index, metadata_df.index)
     return metadata_df
+
+
+def report_sample_matching(count_samples, metadata_samples):
+    """
+    Match the samples of the count table and the metadata by ID, print what does not match, and stop
+    if the files cannot be paired (no ID in common, or an ID used twice).
+    """
+    matching = match_samples(count_samples, metadata_samples)
+    findings = matching.findings()
+    for finding in findings:
+        if finding.level != 'error':
+            print(f'{finding.level.capitalize()}: {finding.message}.')
+    errors = [finding.message for finding in findings if finding.level == 'error']
+    if errors:
+        raise SystemExit('Count and metadata samples cannot be matched by ID: ' + '; '.join(errors) + '.')
+    print(f'{len(matching.matched)} samples in both the count and metadata files.\n')
+    return matching
 
 
 def permanova(args, outdir, logger):
@@ -199,8 +212,7 @@ def permanova(args, outdir, logger):
     counts_df = read_taxonomy_counts(args.countfile)
     print(f'Found {counts_df.shape[1]} samples and {counts_df.shape[0]} taxa')
     metadata_df = handleMetadata.Inputs(args.metadata).openmeta(outdir)
-    n_common = len(set(counts_df.columns) & set(metadata_df.index))
-    print(f'{n_common} samples in both the count and metadata files.\n')
+    report_sample_matching(counts_df.columns, metadata_df.index)
     try:
         results = run_permanova(
             counts_df, metadata_df, columns=args.permanova or None, taxa_level=args.taxa_level,
