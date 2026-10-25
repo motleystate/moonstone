@@ -34,6 +34,9 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: ./coverage.xml
+        # Upload the report pytest wrote; do not let the uploader re-combine and regenerate it.
+        disable_search: true
+        plugins: noop
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: true
