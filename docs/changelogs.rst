@@ -10,6 +10,13 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* **Command-line change:** the count table and the metadata are now matched by sample ID instead of by number of
+  rows (new ``moonstone.validation.match_samples``, see :ref:`sample_matching`). A metadata file with extra
+  samples no longer stops the run; they are listed and ignored. Count-table samples with no metadata are listed in
+  a warning and left out; before, they were left out silently when the two files had the same number of rows. The
+  run stops with a clear error when no ID is shared or an ID is used twice. Metadata sample IDs are read as text,
+  so ``01`` matches a count column named ``01``.
+
 * New opt-in converters ``moonstone.validation.convert_to_utf8`` and ``moonstone.validation.convert_locale``. They
   run only when called: they re-encode a file to UTF-8 from an encoding the user names, and rewrite a file from
   conventions the user declares (separator, decimal mark, thousands separators, dd/mm or mm/dd dates) to commas,
