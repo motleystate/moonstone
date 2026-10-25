@@ -10,6 +10,11 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* New ``moonstone.validation.check_file_format``: a first-pass check of CSV, TSV and Excel input that reports
+  non-UTF-8 encodings (such as cp1252 from French Excel), byte order marks, ";" separators, decimal commas,
+  thousands separators and dd/mm versus mm/dd dates. It only reports and never changes the data. Nothing calls it
+  yet, so the command line is unchanged.
+
 * **Breaking change:** blank count cells now stop the PERMANOVA loader (``read_taxonomy_counts``, used by
   ``--permanova``) and the read-threshold loader with an error naming the samples, instead of being read as 0.
   Fill them in (with 0 if the taxon was not found) beforehand. (https://github.com/motleystate/moonstone/issues/143)
