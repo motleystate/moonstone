@@ -135,3 +135,25 @@ class TestMeanFiltering(TestCase):
                 }
             }
         self.assertDictEqual(tested_object_instance.generate_report_data(), expected_object)
+
+    def test_mean_equal_to_threshold_kept(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'specie_1': [2, 2],
+                'specie_2': [1, 2],
+            },
+            orient='index', columns=['1', '2'])
+        filtered_df = MeanFiltering(tested_object, threshold=2).filtered_df
+        self.assertEqual(list(filtered_df.index), ['specie_1'])
+
+    def test_input_not_modified(self):
+        tested_object = pd.DataFrame.from_dict(
+            {
+                'specie_1': [10, 0, 0, 2],
+                'specie_2': [0, 0, 1, 0],
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        original = tested_object.copy()
+        filtered_df = MeanFiltering(tested_object, threshold=1).filtered_df
+        self.assertEqual(list(filtered_df.index), ['specie_1'])
+        pd.testing.assert_frame_equal(tested_object, original)

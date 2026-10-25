@@ -43,7 +43,7 @@ class TaxonomyMeanFiltering(CountsFiltering):
     Filtering a Taxonomy multiindexed dataframe on sample mean at a chosen level.
 
     This means you select a mean value for all samples and it will discard all selected
-    taxonomy below this mean.
+    taxonomy below this mean. Taxa whose mean equals the mean value are kept.
     """
 
     def __init__(
@@ -51,7 +51,7 @@ class TaxonomyMeanFiltering(CountsFiltering):
         level: str = 'species'
     ):
         """
-        :param mean_value: mean among all samples to be kept
+        :param mean_value: minimum mean among all samples for a taxon to be kept
         :param level: level of the MultiIndex to filter on
         """
         super().__init__(dataframe)
@@ -66,6 +66,6 @@ class TaxonomyMeanFiltering(CountsFiltering):
 
     def filter(self) -> pd.DataFrame:
         level_df = self.df.groupby(self.level).sum()
-        selected_names = level_df[level_df.mean(axis=1) > self.mean_value].index
+        selected_names = level_df[level_df.mean(axis=1) >= self.mean_value].index
         corresponding_rows = self.df.index.get_level_values(self.level).isin(selected_names)
         return self.df.loc[corresponding_rows]
