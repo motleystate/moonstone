@@ -701,11 +701,15 @@ image")
             )
 
             if pval_to_display:
-                to_display = self._pval_selection(pval, groups)
                 if groups is not None:
                     final_groups = groups
                 else:
-                    final_groups = list(metadata_df[group_col].unique())
+                    # the groups plotted, in the order the graph draws them
+                    final_groups = list(df[group_col].dropna().unique())
+                if kwargs.get("sort_groups"):
+                    # the graph sorts the groups as strings; brackets must follow the same order
+                    final_groups = sorted(final_groups, key=str)
+                to_display = self._pval_selection(pval, final_groups)
 
         if pval_to_display and to_display.empty:       # nothing to display
             pval_to_display = None
@@ -733,7 +737,7 @@ image")
 
             # forcing groups into string otherwise the pvalue risks to be off
             df[group_col] = df[group_col].astype(str)
-            groups = [str(g) for g in groups]
+            groups = [str(g) for g in final_groups]
 
         if infct_structure_pval != structure_pval:
             # pval is in the right structure to be returned
