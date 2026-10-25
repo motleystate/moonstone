@@ -42,6 +42,12 @@ Unreleased
   ``run_permanova`` and ``permanova.csv``; the count is logged as a warning and printed by ``--permanova``. Skipped
   variables are logged as warnings, and so is a variable with no value for more than half of the samples (missing
   values are never filled in).
+* PERMANOVA defaults to 9,999 permutations instead of 999, in ``permanova``, ``permanova_screen``,
+  ``run_permanova`` and ``--permutations``. New ``p_value_se`` and ``permdisp_p_value_se`` columns give the standard
+  error of each permutation p-value, sqrt(p (1 - p) / N). A warning (logged, and in the ``warnings`` column) says when
+  there are too few permutations for any test to pass the multiple-testing correction. New ``--threads`` flag
+  (every available core by default) and ``n_jobs`` parameter run the tests in parallel with identical results.
+  New dependencies listed explicitly (already installed with scikit-learn): ``joblib`` and ``threadpoolctl``.
 
 
 v1.1

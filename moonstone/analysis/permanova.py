@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 from statsmodels.stats.multitest import multipletests
 
-from moonstone.analysis.diversity.beta import BrayCurtis
+from moonstone.analysis.diversity.beta import DEFAULT_PERMUTATIONS, BrayCurtis, too_few_permutations_warning
 from moonstone.filtering.read_threshold_analysis import combined_score_threshold, compute_taxa_metrics
 
 logger = logging.getLogger(__name__)
@@ -37,8 +37,9 @@ MIN_TAXA_FOR_KNEE = 3
 MAX_READS_PCT_REMOVED = 10
 
 RESULT_COLUMNS = [
-    'level', 'variable', 'n_samples', 'n_missing', 'n_groups', 'pseudo_F', 'R2', 'p_value', 'p_value_corrected',
-    'permdisp_F', 'permdisp_p_value', 'permdisp_p_value_corrected', 'permutations', 'skipped',
+    'level', 'variable', 'n_samples', 'n_missing', 'n_groups', 'pseudo_F', 'R2', 'p_value', 'p_value_se',
+    'p_value_corrected', 'permdisp_F', 'permdisp_p_value', 'permdisp_p_value_se', 'permdisp_p_value_corrected',
+    'permutations', 'skipped',
     'taxa_total', 'taxa_kept', 'reads_pct_kept', 'warnings',
 ]
 
@@ -134,7 +135,7 @@ def _drop_empty_samples(level_df: pd.DataFrame) -> tuple:
 def run_permanova(
     counts_df: pd.DataFrame, metadata_df: pd.DataFrame, columns: list = None, taxa_level: str = 'species',
     read_threshold: bool = True, correction_method: str = 'fdr_bh', max_groups: int = 15,
-    permutations: int = 999, seed: int = 0, min_group_size: int = 2,
+    permutations: int = DEFAULT_PERMUTATIONS, seed: int = 0, min_group_size: int = 2, n_jobs: int = 1,
 ) -> pd.DataFrame:
     """
     PERMANOVA with a PERMDISP dispersion check on Bray-Curtis distances, for one or all taxonomic levels.
@@ -147,7 +148,8 @@ def run_permanova(
         taxa_level: a level of the taxonomy index ('species' by default), or 'all' for every level present.
         read_threshold: keep only the taxa above the read-threshold knee at each level before testing.
         correction_method: 'fdr_bh' (default), 'bonferroni', or None. Applied once over every test of the run.
-        max_groups, permutations, seed, min_group_size: see ``BetaDiversity.permanova_screen``.
+        max_groups, permutations, seed, min_group_size, n_jobs: see ``BetaDiversity.permanova_screen``.
+          The seed makes a run repeatable; it does not make the p-values more accurate (more permutations do).
 
     Returns:
         One row per level and variable, with the columns of ``RESULT_COLUMNS``. ``warnings`` lists anything the
@@ -190,7 +192,7 @@ def run_permanova(
         else:
             screen = BrayCurtis(level_df).permanova_screen(
                 metadata_df, columns=columns, correction_method=None, max_groups=max_groups,
-                permutations=permutations, seed=seed, min_group_size=min_group_size,
+                permutations=permutations, seed=seed, min_group_size=min_group_size, n_jobs=n_jobs,
             )
         screen = screen.rename_axis('variable').reset_index()
         screen.insert(0, 'level', level)
@@ -200,6 +202,11 @@ def run_permanova(
         tables.append(screen)
 
     results = pd.concat(tables, ignore_index=True)
+    if correction_method is not None:
+        warning = too_few_permutations_warning(int(results['p_value'].notna().sum()), permutations)
+        if warning:
+            logger.warning("%s.", warning)
+            results['warnings'] = [f"{w}; {warning}" if w else warning for w in results['warnings']]
     for pval_col in ['p_value', 'permdisp_p_value']:
         corrected = pd.Series(np.nan, index=results.index)
         tested = results[pval_col].dropna()

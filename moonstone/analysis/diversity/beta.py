@@ -6,9 +6,11 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import skbio.diversity
+from joblib import Parallel, cpu_count, delayed
 from skbio.stats.distance import DistanceMatrix, permanova, permdisp
 from skbio.stats.ordination import pcoa
 from statsmodels.stats.multitest import multipletests
+from threadpoolctl import threadpool_limits
 
 from moonstone.analysis.diversity.base import (
     DiversityBase, PhylogeneticDiversityBase
@@ -20,6 +22,46 @@ logger = logging.getLogger(__name__)
 
 # PERMANOVA: warn when more than this share of the samples lack a value for the tested variable
 MISSING_WARNING_FRACTION = 0.5
+# PERMANOVA: default number of label permutations. The smallest possible p-value is 1 / (permutations + 1).
+DEFAULT_PERMUTATIONS = 9999
+# PERMANOVA: significance threshold used to check that the permutations are enough for the multiple-test correction
+FDR_ALPHA = 0.05
+
+
+def permutation_p_value_se(p_value, permutations):
+    """
+    Monte Carlo standard error of a permutation p-value, sqrt(p (1 - p) / N): how much the p-value would vary
+    between runs with different seeds. It shrinks with more permutations, not with a fixed seed.
+    """
+    if not permutations:
+        return np.nan
+    return np.sqrt(p_value * (1 - p_value) / permutations)
+
+
+def too_few_permutations_warning(n_tests: int, permutations: int, alpha: float = FDR_ALPHA) -> str:
+    """
+    Return a warning when, with n_tests corrected together, even the smallest possible p-value 1 / (N + 1) cannot
+    pass the correction for a single real effect (n_tests / (N + 1) >= alpha, for Benjamini-Hochberg and Bonferroni
+    alike), and an empty string otherwise.
+    """
+    if n_tests < 1 or not permutations:
+        return ''
+    best = n_tests / (permutations + 1)
+    if best < alpha:
+        return ''
+    needed = int(np.ceil(n_tests / alpha))
+    return (f"{permutations} permutations are too few for {n_tests} tests: the smallest corrected p-value a single "
+            f"real effect can reach is {min(best, 1):.3g}, not below {alpha}. Use at least {needed} permutations")
+
+
+def resolve_n_jobs(n_jobs) -> int:
+    """Number of worker processes: n_jobs as given, or every available core for 0, -1 or None."""
+    if n_jobs in (None, 0, -1):
+        # joblib's count respects CPU affinity and container (cgroup) limits
+        return cpu_count()
+    if n_jobs < 1:
+        raise ValueError(f"n_jobs must be a positive number of processes, or 0 / -1 for all cores, not {n_jobs}.")
+    return int(n_jobs)
 
 
 class BetaDiversity(DiversityBase, ABC):
@@ -392,7 +434,7 @@ class BetaDiversity(DiversityBase, ABC):
 
     def permanova(
         self, metadata_df: pd.DataFrame, group_col: str,
-        permutations: int = 999, seed: int = 0, min_group_size: int = 2,
+        permutations: int = DEFAULT_PERMUTATIONS, seed: int = 0, min_group_size: int = 2,
         dispersion: bool = True, dispersion_test: str = 'median',
     ) -> pd.Series:
         """
@@ -411,8 +453,12 @@ class BetaDiversity(DiversityBase, ABC):
         Args:
             metadata_df: dataframe of metadata, indexed by sample.
             group_col: column of metadata_df defining the groups (treated as categories).
-            permutations: number of label permutations used for the p-values.
-            seed: random seed for the permutations, so results are reproducible. None for an unseeded run.
+            permutations: number of label permutations used for the p-values (9,999 by default). The smallest
+              possible p-value is 1 / (permutations + 1), and the p-values' run-to-run variation (p_value_se)
+              shrinks with more permutations.
+            seed: random seed for the permutations, so the same call gives the same p-values. None for an unseeded
+              run. The seed gives repeatability, not accuracy: a different seed gives p-values that differ by about
+              p_value_se.
             min_group_size: smallest group kept in the test.
             dispersion: also run PERMDISP.
             dispersion_test: centre used by PERMDISP: 'median' (spatial median, as vegan::betadisper's default)
@@ -420,8 +466,9 @@ class BetaDiversity(DiversityBase, ABC):
 
         Returns:
             Series named after group_col with: n_samples, n_missing (samples left out for a missing value),
-            n_groups, pseudo_F, R2 (share of the variation explained by the groups), p_value, permdisp_F,
-            permdisp_p_value (NaN when dispersion=False), and permutations.
+            n_groups, pseudo_F, R2 (share of the variation explained by the groups), p_value, p_value_se (Monte
+            Carlo standard error of p_value, sqrt(p (1 - p) / permutations)), permdisp_F, permdisp_p_value and
+            permdisp_p_value_se (NaN when dispersion=False), and permutations.
 
         Note:
             PERMDISP works on Principal Coordinates Analysis (PCoA) axes. All axes with a positive eigenvalue are
@@ -471,17 +518,24 @@ class BetaDiversity(DiversityBase, ABC):
                 'pseudo_F': pseudo_f,
                 'R2': r2,
                 'p_value': float(result['p-value']),
+                'p_value_se': permutation_p_value_se(float(result['p-value']), permutations),
                 'permdisp_F': permdisp_f,
                 'permdisp_p_value': permdisp_p,
+                'permdisp_p_value_se': permutation_p_value_se(permdisp_p, permutations),
                 'permutations': permutations,
             },
             name=group_col, dtype=object,
         )
 
+    def _permanova_single_thread(self, *args) -> pd.Series:
+        # Runs in a worker process with one test per core, so scikit-bio's own threads would only compete.
+        with threadpool_limits(1):
+            return self._permanova_on_grouping(*args)
+
     def permanova_screen(
         self, metadata_df: pd.DataFrame, columns: list = None, correction_method: str = 'fdr_bh',
-        max_groups: int = 15, permutations: int = 999, seed: int = 0, min_group_size: int = 2,
-        dispersion: bool = True, dispersion_test: str = 'median',
+        max_groups: int = 15, permutations: int = DEFAULT_PERMUTATIONS, seed: int = 0, min_group_size: int = 2,
+        dispersion: bool = True, dispersion_test: str = 'median', n_jobs: int = 1,
     ) -> pd.DataFrame:
         """
         Run permanova() for each column of metadata_df and correct the p-values for multiple testing.
@@ -497,6 +551,8 @@ class BetaDiversity(DiversityBase, ABC):
             max_groups: columns with more groups than this are skipped (usually continuous variables, which
               PERMANOVA on categories does not handle).
             permutations, seed, min_group_size, dispersion, dispersion_test: passed to permanova().
+            n_jobs: number of processes testing columns in parallel (1 by default; 0 or -1 for every available
+              core). Each test uses the same seed whichever process runs it, so the results do not depend on n_jobs.
 
         Returns:
             Dataframe with one row per column: the fields of permanova(), the corrected p-values, and 'skipped'
@@ -506,6 +562,7 @@ class BetaDiversity(DiversityBase, ABC):
         if columns is None:
             columns = list(metadata_df.columns)
         rows = []
+        to_test = []
         for col in columns:
             grouping, n_missing = self._permanova_grouping(metadata_df, col, min_group_size)
             values = metadata_df.loc[metadata_df.index.isin(self.df.columns), col]
@@ -523,21 +580,33 @@ class BetaDiversity(DiversityBase, ABC):
                 rows.append(pd.Series({'n_samples': grouping.shape[0], 'n_missing': n_missing, 'n_groups': n_groups,
                                        'skipped': skipped}, name=col))
                 continue
-            row = self._permanova_on_grouping(
-                grouping, n_missing, min_group_size, permutations, seed, dispersion, dispersion_test
-            )
+            rows.append(len(to_test))
+            to_test.append((grouping, n_missing))
+
+        n_jobs = min(resolve_n_jobs(n_jobs), max(len(to_test), 1))
+        args = [(grouping, n_missing, min_group_size, permutations, seed, dispersion, dispersion_test)
+                for grouping, n_missing in to_test]
+        if n_jobs == 1:
+            tested_rows = [self._permanova_on_grouping(*arg) for arg in args]
+        else:
+            tested_rows = Parallel(n_jobs=n_jobs)(delayed(self._permanova_single_thread)(*arg) for arg in args)
+        for row in tested_rows:
             row['skipped'] = ''
-            rows.append(row)
+        # rows holds skipped columns as Series and tested columns as their position in tested_rows
+        rows = [tested_rows[row] if isinstance(row, int) else row for row in rows]
 
         columns_order = [
-            'n_samples', 'n_missing', 'n_groups', 'pseudo_F', 'R2', 'p_value', 'permdisp_F', 'permdisp_p_value',
-            'permutations', 'skipped'
+            'n_samples', 'n_missing', 'n_groups', 'pseudo_F', 'R2', 'p_value', 'p_value_se', 'permdisp_F',
+            'permdisp_p_value', 'permdisp_p_value_se', 'permutations', 'skipped'
         ]
         screen = pd.DataFrame(rows).reindex(columns=columns_order)
         for col in columns_order[:-1]:
             screen[col] = pd.to_numeric(screen[col])
 
         if correction_method is not None:
+            warning = too_few_permutations_warning(int(screen['p_value'].notna().sum()), permutations)
+            if warning:
+                logger.warning("%s.", warning)
             for pval_col in ['p_value', 'permdisp_p_value']:
                 corrected = pd.Series(np.nan, index=screen.index)
                 tested = screen[pval_col].dropna()

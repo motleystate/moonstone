@@ -130,6 +130,25 @@ class TestCommandLinePermanova(TestCase):
         table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
         self.assertEqual(list(table['variable']), ['group', 'random'])
         self.assertEqual(set(table['level']), {'species'})
+        self.assertIn('p_value_se', table.columns)
+
+    def test_permanova_threads_same_results(self):
+        counts, metadata, outdir = self.write_inputs()
+        tables = []
+        for threads in ['1', '2']:
+            out = outdir + threads
+            result = self.run_moonstone(counts, metadata, out, '--permanova', '--permutations', '199',
+                                        '--threads', threads)
+            self.assertEqual(result.returncode, 0)
+            tables.append(pd.read_csv(os.path.join(out, 'permanova.csv')))
+        pd.testing.assert_frame_equal(tables[0], tables[1])
+
+    def test_permanova_rejects_negative_threads(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', '--permutations', '9',
+                                    '--threads', '-3')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn('Traceback', result.stderr)
 
     def test_permanova_all_levels_one_variable(self):
         counts, metadata, outdir = self.write_inputs()
