@@ -17,6 +17,12 @@ Unreleased
   run stops with a clear error when no ID is shared or an ID is used twice. Metadata sample IDs are read as text,
   so ``01`` matches a count column named ``01``.
 
+* ``PlotCountsStats.plot_mean_distribution`` takes ``mode='bargraph'`` (default, unchanged), ``'boxplot'`` or
+  ``'violin'``. Its default axis titles are fixed: the x-axis said "sex" and the y-axis said "number of samples",
+  but the bins count items (for example species). New ``PlotCountsStats.plot_sample_totals`` plots the total
+  number of reads per sample, as bins (default, for large studies), one bar per sample (``binned=False``, for
+  small studies), a boxplot or a violin plot. (https://github.com/motleystate/moonstone/issues/47)
+
 * New opt-in converters ``moonstone.validation.convert_to_utf8`` and ``moonstone.validation.convert_locale``. They
   run only when called: they re-encode a file to UTF-8 from an encoding the user names, and rewrite a file from
   conventions the user declares (separator, decimal mark, thousands separators, dd/mm or mm/dd dates) to commas,
