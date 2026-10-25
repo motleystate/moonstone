@@ -102,7 +102,7 @@ class TestCheckFileFormat(TestCase):
     def test_ambiguous_thousands_comma(self):
         path = self.write("amb.csv", 's,v\nS1,"1,234"\nS2,2\n')
         finding = self.by_code(check_file_format(path), "ambiguous_comma")
-        self.assertEqual(finding.level, "warning")
+        self.assertEqual(finding.level, "error")
         self.assertIn("could be 1234", finding.message)
 
     def test_ambiguous_comma_next_to_french_values(self):
@@ -113,7 +113,7 @@ class TestCheckFileFormat(TestCase):
     def test_english_thousands(self):
         path = self.write("en.csv", 's,v\nS1,"1,234,567"\nS2,"1,234.5"\n')
         finding = self.by_code(check_file_format(path), "english_thousands")
-        self.assertEqual(finding.level, "warning")
+        self.assertEqual(finding.level, "error")
         self.assertIn("2 value(s)", finding.message)
 
     def test_french_thousands_variants(self):

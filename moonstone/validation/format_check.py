@@ -246,16 +246,16 @@ class _ColumnScanner:
                 meaning = ("probably decimal commas, as other values in this column are French-formatted"
                            if french else "could be 1234 (English thousands) or 1.234 (French decimal)")
                 out.append(Finding(
-                    "warning", "ambiguous_comma",
+                    "error", "ambiguous_comma",
                     f"{self.counts[(i, 'ambiguous_comma')]} value(s) like '1,234' {meaning}; "
-                    "pandas reads these as text.",
+                    "numbers must not contain commas, and pandas reads these as text.",
                     name, row, value))
             if (i, "english_grouped") in self.first:
                 row, value = self.first[(i, "english_grouped")]
                 out.append(Finding(
-                    "warning", "english_thousands",
+                    "error", "english_thousands",
                     f"{self.counts[(i, 'english_grouped')]} value(s) use a comma as thousands separator; "
-                    "pandas reads these as text.",
+                    "numbers must not contain commas, and pandas reads these as text.",
                     name, row, value))
             if i in self.dates:
                 out.append(self._date_finding(i, name))
