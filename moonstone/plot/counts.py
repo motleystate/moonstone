@@ -8,8 +8,8 @@ from scipy.cluster import hierarchy
 from scipy.spatial import distance
 
 from moonstone.plot.graphs.bargraph import BarGraph, MatrixBarGraph
-from moonstone.plot.graphs.box import GroupBoxGraph
-from moonstone.plot.graphs.violin import GroupViolinGraph
+from moonstone.plot.graphs.box import BoxGraph, GroupBoxGraph
+from moonstone.plot.graphs.violin import GroupViolinGraph, ViolinGraph
 from moonstone.utils.dict_operations import merge_dict
 from moonstone.utils.plot import (
     add_x_to_plotting_options,
@@ -24,6 +24,17 @@ logger = logging.getLogger(__name__)
 # What people might want to visualize?
 
 
+def _valid_mode_param(mode: str) -> str:
+    if mode[:3] == "box":
+        return "boxplot"
+    if mode[:6] == "violin":
+        return "violin"
+    if mode[:3] == "bar":
+        return "bargraph"
+    logger.warning("mode='%s' not valid, set to default (bargraph).", mode)
+    return "bargraph"
+
+
 class PlotCountsStats:
     """
     Several plots available to visualize simple count data.
@@ -33,14 +44,47 @@ class PlotCountsStats:
         self.df = dataframe
         self.items_name = items_name
 
+    def _plot_distribution(
+        self,
+        series: pd.Series,
+        mode: str,
+        binned: bool,
+        plotting_options: dict,
+        title: str,
+        xlabel: str,
+        ylabel: str,
+        log: bool,
+        show: bool,
+        output_file: Union[bool, str],
+        **kwargs,
+    ) -> go.Figure:
+        """
+        Bargraph of the binned values (or of every value if binned=False), boxplot or violin plot of the values.
+        """
+        plotting_options = {} if plotting_options is None else plotting_options
+        plotting_options = add_default_titles_to_plotting_options(plotting_options, title, xlabel, ylabel)
+        if log:
+            plotting_options = add_x_to_plotting_options(plotting_options, "layout", "yaxis_type", "log")
+        if mode == "bargraph":
+            plotting_options = add_x_to_plotting_options(plotting_options, "xaxes", "tickangle", -60)
+            data = SeriesBinning(series).binned_data if binned else series
+            graph = BarGraph(data)
+        elif mode == "violin":
+            graph = ViolinGraph(series)
+        else:
+            graph = BoxGraph(series)
+        return graph.plot_one_graph(plotting_options=plotting_options, show=show, output_file=output_file, **kwargs)
+
     def plot_mean_distribution(
         self,
         plotting_options: dict = None,
         show: Optional[bool] = True,
         output_file: Optional[str] = False,
-    ):
+        mode: str = "bargraph",
+        **kwargs,
+    ) -> go.Figure:
         """
-        method to visualize the mean distribution of the number of reads by items
+        method to visualize the distribution of the mean number of reads of each item (mean among samples)
 
         :param show: set to False if you don't want to show the plot
         :param output_file: name of the output file
@@ -48,31 +92,54 @@ class PlotCountsStats:
                                  [!] Make sure the value given to an argument is of the right type \n
                                  options allowed : 'log': `bool` ; 'colorbar': `[str, List[str]]` ;
                                  'tickangle': `[int, float]`
+        :param mode: { 'bargraph' (default), 'boxplot', 'violin' } Bargraph shows the number of items in each bin
+                     of mean. Boxplot and violin plot show every item's mean as a point.
         """
-        if plotting_options is None:
-            plotting_options = {
-                "layout": {
-                    "title_text": "Distribution of %s mean" % self.items_name,
-                    "title_x": 0.5,
-                    "yaxis_type": "log",
-                },
-                "xaxes": {"title_text": "sex", "tickangle": -60},
-                "yaxes": {"title_text": "number of samples"},
-            }
-        else:
-            plotting_options = add_default_titles_to_plotting_options(
-                plotting_options,
-                "Distribution of %s mean" % self.items_name,
-                "mean of the number of reads",
-                "number of samples",
-            )
-            plotting_options = add_x_to_plotting_options(plotting_options, "layout", "yaxis_type", "log")
-            plotting_options = add_x_to_plotting_options(plotting_options, "xaxes", "tickangle", -60)
-
+        mode = _valid_mode_param(mode)
         mean_series = self.df.mean(axis=1)
-        binned_mean = SeriesBinning(mean_series).binned_data
-        bar_fig = BarGraph(binned_mean)
-        bar_fig.plot_one_graph(plotting_options=plotting_options, show=show, output_file=output_file)
+        mean_series.name = "mean"
+        title = "Distribution of %s mean" % self.items_name
+        if mode == "bargraph":
+            xlabel, ylabel = "mean of the number of reads", "number of %s" % self.items_name
+        else:
+            xlabel, ylabel = None, "mean of the number of reads"
+        return self._plot_distribution(
+            mean_series, mode, True, plotting_options, title, xlabel, ylabel, True, show, output_file, **kwargs
+        )
+
+    def plot_sample_totals(
+        self,
+        plotting_options: dict = None,
+        show: Optional[bool] = True,
+        output_file: Optional[str] = False,
+        mode: str = "bargraph",
+        binned: bool = True,
+        **kwargs,
+    ) -> go.Figure:
+        """
+        method to visualize the total number of reads of each sample
+
+        :param show: set to False if you don't want to show the plot
+        :param output_file: name of the output file
+        :param plotting_options: options of plotting that will override the default setup
+        :param mode: { 'bargraph' (default), 'boxplot', 'violin' } Boxplot and violin plot show every sample's
+                     total as a point.
+        :param binned: only used with mode='bargraph'. If True (default), shows the number of samples in each bin of
+                       total; suited to large studies. If False, shows one bar per sample; suited to small studies.
+        """
+        mode = _valid_mode_param(mode)
+        totals = self.df.sum(axis=0)
+        totals.name = "total"
+        title = "Total number of reads per sample"
+        if mode == "bargraph" and binned:
+            xlabel, ylabel = "total number of reads", "number of samples"
+        elif mode == "bargraph":
+            xlabel, ylabel = self.df.columns.name or "samples", "total number of reads"
+        else:
+            xlabel, ylabel = None, "total number of reads"
+        return self._plot_distribution(
+            totals, mode, binned, plotting_options, title, xlabel, ylabel, False, show, output_file, **kwargs
+        )
 
 
 class PlotTaxonomyCounts:
@@ -101,14 +168,7 @@ class PlotTaxonomyCounts:
         return self._relative_abundance_dataframe
 
     def _valid_mode_param(self, mode: str) -> str:
-        if mode[:3] == "box":
-            return "boxplot"
-        if mode[:6] == "violin":
-            return "violin"
-        if mode[:3] == "bar":
-            return "bargraph"
-        logger.warning("mode='%s' not valid, set to default (bargraph).", mode)
-        return "bargraph"
+        return _valid_mode_param(mode)
 
     def _add_mean_info_to_index(self, data_df: Union[pd.DataFrame, pd.Series], mean_counts_ser_taxa: pd.Series):
         """

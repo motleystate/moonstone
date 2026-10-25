@@ -262,8 +262,10 @@ What can be plotted with this module?
 
 Plot available for data :
 
-- the mean distribution of your data (`plot_mean`)
-- ...tbc...
+- the distribution of the mean number of reads of each item, as binned bargraph, boxplot or violin plot
+  (`plot_mean_distribution`)
+- the total number of reads per sample, as binned bargraph, one bar per sample, boxplot or violin plot
+  (`plot_sample_totals`)
 
 Plot available for metadata :
 
