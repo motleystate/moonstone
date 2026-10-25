@@ -24,5 +24,4 @@ class Inputs(object):
         df.rename_axis("sample", inplace=True)
         df.to_csv(path_or_buf=outdir_path + '/' + 'importedMetaData.csv')
         self.logger.info('Success!')
-        # variables_dict = DataAnalysisType.Variables.inspect(df, df)
         return df

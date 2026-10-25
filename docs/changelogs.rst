@@ -36,6 +36,7 @@ Unreleased
   ``force_computation=True``.
 * Fix: ``GeometricMeanNormalization`` raises an error naming samples without reads, instead of looping forever.
 * Fix: the command-line count-file warning gives the real number of unnamed taxa removed.
+* Removed two unused stub modules, ``moonstone.parsers.DataAnalysisType`` and ``moonstone.analysis.regression``.
 * Fixes to FASTQ read downsizing (``moonstone.normalization.reads``):
 
   * Reads are drawn without replacement, so each output pair has exactly the requested number of different reads.
