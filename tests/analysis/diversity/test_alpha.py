@@ -763,3 +763,57 @@ Computation of the Faith's diversity using only the OTU IDs present in the Tree.
             u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
         tested_object_instance = FaithsPhylogeneticDiversity(tested_object, tree)
         tested_object_instance.visualize(show=False)
+
+
+class TestAnalyseGroupsPvalToDisplay(TestCase):
+    """Significance brackets drawn by analyse_groups(pval_to_display="all")."""
+
+    def setUp(self):
+        # 30 samples in groups A, B and C (one in three each). Every species present in a sample has the same count,
+        # so A and B (3 species) have the same Shannon index, and C (20 species) is higher than both.
+        # So only A-C and B-C are significant.
+        samples = [f"s{i}" for i in range(30)]
+        richness = {"A": 3, "B": 3, "C": 20}
+        self.groups = {s: "ABC"[i % 3] for i, s in enumerate(samples)}
+        self.count_df = pd.DataFrame(
+            {s: [10] * richness[self.groups[s]] + [0] * (20 - richness[self.groups[s]]) for s in samples},
+            index=[f"species{j}" for j in range(20)]
+        )
+        self.metadata_df = pd.DataFrame({"group": self.groups})
+
+    @staticmethod
+    def _bracket_pairs(fig):
+        # each bracket is 3 shapes (bar + 2 edges); x positions are indexes in the order of the boxes
+        names = [trace.name for trace in fig.data]
+        return {frozenset((names[shape.x0], names[shape.x1])) for shape in fig.layout.shapes[::3]}
+
+    def test_without_groups(self):
+        output = ShannonIndex(self.count_df).analyse_groups(
+            self.metadata_df, group_col="group", pval_to_display="all", show=False, show_pval=False
+        )
+        self.assertEqual(sorted(trace.name for trace in output["fig"].data), ["A", "B", "C"])
+        self.assertEqual(
+            self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
+        )
+
+    def test_without_groups_metadata_not_plotted(self):
+        # metadata also has a sample missing from the count table (group Z) and a sample with a blank group
+        metadata_df = pd.concat([pd.DataFrame({"group": ["Z"]}, index=["not_counted"]), self.metadata_df])
+        metadata_df.loc["s0", "group"] = np.nan
+        output = ShannonIndex(self.count_df).analyse_groups(
+            metadata_df, group_col="group", pval_to_display="all", show=False, show_pval=False
+        )
+        self.assertEqual(sorted(trace.name for trace in output["fig"].data), ["A", "B", "C"])
+        self.assertEqual(
+            self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
+        )
+
+    def test_with_groups(self):
+        output = ShannonIndex(self.count_df).analyse_groups(
+            self.metadata_df, group_col="group", groups=["C", "A", "B"],
+            pval_to_display="all", show=False, show_pval=False
+        )
+        self.assertEqual([trace.name for trace in output["fig"].data], ["C", "A", "B"])
+        self.assertEqual(
+            self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
+        )
