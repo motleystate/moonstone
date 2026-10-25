@@ -10,6 +10,12 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* New opt-in converters ``moonstone.validation.convert_to_utf8`` and ``moonstone.validation.convert_locale``. They
+  run only when called: they re-encode a file to UTF-8 from an encoding the user names, and rewrite a file from
+  conventions the user declares (separator, decimal mark, thousands separators, dd/mm or mm/dd dates) to commas,
+  dot decimals and ISO dates. They write a new file, never overwrite, return every change, convert a column only
+  when all its values fit, and run the format check on the output.
+
 * New ``moonstone.validation.check_file_format``: a first-pass check of CSV, TSV and Excel input that reports
   non-UTF-8 encodings (such as cp1252 from French Excel), byte order marks, ";" separators, decimal commas,
   thousands separators and dd/mm versus mm/dd dates. It only reports and never changes the data. Nothing calls it
