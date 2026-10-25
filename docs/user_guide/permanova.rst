@@ -39,7 +39,7 @@ plus a metadata file with one row per sample:
 Put ``--permanova`` after the three file arguments. The results go to ``results/permanova.csv``, one row per level
 and variable. Other options: ``--no_read_threshold``, ``--permutations`` (9,999 by default), ``--seed``
 (0 by default) and ``--threads`` (number of tests run at the same time, one per processor core; 0, the default, uses
-every core available to Moonstone). ``--permanova`` cannot be combined with ``-f``, ``-p``, ``-k`` or ``-c``.
+every core available to Moonstone). ``--permanova`` cannot be combined with ``-f`` or ``-c``.
 
 Most of the run time is the PERMDISP dispersion check. As a guide, measured on synthetic data with one core
 (unverified on real data): one variable at 9,999 permutations took about 8 s with 100 samples, 18 s with 300 and

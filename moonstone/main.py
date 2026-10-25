@@ -4,7 +4,7 @@ import sys
 import logging
 
 from moonstone.parsers import (handleCounts, handleMetadata)
-from moonstone.analysis import (clustering, stats)
+from moonstone.analysis import stats
 from moonstone.analysis.classification import Classification, KERNELS, MODELS
 from moonstone.analysis.diversity.beta import DEFAULT_PERMUTATIONS, MISSING_WARNING_FRACTION
 from moonstone.analysis.permanova import TAXA_LEVELS, read_taxonomy_counts, run_permanova
@@ -16,19 +16,20 @@ The program englobes the following functionalities:
     > Import of count data (currently limited to SHAMAN-style counts output)
     > Import of clinical metadata (in development)
     > A basic statistical analysis of the imported data
-    > Unsupervised clustering algorithms: PCA (other is development)
-    > Supervised clustering (in development)
-    > Classifier and biomarker discovery (in development)"""
+    > Classification of a metadata variable from the counts
+    > PERMANOVA with a dispersion check"""
 
 
 class RemovedFlag(argparse.Action):
-    """A classifier flag that was replaced by --classify: fail and name its replacement."""
+    """A removed flag: fail and name its replacement, if there is one."""
 
-    def __init__(self, option_strings, dest, replacement, **kwargs):
+    def __init__(self, option_strings, dest, replacement=None, **kwargs):
         self.replacement = replacement
         super().__init__(option_strings, dest, help=argparse.SUPPRESS, **kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
+        if self.replacement is None:
+            parser.error(f'{option_string} has been removed.')
         parser.error(f'{option_string} has been removed. Use: {self.replacement.format(variable=values)}')
 
 
@@ -46,9 +47,6 @@ def parse_arguments():
     parser.add_argument('-os', '--skip_prompt', help='Suppress output directory exists prompt.', action='store_true')
     parser.add_argument('-f', '--filtering', metavar='min_mean_read', type=float,
                         help="Minimum mean reads per variable: use a float >0")
-    parser.add_argument('-p', '--pca_plot', help='Generates PCA plot of data', action='store_true')
-    parser.add_argument('-k', '--k_means', metavar='nb_clusters', type=int,
-                        help="Runs K-Means clustering. Provide number of clusters")
     parser.add_argument('-c', '--classify', metavar='variable', type=str,
                         help='Cross-validated classification of a metadata variable from the counts')
     parser.add_argument('--model', nargs='+', choices=MODELS, default=['svm'],
@@ -86,11 +84,12 @@ def parse_arguments():
                                (['-sc', '--svm_classifier'], '--classify {variable} --feature_selection'),
                                (['-rf', '--random_forest'], '--classify {variable} --model random_forest')]:
         parser.add_argument(*flags, action=RemovedFlag, replacement=replacement, metavar='variable')
+    parser.add_argument('-p', '--pca_plot', action=RemovedFlag, nargs=0)
+    parser.add_argument('-k', '--k_means', action=RemovedFlag, metavar='nb_clusters')
     try:
         args = parser.parse_args()
         if args.permanova is not None:
-            others = [flag for flag, used in [('-f/--filtering', args.filtering), ('-p/--pca_plot', args.pca_plot),
-                                              ('-k/--k_means', args.k_means), ('-c/--classify', args.classify)]
+            others = [flag for flag, used in [('-f/--filtering', args.filtering), ('-c/--classify', args.classify)]
                       if used]
             if others:
                 parser.error(f"--permanova reads a count table with taxonomy and cannot be combined with "
@@ -255,14 +254,6 @@ def run():
     metadata_df = get_metadata_file(args.metadata, count_df, args.outdir)  # dm
 
     # Run different analysis
-    if args.pca_plot:
-        pca = clustering.Unsupervised(count_df, metadata_df, outdir)
-        pca.pca()
-
-    if args.k_means:
-        kmeans = clustering.Unsupervised(count_df, metadata_df, outdir)
-        kmeans.kmeans('metaData_withKClusters.csv', n_clusters=args.k_means)
-
     if args.classify:
         if args.explore_kernels:
             exploration = Classification(count_df, metadata_df, args.classify, outdir, model='svm',

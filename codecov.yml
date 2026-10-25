@@ -1,0 +1,14 @@
+# Codecov checks on each pull request.
+# project: fail if total coverage drops more than 0.5 percentage points below the base branch.
+# patch: fail if less than 80% of the lines added or changed by the pull request are run by the tests.
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 0.5%
+    patch:
+      default:
+        target: 80%
+comment:
+  layout: "diff, files"

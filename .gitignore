@@ -11,6 +11,7 @@ output/
 
 coverage.xml
 .coverage
+.coverage.*
 
 # Default output directory from moonstone
 output

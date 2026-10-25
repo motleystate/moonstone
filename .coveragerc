@@ -1,4 +1,7 @@
 [run]
+# Measure branches, and follow the command-line tests, which start moonstone in a subprocess.
+branch = True
+patch = subprocess
 omit =
   */__init__.py
   */test_*.py
