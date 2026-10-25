@@ -29,7 +29,7 @@ class Inputs(object):
         # The following statements looks for 'NaN' in row 1.
         # If 'NaN' is found, the whole column is removed.
         if df.iloc[0].isnull().any():  # NEED TO FILTER OUT NAN BEFORE PROCEEDING!
-            self.logger.warning(f'Removed {df.iloc[0].isnull().any().sum()} unnamed/unidentified variable(s)!')
+            self.logger.warning(f'Removed {df.iloc[0].isnull().sum()} unnamed/unidentified variable(s)!')
             df.drop(df.columns[df.iloc[0].isnull()], axis=1, inplace=True)
 
         df.columns = df.iloc[0]

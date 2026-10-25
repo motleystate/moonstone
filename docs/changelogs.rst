@@ -21,6 +21,13 @@ Unreleased
   (with ``--roc``, ``--feature_selection`` or ``--model random_forest``). Output file names change, and the decision
   tree, AdaBoost and gradient boosting runs are removed. See :ref:`classification`.
   (https://github.com/motleystate/moonstone/pull/123)
+* Fix: ``-f/--filtering`` on the command line now removes taxa whose mean read count is below the threshold,
+  as documented. It used to remove samples instead, which usually stopped the run with a sample-number mismatch.
+* Fix: Faith's phylogenetic diversity and UniFrac now sum a multi-level taxonomy table to its last level as intended.
+  Before, such a table raised a misleading "INCOMPLETE TREE" error, or gave 0 for every sample with
+  ``force_computation=True``.
+* Fix: ``GeometricMeanNormalization`` raises an error naming samples without reads, instead of looping forever.
+* Fix: the command-line count-file warning gives the real number of unnamed taxa removed.
 * **Breaking change:** the command-line flags ``-p/--pca_plot`` and ``-k/--k_means`` are removed, with the module
   ``moonstone.analysis.clustering`` behind them. Both were broken: ``--pca_plot`` drew an empty figure and saved nothing,
   and ``--k_means`` wrote a metadata file with no rows. The flags now stop with an error saying they were removed.

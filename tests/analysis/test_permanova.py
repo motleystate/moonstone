@@ -1,6 +1,6 @@
 import os
 import tempfile
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import numpy as np
 import pandas as pd
@@ -51,6 +51,17 @@ class TestReadTaxonomyCounts(TestCase):
         pd.DataFrame({'OTU': ['a', 'b'], 's1': [1, 2]}).to_csv(path, index=False)
         with self.assertRaises(ValueError):
             read_taxonomy_counts(path)
+
+    def test_non_numeric_sample_column_raises(self):
+        path = os.path.join(tempfile.mkdtemp(), 'counts.csv')
+        pd.DataFrame({'species': ['a', 'b'], 's1': [1, 2], 's2': ['3', 'x']}).to_csv(path, index=False)
+        with self.assertRaisesRegex(ValueError, 'sample columns must be numeric.*s2'):
+            read_taxonomy_counts(path)
+
+    def test_blank_counts_read_as_zero(self):
+        path = os.path.join(tempfile.mkdtemp(), 'counts.csv')
+        pd.DataFrame({'species': ['a', 'b'], 's1': [1, None]}).to_csv(path, index=False)
+        self.assertEqual(list(read_taxonomy_counts(path)['s1']), [1.0, 0.0])
 
 
 class TestSumAndFilter(TestCase):
@@ -105,6 +116,21 @@ class TestSumAndFilter(TestCase):
         filtered, summary, warnings = read_threshold_filter(kingdom, 'kingdom')
         self.assertEqual(filtered.shape[0], 1)
         self.assertTrue(any('not applied' in w for w in warnings))
+
+    def test_sum_to_unknown_level_raises(self):
+        counts_df, _ = make_taxonomy_counts()
+        with self.assertRaisesRegex(ValueError, "Level 'strain' not in the count table"):
+            sum_to_level(counts_df, 'strain')
+
+    def test_no_taxon_above_knee_keeps_all(self):
+        counts_df, _ = make_taxonomy_counts()
+        species, _ = sum_to_level(counts_df, 'species')
+        none_kept = (pd.Series(False, index=species.index), None)
+        with mock.patch('moonstone.analysis.permanova.combined_score_threshold', return_value=none_kept):
+            filtered, summary, warnings = read_threshold_filter(species, 'species')
+        pd.testing.assert_frame_equal(filtered, species)
+        self.assertEqual(summary['reads_pct_kept'], 100)
+        self.assertIn('read-threshold not applied: no taxon above the knee', warnings)
 
 
 class TestRunPermanova(TestCase):
@@ -208,6 +234,12 @@ class TestRunPermanova(TestCase):
         self.assertTrue((group.loc[tested, 'n_samples'] == 28).all())
         random = results[(results['variable'] == 'random') & (results['skipped'] == '')]
         self.assertTrue((random['n_missing'] == 0).all())
+
+    def test_no_common_sample_raises(self):
+        counts_df, metadata = make_taxonomy_counts()
+        metadata.index = [f'other{i}' for i in range(metadata.shape[0])]
+        with self.assertRaisesRegex(ValueError, 'No sample is found in both'):
+            run_permanova(counts_df, metadata, permutations=9)
 
     def test_unknown_level_raises(self):
         counts_df, metadata = make_taxonomy_counts()

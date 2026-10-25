@@ -787,6 +787,18 @@ class TestWeightedUniFrac(TestCase):
             self.assertIn("WARNING:moonstone.analysis.diversity.beta:INCOMPLETE TREE: missing ['species6'].\n\
 Computation of the Weighted UniFrac diversity using only the OTU IDs present in the Tree.", log.output)
 
+    def test_compute_beta_diversity_multiindex_summed_to_last_level(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
+        tested_object = self.tested_object.copy()
+        tested_object.index = pd.MultiIndex.from_tuples(
+            [('genus1', 'species1'), ('genus1', 'species2'), ('genus2', 'species3'), ('genus2', 'species4')],
+            names=['genus', 'species'])
+        pd.testing.assert_frame_equal(
+            WeightedUniFrac(tested_object, tree).beta_diversity_df,
+            WeightedUniFrac(self.tested_object, tree).beta_diversity_df,
+        )
+
 
 class TestUnweightedUniFrac(TestCase):
 

@@ -118,6 +118,43 @@ class TestCommandLineSmoke(TestCase):
         self.assertNotIn('--pca_plot', result.stdout)
         self.assertNotIn('--k_means', result.stdout)
 
+    def test_filtering_writes_filtered_table(self):
+        counts, metadata, outdir = self.write_inputs()
+        table = pd.read_csv(counts, index_col=0)
+        table.loc['taxon0'] = 1   # mean of 1 read per sample, below the threshold
+        table.to_csv(counts)
+        result = self.run_moonstone(counts, metadata, outdir, '-f', '5')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        filtered = pd.read_csv(os.path.join(outdir, 'filteredCountFile.csv'), index_col=0)
+        self.assertEqual(filtered.shape, (40, 11))
+        self.assertNotIn('taxon0', filtered.columns)
+        self.assertTrue(os.path.isfile(os.path.join(outdir, 'filtered_variables.csv')))
+
+    def test_sample_number_mismatch_exits_1(self):
+        counts, metadata, outdir = self.write_inputs()
+        pd.read_csv(metadata, index_col=0).iloc[:-1].to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertIn("Count and Metadata sample numbers don't match", result.stderr)
+        self.assertEqual(result.returncode, 1)
+
+    def test_existing_output_directory_asks_before_overwriting(self):
+        counts, metadata, outdir = self.write_inputs()
+        os.mkdir(outdir)
+        for answer, returncode in [('n\n', 1), ('y\n', 0)]:
+            with self.subTest(answer=answer):
+                result = subprocess.run(
+                    [sys.executable, '-c', 'from moonstone.main import run; run()', counts, metadata, outdir],
+                    capture_output=True, text=True, timeout=120, input=answer,
+                )
+                self.assertIn('already exists! Continue anyway', result.stdout)
+                self.assertNotIn('Traceback', result.stderr)
+                self.assertEqual(result.returncode, returncode)
+        self.assertIn('Not overwriting...aborting.', subprocess.run(
+            [sys.executable, '-c', 'from moonstone.main import run; run()', counts, metadata, outdir],
+            capture_output=True, text=True, timeout=120, input='n\n').stderr)
+
 
 class TestCommandLinePermanova(TestCase):
 

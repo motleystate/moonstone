@@ -154,8 +154,9 @@ def filter_count_df(count_df, min_read_mean, outdir_path):
     :return: filtered count dataframe
     """
     check_sparse = stats.Density(count_df)
-    filtering = MeanFiltering(count_df, threshold=min_read_mean)
-    count_df = filtering.filtered_df
+    # MeanFiltering expects one row per taxon; the count table here has one row per sample.
+    filtering = MeanFiltering(count_df.T, threshold=min_read_mean)
+    count_df = filtering.filtered_df.T
     filtered_stats = stats.Descriptive(count_df, outdir_path)
     filtered_stats.matrix_stats('filtered_variables.csv')
     count_df.to_csv(path_or_buf=outdir_path+'/'+'filteredCountFile.csv')

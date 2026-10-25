@@ -287,3 +287,16 @@ class TestGeometricMeanNormalization(TestCase):
         expected_result.columns.name = 'sample'
         expected_result.index.set_names(['genus', 'specie'], inplace=True)
         pd.testing.assert_frame_equal(normalized_tested_object.normalized_df, expected_result)
+
+    def test_sample_without_reads_raises(self):
+        # Before, relaxing the zero filtering never gave this sample a scaling factor, so it looped forever.
+        tested_object = self.dummy_df.assign(Sample_5=0)
+        with self.assertRaisesRegex(ValueError, r"without reads: \['Sample_5'\]"):
+            GeometricMeanNormalization(tested_object).scaling_factors
+
+    def test_zero_threshold_relaxed_until_every_sample_has_a_factor(self):
+        tested_object = pd.DataFrame({'s1': [10, 20, 30, 0], 's2': [0, 0, 40, 50], 's3': [5, 0, 0, 7]},
+                                     index=['a', 'b', 'c', 'd'])
+        normalization = GeometricMeanNormalization(tested_object)
+        self.assertFalse(normalization.scaling_factors.isna().any())
+        self.assertEqual(normalization.zero_threshold, 65)
