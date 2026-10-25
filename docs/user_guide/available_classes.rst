@@ -55,6 +55,7 @@ Taxonomy counts parsers (``from moonstone.parsers.counts.taxonomy``):
     kraken2.SunbeamKraken2Parser
     metaphlan.Metaphlan2Parser
     metaphlan.Metaphlan3Parser
+    metaphlan.MetaphlanReadStatsParser
     qiime.Qiime2Parser
 
 .. Note::

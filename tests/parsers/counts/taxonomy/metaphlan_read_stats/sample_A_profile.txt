@@ -1,0 +1,24 @@
+#mpa_vOct22_CHOCOPhlAnSGB_202403
+#/usr/local/bin/metaphlan sample_A.fastq.gz --input_type fastq -t rel_ab_w_read_stats -o sample_A_profile.txt
+#10000 reads processed
+#SampleID	sample_A
+#Estimated reads mapped to known clades: 9000
+#clade_name	clade_taxid	relative_abundance	coverage	estimated_number_of_reads_from_the_clade
+UNCLASSIFIED	-1	10.0	-	1000
+k__Bacteria	2	90.0	1.5	9000
+k__Bacteria|p__Firmicutes	2|1239	80.0	1.5	8000
+k__Bacteria|p__Actinobacteria	2|201174	10.0	1.5	1000
+k__Bacteria|p__Firmicutes|c__Bacilli	2|1239|91061	80.0	1.5	8000
+k__Bacteria|p__Actinobacteria|c__Actinomycetia	2|201174|1760	10.0	1.5	1000
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales	2|1239|91061|186826	80.0	1.5	8000
+k__Bacteria|p__Actinobacteria|c__Actinomycetia|o__Bifidobacteriales	2|201174|1760|85004	10.0	1.5	1000
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae	2|1239|91061|186826|33958	80.0	1.5	8000
+k__Bacteria|p__Actinobacteria|c__Actinomycetia|o__Bifidobacteriales|f__Bifidobacteriaceae	2|201174|1760|85004|31953	10.0	1.5	1000
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus	2|1239|91061|186826|33958|1578	80.0	1.5	8000
+k__Bacteria|p__Actinobacteria|c__Actinomycetia|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Gardnerella	2|201174|1760|85004|31953|2701	10.0	1.5	1000
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_crispatus	2|1239|91061|186826|33958|1578|47770	60.0	1.5	6000
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_iners	2|1239|91061|186826|33958|1578|147802	20.0	1.5	2000
+k__Bacteria|p__Actinobacteria|c__Actinomycetia|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Gardnerella|s__Gardnerella_vaginalis	2|201174|1760|85004|31953|2701|2702	10.0	1.5	1000
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_crispatus|t__SGB7037	2|1239|91061|186826|33958|1578|47770|	60.0	1.5	6000
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_iners|t__SGB7046	2|1239|91061|186826|33958|1578|147802|	20.0	1.5	2000
+k__Bacteria|p__Actinobacteria|c__Actinomycetia|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Gardnerella|s__Gardnerella_vaginalis|t__SGB17302	2|201174|1760|85004|31953|2701|2702|	10.0	1.5	1000
