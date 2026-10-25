@@ -817,3 +817,14 @@ class TestAnalyseGroupsPvalToDisplay(TestCase):
         self.assertEqual(
             self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
         )
+
+    def test_sort_groups(self):
+        # brackets must be placed after the boxes are sorted
+        output = ShannonIndex(self.count_df).analyse_groups(
+            self.metadata_df, group_col="group", groups=["C", "A", "B"], sort_groups=True,
+            pval_to_display="all", show=False, show_pval=False
+        )
+        self.assertEqual([trace.name for trace in output["fig"].data], ["A", "B", "C"])
+        self.assertEqual(
+            self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
+        )

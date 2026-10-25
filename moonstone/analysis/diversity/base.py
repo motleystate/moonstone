@@ -706,6 +706,9 @@ image")
                 else:
                     # the groups plotted, in the order the graph draws them
                     final_groups = list(df[group_col].dropna().unique())
+                if kwargs.get("sort_groups"):
+                    # the graph sorts the groups as strings; brackets must follow the same order
+                    final_groups = sorted(final_groups, key=str)
                 to_display = self._pval_selection(pval, final_groups)
 
         if pval_to_display and to_display.empty:       # nothing to display

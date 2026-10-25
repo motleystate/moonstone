@@ -50,7 +50,9 @@ Unreleased
   New dependencies listed explicitly (already installed with scikit-learn): ``joblib`` and ``threadpoolctl``.
 * ``analyse_groups(pval_to_display="all")`` no longer crashes when ``groups`` is not given, or when a sample's
   group is blank in the metadata. The significance brackets are placed on the groups that are plotted, so a group
-  that is only in the metadata no longer adds an empty box. (https://github.com/motleystate/moonstone/issues/101)
+  that is only in the metadata no longer adds an empty box. With ``sort_groups=True``, the brackets are now placed
+  after the groups are sorted; before, they could mark the wrong pairs of groups.
+  (https://github.com/motleystate/moonstone/issues/101)
 
 
 v1.1
