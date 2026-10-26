@@ -92,23 +92,32 @@ def multiplicative_replacement(df: pd.DataFrame, delta: float = None) -> pd.Data
         A new table of proportions, same shape, with no zeros.
     """
     values = _check_table(df)
+    if delta is not None and not 0 < delta < 1:
+        raise ValueError(f"delta must be a proportion between 0 and 1, got {delta}.")
+    return pd.DataFrame(_replace_zeros(values.to_numpy(), delta), index=values.index, columns=values.columns)
+
+
+def _replace_zeros(values: np.ndarray, delta: float = None) -> np.ndarray:
+    """Multiplicative replacement on an array (features x samples) already checked by _check_table."""
     proportions = values / values.sum(axis=0)
     zeros = proportions == 0
     if delta is None:
-        delta_per_sample = proportions.where(~zeros).min(axis=0) * DETECTION_FRACTION
+        with np.errstate(invalid='ignore'):
+            delta_per_sample = np.nanmin(np.where(zeros, np.nan, proportions), axis=0) * DETECTION_FRACTION
     else:
-        if not 0 < delta < 1:
-            raise ValueError(f"delta must be a proportion between 0 and 1, got {delta}.")
-        delta_per_sample = pd.Series(float(delta), index=proportions.columns)
+        delta_per_sample = np.full(proportions.shape[1], float(delta))
     zero_mass = zeros.sum(axis=0) * delta_per_sample
     if (zero_mass >= 1).any():
         raise ValueError("delta is too large: the replaced zeros would take up the whole sample. Use a smaller delta.")
-    replaced = proportions * (1 - zero_mass)
-    delta_table = pd.DataFrame(
-        np.broadcast_to(delta_per_sample.to_numpy(), proportions.shape),
-        index=proportions.index, columns=proportions.columns,
-    )
-    return replaced.mask(zeros, delta_table)
+    return np.where(zeros, delta_per_sample, proportions * (1 - zero_mass))
+
+
+def _clr_array(values: np.ndarray, zeros: str = 'multiplicative', delta: float = None,
+               pseudocount: float = None) -> np.ndarray:
+    """CLR of an array (features x samples) already checked, with arguments already validated by clr()."""
+    positive = _replace_zeros(values, delta) if zeros == 'multiplicative' else values + pseudocount
+    logs = np.log(positive)
+    return logs - logs.mean(axis=0)
 
 
 def _centre_logs(positive: pd.DataFrame) -> pd.DataFrame:
@@ -135,12 +144,16 @@ def clr(df: pd.DataFrame, zeros: str = 'multiplicative', delta: float = None, ps
     if zeros == 'multiplicative':
         if pseudocount is not None:
             raise ValueError("pseudocount is only used with zeros='pseudocount'.")
-        return _centre_logs(multiplicative_replacement(df, delta=delta))
-    if delta is not None:
-        raise ValueError("delta is only used with zeros='multiplicative'.")
-    if pseudocount is None or not pseudocount > 0:
-        raise ValueError("zeros='pseudocount' needs an explicit pseudocount > 0.")
-    return _centre_logs(_check_table(df) + pseudocount)
+        if delta is not None and not 0 < delta < 1:
+            raise ValueError(f"delta must be a proportion between 0 and 1, got {delta}.")
+    else:
+        if delta is not None:
+            raise ValueError("delta is only used with zeros='multiplicative'.")
+        if pseudocount is None or not pseudocount > 0:
+            raise ValueError("zeros='pseudocount' needs an explicit pseudocount > 0.")
+    values = _check_table(df)
+    return pd.DataFrame(_clr_array(values.to_numpy(), zeros, delta, pseudocount),
+                        index=values.index, columns=values.columns)
 
 
 def rclr(df: pd.DataFrame) -> pd.DataFrame:
