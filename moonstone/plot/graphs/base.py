@@ -137,7 +137,7 @@ class BaseGraph(ABC):
             getattr(fig, updater)(plotting_options[option])
         return fig
 
-    def _handle_output_plotly(self, fig: go.Figure, show: bool, output_file: str):
+    def _handle_output_plotly(self, fig: go.Figure, show: bool, output_file: str, v: bool = 0):
         if show is True:
             fig.show()
 
@@ -154,6 +154,8 @@ class BaseGraph(ABC):
                 plotly.io.write_html(fig, output_file)
             else:
                 plotly.io.write_image(fig, output_file)
+            if v >= 3:
+                print(f"✅ Figure saved: {output_file}")
 
 
 class GroupBaseGraph(BaseGraph):
