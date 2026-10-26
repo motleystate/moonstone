@@ -16,6 +16,11 @@ Unreleased
   a warning and left out; before, they were left out silently when the two files had the same number of rows. The
   run stops with a clear error when no ID is shared or an ID is used twice. Metadata sample IDs are read as text,
   so ``01`` matches a count column named ``01``.
+* New ``MetaphlanReadStatsParser`` reads per-sample MetaPhlAn profiles made with ``-t rel_ab_w_read_stats`` and
+  returns a table of estimated read counts (or bases, for long reads) per clade, one column per sample. MetaPhlAn's
+  ``merge_metaphlan_tables.py`` merges only relative abundances, so this parser joins the profiles itself, giving 0
+  reads to a clade absent from a sample, as that script does. The ``UNCLASSIFIED`` row is kept, so each sample sums
+  to its number of reads processed. (https://github.com/motleystate/moonstone/issues/100)
 
 * ``PlotCountsStats.plot_mean_distribution`` takes ``mode='bargraph'`` (default, unchanged), ``'boxplot'`` or
   ``'violin'``. Its default axis titles are fixed: the x-axis said "sex" and the y-axis said "number of samples",
