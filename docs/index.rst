@@ -37,6 +37,7 @@ Welcome to Moonstone's documentation!
     api_docs/parsers
     api_docs/filtering
     api_docs/normalization
+    api_docs/transformers
     api_docs/plot
     api_docs/analysis
     api_docs/validation

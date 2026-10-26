@@ -10,6 +10,12 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* New ``moonstone.transformers.compositional`` with the centred log-ratio transform (``clr``), its robust version
+  (``rclr``, which ignores zeros) and ``multiplicative_replacement`` for zeros. These are the first step towards
+  compositional correlation (https://github.com/motleystate/moonstone/issues/150). Zero handling is always explicit:
+  multiplicative replacement by default (each zero becomes 65% of the smallest non-zero proportion of its sample), or
+  a pseudocount that must be given. Missing values, negative values and all-zero samples stop the transform; it never
+  fills them in.
 * **Command-line change:** the count table and the metadata are now matched by sample ID instead of by number of
   rows (new ``moonstone.validation.match_samples``, see :ref:`sample_matching`). A metadata file with extra
   samples no longer stops the run; they are listed and ignored. Count-table samples with no metadata are listed in
