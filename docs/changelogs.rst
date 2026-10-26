@@ -10,6 +10,13 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* New ``moonstone.analysis.correlation.feature_correlation``: correlation between every pair of features of a
+  compositional table, or between the features of two tables (for example species and resistance genes), with
+  multiple-testing correction (Benjamini-Hochberg by default). Methods: Spearman (default), Pearson and Kendall on
+  centred log-ratio values, proportionality (rho) and SparCC. p-values come from a permutation null in which every
+  feature is shuffled and the table transformed again; textbook p-values on log-ratio values give too many false
+  positives. Optional check that no subject has more than one sample. Helpers ``filter_edges``, ``edges_to_matrix``
+  and ``to_gephi``. Python API only for now (https://github.com/motleystate/moonstone/issues/150).
 * New ``moonstone.transformers.compositional`` with the centred log-ratio transform (``clr``), its robust version
   (``rclr``, which ignores zeros) and ``multiplicative_replacement`` for zeros. These are the first step towards
   compositional correlation (https://github.com/motleystate/moonstone/issues/150). Zero handling is always explicit:
