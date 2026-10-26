@@ -120,7 +120,8 @@ Reproducibility
     number of permutations and the seed with the results.
 
 Which samples are used
-    Samples without metadata and groups with fewer than ``min_group_size`` samples (2 by default) are left out, and
+    Samples are matched to the metadata by ID (see :ref:`sample_matching`). Samples without metadata and groups
+    with fewer than ``min_group_size`` samples (2 by default) are left out, and
     this is logged. ``permanova_screen`` skips variables with fewer than 2 usable groups or more than ``max_groups``
     (15 by default) distinct values, which are usually continuous variables, logs a warning, and says why in the
     ``skipped`` column.

@@ -22,6 +22,27 @@ Please refer to the help section of the command-line tool for more information:
 Classification of samples with a Support Vector Machine or a random forest (``--classify``) is described in
 :ref:`classification`.
 
+.. _sample_matching:
+
+Matching samples between the count table and the metadata
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+A Moonstone analysis starts from two files: a normalized count table and a metadata file with one row per sample.
+The command line pairs them by sample ID (the count table's column names and the first column of the metadata),
+not by position or by number of rows. IDs are compared as text, exactly as written: ``01`` and ``1`` are different
+samples, and nothing is renamed, trimmed or reordered. Before the analysis it prints:
+
+- the number of samples found in both files;
+- a warning listing count-table samples with no metadata (they are left out of the analysis);
+- a note listing metadata samples that are not in the count table (they are ignored);
+- a warning for IDs that differ only by case or spaces, such as ``S31`` and ``s31``; these are not matched, so
+  correct the files if they are the same sample;
+- a note when the two files list the samples in a different order (harmless, as samples are matched by ID).
+
+The run stops with an error when no sample ID is in both files, or when an ID is used more than once in the
+metadata. The same check is available in Python as ``moonstone.validation.match_samples``
+(see :ref:`api_validation`).
+
 In Python
 =========
 

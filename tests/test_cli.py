@@ -131,13 +131,74 @@ class TestCommandLineSmoke(TestCase):
         self.assertNotIn('taxon0', filtered.columns)
         self.assertTrue(os.path.isfile(os.path.join(outdir, 'filtered_variables.csv')))
 
-    def test_sample_number_mismatch_exits_1(self):
+    def test_sample_without_metadata_warns_and_continues(self):
         counts, metadata, outdir = self.write_inputs()
         pd.read_csv(metadata, index_col=0).iloc[:-1].to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group', '--folds', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('1 sample(s) of the count table have no metadata and are left out: s39', result.stdout)
+        self.assertIn('39 samples in both the count and metadata files', result.stdout)
+        self.assertIn('39 samples: A 20', result.stdout)
+
+    def test_extra_metadata_samples_are_ignored(self):
+        # Used to exit with "sample numbers don't match" although every counted sample had metadata.
+        counts, metadata, outdir = self.write_inputs()
+        extra = pd.DataFrame({'group': ['A'] * 3}, index=pd.Index(['x1', 'x2', 'x3'], name='sample'))
+        pd.concat([pd.read_csv(metadata, index_col=0), extra]).to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group', '--folds', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('3 sample(s) of the metadata are not in the count table and are ignored: x1, x2, x3',
+                      result.stdout)
+        self.assertIn('40 samples in both the count and metadata files', result.stdout)
+
+    def test_same_number_of_samples_with_different_ids_warns(self):
+        # Used to print "Nice! 40 samples" and silently train on the 30 matching samples.
+        counts, metadata, outdir = self.write_inputs()
+        df = pd.read_csv(metadata, index_col=0)
+        df.index = [s.upper() if i >= 30 else s for i, s in enumerate(df.index)]
+        df.rename_axis('sample').to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group', '--folds', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('10 sample(s) of the count table have no metadata and are left out', result.stdout)
+        self.assertIn("differ only by case or spaces (not matched): 's30' / 'S30'", result.stdout)
+        self.assertIn('30 samples in both the count and metadata files', result.stdout)
+
+    def test_no_common_sample_exits_1(self):
+        counts, metadata, outdir = self.write_inputs()
+        df = pd.read_csv(metadata, index_col=0)
+        df.index = [f'p{i}' for i in range(len(df))]
+        df.rename_axis('sample').to_csv(metadata)
         result = self.run_moonstone(counts, metadata, outdir, '-c', 'group')
         self.assertNotIn('Traceback', result.stderr)
-        self.assertIn("Count and Metadata sample numbers don't match", result.stderr)
+        self.assertIn('No sample ID is found in both the count table and the metadata', result.stderr)
         self.assertEqual(result.returncode, 1)
+
+    def test_duplicated_metadata_sample_exits_1(self):
+        counts, metadata, outdir = self.write_inputs()
+        df = pd.read_csv(metadata, index_col=0)
+        pd.concat([df, df.iloc[[0]]]).to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertIn('Sample IDs used more than once in the metadata: s0', result.stderr)
+        self.assertEqual(result.returncode, 1)
+
+    def test_numeric_sample_ids_keep_leading_zeros(self):
+        counts, metadata, outdir = self.write_inputs()
+        ids = [f'{i:03d}' for i in range(40)]
+        counts_df = pd.read_csv(counts, index_col=0)
+        counts_df.columns = ids
+        counts_df.to_csv(counts)
+        df = pd.read_csv(metadata, index_col=0)
+        df.index = pd.Index(ids, name='sample')
+        df.sample(frac=1, random_state=0).to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group', '--folds', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('not in the same order in the two files; they are matched by ID', result.stdout)
+        self.assertIn('40 samples in both the count and metadata files', result.stdout)
 
     def test_existing_output_directory_asks_before_overwriting(self):
         counts, metadata, outdir = self.write_inputs()

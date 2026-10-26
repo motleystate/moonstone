@@ -10,6 +10,12 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* **Command-line change:** the count table and the metadata are now matched by sample ID instead of by number of
+  rows (new ``moonstone.validation.match_samples``, see :ref:`sample_matching`). A metadata file with extra
+  samples no longer stops the run; they are listed and ignored. Count-table samples with no metadata are listed in
+  a warning and left out; before, they were left out silently when the two files had the same number of rows. The
+  run stops with a clear error when no ID is shared or an ID is used twice. Metadata sample IDs are read as text,
+  so ``01`` matches a count column named ``01``.
 * New ``MetaphlanReadStatsParser`` reads per-sample MetaPhlAn profiles made with ``-t rel_ab_w_read_stats`` and
   returns a table of estimated read counts (or bases, for long reads) per clade, one column per sample. MetaPhlAn's
   ``merge_metaphlan_tables.py`` merges only relative abundances, so this parser joins the profiles itself, giving 0

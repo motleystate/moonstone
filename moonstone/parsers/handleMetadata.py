@@ -20,7 +20,8 @@ class Inputs(object):
 
     def openmeta(self, outdir_path):
         self.logger.info('Opening Metadata file: ' + self.metafile)
-        df = pd.read_csv(self.metafile, sep=',', index_col=0)
+        # Sample IDs are kept as written (e.g. '01' stays '01') so that they match the count table's column names.
+        df = pd.read_csv(self.metafile, sep=',', index_col=0, dtype={0: str})
         df.rename_axis("sample", inplace=True)
         df.to_csv(path_or_buf=outdir_path + '/' + 'importedMetaData.csv')
         self.logger.info('Success!')
