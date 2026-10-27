@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 import pandas as pd
@@ -231,3 +232,18 @@ class TestAncombcCheck:
         results = ancombc_check(counts, metadata, 'age')
         assert set(results['n_samples']) == {79}
         assert set(results['n_dropped']) == {1}
+
+
+def test_matches_r_lm_reference():
+    """tests/reference/association_lm.R: R lm() on the CLR of the same synthetic counts, without zeros."""
+    folder = os.path.join(os.path.dirname(__file__), '..', 'reference')
+    counts = pd.read_csv(os.path.join(folder, 'association_counts.csv'), index_col=0)
+    metadata = pd.read_csv(os.path.join(folder, 'association_metadata.csv'), index_col=0)
+    expected = pd.read_csv(os.path.join(folder, 'association_lm_expected.csv'))
+    results = feature_association(counts, metadata, ['disease', 'age'], covariates='smoker',
+                                  reference={'disease': 'healthy', 'smoker': 'no'}, correction_method=None)
+    results['term'] = np.where(results['level'].isna(), results['variable'], results['variable'] + results['level'])
+    merged = expected.merge(results, on=['feature', 'term'], suffixes=('_r', ''))
+    assert len(merged) == len(expected) == 18
+    for column in ['coef', 'std_error', 't_value', 'p_value', 'ci_low', 'ci_high']:
+        np.testing.assert_allclose(merged[column], merged[f'{column}_r'], rtol=1e-6, atol=1e-10)

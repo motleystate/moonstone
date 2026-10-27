@@ -10,6 +10,14 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* New command-line options ``--correlation`` (with ``--correlation_method`` and ``--second_countfile``) and
+  ``--associate`` (with ``--covariates``, ``--reference``, ``--categorical``, ``--standardize`` and ``--ancombc``).
+  Samples can be chosen with ``--select COLUMN=VALUE`` (repeatable), features filtered with ``--min_prevalence``
+  (10% by default) and ``--top``, and the correction set with ``--correction`` and ``--alpha``. Each run writes a
+  ``methods.txt`` paragraph. New user-guide page :ref:`correlation`, which also notes FastSpar
+  (https://github.com/motleystate/moonstone/issues/150). ``--permutations`` now defaults to 9,999 for
+  ``--permanova`` (unchanged) and 999 for ``--correlation``. The association model is checked against R ``lm()``
+  (``tests/reference``).
 * New ``moonstone.analysis.association.feature_association``: association of every feature with metadata variables,
   adjusted for covariates. One ordinary least squares model per feature on centred log-ratio values (MaAsLin2's
   linear model on CLR, without random effect), with coefficient, standard error, 95% confidence interval, p-value
