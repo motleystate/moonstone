@@ -11,6 +11,13 @@ Classification
     :members:
     :special-members: __init__
 
+Association
+===========
+
+.. automodule:: moonstone.analysis.association
+    :members:
+
+
 Correlation
 ===========
 

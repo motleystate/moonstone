@@ -10,6 +10,13 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* New ``moonstone.analysis.association.feature_association``: association of every feature with metadata variables,
+  adjusted for covariates. One ordinary least squares model per feature on centred log-ratio values (MaAsLin2's
+  linear model on CLR, without random effect), with coefficient, standard error, 95% confidence interval, p-value
+  and Benjamini-Hochberg q-value for each variable level. Samples are matched to the metadata by name; samples with
+  missing metadata are left out and counted. Optional check that no subject has more than one sample.
+  ``ancombc_check`` runs ANCOM-BC (scikit-bio) on the same model as a sensitivity check. Python API only for now
+  (https://github.com/motleystate/moonstone/issues/150).
 * New ``moonstone.analysis.correlation.feature_correlation``: correlation between every pair of features of a
   compositional table, or between the features of two tables (for example species and resistance genes), with
   multiple-testing correction (Benjamini-Hochberg by default). Methods: Spearman (default), Pearson and Kendall on
