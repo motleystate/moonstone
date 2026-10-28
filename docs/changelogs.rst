@@ -18,6 +18,11 @@ Unreleased
   (https://github.com/motleystate/moonstone/issues/150). ``--permutations`` now defaults to 9,999 for
   ``--permanova`` (unchanged) and 999 for ``--correlation``. The association model is checked against R ``lm()``
   (``tests/reference``).
+  The user-guide page has example input files (species table with taxonomy, gene table, metadata) to download, with
+  the formats and column names they need.
+* ``multiplicative_replacement`` and ``clr``: a sample that is mostly zeros (for example one non-zero gene out of
+  four) no longer stops the run. With the default ``delta`` its zeros now share 65% of the sample, and a warning
+  names it. Other samples are unchanged.
 * New ``moonstone.analysis.association.feature_association``: association of every feature with metadata variables,
   adjusted for covariates. One ordinary least squares model per feature on centred log-ratio values (MaAsLin2's
   linear model on CLR, without random effect), with coefficient, standard error, 95% confidence interval, p-value

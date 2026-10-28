@@ -420,3 +420,36 @@ class TestCommandLineCompositional(TestCase):
                 self.assertNotIn('Traceback', result.stderr)
                 self.assertEqual(result.returncode, 1)
                 self.assertIn(message, result.stderr)
+
+
+class TestUserGuideExamples(TestCase):
+    """The example files and commands of docs/user_guide/correlation.rst run, and give the results it quotes."""
+
+    folder = os.path.join(os.path.dirname(__file__), '..', 'docs', 'user_guide', 'examples')
+
+    def run_example(self, *flags):
+        outdir = os.path.join(tempfile.mkdtemp(), 'results')
+        result = subprocess.run(
+            [sys.executable, '-c', 'from moonstone.main import run; run()', 'species_counts.tsv', 'metadata.csv',
+             outdir, *flags], capture_output=True, text=True, timeout=300, cwd=self.folder,
+        )
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return outdir
+
+    def test_species_against_genes(self):
+        outdir = self.run_example('--correlation', '--second_countfile', 'resistance_genes.csv', '--select',
+                                  'Type=inclusion')
+        edges = pd.read_csv(os.path.join(outdir, 'correlation_edges.csv')).set_index(['feature_a', 'feature_b'])
+        self.assertAlmostEqual(edges.loc[('Gardnerella vaginalis', 'tetM'), 'r'], 0.81, places=2)
+
+    def test_association_with_ancombc(self):
+        outdir = self.run_example('--associate', 'disease', '--covariates', 'age', 'antibiotics', '--reference',
+                                  'disease=healthy', '--ancombc', '--select', 'Type=inclusion', '--group_column',
+                                  'patient')
+        results = pd.read_csv(os.path.join(outdir, 'association.csv')).set_index('feature')
+        self.assertAlmostEqual(results.loc['Lactobacillus crispatus', 'coef'], -3.3, places=1)
+        self.assertLess(results.loc['Lactobacillus crispatus', 'q_value'], 0.001)
+        for feature, ancombc_q in [('Escherichia coli', 0.47), ('Lactobacillus iners', 0.81)]:
+            self.assertLess(results.loc[feature, 'q_value'], 0.05)
+            self.assertAlmostEqual(results.loc[feature, 'ancombc_q_value'], ancombc_q, places=2)

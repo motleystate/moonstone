@@ -127,6 +127,16 @@ class TestMultiplicativeReplacement:
         with pytest.raises(ValueError, match="too large"):
             multiplicative_replacement(two_zeros, delta=0.5)
 
+    def test_mostly_zero_sample_gets_capped_delta(self, caplog):
+        # s1: one non-zero gene and three zeros; 3 x 65% of 1 would exceed the whole sample
+        sparse = pd.DataFrame({'s1': [5, 0, 0, 0], 's2': [1, 2, 3, 4]}, index=['a', 'b', 'c', 'd'])
+        with caplog.at_level(logging.WARNING):
+            result = multiplicative_replacement(sparse)
+        assert "mostly zeros" in caplog.text and "s1" in caplog.text
+        np.testing.assert_allclose(result['s1'], [0.35, 0.65 / 3, 0.65 / 3, 0.65 / 3])
+        np.testing.assert_allclose(result['s2'], [0.1, 0.2, 0.3, 0.4])
+        assert np.isfinite(clr(sparse)).all().all()
+
 
 class TestRclr:
 

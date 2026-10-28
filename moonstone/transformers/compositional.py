@@ -94,28 +94,47 @@ def multiplicative_replacement(df: pd.DataFrame, delta: float = None) -> pd.Data
     values = _check_table(df)
     if delta is not None and not 0 < delta < 1:
         raise ValueError(f"delta must be a proportion between 0 and 1, got {delta}.")
-    return pd.DataFrame(_replace_zeros(values.to_numpy(), delta), index=values.index, columns=values.columns)
+    return pd.DataFrame(_replace_zeros(values.to_numpy(), delta, warn=True, samples=values.columns), index=values.index,
+                        columns=values.columns)
 
 
-def _replace_zeros(values: np.ndarray, delta: float = None) -> np.ndarray:
-    """Multiplicative replacement on an array (features x samples) already checked by _check_table."""
+def _replace_zeros(values: np.ndarray, delta: float = None, warn: bool = False, samples=None) -> np.ndarray:
+    """
+    Multiplicative replacement on an array (features x samples) already checked by _check_table.
+
+    With the default delta, a sample with few non-zero values could get zeros adding up to the whole sample (for
+    example one non-zero gene and three zeros: 3 x 65% of 1). Its zeros then share 65% of the sample instead, and a
+    warning names it if ``warn``.
+    """
     proportions = values / values.sum(axis=0)
     zeros = proportions == 0
+    n_zeros = zeros.sum(axis=0)
     if delta is None:
         with np.errstate(invalid='ignore'):
             delta_per_sample = np.nanmin(np.where(zeros, np.nan, proportions), axis=0) * DETECTION_FRACTION
+        too_large = n_zeros * delta_per_sample >= 1
+        if too_large.any():
+            delta_per_sample[too_large] = DETECTION_FRACTION / n_zeros[too_large]
+            if warn:
+                names = np.asarray(samples if samples is not None else range(values.shape[1]))[too_large]
+                logger.warning("%d sample(s) are mostly zeros, so their zeros share 65%% of the sample instead of "
+                               "each getting 65%% of its smallest value: %s. Their CLR values are unreliable; "
+                               "consider leaving them out.", int(too_large.sum()), ', '.join(map(str, names[:10])))
     else:
         delta_per_sample = np.full(proportions.shape[1], float(delta))
-    zero_mass = zeros.sum(axis=0) * delta_per_sample
+    zero_mass = n_zeros * delta_per_sample
     if (zero_mass >= 1).any():
         raise ValueError("delta is too large: the replaced zeros would take up the whole sample. Use a smaller delta.")
     return np.where(zeros, delta_per_sample, proportions * (1 - zero_mass))
 
 
 def _clr_array(values: np.ndarray, zeros: str = 'multiplicative', delta: float = None,
-               pseudocount: float = None) -> np.ndarray:
+               pseudocount: float = None, warn: bool = False, samples=None) -> np.ndarray:
     """CLR of an array (features x samples) already checked, with arguments already validated by clr()."""
-    positive = _replace_zeros(values, delta) if zeros == 'multiplicative' else values + pseudocount
+    if zeros == 'multiplicative':
+        positive = _replace_zeros(values, delta, warn, samples)
+    else:
+        positive = values + pseudocount
     logs = np.log(positive)
     return logs - logs.mean(axis=0)
 
@@ -152,7 +171,7 @@ def clr(df: pd.DataFrame, zeros: str = 'multiplicative', delta: float = None, ps
         if pseudocount is None or not pseudocount > 0:
             raise ValueError("zeros='pseudocount' needs an explicit pseudocount > 0.")
     values = _check_table(df)
-    return pd.DataFrame(_clr_array(values.to_numpy(), zeros, delta, pseudocount),
+    return pd.DataFrame(_clr_array(values.to_numpy(), zeros, delta, pseudocount, warn=True, samples=values.columns),
                         index=values.index, columns=values.columns)
 
 

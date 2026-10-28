@@ -27,25 +27,101 @@ Which analysis?
 From the command line
 =====================
 
-The count file has one row per feature and one column per sample, tab- or comma-separated. If it has taxonomy
-columns (``kingdom`` ... ``species``), the counts are summed to ``--taxa_level`` (species by default); otherwise
-the first column names the features (for example gene names). The metadata file has one row per sample, and
-samples are matched by name.
+Each run needs a count table and a metadata file; ``--second_countfile`` adds a second count table. Example files
+are given below. They are synthetic (simulated values, no real samples) and small enough to run every command on
+this page in a few seconds.
+
+Input files
+-----------
+
+Species count table (:download:`species_counts.tsv <examples/species_counts.tsv>`)
+    One row per taxon, one column per sample. Tab- or comma-separated: Moonstone picks the separator from the
+    header line.
+
+    .. csv-table:: First rows and columns of ``species_counts.tsv`` (60 sample columns in all)
+        :header: kingdom, phylum, class, order, family, genus, species, S001, S002, S003, ...
+
+        Bacteria, Firmicutes, Bacilli, Lactobacillales, Lactobacillaceae, Lactobacillus, Lactobacillus crispatus, 582, 579, 16398, ...
+        Bacteria, Firmicutes, Bacilli, Lactobacillales, Lactobacillaceae, Lactobacillus, Lactobacillus iners, 2193, 19220, 18175, ...
+        Bacteria, Actinobacteria, Actinomycetia, Bifidobacteriales, Bifidobacteriaceae, Gardnerella, Gardnerella vaginalis, 19803, 5483, 2573, ...
+
+    - **Taxonomy columns** are named exactly ``kingdom``, ``phylum``, ``class``, ``order``, ``family``, ``genus``
+      and ``species`` (lower case). They can be left out from the top (a table can start at ``genus``), but the
+      level given to ``--taxa_level`` must be there. A column ``NCBI_taxonomy_ID``, if present, is ignored.
+    - **Every other column is a sample.** Its header is the sample ID and must be written exactly as in the
+      metadata (``S001`` and ``s001`` are different samples; ``001`` stays ``001``).
+    - **Values** are counts or normalised counts: numbers only, with a dot as decimal separator and no thousands
+      separator. Write 0 for a taxon not found; a blank cell stops the run. Moonstone never fills in values.
+    - Rows without a name at the chosen level are pooled as ``unclassified <level>``, with a warning.
+
+Feature table without taxonomy (:download:`resistance_genes.csv <examples/resistance_genes.csv>`)
+    For genes, pathways or any other features. The **first column holds the feature names** (its header can be
+    anything, here ``gene``); every other column is a sample, with the same rules for IDs and values. Feature names
+    must be unique. Units do not need to match the species table (here, reads per kilobase per million): each table
+    is transformed on its own.
+
+    .. csv-table:: First rows and columns of ``resistance_genes.csv``
+        :header: gene, S001, S002, S003, S004, ...
+
+        tetM, 127.2, 43.7, 19.3, 4.0, ...
+        ermB, 13.7, 0.0, 41.5, 11.3, ...
+
+Metadata (:download:`metadata.csv <examples/metadata.csv>`)
+    One row per sample, comma-separated. **The first column holds the sample IDs** (its header can be anything,
+    here ``sample``); the other columns are the variables.
+
+    .. csv-table:: First rows of ``metadata.csv``
+        :header: sample, patient, Type, disease, age, antibiotics
+
+        S001, P01, inclusion, bv, 25, no
+        S002, P01, delivery, bv, 25, no
+        S003, P02, inclusion, healthy, 33, no
+        S004, P02, delivery, healthy, 33, no
+
+    - Here each patient was sampled twice. ``Type`` tells the visits apart, for ``--select Type=inclusion``;
+      ``patient`` names the subject, for ``--group_column patient``, which stops the run if a patient still has
+      more than one sample.
+    - **Text columns** (``disease``, ``antibiotics``) are groups; the reference group is chosen with
+      ``--reference disease=healthy``. **Numeric columns** (``age``) are numbers: a coefficient is per unit (per
+      year). A column of group codes such as 1, 2, 3 must be listed in ``--categorical``.
+    - **Missing values** are left blank (or ``NA``). Samples with a missing value in a variable of the model are
+      left out and counted; nothing is filled in. Do not code missing values as 0 or 99.
+    - Samples in the metadata but not in the count table are ignored. Count-table samples without a metadata row
+      are listed in a warning and left out.
+
+Try it
+------
+
+From the folder holding the three example files:
 
 .. code-block:: bash
 
     # co-occurrence network of species, at inclusion only
-    moonstone species.tsv metadata.csv results --correlation --select Type=inclusion --group_column patient
+    moonstone species_counts.tsv metadata.csv results --correlation --select Type=inclusion --group_column patient
 
     # species against resistance genes: only pairs across the two tables
-    moonstone species.tsv metadata.csv results --correlation --second_countfile args.csv --select Type=inclusion
+    moonstone species_counts.tsv metadata.csv results --correlation --second_countfile resistance_genes.csv \
+        --select Type=inclusion
 
-    # species associated with BV, adjusted for age and antibiotics, checked with ANCOM-BC
-    moonstone species.tsv metadata.csv results --associate disease --covariates age antibiotics \
-        --reference disease=healthy --ancombc --select Type=inclusion
+    # species associated with bacterial vaginosis, adjusted for age and antibiotics, checked with ANCOM-BC
+    moonstone species_counts.tsv metadata.csv results --associate disease --covariates age antibiotics \
+        --reference disease=healthy --ancombc --select Type=inclusion --group_column patient
 
 Put ``--associate`` and ``--covariates`` after the three file arguments. ``--correlation`` and ``--associate`` can
 run together; they cannot be combined with ``-f``, ``-c`` or ``--permanova``.
+
+In the simulation, *Gardnerella vaginalis*, *Fannyhessea vaginae*, *Prevotella bivia* and *Sneathia amnii* were
+made more abundant, and *Lactobacillus crispatus* less abundant, with bacterial vaginosis; ``tetM`` follows
+*Gardnerella vaginalis*. The runs find these: for example *G. vaginalis* and ``tetM`` correlate at r = 0.81, and
+*L. crispatus* is lower with bacterial vaginosis (coefficient -3.3 on the CLR scale, q < 0.001).
+
+The association run also reports *Escherichia coli* and *Lactobacillus iners* as lower with bacterial vaginosis,
+although their abundance was simulated with no change. This is how CLR values behave: each value is relative to
+the geometric mean of its sample, so when *L. crispatus* drops sharply the others shift on the CLR scale.
+ANCOM-BC, which corrects for this bias, does not report them (``ancombc_q_value`` of 0.47 and 0.81 in
+``association.csv``). Associations found by both methods are the robust ones.
+
+The example files are made by ``docs/user_guide/examples/make_examples.py``.
 
 What happens, in this order
 ---------------------------
