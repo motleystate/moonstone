@@ -18,6 +18,13 @@ Association
     :members:
 
 
+Compositional pipeline (command line)
+=====================================
+
+.. automodule:: moonstone.analysis.compositional_pipeline
+    :members:
+
+
 Correlation
 ===========
 

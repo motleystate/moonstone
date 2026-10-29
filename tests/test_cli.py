@@ -313,3 +313,143 @@ class TestCommandLinePermanova(TestCase):
         self.assertNotIn('Traceback', result.stderr)
         self.assertEqual(result.returncode, 1)
         self.assertIn('cannot be combined with -f/--filtering', result.stderr)
+
+
+class TestCommandLineCompositional(TestCase):
+
+    def run_moonstone(self, *args):
+        return subprocess.run(
+            [sys.executable, '-c', 'from moonstone.main import run; run()', *args],
+            capture_output=True, text=True, timeout=300,
+        )
+
+    def write_inputs(self):
+        """Species table with taxonomy (sp0 higher with bv), a gene table, and metadata with two visits per patient."""
+        tmpdir = tempfile.mkdtemp()
+        rng = np.random.default_rng(0)
+        n, d = 60, 8
+        samples = [f'S{i:02d}' for i in range(n)]
+        metadata = pd.DataFrame({
+            'Type': ['inclusion'] * 30 + ['delivery'] * 30,
+            'patient': [f'p{i % 30}' for i in range(n)],
+            'disease': rng.choice(['healthy', 'bv'], n),
+            'age': rng.normal(30, 5, n).round(1),
+        }, index=pd.Index(samples, name='sample'))
+        log_abundance = rng.normal(3, 1, (d, n))
+        log_abundance[0] += 2 * (metadata['disease'] == 'bv').to_numpy()
+        proportions = np.exp(log_abundance) / np.exp(log_abundance).sum(axis=0)
+        counts = np.stack([rng.multinomial(20000, proportions[:, j]) for j in range(n)]).T
+        taxonomy = pd.DataFrame({'kingdom': 'Bacteria', 'genus': [f'G{i // 2}' for i in range(d)],
+                                 'species': [f'G{i // 2} sp{i}' for i in range(d)]})
+        pd.concat([taxonomy, pd.DataFrame(counts, columns=samples)], axis=1).to_csv(
+            os.path.join(tmpdir, 'species.tsv'), sep='\t', index=False)
+        genes = pd.DataFrame(rng.poisson(30, (4, n)), index=pd.Index([f'gene{i}' for i in range(4)], name='gene'),
+                             columns=samples)
+        genes.to_csv(os.path.join(tmpdir, 'genes.csv'))
+        metadata.to_csv(os.path.join(tmpdir, 'metadata.csv'))
+        return [os.path.join(tmpdir, name) for name in ('species.tsv', 'genes.csv', 'metadata.csv', 'out')]
+
+    def test_correlation_and_association_with_selection(self):
+        species, _, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(species, metadata, outdir, '--correlation', '--associate', 'disease',
+                                    '--covariates', 'age', '--reference', 'disease=healthy', '--select',
+                                    'Type=inclusion', '--group_column', 'patient', '--permutations', '199')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('Selected Type = inclusion (30 of 60 samples)', result.stdout)
+        edges = pd.read_csv(os.path.join(outdir, 'correlation_edges.csv'))
+        self.assertEqual(len(edges), 8 * 7 // 2)
+        self.assertEqual(set(edges['n_samples']), {30})
+        self.assertTrue(os.path.exists(os.path.join(outdir, 'correlation_gephi_edges.csv')))
+        matrix = pd.read_csv(os.path.join(outdir, 'correlation_matrix.csv'), index_col=0)
+        self.assertEqual(matrix.shape, (8, 8))
+        association = pd.read_csv(os.path.join(outdir, 'association.csv'))
+        top = association.sort_values('p_value').iloc[0]
+        self.assertEqual((top['feature'], top['level'], top['reference']), ('G0 sp0', 'bv', 'healthy'))
+        self.assertLess(top['q_value'], 0.05)
+        methods = open(os.path.join(outdir, 'methods.txt')).read()
+        for text in ['Type = inclusion', 'checked on patient', '199 permutations', 'CLR ~ disease + age',
+                     'disease = healthy', 'summed to species level', 'Benjamini-Hochberg']:
+            self.assertIn(text, methods)
+
+    def test_repeated_subjects_stop_the_run(self):
+        species, _, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(species, metadata, outdir, '--associate', 'disease', '--group_column', 'patient')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('more than one sample', result.stderr)
+
+    def test_two_tables_and_ancombc(self):
+        species, genes, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(species, metadata, outdir, '--correlation', '--second_countfile', genes,
+                                    '--taxa_level', 'genus', '--correlation_method', 'pearson', '--permutations',
+                                    '100', '--associate', 'disease', '--ancombc', '--top', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        edges = pd.read_csv(os.path.join(outdir, 'correlation_edges.csv'))
+        self.assertEqual(len(edges), 3 * 3)
+        self.assertTrue(edges['feature_b'].str.startswith('gene').all())
+        association = pd.read_csv(os.path.join(outdir, 'association.csv'))
+        self.assertIn('ancombc_q_value', association.columns)
+        self.assertTrue(os.path.exists(os.path.join(outdir, 'ancombc.csv')))
+        self.assertIn('also significant with ANCOM-BC', result.stdout)
+        methods = open(os.path.join(outdir, 'methods.txt')).read()
+        self.assertIn('across the two tables', methods)
+        self.assertIn('the 3 with the highest mean relative abundance', methods)
+
+    def test_selection_value_not_found(self):
+        species, _, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(species, metadata, outdir, '--associate', 'disease', '--select', 'Type=visit3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("no sample has Type = 'visit3'", result.stderr)
+
+    def test_flag_combinations(self):
+        species, genes, metadata, outdir = self.write_inputs()
+        for flags, message in [
+            (['--correlation', '-f', '5'], 'cannot be combined with -f/--filtering'),
+            (['--correlation', '--permanova'], 'cannot be combined with --correlation'),
+            (['--associate', 'disease', '--second_countfile', genes], '--second_countfile is only used with'),
+            (['--correlation', '--covariates', 'age'], '--covariates is only used with --associate'),
+            (['--select', 'Type=inclusion'], '--select is only used with'),
+            (['--correlation_method', 'sparcc'], '--correlation_method is only used with --correlation'),
+            (['--correlation', '--alpha', '2'], '--alpha must be between 0 and 1'),
+        ]:
+            with self.subTest(flags=flags):
+                result = self.run_moonstone(species, metadata, outdir, *flags)
+                self.assertNotIn('Traceback', result.stderr)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(message, result.stderr)
+
+
+class TestUserGuideExamples(TestCase):
+    """The example files and commands of docs/user_guide/correlation.rst run, and give the results it quotes."""
+
+    folder = os.path.join(os.path.dirname(__file__), '..', 'docs', 'user_guide', 'examples')
+
+    def run_example(self, *flags):
+        outdir = os.path.join(tempfile.mkdtemp(), 'results')
+        result = subprocess.run(
+            [sys.executable, '-c', 'from moonstone.main import run; run()', 'species_counts.tsv', 'metadata.csv',
+             outdir, *flags], capture_output=True, text=True, timeout=300, cwd=self.folder,
+        )
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return outdir
+
+    def test_species_against_genes(self):
+        outdir = self.run_example('--correlation', '--second_countfile', 'resistance_genes.csv', '--select',
+                                  'Type=inclusion')
+        edges = pd.read_csv(os.path.join(outdir, 'correlation_edges.csv')).set_index(['feature_a', 'feature_b'])
+        self.assertAlmostEqual(edges.loc[('Gardnerella vaginalis', 'tetM'), 'r'], 0.81, places=2)
+
+    def test_association_with_ancombc(self):
+        outdir = self.run_example('--associate', 'disease', '--covariates', 'age', 'antibiotics', '--reference',
+                                  'disease=healthy', '--ancombc', '--select', 'Type=inclusion', '--group_column',
+                                  'patient')
+        results = pd.read_csv(os.path.join(outdir, 'association.csv')).set_index('feature')
+        self.assertAlmostEqual(results.loc['Lactobacillus crispatus', 'coef'], -3.3, places=1)
+        self.assertLess(results.loc['Lactobacillus crispatus', 'q_value'], 0.001)
+        for feature, ancombc_q in [('Escherichia coli', 0.47), ('Lactobacillus iners', 0.81)]:
+            self.assertLess(results.loc[feature, 'q_value'], 0.05)
+            self.assertAlmostEqual(results.loc[feature, 'ancombc_q_value'], ancombc_q, places=2)

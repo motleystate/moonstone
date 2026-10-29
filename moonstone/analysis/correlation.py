@@ -218,6 +218,21 @@ def _permutation_null(statistic, values: list, rng: np.random.Generator, permuta
         return np.nanmean(nulls, axis=0), np.nanstd(nulls, axis=0, ddof=1)
 
 
+def _check_arguments(method, two_tables, zeros, delta, pseudocount, correction_method, permutations):
+    if method not in METHODS:
+        raise ValueError(f"method must be one of {METHODS}, got {method!r}.")
+    if two_tables and method not in CROSS_TABLE_METHODS:
+        raise ValueError(f"Only {CROSS_TABLE_METHODS} can correlate two tables; {method!r} assumes features of one "
+                         "composition.")
+    if method == 'sparcc' and (delta is not None or pseudocount is not None or zeros != 'multiplicative'):
+        raise ValueError("zeros, delta and pseudocount apply to the CLR methods; SparCC handles zeros itself.")
+    if correction_method not in (None, 'fdr_bh', 'bonferroni'):
+        raise ValueError(f"correction_method must be 'fdr_bh', 'bonferroni' or None, got {correction_method!r}.")
+    if permutations < MIN_PERMUTATIONS:
+        raise ValueError(f"At least {MIN_PERMUTATIONS} permutations are needed to estimate the null distribution, "
+                         f"got {permutations}.")
+
+
 def feature_correlation(
     counts: pd.DataFrame, second_counts: pd.DataFrame = None, method: str = 'spearman',
     zeros: str = 'multiplicative', delta: float = None, pseudocount: float = None,
@@ -254,18 +269,7 @@ def feature_correlation(
         in standard deviations), p_value, q_value (NaN when not corrected), n_samples, prevalence_a, prevalence_b
         (share of samples where the feature is non-zero). r, z and p_value are NaN for a constant feature.
     """
-    if method not in METHODS:
-        raise ValueError(f"method must be one of {METHODS}, got {method!r}.")
-    if second_counts is not None and method not in CROSS_TABLE_METHODS:
-        raise ValueError(f"Only {CROSS_TABLE_METHODS} can correlate two tables; {method!r} assumes features of one "
-                         "composition.")
-    if method == 'sparcc' and (delta is not None or pseudocount is not None or zeros != 'multiplicative'):
-        raise ValueError("zeros, delta and pseudocount apply to the CLR methods; SparCC handles zeros itself.")
-    if correction_method not in (None, 'fdr_bh', 'bonferroni'):
-        raise ValueError(f"correction_method must be 'fdr_bh', 'bonferroni' or None, got {correction_method!r}.")
-    if permutations < MIN_PERMUTATIONS:
-        raise ValueError(f"At least {MIN_PERMUTATIONS} permutations are needed to estimate the null distribution, "
-                         f"got {permutations}.")
+    _check_arguments(method, second_counts is not None, zeros, delta, pseudocount, correction_method, permutations)
 
     if second_counts is not None:
         counts, second_counts = _align_samples(counts, second_counts)
@@ -290,7 +294,9 @@ def feature_correlation(
             logger.warning("Every sample sums to about 1: these look like proportions. SparCC needs count-like values "
                            "(reads); on proportions its estimates are close to meaningless.")
 
-    clr(values_a, zeros=zeros, delta=delta, pseudocount=pseudocount)  # validates the zero arguments once
+    if method != 'sparcc':  # validates the zero arguments once, and warns about mostly-zero samples
+        for values in [v for v in (values_a, values_b) if v is not None]:
+            clr(values, zeros=zeros, delta=delta, pseudocount=pseudocount)
 
     def transform(table):
         return _clr_array(table, zeros, delta, pseudocount)
