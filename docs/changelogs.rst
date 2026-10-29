@@ -10,6 +10,10 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* ``MetadataParser.visualize_categories`` is deprecated and now calls ``plot_category_flows(kind="parcats")``, with
+  the same look as before (alphabetical categories, ``colorscale``). ``plot_category_flows`` and
+  ``plot_taxonomy_flows`` gain ``sort_categories="alphabetical"``, and the parallel categories plot a ``colorscale``
+  option to spread the categories of an ordered variable along a gradient.
 * New ``moonstone.plot.plot_category_flows`` and ``plot_taxonomy_flows``: Sankey diagrams (``kind="sankey"``) and
   parallel categories diagrams (``kind="parcats"``) of metadata columns, or of taxonomic levels of a count table
   (top N taxa per level, others as ``Other``; widths by mean relative abundance or total reads). Column titles, category

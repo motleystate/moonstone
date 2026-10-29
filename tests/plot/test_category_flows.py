@@ -30,6 +30,16 @@ class TestPlotCategoryFlows(TestCase):
             plot_category_flows(self.df, kind="pie", show=False)
         with self.assertRaises(ValueError):
             plot_category_flows(self.df, color_by="b", show=False)
+        with self.assertRaises(ValueError):
+            plot_category_flows(self.df, colorscale="Viridis", show=False)
+
+    def test_sort_categories_alphabetical(self):
+        fig = plot_category_flows(self.df, kind="parcats", sort_categories="alphabetical", show=False)
+        self.assertEqual(list(fig.data[0].dimensions[0].categoryarray), ["x", "y"])
+        fig = plot_taxonomy_flows(
+            pd.DataFrame({"s": [1, 3]}, index=pd.MultiIndex.from_tuples([("g1", "a"), ("g2", "b")], names=["g", "sp"])),
+            ["g", "sp"], kind="parcats", sort_categories="alphabetical", show=False)
+        self.assertEqual(list(fig.data[0].dimensions[0].categoryarray), ["g1", "g2"])
 
 
 class TestPlotTaxonomyFlows(TestCase):

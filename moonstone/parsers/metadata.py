@@ -1,11 +1,10 @@
 """Classes to handle metadata import."""
+import warnings
 import yaml
 from collections import defaultdict
 from typing import Dict, List
 
-from pandas import DataFrame, Series
-import plotly.io
-import plotly.graph_objects as go
+from pandas import DataFrame
 
 from moonstone.analysis.columns_statistics import DataframeStatistics
 from moonstone.parsers.transform.cleaning import DataFrameCleaner
@@ -73,26 +72,6 @@ class MetadataParser(BaseParser):
         """
         return DataframeStatistics(self.dataframe).get_stats()
 
-    def _get_dimensions(self, categories) -> List[go.parcats.Dimension]:
-        dimensions = []
-        for cat in categories:
-            dimensions.append(
-                go.parcats.Dimension(
-                    values=self.dataframe[cat],
-                    categoryorder="category ascending",
-                    label=cat,
-                )
-            )
-        return dimensions
-
-    def _get_color(self, color_by: str) -> Series:
-        cpt = 1
-        color_dict = {}
-        for i in self.dataframe[color_by].unique():
-            color_dict[i] = cpt
-            cpt += 1
-        return self.dataframe[color_by].apply(lambda x: color_dict.get(x, 0))
-
     def visualize_categories(
         self,
         categories: list,
@@ -104,28 +83,36 @@ class MetadataParser(BaseParser):
         """
         Visualize category metadata with parallel categories diagram.
 
+        .. deprecated::
+            Use :func:`moonstone.plot.plot_category_flows` (with ``kind="parcats"``) instead. This method now only
+            calls it, with the same look as before: categories in alphabetical order and the ribbons coloured along
+            ``colorscale``.
+
         :param categories: list of column to display
         :param color_by: perform coloration on the given category
+        :param colorscale: Plotly colorscale for the categories of ``color_by`` (default: DEFAULT_COLORSCALE)
+        :param title: title of the figure
+        :param output_file: if given, the figure is also written to this file
         """
-        if colorscale is None:
-            colorscale = self.DEFAULT_COLORSCALE
-        dimensions = self._get_dimensions(categories)
-        color = self._get_color(color_by)
+        from moonstone.plot.category_flows import plot_category_flows  # here, to avoid a circular import
 
-        fig = go.Figure(
-            data=[
-                go.Parcats(
-                    dimensions=dimensions,
-                    line={"color": color, "colorscale": colorscale},
-                    hoverinfo="count",
-                    arrangement="freeform",
-                )
-            ]
+        warnings.warn(
+            "MetadataParser.visualize_categories is deprecated, use moonstone.plot.plot_category_flows "
+            'with kind="parcats" instead.',
+            DeprecationWarning,
+            stacklevel=2,
         )
-        fig.update_layout(title=title)
-        fig.show()
-        if output_file:
-            plotly.io.write_html(fig, output_file)
+        plot_category_flows(
+            self.dataframe,
+            columns=categories,
+            kind="parcats",
+            color_by=color_by,
+            colorscale=self.DEFAULT_COLORSCALE if colorscale is None else colorscale,
+            sort_categories="alphabetical",
+            plotting_options={"layout": {"title_text": title}},
+            show=True,
+            output_file=output_file or False,
+        )
 
 
 class YAMLBasedMetadataParser:
