@@ -21,6 +21,7 @@ Welcome to Moonstone's documentation!
     user_guide/classification
     user_guide/permanova
     user_guide/correlation
+    user_guide/category_flows
     user_guide/available_classes
 
 

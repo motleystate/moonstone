@@ -10,6 +10,11 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* New ``moonstone.plot.plot_category_flows`` and ``plot_taxonomy_flows``: Sankey diagrams (``kind="sankey"``) and
+  parallel categories diagrams (``kind="parcats"``) of metadata columns, or of taxonomic levels of a count table
+  (top N taxa per level, others as ``Other``; widths by mean relative abundance or total reads). Column titles, category
+  order, colouring by a variable, missing values shown as ``(missing)``. Built on Agnes Baud's Sankey code
+  (https://github.com/motleystate/moonstone/issues/148). New user-guide page :ref:`category_flows`.
 * New command-line options ``--correlation`` (with ``--correlation_method`` and ``--second_countfile``) and
   ``--associate`` (with ``--covariates``, ``--reference``, ``--categorical``, ``--standardize`` and ``--ancombc``).
   Samples can be chosen with ``--select COLUMN=VALUE`` (repeatable), features filtered with ``--min_prevalence``
