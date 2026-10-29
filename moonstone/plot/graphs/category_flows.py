@@ -14,6 +14,7 @@ def prepare_categories(
     weights: Optional[pd.Series] = None,
     order: Optional[Dict[str, list]] = None,
     column_titles: Optional[Dict[str, str]] = None,
+    sort_categories: str = "size",
 ) -> Tuple[pd.DataFrame, pd.Series, Dict[str, List[str]], List[str]]:
     """
     Turn the columns of ``data`` into strings and work out the order of the categories of each column.
@@ -23,15 +24,18 @@ def prepare_categories(
 
     :param data: one row per sample (or per taxon), one column per categorical variable. Plotted left to right.
     :param weights: weight of each row (default 1). Must have the same index as ``data``.
-    :param order: for some columns, the categories in the order wanted. Categories left out come after, from the
-        largest to the smallest.
+    :param order: for some columns, the categories in the order wanted. Categories left out come after, in the
+        order given by ``sort_categories``.
     :param column_titles: for some columns, the title to display instead of the column name.
+    :param sort_categories: ``"size"`` (default: largest category first, ties by name) or ``"alphabetical"``.
     :return: the string dataframe, the weights, the category order of each column, and the column titles.
     """
     if isinstance(data, pd.Series):
         data = data.to_frame()
     if data.shape[1] < 2:
         raise ValueError("At least two columns are needed to show flows between categories.")
+    if sort_categories not in ("size", "alphabetical"):
+        raise ValueError('sort_categories must be "size" or "alphabetical".')
     if data.columns.duplicated().any():
         raise ValueError("Column names must be unique.")
     if weights is None:
@@ -57,8 +61,11 @@ def prepare_categories(
     category_order = {}
     for col in data.columns:
         totals = weights.groupby(str_df[col]).sum()
-        # largest first, ties broken by name so that the order is reproducible
-        by_size = sorted(totals.index, key=lambda cat: (-totals[cat], cat))
+        if sort_categories == "size":
+            # largest first, ties broken by name so that the order is reproducible
+            by_size = sorted(totals.index, key=lambda cat: (-totals[cat], cat))
+        else:
+            by_size = sorted(totals.index)
         wanted = [str(cat) for cat in order.get(col, [])]
         bad = [cat for cat in wanted if cat not in totals.index]
         if bad:
