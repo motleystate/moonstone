@@ -27,6 +27,8 @@ def plot_category_flows(
     order: Optional[Dict[str, list]] = None,
     column_titles: Optional[Dict[str, str]] = None,
     color_by: Union[str, pd.Series, None] = None,
+    colorscale: Union[str, list, None] = None,
+    sort_categories: str = "size",
     weights: Optional[pd.Series] = None,
     plotting_options: dict = None,
     show: bool = True,
@@ -44,6 +46,10 @@ def plot_category_flows(
         largest to the smallest.
     :param column_titles: for some columns, the title to display instead of the column name
     :param color_by: (``"parcats"`` only) a column of data, or a series with the same index, to colour the ribbons by
+    :param colorscale: (``"parcats"`` only) a Plotly colorscale along which the categories of ``color_by`` are spread
+        evenly, for an ordered variable (age groups, for example). Default: one distinct colour per category.
+    :param sort_categories: ``"size"`` (default: largest category first) or ``"alphabetical"``, for the categories
+        not listed in ``order``
     :param weights: weight of each row (default 1, so the widths are numbers of samples)
     :param plotting_options: options of plotting that will override the default setup
     :param show: set to False if you don't want to show the plot
@@ -55,15 +61,16 @@ def plot_category_flows(
     plotted = data if columns is None else data[columns]
     graph = graph_class(plotted, weights=weights)
     kwargs = dict(
-        order=order, column_titles=column_titles, plotting_options=plotting_options,
-        show=show, output_file=output_file,
+        order=order, column_titles=column_titles, sort_categories=sort_categories,
+        plotting_options=plotting_options, show=show, output_file=output_file,
     )
     if kind == "parcats":
         if isinstance(color_by, str) and color_by not in plotted.columns:
             color_by = data[color_by]
         kwargs["color_by"] = color_by
-    elif color_by is not None:
-        raise ValueError('color_by is only available with kind="parcats".')
+        kwargs["colorscale"] = colorscale
+    elif color_by is not None or colorscale is not None:
+        raise ValueError('color_by and colorscale are only available with kind="parcats".')
     return graph.plot_one_graph(**kwargs)
 
 
@@ -86,6 +93,7 @@ def plot_taxonomy_flows(
     weight: str = "mean_relative_abundance",
     order: Optional[Dict[str, list]] = None,
     column_titles: Optional[Dict[str, str]] = None,
+    sort_categories: str = "size",
     plotting_options: dict = None,
     show: bool = True,
     output_file: Union[bool, str] = False,
@@ -103,6 +111,7 @@ def plot_taxonomy_flows(
     :param order: for some levels, the order wanted for the taxa, from top to bottom. By default, from the largest to
         the smallest.
     :param column_titles: for some levels, the title to display instead of the level name
+    :param sort_categories: ``"size"`` (default) or ``"alphabetical"``, for the taxa not listed in ``order``
     :param plotting_options: options of plotting that will override the default setup
     :param show: set to False if you don't want to show the plot
     :param output_file: name of the output file (.html or an image format)
@@ -129,6 +138,6 @@ def plot_taxonomy_flows(
     if top_n is not None:
         flows_df = _lump_into_other(flows_df, weights, top_n)
     return graph_class(flows_df, weights=weights).plot_one_graph(
-        order=order, column_titles=column_titles, plotting_options=plotting_options,
-        show=show, output_file=output_file,
+        order=order, column_titles=column_titles, sort_categories=sort_categories,
+        plotting_options=plotting_options, show=show, output_file=output_file,
     )

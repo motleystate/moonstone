@@ -28,6 +28,7 @@ class SankeyDiagram(BaseGraph):
         self,
         order: Optional[Dict[str, list]] = None,
         column_titles: Optional[Dict[str, str]] = None,
+        sort_categories: str = "size",
         plotting_options: dict = None,
         show: bool = True,
         output_file: Union[bool, str] = False,
@@ -36,11 +37,14 @@ class SankeyDiagram(BaseGraph):
         :param order: for some columns, the order wanted for the categories, from top to bottom. By default, from the
             largest to the smallest.
         :param column_titles: for some columns, the title to display above the column instead of the column name
+        :param sort_categories: order of the categories not listed in ``order``: ``"size"`` (largest first,
+            default) or ``"alphabetical"``
         :param plotting_options: options of plotting that will override the default setup
         :param show: set to False if you don't want to show the plot
         :param output_file: name of the output file (.html or an image format)
         """
-        str_df, weights, cat_order, titles = prepare_categories(self.data, self.weights, order, column_titles)
+        str_df, weights, cat_order, titles = prepare_categories(
+            self.data, self.weights, order, column_titles, sort_categories)
         columns = list(str_df.columns)
         n_cols = len(columns)
 

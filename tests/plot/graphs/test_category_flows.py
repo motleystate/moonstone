@@ -28,6 +28,13 @@ class TestPrepareCategories(TestCase):
         self.assertEqual(cat_order["age"], ["old", "young"])
         self.assertEqual(cat_order["city"], ["Paris", MISSING_LABEL, "Lyon"])
 
+    def test_alphabetical_order(self):
+        _, _, cat_order, _ = prepare_categories(self.df, sort_categories="alphabetical")
+        self.assertEqual(cat_order["age"], ["old", "young"])
+        self.assertEqual(cat_order["city"], ["(missing)", "Lyon", "Paris"])
+        with self.assertRaises(ValueError):
+            prepare_categories(self.df, sort_categories="random")
+
     def test_order_given_then_rest(self):
         _, _, cat_order, _ = prepare_categories(self.df, order={"city": ["Lyon"]})
         self.assertEqual(cat_order["city"], ["Lyon", "Paris", MISSING_LABEL])
@@ -156,3 +163,23 @@ class TestParallelCategoriesGraph(TestCase):
         fig = ParallelCategoriesGraph(self.df[["a", "b"]]).plot_one_graph(
             show=False, color_by=self.df["grp"], colors={"g2": "#ff0000"})
         self.assertIn("#ff0000", [step[1] for step in fig.data[0].line.colorscale])
+
+    def test_colorscale_spreads_categories_along_scale_in_given_order(self):
+        df = pd.DataFrame(
+            {"a": ["x", "y", "x", "y"], "b": ["u", "u", "v", "v"], "age": ["<=30", ">40", "31-40", ">40"]})
+        fig = ParallelCategoriesGraph(df[["a", "b"]]).plot_one_graph(
+            show=False, color_by=df["age"].rename("age"), colorscale=[[0, "rgb(0,0,0)"], [1, "rgb(255,255,255)"]],
+            order={"age": ["<=30", "31-40", ">40"]})
+        line = fig.data[0].line
+        steps = [step[1] for step in line.colorscale][::2]
+        self.assertEqual(steps, ["rgb(0, 0, 0)", "rgb(128, 128, 128)", "rgb(255, 255, 255)"])
+        # rows: <=30 -> first step, >40 -> last step, 31-40 -> middle step
+        self.assertEqual(list(line.color), [0.5, 2.5, 1.5, 2.5])
+
+    def test_colorscale_single_category_and_colors_override(self):
+        df = pd.DataFrame({"a": ["x", "y"], "b": ["u", "v"], "g": ["only", "only"]})
+        fig = ParallelCategoriesGraph(df[["a", "b"]]).plot_one_graph(show=False, color_by=df["g"], colorscale="Viridis")
+        self.assertEqual(len(fig.data[0].line.colorscale), 2)
+        fig = ParallelCategoriesGraph(df[["a", "b"]]).plot_one_graph(
+            show=False, color_by=df["g"], colorscale="Viridis", colors={"only": "#123456"})
+        self.assertEqual(fig.data[0].line.colorscale[0][1], "#123456")

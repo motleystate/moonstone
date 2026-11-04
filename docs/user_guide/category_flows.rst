@@ -50,7 +50,11 @@ Options
 
 - ``columns``: the columns to plot, from left to right.
 - ``order={"Type": ["inclusion", "delivery"]}``: order of the categories of a column, from top to bottom. By
-  default from the largest to the smallest; categories you leave out follow.
+  default from the largest to the smallest; categories you leave out follow. ``sort_categories="alphabetical"``
+  sorts them alphabetically instead.
+- ``colorscale`` (``"parcats"``): for an ordered ``color_by`` (age groups, for example), the categories are spread
+  evenly along a Plotly colorscale (``"Viridis"``, or a list of colours) in the order given for that variable in
+  ``order``, instead of getting unrelated colours. Each category still has exactly one colour.
 - ``column_titles``: titles shown above the columns.
 - ``weights``: a series (same index as the data) to make the ribbon widths something other than a number of samples.
 - ``plotting_options``, ``show`` and ``output_file``: as for the other Moonstone plots.
@@ -81,5 +85,4 @@ Taxonomic levels of a count table
 
 Many tiny boxes overlap their labels; lower ``top_n`` if the plot gets crowded.
 
-Existing ``MetadataParser.visualize_categories`` still works; the functions above replace it and are not tied to
-the metadata parser.
+``MetadataParser.visualize_categories`` is deprecated: it now calls ``plot_category_flows(kind="parcats")`` and warns.
