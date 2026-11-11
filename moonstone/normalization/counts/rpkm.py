@@ -12,7 +12,7 @@ class RPKMNormalization(BaseNormalization):
 
     Feature lengths must be provided in base pairs (bp)
     Sequencing depth is estimated from the sum of
-    counts per sample unless custom depths are provided ().
+    counts per sample unless custom depths are provided.
 
     Note:
         Filtering features before automatic normalization may underestimate

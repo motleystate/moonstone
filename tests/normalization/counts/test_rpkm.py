@@ -91,3 +91,16 @@ class TestRPKMNormalization(TestCase):
 
                 with self.assertRaises(ValueError):
                     tested_normalization.normalized_df
+
+    def test_missing_feature_length(self):
+        # Test a feature missing from the feature lengths index
+
+        feature_lengths = self.feature_lengths.drop("Gene_1")
+
+        tested_normalization = RPKMNormalization(
+            self.raw_df,
+            feature_lengths=feature_lengths,
+        )
+
+        with self.assertRaises(ValueError):
+            tested_normalization.normalized_df
