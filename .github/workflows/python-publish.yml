@@ -1,31 +1,38 @@
-# This workflows will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+# Build and upload the package to PyPI when a GitHub release is published.
+# Uses PyPI trusted publishing: no password or token is stored in the repository. On PyPI, the project
+# needs a trusted publisher for owner "motleystate", repository "moonstone" and workflow "python-publish.yml".
+# Earlier versions stay available on PyPI; a version number can never be uploaded twice.
 
 name: Upload Python Package
 
 on:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   deploy:
 
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # required for trusted publishing
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
-    - name: Install dependencies
+        python-version: '3.13'
+    - name: Check the release tag matches the package version
       run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        version=$(python -c "exec(open('moonstone/version.py').read()); print(__version__)")
+        if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+          echo "Release tag ${GITHUB_REF_NAME} does not match package version v${version}"
+          exit 1
+        fi
+    - name: Build
       run: |
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
+        python -m pip install --upgrade pip build twine
+        python -m build
+        twine check dist/*
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1

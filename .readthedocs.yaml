@@ -7,9 +7,9 @@ version: 2
 
 # Set the version of Python and other tools you might need
 build:
-  os: ubuntu-22.04
+  os: ubuntu-24.04
   tools:
-    python: "3.11"
+    python: "3.13"
 
 # The docs describe the version released on PyPI (docs/requirements.txt installs
 # it from there). The Python version below must be one the released version supports.
