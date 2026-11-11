@@ -26,6 +26,6 @@ setup(
         'threadpoolctl>=3.1.0'
     ],
     python_requires='>=3.13,<3.14',
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests", "tests.*"]),
     entry_points={'console_scripts': ['moonstone=moonstone.main:run']},
 )
