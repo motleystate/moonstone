@@ -1,8 +1,9 @@
 import os
+import tempfile
 from unittest import TestCase
+from unittest.mock import patch
 
 import pandas as pd
-import plotly.graph_objects as go
 from pandas.testing import assert_frame_equal
 
 from moonstone.parsers.metadata import MetadataParser, YAMLBasedMetadataParser
@@ -106,20 +107,20 @@ class TestMetadataParser(TestCase):
         )
         assert_frame_equal(parser.dataframe, expected_df)
 
-    def test_get_dimensions(self):
-        categories = ["col_3"]
+    @patch("plotly.graph_objects.Figure.show")
+    def test_visualize_categories_deprecated_wrapper(self, mocked_show):
         parser = MetadataParser(self.metadata_file, index_col="col_1")
-        output_dimensions = parser._get_dimensions(categories)
-        self.assertEqual(len(output_dimensions), 1)
-        for dim in output_dimensions:
-            self.assertTrue(isinstance(dim, go.parcats.Dimension))
+        with self.assertWarns(DeprecationWarning):
+            parser.visualize_categories(["col_2", "col_3"], color_by="col_3", title="My title")
+        mocked_show.assert_called_once()
 
-    def test_get_color(self):
-        color_by = "col_3"
-        index = pd.Series(("s1", "s2", "s3"), name="col_1")
-        expected_series = pd.Series([1, 2, 1], index=index, name=color_by)
+    def test_visualize_categories_output_file(self):
         parser = MetadataParser(self.metadata_file, index_col="col_1")
-        pd.testing.assert_series_equal(parser._get_color(color_by), expected_series)
+        with tempfile.TemporaryDirectory() as tmp, patch("plotly.graph_objects.Figure.show"):
+            path = os.path.join(tmp, "categories.html")
+            with self.assertWarns(DeprecationWarning):
+                parser.visualize_categories(["col_2", "col_3"], color_by="col_3", output_file=path)
+            self.assertTrue(os.path.getsize(path) > 0)
 
 
 class MockedYAMLBasedMetadataParser(YAMLBasedMetadataParser):

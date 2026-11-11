@@ -11,6 +11,27 @@ Classification
     :members:
     :special-members: __init__
 
+Association
+===========
+
+.. automodule:: moonstone.analysis.association
+    :members:
+
+
+Compositional pipeline (command line)
+=====================================
+
+.. automodule:: moonstone.analysis.compositional_pipeline
+    :members:
+
+
+Correlation
+===========
+
+.. automodule:: moonstone.analysis.correlation
+    :members:
+
+
 Differential Analysis
 =====================
 
@@ -19,6 +40,13 @@ Differential Analysis
     :undoc-members:
     :special-members: __init__
     :inherited-members:
+
+
+PERMANOVA
+=========
+
+.. automodule:: moonstone.analysis.permanova
+    :members:
 
 
 Diversity

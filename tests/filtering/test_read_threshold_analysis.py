@@ -76,11 +76,23 @@ class TestLoadSpeciesTable(TestCase):
         path = self._write(
             "genus,species,NCBI_taxonomy_ID,s1,s2\n"
             "Serratia,Serratia_marcescens,615,10,0\n"
-            "Serratia,Serratia_marcescens,615,5,\n"
+            "Serratia,Serratia_marcescens,615,5,0\n"
             "Lactobacillus,Lactobacillus_crispatus,47770,200,300\n")
         table = load_species_table(path)
         self.assertListEqual(table.columns.tolist(), ['s1', 's2'])
         self.assertListEqual(table.loc[('Serratia_marcescens', 615)].tolist(), [15, 0])
+
+    def test_load_species_table_blank_count_raises(self):
+        path = self._write("species,NCBI_taxonomy_ID,s1,s2\nSerratia_marcescens,615,5,\n")
+        with self.assertRaisesRegex(ValueError, '1 blank count cell.*s2'):
+            load_species_table(path)
+
+    def test_load_species_table_keeps_rows_without_id(self):
+        path = self._write("species,NCBI_taxonomy_ID,s1\nSerratia_marcescens,615,5\nUnknown_sp,,500\n")
+        with self.assertWarnsRegex(UserWarning, '1 row\\(s\\) with a blank species or NCBI_taxonomy_ID'):
+            table = load_species_table(path)
+        self.assertEqual(table.shape[0], 2)
+        self.assertEqual(table['s1'].sum(), 505)
 
     def test_load_species_table_missing_required_column(self):
         path = self._write("genus,species,s1\nSerratia,Serratia_marcescens,10\n")

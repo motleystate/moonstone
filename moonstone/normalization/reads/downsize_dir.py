@@ -21,7 +21,9 @@ def pair_up(seq_files_info):
             rev_reads_file = None
 
             for key_a in seq_files_info:  # Loop through again to find the matching header
-                if query in seq_files_info[key_a][0]:  # If the headers match it is either forward or reverse reads.
+                # If the headers match it is either forward or reverse reads. Compared whole, as a header can be the
+                # start of another sample's header (e.g. '...:1266' and '...:12660').
+                if query == seq_files_info[key_a][0]:
                     if seq_files_info[key_a][1] == '1':
                         fwd_reads_file = key_a
                         file_counter += 1
@@ -32,8 +34,12 @@ def pair_up(seq_files_info):
                         logger.info('\nForward file = %s\nReverse file = %s' % (fwd_reads_file, rev_reads_file))
                         paired_list.append(fwd_reads_file)
                         paired_list.append(rev_reads_file)
+                        break
 
     logger.info(f'List of Paired Reads Files:\n{paired_list}')
+    unpaired = [key for key in seq_files_info if key not in paired_list]
+    if unpaired:
+        logger.warning(f'No pair found for {len(unpaired)} file(s), not downsized: {unpaired}')
     return paired_list
 
 
@@ -99,30 +105,30 @@ class DownsizeDir:
         {file: [header, F/R, Number of reads, format]}
         # e.g. {'forward.fastq': ['@A00709:44:HYG57DSXX:2:1101:10737:1266', '1', 100257, 'Uncompressed/FASTQ']"""
 
-        seq_files_info = {}
         detect_type = filetype.guess(self.in_dir + seq_file)
-        if detect_type:
-            if detect_type.mime == 'application/gzip':
-                logger.info('Detected gzipped file for %s' % seq_file)
-                file = gzip.open(self.in_dir + seq_file, 'r')
-                read_num = sum(1 for _ in gzip.open(self.in_dir + seq_file)) // 4
-                header = file.readline().decode().split(' ')[0]
-                file.seek(0, 0)
-                pair = file.readline().decode().split(' ')[1][0]
-                file.close()
-                seq_files_info[seq_file] = [header, pair, read_num, detect_type.mime]
-                return seq_files_info
-
-        if not detect_type:
+        if detect_type and detect_type.mime == 'application/gzip':
+            logger.info('Detected gzipped file for %s' % seq_file)
+            opener, file_format = gzip.open, detect_type.mime
+        elif detect_type:
+            logger.warning('Skipping %s: %s, not a FASTQ file' % (seq_file, detect_type.mime))
+            return {}
+        else:
             logger.info('Assuming uncompressed fastq file for %s' % seq_file)
-            file = open(self.in_dir + seq_file, 'r')
-            read_num = sum(1 for _ in open(self.in_dir + seq_file)) // 4
-            header = file.readline().split(' ')[0]
-            file.seek(0, 0)
-            pair = file.readline().split(' ')[1][0]
-            file.close()
-            seq_files_info[seq_file] = [header, pair, read_num, 'Uncompressed/FASTQ']
-            return seq_files_info
+            opener, file_format = open, 'Uncompressed/FASTQ'
+
+        try:
+            with opener(self.in_dir + seq_file, 'rt') as file:
+                first_line = file.readline()
+            with opener(self.in_dir + seq_file, 'rt') as file:
+                read_num = sum(1 for _ in file) // 4
+        except UnicodeDecodeError:
+            first_line = ''
+        fields = first_line.split(' ')
+        # Illumina 1.8+ header: '@<read id> <mate>:<filtered>:<control>:<index>'
+        if not first_line.startswith('@') or len(fields) < 2 or fields[1][:1] not in ('1', '2'):
+            logger.warning('Skipping %s: first line is not a paired-end FASTQ header' % seq_file)
+            return {}
+        return {seq_file: [fields[0], fields[1][0], read_num, file_format]}
 
     def down_dir_pair(self):
         files_to_downsize = self.detect_seq_reads()
@@ -141,6 +147,11 @@ class DownsizeDir:
 
         worker_parameters = []
         for k in range(len(list_to_downsize)//2):  # number of files divided by 2: one instance per pair
+            read_number = file_info_dict[list_to_downsize[k * 2]][2]
+            if read_number < self.downsize_to:
+                logger.warning('Leaving out %s and its pair: %i reads, fewer than %i' %
+                               (list_to_downsize[k * 2], read_number, self.downsize_to))
+                continue
             worker_parameters.append({'raw_file_f': list_to_downsize[k * 2],
                                       'raw_file_r': list_to_downsize[k * 2 + 1],
                                       'read_info': file_info_dict[list_to_downsize[k * 2]],

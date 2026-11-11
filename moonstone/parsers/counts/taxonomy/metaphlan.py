@@ -1,4 +1,7 @@
 import logging
+import os
+from itertools import takewhile
+from typing import List, Optional, Union
 
 import pandas as pd
 
@@ -159,4 +162,79 @@ class Metaphlan3Parser(BaseMetaphlanParser):
 
         df = self.split_taxa_fill_none(df, sep="|")
         df = df.set_index(self.taxonomical_names[:self.rank_level])
+        return df
+
+
+class MetaphlanReadStatsParser(BaseMetaphlanParser):
+    """
+    Parse per-sample `MetaPhlAn <https://github.com/biobakery/MetaPhlAn/>`_ profiles made with
+    ``-t rel_ab_w_read_stats`` into a table of estimated read counts per clade.
+
+    MetaPhlAn's ``merge_metaphlan_tables.py`` merges only relative abundances, so this parser reads the per-sample
+    profiles directly and joins them on clade name. A clade absent from a sample's profile has 0 estimated reads
+    in that sample, as in ``merge_metaphlan_tables.py``. The ``UNCLASSIFIED`` row written by MetaPhlAn (reads not
+    assigned to a known clade) is kept as its own kingdom.
+    """
+
+    taxa_column = 'clade_name'
+    reads_columns = ['estimated_number_of_reads_from_the_clade', 'estimated_number_of_bases_from_the_clade']
+
+    def __init__(
+        self, file_paths: Union[str, os.PathLike, List[Union[str, os.PathLike]]],
+        sample_names: Optional[List[str]] = None, **kwargs
+    ):
+        """
+        Args:
+            file_paths: path of one profile, or list of paths (one profile per sample).
+            sample_names: names of the samples, in the same order as ``file_paths``. By default, the file name
+              without extension and without a ``_profile`` suffix, as in ``merge_metaphlan_tables.py``.
+        """
+        if isinstance(file_paths, (str, os.PathLike)):
+            file_paths = [file_paths]
+        self.file_paths = [os.fspath(path) for path in file_paths]
+        if sample_names is None:
+            sample_names = [
+                os.path.splitext(os.path.basename(path))[0].replace('_profile', '') for path in self.file_paths
+            ]
+        if len(sample_names) != len(self.file_paths):
+            raise ValueError(
+                f"{len(sample_names)} sample_names given for {len(self.file_paths)} files: expecting one per file."
+            )
+        duplicates = sorted({name for name in sample_names if list(sample_names).count(name) > 1})
+        if duplicates:
+            raise ValueError(f"Duplicated sample names: {duplicates}. Give unique sample_names.")
+        self.sample_names = list(sample_names)
+        super().__init__(self.file_paths, analysis_type='rel_ab_w_read_stats', **kwargs)
+
+    def _read_profile(self, file_path: str) -> pd.Series:
+        with open(file_path) as profile:
+            headers = list(takewhile(lambda line: line.startswith('#'), profile))
+        columns = headers[-1].lstrip('#').rstrip('\n').split('\t') if headers else []
+        reads_column = next((column for column in self.reads_columns if column in columns), None)
+        if self.taxa_column not in columns or reads_column is None:
+            raise ValueError(
+                f"{file_path} is not a MetaPhlAn rel_ab_w_read_stats profile: expecting a header line with columns "
+                f"'{self.taxa_column}' and '{self.reads_columns[0]}'."
+            )
+        profile_df = pd.read_csv(
+            file_path, sep='\t', skiprows=len(headers), header=None, names=columns,
+            usecols=[self.taxa_column, reads_column]
+        )
+        if profile_df.empty:
+            raise ValueError(f"{file_path} has no clade rows.")
+        return profile_df.set_index(self.taxa_column)[reads_column]
+
+    def _load_data(self) -> pd.DataFrame:
+        df = pd.concat(
+            [self._read_profile(path).rename(name) for path, name in zip(self.file_paths, self.sample_names)], axis=1
+        ).fillna(0)
+        df.index.name = self.taxa_column
+        df = df.reset_index()
+        # keep only the rows with no more taxonomical levels than taxonomical_names
+        df = df[df[self.taxa_column].str.count(r'\|') < len(self.taxonomical_names)]
+        df = self.remove_duplicates(df)
+        df = self.split_taxa_fill_none(df, sep="|")
+        df = df.set_index(self.taxonomical_names[:self.rank_level])
+        if (df % 1 == 0).all().all():
+            df = df.astype('int64')  # read counts stay integers (pandas turns them to floats while merging)
         return df

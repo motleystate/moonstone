@@ -49,9 +49,11 @@ class DownsizePair(BaseDownsizing):
         if self._file_type:
             return self.file_type
         else:
-            self.file_type = filetype.guess(self.raw_file_f).mime
+            detected = filetype.guess(self.in_dir + self.raw_file_f)
             #  Uncompressed yields NONE, while gzip yields 'application/gzip'
-            if not self.file_type:
+            if detected:
+                self.file_type = detected.mime
+            else:
                 self.file_type = 'Uncompressed/FASTQ'  # Assumed here, but could add more checks for real FASTQ.
             self._file_type = True
             logger.info('File type for %s and its pair is %s' % (self.raw_file_f, self.file_type))
@@ -67,7 +69,7 @@ class DownsizePair(BaseDownsizing):
             return self.starting_reads
         else:
             if not self._file_type:
-                self.find_file_type()
+                self.find_file_type
 
             if self.file_type == 'Uncompressed/FASTQ':
                 self.starting_reads: int = sum(1 for _ in open(self.in_dir + self.raw_file_f)) // 4
@@ -79,36 +81,44 @@ class DownsizePair(BaseDownsizing):
             self._starting_reads = True
             return self.starting_reads
 
+    def select_reads(self) -> list:
+        """Sorted indexes of the reads to keep: downsize_to different reads, drawn without replacement with the seed
+        set during instantiation."""
+        starting_reads = self.count_starting_reads
+        if self.downsize_to > starting_reads:
+            raise ValueError(f'Cannot downsize {self.raw_file_f} to {self.downsize_to} reads: it has only '
+                             f'{starting_reads}.')
+        return sorted(random.Random(self.seed).sample(range(starting_reads), self.downsize_to))
+
+    @staticmethod
+    def copy_reads(rand_reads, forward_reads, reverse_reads, downsized_forward, downsized_reverse):
+        """Copy the selected records (groups of 4 lines for FASTQ) from both files of the pair."""
+        rec_no = 0  # index of the next record in the input files
+        for rr in rand_reads:
+            # Skip records until the next one to read is the selected one.
+            while rec_no < rr:
+                for i in range(4):
+                    forward_reads.readline()
+                    reverse_reads.readline()
+                rec_no += 1
+            # Write the selected record, forward and reverse.
+            for i in range(4):
+                downsized_forward.write(forward_reads.readline())
+                downsized_reverse.write(reverse_reads.readline())
+            rec_no += 1
+
     def downsize_pair_uncompressed(self):
         """Selects a pseudo-random list of reads from the sequence file and returns the downsized file in the
         same format. The seed for generating the list of reads to select is set during instantiation.
         """
-        random.seed(self.seed)
-
-        if not self._starting_reads:
-            self.starting_reads = self.count_starting_reads()
-
-        rand_reads: list = sorted([random.randint(0, self.starting_reads - 1) for _ in range(self.downsize_to)])
+        rand_reads = self.select_reads()
 
         forward_reads = open(self.in_dir + self.raw_file_f, 'r')
         reverse_reads = open(self.in_dir + self.raw_file_r, 'r')
         downsized_forward = open(self.out_dir+"downsized."+self.raw_file_f, "w+")
         downsized_reverse = open(self.out_dir+"downsized."+self.raw_file_r, "w+")
 
-        rec_no = -1
-        for rr in rand_reads:
-            # Read records in the file (groups of 4 for fastq)
-            # Until the record being read is no longer less that one of the ordered random (oxymoron?) records
-            while rec_no < rr:
-                rec_no += 1
-                for i in range(4):
-                    forward_reads.readline()
-                    reverse_reads.readline()
-            # Once rec_no == rr (we find a matching record), we write that record, forward and reverse.
-            for i in range(4):
-                downsized_forward.write(forward_reads.readline())
-                downsized_reverse.write(reverse_reads.readline())
-            rec_no += 1
+        self.copy_reads(rand_reads, forward_reads, reverse_reads, downsized_forward, downsized_reverse)
 
         # Close raw read files.
         forward_reads.close()
@@ -129,31 +139,14 @@ class DownsizePair(BaseDownsizing):
     def downsize_pair_gzip(self):
         """Same as 'downsize_pair' module, but made for gzip compressed files. This module returns files using the
         same compression"""
-        random.seed(self.seed)
-
-        if not self._starting_reads:
-            self.starting_reads = self.count_starting_reads()
-
-        rand_reads: list = sorted([random.randint(0, self.starting_reads - 1) for _ in range(self.downsize_to)])
+        rand_reads = self.select_reads()
 
         forward_reads = gzip.open(self.in_dir + self.raw_file_f, 'rb')
         reverse_reads = gzip.open(self.in_dir + self.raw_file_r, 'rb')
         downsized_forward = gzip.open(self.out_dir+"downsized."+self.raw_file_f, "wb+")
         downsized_reverse = gzip.open(self.out_dir+"downsized."+self.raw_file_r, "wb+")
 
-        rec_no = -1
-        reads_written = 0
-        for rr in rand_reads:
-            while rec_no < rr:
-                rec_no += 1
-                for i in range(4):
-                    forward_reads.readline()
-                    reverse_reads.readline()
-            for i in range(4):
-                downsized_forward.write(forward_reads.readline())
-                downsized_reverse.write(reverse_reads.readline())
-                reads_written += 1
-            rec_no += 1
+        self.copy_reads(rand_reads, forward_reads, reverse_reads, downsized_forward, downsized_reverse)
 
         forward_reads.close()
         reverse_reads.close()

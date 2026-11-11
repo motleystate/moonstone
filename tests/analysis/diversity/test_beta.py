@@ -8,7 +8,8 @@ from plotly.graph_objs._cone import Cone
 from skbio import TreeNode
 
 from moonstone.analysis.diversity.beta import (
-    BrayCurtis, Jaccard, WeightedUniFrac, UnweightedUniFrac
+    BrayCurtis, Jaccard, WeightedUniFrac, UnweightedUniFrac,
+    permutation_p_value_se, resolve_n_jobs, too_few_permutations_warning
 )
 
 
@@ -786,6 +787,18 @@ class TestWeightedUniFrac(TestCase):
             self.assertIn("WARNING:moonstone.analysis.diversity.beta:INCOMPLETE TREE: missing ['species6'].\n\
 Computation of the Weighted UniFrac diversity using only the OTU IDs present in the Tree.", log.output)
 
+    def test_compute_beta_diversity_multiindex_summed_to_last_level(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
+        tested_object = self.tested_object.copy()
+        tested_object.index = pd.MultiIndex.from_tuples(
+            [('genus1', 'species1'), ('genus1', 'species2'), ('genus2', 'species3'), ('genus2', 'species4')],
+            names=['genus', 'species'])
+        pd.testing.assert_frame_equal(
+            WeightedUniFrac(tested_object, tree).beta_diversity_df,
+            WeightedUniFrac(self.tested_object, tree).beta_diversity_df,
+        )
+
 
 class TestUnweightedUniFrac(TestCase):
 
@@ -840,3 +853,228 @@ class TestUnweightedUniFrac(TestCase):
             self.assertEqual(len(log.output), 1)
             self.assertIn("WARNING:moonstone.analysis.diversity.beta:INCOMPLETE TREE: missing ['species6'].\n\
 Computation of the Unweighted UniFrac diversity using only the OTU IDs present in the Tree.", log.output)
+
+
+class TestPermanova(TestCase):
+    """PERMANOVA and PERMDISP on synthetic counts with known structure."""
+
+    @staticmethod
+    def make_counts(spread_a, spread_b, shift_b=1.0, n=15, n_taxa=20, seed=1):
+        rng = np.random.default_rng(seed)
+        base = rng.gamma(2, 50, size=n_taxa)
+        shifted = base.copy()
+        shifted[:5] *= shift_b
+        a = [rng.poisson(base * rng.lognormal(0, spread_a, n_taxa)) for _ in range(n)]
+        b = [rng.poisson(shifted * rng.lognormal(0, spread_b, n_taxa)) for _ in range(n)]
+        samples = [f"s{i}" for i in range(2 * n)]
+        counts = pd.DataFrame(np.vstack(a + b).T, index=[f"t{i}" for i in range(n_taxa)], columns=samples)
+        metadata = pd.DataFrame({"group": ["A"] * n + ["B"] * n}, index=samples)
+        return counts, metadata
+
+    def test_location_difference_detected(self):
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        res = BrayCurtis(counts).permanova(metadata, "group")
+        self.assertLess(res["p_value"], 0.01)
+        self.assertEqual(res["n_samples"], 30)
+        self.assertEqual(res["n_groups"], 2)
+        self.assertEqual(res.name, "group")
+
+    def test_dispersion_difference_flagged_by_permdisp(self):
+        counts, metadata = self.make_counts(0.1, 1.0)
+        res = BrayCurtis(counts).permanova(metadata, "group")
+        self.assertLess(res["permdisp_p_value"], 0.01)
+
+    def test_no_dispersion(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        res = BrayCurtis(counts).permanova(metadata, "group", dispersion=False)
+        self.assertTrue(np.isnan(res["permdisp_p_value"]))
+
+    def test_seed_reproducible(self):
+        counts, metadata = self.make_counts(0.3, 0.3)
+        metadata["random"] = np.random.default_rng(3).choice(["x", "y"], 30)
+        div = BrayCurtis(counts)
+        first = div.permanova(metadata, "random", permutations=99, seed=5)
+        second = div.permanova(metadata, "random", permutations=99, seed=5)
+        pd.testing.assert_series_equal(first, second)
+
+    def test_r2_by_hand(self):
+        counts = pd.DataFrame(
+            {"s1": [10, 0, 5], "s2": [8, 1, 6], "s3": [9, 2, 4], "s4": [0, 10, 3], "s5": [1, 9, 2], "s6": [2, 7, 5]},
+            index=["t1", "t2", "t3"],
+        )
+        metadata = pd.DataFrame({"g": ["a", "a", "a", "b", "b", "b"]}, index=counts.columns)
+        div = BrayCurtis(counts)
+        res = div.permanova(metadata, "g", permutations=9)
+        d2 = div.beta_diversity.data ** 2
+        ss_total = d2[np.triu_indices(6, 1)].sum() / 6
+        ss_within = sum(d2[np.ix_(idx, idx)][np.triu_indices(3, 1)].sum() / 3 for idx in ([0, 1, 2], [3, 4, 5]))
+        self.assertAlmostEqual(res["R2"], 1 - ss_within / ss_total)
+        self.assertAlmostEqual(res["pseudo_F"], ((ss_total - ss_within) / 1) / (ss_within / 4))
+
+    def test_missing_and_unmatched_samples_left_out(self):
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        metadata.loc["s0", "group"] = np.nan
+        metadata = metadata.drop("s1")
+        metadata.loc["not_sequenced", "group"] = "A"
+        res = BrayCurtis(counts).permanova(metadata, "group", permutations=99)
+        self.assertEqual(res["n_samples"], 28)
+
+    def test_missing_values_counted_not_grouped(self):
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        complete = [s for s in counts.columns if s not in ("s0", "s1", "s15", "s16")]
+        expected = BrayCurtis(counts[complete]).permanova(metadata.loc[complete], "group", permutations=99)
+        missing_values = {
+            "nan": np.nan, "None": None, "pd.NA": pd.NA, "empty": "", "space": " ",
+        }
+        for dtype in [object, "string", "category"]:
+            for name, value in missing_values.items():
+                with self.subTest(dtype=dtype, missing=name):
+                    meta = metadata.copy()
+                    meta["group"] = meta["group"].astype(object)
+                    meta.loc[["s0", "s1", "s15", "s16"], "group"] = value
+                    meta["group"] = meta["group"].astype(dtype)
+                    res = BrayCurtis(counts).permanova(meta, "group", permutations=99)
+                    self.assertEqual(res["n_samples"], 26)
+                    self.assertEqual(res["n_missing"], 4)
+                    self.assertEqual(res["n_groups"], 2)
+                    self.assertEqual(res["pseudo_F"], expected["pseudo_F"])
+                    self.assertEqual(res["permdisp_F"], expected["permdisp_F"])
+
+    def test_missing_values_in_numeric_column(self):
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        for dtype, value in [(float, np.nan), ("Float64", pd.NA)]:
+            with self.subTest(dtype=dtype):
+                meta = pd.DataFrame({"visit": [1.0] * 15 + [2.0] * 15}, index=metadata.index).astype(dtype)
+                meta.loc[["s0", "s15", "s16"], "visit"] = value
+                res = BrayCurtis(counts).permanova(meta, "visit", permutations=9)
+                self.assertEqual(res["n_samples"], 27)
+                self.assertEqual(res["n_missing"], 3)
+                self.assertEqual(res["n_groups"], 2)
+
+    def test_missing_values_logged_once(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata.loc["s0", "group"] = np.nan
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            BrayCurtis(counts).permanova_screen(metadata, permutations=99)
+        self.assertEqual(log.output, ["WARNING:moonstone.analysis.diversity.beta:group: 1 sample(s) with a missing "
+                                      "value are left out."])
+
+    def test_screen_reports_missing_and_skips_with_warning(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["mostly_missing"] = [np.nan] * 28 + ["x", "y"]
+        metadata.loc["s3", "group"] = None
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            screen = BrayCurtis(counts).permanova_screen(metadata, permutations=9)
+        self.assertEqual(screen.loc["group", "n_missing"], 1)
+        self.assertEqual(screen.loc["group", "n_samples"], 29)
+        self.assertEqual(screen.loc["mostly_missing", "n_missing"], 28)
+        self.assertEqual(screen.loc["mostly_missing", "skipped"], "fewer than 2 groups with at least 2 samples")
+        self.assertTrue(any("mostly_missing: not tested" in line for line in log.output))
+
+    def test_mostly_missing_variable_warns_without_filling(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["half"] = ["x", "y"] * 7 + [np.nan] * 16
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            res = BrayCurtis(counts).permanova(metadata, "half", permutations=9)
+        self.assertTrue(any("16 of 30 samples (53%) have no value" in line for line in log.output))
+        self.assertEqual(res["n_samples"], 14)
+        self.assertEqual(res["n_missing"], 16)
+        self.assertEqual(res["n_groups"], 2)
+
+    def test_half_missing_does_not_warn_as_mostly_missing(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["half"] = ["x", "y"] * 8 + [np.nan] * 14
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            BrayCurtis(counts).permanova(metadata, "half", permutations=9)
+        self.assertFalse(any("have no value" in line for line in log.output))
+
+    def test_unused_categories_not_reported(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["group"] = pd.Categorical(metadata["group"], categories=["A", "B", "unused"])
+        with self.assertNoLogs("moonstone.analysis.diversity.beta", level="INFO"):
+            res = BrayCurtis(counts).permanova(metadata, "group", permutations=9)
+        self.assertEqual(res["n_groups"], 2)
+
+    def test_small_groups_left_out(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata.loc["s0", "group"] = "C"
+        res = BrayCurtis(counts).permanova(metadata, "group", permutations=9, min_group_size=2)
+        self.assertEqual(res["n_groups"], 2)
+        self.assertEqual(res["n_samples"], 29)
+
+    def test_one_group_raises(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["group"] = "A"
+        with self.assertRaises(ValueError):
+            BrayCurtis(counts).permanova(metadata, "group")
+
+    def test_screen_corrects_and_skips(self):
+        from statsmodels.stats.multitest import multipletests
+        counts, metadata = self.make_counts(0.2, 0.2, shift_b=8.0)
+        rng = np.random.default_rng(0)
+        for i in range(5):
+            metadata[f"null{i}"] = rng.choice(["x", "y"], 30)
+        metadata["constant"] = "same"
+        metadata["continuous"] = rng.normal(size=30)
+        screen = BrayCurtis(counts).permanova_screen(metadata, permutations=199)
+        self.assertEqual(list(screen.index), list(metadata.columns))
+        self.assertEqual(screen.loc["constant", "skipped"], "fewer than 2 groups with at least 2 samples")
+        self.assertEqual(screen.loc["continuous", "skipped"], "more than 15 groups")
+        tested = screen[screen["skipped"] == ""]
+        self.assertEqual(len(tested), 6)
+        np.testing.assert_allclose(
+            tested["p_value_corrected"], multipletests(tested["p_value"], method="fdr_bh")[1]
+        )
+        self.assertTrue(screen.loc[["constant", "continuous"], "p_value_corrected"].isna().all())
+        self.assertLess(screen.loc["group", "p_value_corrected"], 0.05)
+
+    def test_screen_without_correction(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        screen = BrayCurtis(counts).permanova_screen(metadata, correction_method=None, permutations=9)
+        self.assertNotIn("p_value_corrected", screen.columns)
+
+    def test_screen_parallel_matches_serial(self):
+        counts, metadata = self.make_counts(0.2, 0.4, shift_b=2.0)
+        rng = np.random.default_rng(0)
+        for i in range(3):
+            metadata[f"null{i}"] = rng.choice(["x", "y", "z"], 30)
+        metadata["constant"] = "same"
+        div = BrayCurtis(counts)
+        serial = div.permanova_screen(metadata, permutations=199, n_jobs=1)
+        parallel = div.permanova_screen(metadata, permutations=199, n_jobs=3)
+        pd.testing.assert_frame_equal(serial, parallel)
+
+    def test_screen_warns_when_permutations_too_few(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        metadata["other"] = ["x", "y"] * 15
+        with self.assertLogs("moonstone.analysis.diversity.beta", level="WARNING") as log:
+            BrayCurtis(counts).permanova_screen(metadata, permutations=19)
+        self.assertTrue(any("19 permutations are too few for 2 tests" in line for line in log.output))
+
+    def test_default_permutations_and_se(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        res = BrayCurtis(counts).permanova(metadata, "group", dispersion=False)
+        self.assertEqual(res["permutations"], 9999)
+        self.assertAlmostEqual(res["p_value_se"], np.sqrt(res["p_value"] * (1 - res["p_value"]) / 9999))
+        self.assertTrue(np.isnan(res["permdisp_p_value_se"]))
+
+    def test_permutation_helpers(self):
+        self.assertAlmostEqual(permutation_p_value_se(0.05, 9999), np.sqrt(0.05 * 0.95 / 9999))
+        self.assertTrue(np.isnan(permutation_p_value_se(0.5, 0)))
+        # 1 / (N + 1) times the number of tests must be below 0.05
+        self.assertEqual(too_few_permutations_warning(499, 9999), "")
+        self.assertIn("too few for 500 tests", too_few_permutations_warning(500, 9999))
+        self.assertIn("too few for 50 tests", too_few_permutations_warning(50, 999))
+        self.assertIn("Use at least 1000 permutations", too_few_permutations_warning(50, 999))
+        self.assertEqual(too_few_permutations_warning(0, 9), "")
+        self.assertEqual(resolve_n_jobs(3), 3)
+        self.assertGreaterEqual(resolve_n_jobs(0), 1)
+        self.assertEqual(resolve_n_jobs(-1), resolve_n_jobs(0))
+        with self.assertRaises(ValueError):
+            resolve_n_jobs(-2)
+
+    def test_works_for_jaccard(self):
+        counts, metadata = self.make_counts(0.2, 0.2)
+        counts[counts < 100] = 0    # Jaccard uses presence/absence only, so some absences are needed
+        res = Jaccard(counts).permanova(metadata, "group", permutations=9)
+        self.assertEqual(res["n_samples"], 30)

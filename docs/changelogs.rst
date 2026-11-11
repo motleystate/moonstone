@@ -21,6 +21,92 @@ contains the changes listed under v1.1.0 below.
   score's slope overtakes its average rate of change. Usable from Python (``analyze_normalized_reads``) or the
   command line (``python -m moonstone.filtering.read_threshold_analysis``), with diagnostic plots and validation of
   the input CSV. (https://github.com/motleystate/moonstone/pull/125)
+* ``MetadataParser.visualize_categories`` is deprecated and now calls ``plot_category_flows(kind="parcats")``, with
+  the same look as before (alphabetical categories, ``colorscale``). ``plot_category_flows`` and
+  ``plot_taxonomy_flows`` gain ``sort_categories="alphabetical"``, and the parallel categories plot a ``colorscale``
+  option to spread the categories of an ordered variable along a gradient.
+* New ``moonstone.plot.plot_category_flows`` and ``plot_taxonomy_flows``: Sankey diagrams (``kind="sankey"``) and
+  parallel categories diagrams (``kind="parcats"``) of metadata columns, or of taxonomic levels of a count table
+  (top N taxa per level, others as ``Other``; widths by mean relative abundance or total reads). Column titles, category
+  order, colouring by a variable, missing values shown as ``(missing)``. Built on Agnes Baud's Sankey code
+  (https://github.com/motleystate/moonstone/issues/148). New user-guide page :ref:`category_flows`.
+* New command-line options ``--correlation`` (with ``--correlation_method`` and ``--second_countfile``) and
+  ``--associate`` (with ``--covariates``, ``--reference``, ``--categorical``, ``--standardize`` and ``--ancombc``).
+  Samples can be chosen with ``--select COLUMN=VALUE`` (repeatable), features filtered with ``--min_prevalence``
+  (10% by default) and ``--top``, and the correction set with ``--correction`` and ``--alpha``. Each run writes a
+  ``methods.txt`` paragraph. New user-guide page :ref:`correlation`, which also notes FastSpar
+  (https://github.com/motleystate/moonstone/issues/150). ``--permutations`` now defaults to 9,999 for
+  ``--permanova`` (unchanged) and 999 for ``--correlation``. The association model is checked against R ``lm()``
+  (``tests/reference``).
+  The user-guide page has example input files (species table with taxonomy, gene table, metadata) to download, with
+  the formats and column names they need.
+* ``multiplicative_replacement`` and ``clr``: a sample that is mostly zeros (for example one non-zero gene out of
+  four) no longer stops the run. With the default ``delta`` its zeros now share 65% of the sample, and a warning
+  names it. Other samples are unchanged.
+* New ``moonstone.analysis.association.feature_association``: association of every feature with metadata variables,
+  adjusted for covariates. One ordinary least squares model per feature on centred log-ratio values (MaAsLin2's
+  linear model on CLR, without random effect), with coefficient, standard error, 95% confidence interval, p-value
+  and Benjamini-Hochberg q-value for each variable level. Samples are matched to the metadata by name; samples with
+  missing metadata are left out and counted. Optional check that no subject has more than one sample.
+  ``ancombc_check`` runs ANCOM-BC (scikit-bio) on the same model as a sensitivity check. Python API only for now
+  (https://github.com/motleystate/moonstone/issues/150).
+* New ``moonstone.analysis.correlation.feature_correlation``: correlation between every pair of features of a
+  compositional table, or between the features of two tables (for example species and resistance genes), with
+  multiple-testing correction (Benjamini-Hochberg by default). Methods: Spearman (default), Pearson and Kendall on
+  centred log-ratio values, proportionality (rho) and SparCC. p-values come from a permutation null in which every
+  feature is shuffled and the table transformed again; textbook p-values on log-ratio values give too many false
+  positives. Optional check that no subject has more than one sample. Helpers ``filter_edges``, ``edges_to_matrix``
+  and ``to_gephi``. Python API only for now (https://github.com/motleystate/moonstone/issues/150).
+* New ``moonstone.transformers.compositional`` with the centred log-ratio transform (``clr``), its robust version
+  (``rclr``, which ignores zeros) and ``multiplicative_replacement`` for zeros. These are the first step towards
+  compositional correlation (https://github.com/motleystate/moonstone/issues/150). Zero handling is always explicit:
+  multiplicative replacement by default (each zero becomes 65% of the smallest non-zero proportion of its sample), or
+  a pseudocount that must be given. Missing values, negative values and all-zero samples stop the transform; it never
+  fills them in.
+* **Command-line change:** the count table and the metadata are now matched by sample ID instead of by number of
+  rows (new ``moonstone.validation.match_samples``, see :ref:`sample_matching`). A metadata file with extra
+  samples no longer stops the run; they are listed and ignored. Count-table samples with no metadata are listed in
+  a warning and left out; before, they were left out silently when the two files had the same number of rows. The
+  run stops with a clear error when no ID is shared or an ID is used twice. Metadata sample IDs are read as text,
+  so ``01`` matches a count column named ``01``.
+* New ``MetaphlanReadStatsParser`` reads per-sample MetaPhlAn profiles made with ``-t rel_ab_w_read_stats`` and
+  returns a table of estimated read counts (or bases, for long reads) per clade, one column per sample. MetaPhlAn's
+  ``merge_metaphlan_tables.py`` merges only relative abundances, so this parser joins the profiles itself, giving 0
+  reads to a clade absent from a sample, as that script does. The ``UNCLASSIFIED`` row is kept, so each sample sums
+  to its number of reads processed. (https://github.com/motleystate/moonstone/issues/100)
+
+* ``PlotCountsStats.plot_mean_distribution`` takes ``mode='bargraph'`` (default, unchanged), ``'boxplot'`` or
+  ``'violin'``. Its default axis titles are fixed: the x-axis said "sex" and the y-axis said "number of samples",
+  but the bins count items (for example species). New ``PlotCountsStats.plot_sample_totals`` plots the total
+  number of reads per sample, as bins (default, for large studies), one bar per sample (``binned=False``, for
+  small studies), a boxplot or a violin plot. (https://github.com/motleystate/moonstone/issues/47)
+
+* New opt-in converters ``moonstone.validation.convert_to_utf8`` and ``moonstone.validation.convert_locale``. They
+  run only when called: they re-encode a file to UTF-8 from an encoding the user names, and rewrite a file from
+  conventions the user declares (separator, decimal mark, thousands separators, dd/mm or mm/dd dates) to commas,
+  dot decimals and ISO dates. They write a new file, never overwrite, return every change, convert a column only
+  when all its values fit, and run the format check on the output.
+
+* New ``moonstone.validation.check_file_format``: a first-pass check of CSV, TSV and Excel input that reports
+  non-UTF-8 encodings (such as cp1252 from French Excel), byte order marks, ";" separators, decimal commas,
+  thousands separators and dd/mm versus mm/dd dates. It only reports and never changes the data. Nothing calls it
+  yet, so the command line is unchanged.
+
+* **Breaking change:** blank count cells now stop the PERMANOVA loader (``read_taxonomy_counts``, used by
+  ``--permanova``) and the read-threshold loader with an error naming the samples, instead of being read as 0.
+  Fill them in (with 0 if the taxon was not found) beforehand. (https://github.com/motleystate/moonstone/issues/143)
+* The count filters stop with a clear error when counts are text (for example ``12,5``), and warn about negative
+  and blank counts. ``MeanFiltering`` removes rows with no values at all, with a warning; before, they passed.
+  ``TaxonomyMeanFiltering`` and the read-threshold loader keep rows with no name (or no ``NCBI_taxonomy_ID``) at
+  the chosen level, with a warning, instead of dropping them. (https://github.com/motleystate/moonstone/issues/143)
+* **Breaking change (Python interface):** ``NoCountsFiltering`` now removes both taxa (rows) and samples (columns)
+  with no counts by default. Its ``axis`` argument now means the same as in the other filters (0 = rows only,
+  1 = columns only); before, ``axis=0`` removed columns. ``DifferentialAnalysis`` therefore no longer tests taxa
+  with no reads. (https://github.com/motleystate/moonstone/issues/140)
+* ``TaxonomyMeanFiltering`` keeps taxa whose mean equals the threshold, like ``MeanFiltering``.
+  (https://github.com/motleystate/moonstone/issues/140)
+* ``MeanFiltering`` and ``NumberOfDifferentValuesFiltering`` return a new table and no longer modify the one they
+  are given. (https://github.com/motleystate/moonstone/issues/140)
 * Requires Python 3.13 and pandas >= 3.0 (support for Python 3.9 to 3.12 and for pandas 2 is dropped).
   Minimum scikit-bio raised to 0.6.0. (https://github.com/motleystate/moonstone/pull/118)
 * Compatibility with pandas 3 (https://github.com/motleystate/moonstone/pull/118)
@@ -32,6 +118,29 @@ contains the changes listed under v1.1.0 below.
   (with ``--roc``, ``--feature_selection`` or ``--model random_forest``). Output file names change, and the decision
   tree, AdaBoost and gradient boosting runs are removed. See :ref:`classification`.
   (https://github.com/motleystate/moonstone/pull/123)
+* Fix: ``-f/--filtering`` on the command line now removes taxa whose mean read count is below the threshold,
+  as documented. It used to remove samples instead, which usually stopped the run with a sample-number mismatch.
+* Fix: Faith's phylogenetic diversity and UniFrac now sum a multi-level taxonomy table to its last level as intended.
+  Before, such a table raised a misleading "INCOMPLETE TREE" error, or gave 0 for every sample with
+  ``force_computation=True``.
+* Fix: ``GeometricMeanNormalization`` raises an error naming samples without reads, instead of looping forever.
+* Fix: the command-line count-file warning gives the real number of unnamed taxa removed.
+* Removed two unused stub modules, ``moonstone.parsers.DataAnalysisType`` and ``moonstone.analysis.regression``.
+* Fixes to FASTQ read downsizing (``moonstone.normalization.reads``):
+
+  * Reads are drawn without replacement, so each output pair has exactly the requested number of different reads.
+    Before, repeated draws and an off-by-one error (the first read could never be picked) could give fewer reads,
+    for example 987 when downsizing 1,000 reads to 1,000. **With the same seed, different reads are now selected.**
+  * Asking for more reads than a file has raises an error; ``DownsizeDir`` leaves such pairs out with a warning.
+  * ``DownsizePair`` no longer fails on uncompressed FASTQ without ``read_info``, and finds its input in ``in_dir``.
+  * Files that are not FASTQ (a README, an image) are skipped with a warning instead of stopping the run, and files
+    without a pair are reported.
+  * Pairs are matched on the whole first read header, so a header that starts another sample's header no longer
+    pairs files from different samples.
+  * The reads-per-sample plot summary works with pandas 3.
+* **Breaking change:** the command-line flags ``-p/--pca_plot`` and ``-k/--k_means`` are removed, with the module
+  ``moonstone.analysis.clustering`` behind them. Both were broken: ``--pca_plot`` drew an empty figure and saved nothing,
+  and ``--k_means`` wrote a metadata file with no rows. The flags now stop with an error saying they were removed.
 * Classifiers rewritten as one module, ``moonstone.analysis.classification``, replacing ``classify.py`` and
   ``randomForest.py``. New options ``--model``, ``--kernel``, ``--explore_kernels``, ``--folds``, ``--seed`` and
   ``--group_column``. Support Vector Machine scaling now happens inside each training fold, folds are stratified and
@@ -39,6 +148,36 @@ contains the changes listed under v1.1.0 below.
   cross-validation, and feature importance is permutation importance on the test folds. ``--explore_kernels``
   compares kernels (exploratory) and ``--kernel auto`` chooses the kernel by nested cross-validation. Minimum
   scikit-learn raised to 1.5. (https://github.com/motleystate/moonstone/pull/123)
+* New ``permanova`` and ``permanova_screen`` methods on all beta-diversity classes: Permutational Multivariate
+  Analysis of Variance (PERMANOVA) with a dispersion check (PERMDISP), seeded permutations, and false discovery rate
+  correction across variables. See :ref:`permanova`. (https://github.com/motleystate/moonstone/issues/129)
+* New command-line flag ``--permanova [VARIABLE ...]`` with ``--taxa_level`` (``species`` by default, or ``all``),
+  ``--no_read_threshold`` and ``--permutations``, and the matching function
+  ``moonstone.analysis.permanova.run_permanova``. Reads a normalized count table with taxonomy columns, sums it to
+  each level, filters taxa with the read-threshold knee, and corrects all tests of a run together. Existing flags
+  are unchanged. (https://github.com/motleystate/moonstone/issues/131)
+* PERMANOVA missing values: samples with a missing value in the tested variable are left out of that variable's
+  test only (complete-case), for PERMANOVA and PERMDISP alike. Empty and whitespace-only values now count as missing
+  instead of forming a group. New ``n_missing`` column in the results of ``permanova``, ``permanova_screen``,
+  ``run_permanova`` and ``permanova.csv``; the count is logged as a warning and printed by ``--permanova``. Skipped
+  variables are logged as warnings, and so is a variable with no value for more than half of the samples (missing
+  values are never filled in).
+* PERMANOVA defaults to 9,999 permutations instead of 999, in ``permanova``, ``permanova_screen``,
+  ``run_permanova`` and ``--permutations``. New ``p_value_se`` and ``permdisp_p_value_se`` columns give the standard
+  error of each permutation p-value, sqrt(p (1 - p) / N). A warning (logged, and in the ``warnings`` column) says when
+  there are too few permutations for any test to pass the multiple-testing correction. New ``--threads`` flag
+  (every available core by default) and ``n_jobs`` parameter run the tests in parallel with identical results.
+  New dependencies listed explicitly (already installed with scikit-learn): ``joblib`` and ``threadpoolctl``.
+* ``analyse_groups(pval_to_display="all")`` no longer crashes when ``groups`` is not given, or when a sample's
+  group is blank in the metadata. The significance brackets are placed on the groups that are plotted, so a group
+  that is only in the metadata no longer adds an empty box. With ``sort_groups=True``, the brackets are now placed
+  after the groups are sorted; before, they could mark the wrong pairs of groups.
+  (https://github.com/motleystate/moonstone/issues/101)
+* ``analyse_groups(pval_to_display=...)`` now draws the significance brackets when ``group_col2`` is used (it was
+  ignored with a message before), for the three choices ``"all"``, ``"same group_col values"`` and
+  ``"same group_col or group_col2 values"``. Each bracket ends on its box inside the group cluster. P-values are
+  still drawn on static images only. With ``mode="violin"``, the ``group_col2`` violins are now drawn side by side
+  instead of on top of each other. (https://github.com/motleystate/moonstone/issues/101)
 
 
 v1.1

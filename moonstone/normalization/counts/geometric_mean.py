@@ -76,6 +76,10 @@ class GeometricMeanNormalization(BaseNormalization):
     @property
     def scaling_factors(self):
         if getattr(self, "_scaling_factors", None) is None:
+            # A sample without reads has no scaling factor, however far the zero filtering is relaxed below.
+            empty_samples = list(self.grouped_df.columns[(self.grouped_df == 0).all()])
+            if empty_samples:
+                raise ValueError(f"No scaling factor can be computed for sample(s) without reads: {empty_samples}")
             non_zero_log_df = self.remove_zero_and_apply_log(self.grouped_df)
             substracted_mean_df = self.calculating_and_substracting_mean_row(non_zero_log_df)
             while substracted_mean_df.rpow(self.log_number).median().isna().any():

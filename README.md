@@ -86,9 +86,6 @@ options:
   -os, --skip_prompt    Suppress output directory exists prompt.
   -f, --filtering min_mean_read
                         Minimum mean reads per variable: use a float >0
-  -p, --pca_plot        Generates PCA plot of data
-  -k, --k_means nb_clusters
-                        Runs K-Means clustering. Provide number of clusters
   -c, --classify variable
                         Cross-validated classification of a metadata variable
                         from the counts

@@ -7,11 +7,8 @@ from moonstone.plot.counts import PlotCountsStats, PlotTaxonomyCounts
 
 
 class TestPlotCountsStats(TestCase):
-    def test_plot_mean_distribution(self):
-        """
-        Making sure that at least everything runs without errors.
-        """
-        tested_object = pd.DataFrame.from_dict(
+    def setUp(self):
+        self.tested_object = pd.DataFrame.from_dict(
             {
                 "specie_1": [10, 0, 0, 2],
                 "specie_2": [25, 6, 3, 9],
@@ -22,9 +19,64 @@ class TestPlotCountsStats(TestCase):
             orient="index",
             columns=["1", "2", "3", "4"],
         )
-        tested_object.columns.name = "sample"
-        tested_object_instance = PlotCountsStats(tested_object, items_name="species")
-        tested_object_instance.plot_mean_distribution(show=False)
+        self.tested_object.columns.name = "sample"
+        self.tested_object_instance = PlotCountsStats(self.tested_object, items_name="species")
+
+    def test_plot_mean_distribution(self):
+        fig = self.tested_object_instance.plot_mean_distribution(show=False)
+        self.assertEqual(fig.data[0].type, "bar")
+        # bins count items (species), not samples
+        self.assertEqual(sum(fig.data[0].y), 5)
+        self.assertEqual(fig.layout.xaxis.title.text, "mean of the number of reads")
+        self.assertEqual(fig.layout.yaxis.title.text, "number of species")
+        self.assertEqual(fig.layout.yaxis.type, "log")
+        self.assertEqual(fig.layout.title.text, "Distribution of species mean")
+
+    def test_plot_mean_distribution_plotting_options(self):
+        fig = self.tested_object_instance.plot_mean_distribution(
+            plotting_options={"xaxes": {"title_text": "my title"}}, show=False
+        )
+        self.assertEqual(fig.layout.xaxis.title.text, "my title")
+        self.assertEqual(fig.layout.yaxis.title.text, "number of species")
+
+    def test_plot_mean_distribution_boxplot_and_violin(self):
+        expected_means = self.tested_object.mean(axis=1)
+        for mode, trace_type in [("boxplot", "box"), ("violin", "violin")]:
+            with self.subTest(mode=mode):
+                fig = self.tested_object_instance.plot_mean_distribution(mode=mode, show=False)
+                self.assertEqual(fig.data[0].type, trace_type)
+                np.testing.assert_allclose(list(fig.data[0].y), expected_means.values)
+                self.assertListEqual(list(fig.data[0].text), list(expected_means.index))
+                self.assertEqual(fig.layout.yaxis.title.text, "mean of the number of reads")
+                self.assertEqual(fig.layout.yaxis.type, "log")
+
+    def test_plot_mean_distribution_invalid_mode(self):
+        with self.assertLogs("moonstone.plot.counts", level="WARNING"):
+            fig = self.tested_object_instance.plot_mean_distribution(mode="pie", show=False)
+        self.assertEqual(fig.data[0].type, "bar")
+
+    def test_plot_sample_totals_binned(self):
+        fig = self.tested_object_instance.plot_sample_totals(show=False)
+        self.assertEqual(fig.data[0].type, "bar")
+        self.assertEqual(sum(fig.data[0].y), 4)  # 4 samples
+        self.assertEqual(fig.layout.xaxis.title.text, "total number of reads")
+        self.assertEqual(fig.layout.yaxis.title.text, "number of samples")
+
+    def test_plot_sample_totals_per_sample(self):
+        fig = self.tested_object_instance.plot_sample_totals(binned=False, show=False)
+        self.assertEqual(fig.data[0].type, "bar")
+        self.assertListEqual(list(fig.data[0].x), ["1", "2", "3", "4"])
+        self.assertListEqual(list(fig.data[0].y), [55, 18, 12, 15])
+        self.assertEqual(fig.layout.xaxis.title.text, "sample")
+        self.assertEqual(fig.layout.yaxis.title.text, "total number of reads")
+
+    def test_plot_sample_totals_boxplot_and_violin(self):
+        for mode, trace_type in [("boxplot", "box"), ("violin", "violin")]:
+            with self.subTest(mode=mode):
+                fig = self.tested_object_instance.plot_sample_totals(mode=mode, show=False)
+                self.assertEqual(fig.data[0].type, trace_type)
+                self.assertListEqual(list(fig.data[0].y), [55, 18, 12, 15])
+                self.assertListEqual(list(fig.data[0].text), ["1", "2", "3", "4"])
 
 
 class TestPlotTaxonomyCounts(TestCase):

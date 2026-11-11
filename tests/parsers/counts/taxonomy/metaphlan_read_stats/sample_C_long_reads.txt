@@ -1,0 +1,15 @@
+#mpa_vOct22_CHOCOPhlAnSGB_202403
+#/usr/local/bin/metaphlan sample_C.fastq.gz --input_type fastq -t rel_ab_w_read_stats -o sample_C_long_reads.txt
+#800 bases processed
+#SampleID	sample_C
+#Estimated bases mapped to known clades: 600
+#clade_name	clade_taxid	relative_abundance	coverage	estimated_number_of_bases_from_the_clade
+UNCLASSIFIED	-1	25.0	-	200
+k__Bacteria	2	75.0	1.5	600
+k__Bacteria|p__Firmicutes	2|1239	75.0	1.5	600
+k__Bacteria|p__Firmicutes|c__Bacilli	2|1239|91061	75.0	1.5	600
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales	2|1239|91061|186826	75.0	1.5	600
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae	2|1239|91061|186826|33958	75.0	1.5	600
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus	2|1239|91061|186826|33958|1578	75.0	1.5	600
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_crispatus	2|1239|91061|186826|33958|1578|47770	75.0	1.5	600
+k__Bacteria|p__Firmicutes|c__Bacilli|o__Lactobacillales|f__Lactobacillaceae|g__Lactobacillus|s__Lactobacillus_crispatus|t__SGB7037	2|1239|91061|186826|33958|1578|47770|	75.0	1.5	600

@@ -711,6 +711,22 @@ class TestFaithsPhylogeneticDiversity(TestCase):
             tested_object_instance.compute_diversity(), expected_object
             )
 
+    def test_compute_alpha_diversity_multiindex_summed_to_last_level(self):
+        tree = TreeNode.read(StringIO(
+            u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
+        tested_object = self.tested_object.copy()
+        tested_object.index = pd.MultiIndex.from_tuples(
+            [('genus1', 'species1'), ('genus1', 'species2'), ('genus2', 'species3'), ('genus2', 'species4')],
+            names=['genus', 'species'])
+        for force_computation in [False, True]:
+            with self.subTest(force_computation=force_computation):
+                tested_object_instance = FaithsPhylogeneticDiversity(tested_object, tree, validate=False,
+                                                                     force_computation=force_computation)
+                expected_object = pd.Series({
+                    'sample1': 1.75, 'sample2': 3.00, 'sample3': 1.50, 'sample4': 2.50, 'sample5': 4.25
+                })
+                pd.testing.assert_series_equal(tested_object_instance.compute_diversity(), expected_object)
+
     def test_compute_alpha_diversity_incomplete_tree(self):
         tree = TreeNode.read(StringIO(
             u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species6:0.5,species5:0.5):1.0)root;'))
@@ -763,3 +779,157 @@ Computation of the Faith's diversity using only the OTU IDs present in the Tree.
             u'(((species1:0.25,species2:0.25):0.75,species3:1.0):0.5,(species4:0.5,species5:0.5):1.0)root;'))
         tested_object_instance = FaithsPhylogeneticDiversity(tested_object, tree)
         tested_object_instance.visualize(show=False)
+
+
+class TestAnalyseGroupsPvalToDisplay(TestCase):
+    """Significance brackets drawn by analyse_groups(pval_to_display="all")."""
+
+    def setUp(self):
+        # 30 samples in groups A, B and C (one in three each). Every species present in a sample has the same count,
+        # so A and B (3 species) have the same Shannon index, and C (20 species) is higher than both.
+        # So only A-C and B-C are significant.
+        samples = [f"s{i}" for i in range(30)]
+        richness = {"A": 3, "B": 3, "C": 20}
+        self.groups = {s: "ABC"[i % 3] for i, s in enumerate(samples)}
+        self.count_df = pd.DataFrame(
+            {s: [10] * richness[self.groups[s]] + [0] * (20 - richness[self.groups[s]]) for s in samples},
+            index=[f"species{j}" for j in range(20)]
+        )
+        self.metadata_df = pd.DataFrame({"group": self.groups})
+
+    @staticmethod
+    def _bracket_pairs(fig):
+        # each bracket is 3 shapes (bar + 2 edges); x positions are indexes in the order of the boxes
+        names = [trace.name for trace in fig.data]
+        return {frozenset((names[shape.x0], names[shape.x1])) for shape in fig.layout.shapes[::3]}
+
+    def test_without_groups(self):
+        output = ShannonIndex(self.count_df).analyse_groups(
+            self.metadata_df, group_col="group", pval_to_display="all", show=False, show_pval=False
+        )
+        self.assertEqual(sorted(trace.name for trace in output["fig"].data), ["A", "B", "C"])
+        self.assertEqual(
+            self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
+        )
+
+    def test_without_groups_metadata_not_plotted(self):
+        # metadata also has a sample missing from the count table (group Z) and a sample with a blank group
+        metadata_df = pd.concat([pd.DataFrame({"group": ["Z"]}, index=["not_counted"]), self.metadata_df])
+        metadata_df.loc["s0", "group"] = np.nan
+        output = ShannonIndex(self.count_df).analyse_groups(
+            metadata_df, group_col="group", pval_to_display="all", show=False, show_pval=False
+        )
+        self.assertEqual(sorted(trace.name for trace in output["fig"].data), ["A", "B", "C"])
+        self.assertEqual(
+            self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
+        )
+
+    def test_with_groups(self):
+        output = ShannonIndex(self.count_df).analyse_groups(
+            self.metadata_df, group_col="group", groups=["C", "A", "B"],
+            pval_to_display="all", show=False, show_pval=False
+        )
+        self.assertEqual([trace.name for trace in output["fig"].data], ["C", "A", "B"])
+        self.assertEqual(
+            self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
+        )
+
+    def test_sort_groups(self):
+        # brackets must be placed after the boxes are sorted
+        output = ShannonIndex(self.count_df).analyse_groups(
+            self.metadata_df, group_col="group", groups=["C", "A", "B"], sort_groups=True,
+            pval_to_display="all", show=False, show_pval=False
+        )
+        self.assertEqual([trace.name for trace in output["fig"].data], ["A", "B", "C"])
+        self.assertEqual(
+            self._bracket_pairs(output["fig"]), {frozenset(("A", "C")), frozenset(("B", "C"))}
+        )
+
+
+class TestAnalyseGroupsPvalToDisplayGroupCol2(TestCase):
+    """Significance brackets drawn by analyse_groups(pval_to_display=...) with a group_col2."""
+
+    def setUp(self):
+        # 40 samples: site X or Y, sex F or M (10 per combination). "X - F" has 3 species, the others 20,
+        # with the same count for every species present. So only the comparisons with "X - F" are significant.
+        combos = [("X", "F"), ("X", "M"), ("Y", "F"), ("Y", "M")]
+        samples = [f"s{i}" for i in range(40)]
+        site = {s: combos[i % 4][0] for i, s in enumerate(samples)}
+        sex = {s: combos[i % 4][1] for i, s in enumerate(samples)}
+        richness = {s: 3 if (site[s], sex[s]) == ("X", "F") else 20 for s in samples}
+        self.count_df = pd.DataFrame(
+            {s: [10] * richness[s] + [0] * (20 - richness[s]) for s in samples},
+            index=[f"species{j}" for j in range(20)]
+        )
+        self.metadata_df = pd.DataFrame({"site": site, "sex": sex})
+        # with 2 sexes, the boxes of a site are 0.35 wide and sit at -0.175 and +0.175 from its centre
+        self.x = {"X - F": -0.175, "X - M": 0.175, "Y - F": 0.825, "Y - M": 1.175}
+
+    def _analyse(self, **kwargs):
+        return ShannonIndex(self.count_df).analyse_groups(
+            self.metadata_df, group_col="site", group_col2="sex", show=False, show_pval=False, **kwargs
+        )
+
+    @staticmethod
+    def _brackets(fig):
+        # each bracket is 3 shapes (bar + 2 edges)
+        return {(round(shape.x0, 3), round(shape.x1, 3)) for shape in fig.layout.shapes[::3]}
+
+    def _expected(self, *pairs):
+        return {(round(self.x[a], 3), round(self.x[b], 3)) for a, b in pairs}
+
+    def test_all(self):
+        output = self._analyse(pval_to_display="all")
+        self.assertEqual(
+            self._brackets(output["fig"]),
+            self._expected(("X - F", "X - M"), ("X - F", "Y - F"), ("X - F", "Y - M"))
+        )
+        self.assertEqual(len(output["fig"].layout.annotations), 3)
+        self.assertEqual([trace.name for trace in output["fig"].data], ["F", "M"])
+        self.assertEqual(list(output["fig"].layout.xaxis.categoryarray), ["X", "Y"])
+
+    def test_same_group_col_values(self):
+        output = self._analyse(pval_to_display="same group_col values")
+        self.assertEqual(self._brackets(output["fig"]), self._expected(("X - F", "X - M")))
+
+    def test_same_group_col_or_group_col2_values(self):
+        output = self._analyse(
+            pval_to_compute="same group_col or group_col2 values",
+            pval_to_display="same group_col or group_col2 values"
+        )
+        self.assertEqual(
+            self._brackets(output["fig"]), self._expected(("X - F", "X - M"), ("X - F", "Y - F"))
+        )
+
+    def test_groups_order_and_sort_groups(self):
+        # clusters in the given order, sexes sorted by sort_groups
+        output = self._analyse(
+            pval_to_display="same group_col values", groups=["Y", "X"], groups2=["M", "F"], sort_groups=True
+        )
+        self.assertEqual([trace.name for trace in output["fig"].data], ["F", "M"])
+        self.assertEqual(list(output["fig"].layout.xaxis.categoryarray), ["Y", "X"])
+        # X is now the second cluster: F at 1 - 0.175, M at 1 + 0.175
+        self.assertEqual(self._brackets(output["fig"]), {(0.825, 1.175)})
+
+    def test_violin(self):
+        output = self._analyse(pval_to_display="same group_col values", mode="violin")
+        self.assertEqual(output["fig"].layout.violinmode, "group")
+        self.assertEqual(self._brackets(output["fig"]), self._expected(("X - F", "X - M")))
+
+    def test_pval_unchanged(self):
+        # displaying p-values does not change the p-values returned
+        with_display = self._analyse(pval_to_display="all", structure_pval="series", sym=False)
+        without_display = self._analyse(structure_pval="series", sym=False)
+        pd.testing.assert_series_equal(with_display["pval"], without_display["pval"])
+
+    def test_grouped_box_positions(self):
+        # a third group_col2 value: 3 slots per cluster, kept even when a combination has no data
+        final_groups, positions = ShannonIndex(self.count_df)._grouped_box_positions(["X", "Y"], ["F", "M", "U"])
+        self.assertEqual(final_groups, ["X - F", "X - M", "X - U", "Y - F", "Y - M", "Y - U"])
+        expected = [-0.7/3, 0, 0.7/3, 1-0.7/3, 1, 1+0.7/3]
+        for name, x in zip(final_groups, expected):
+            self.assertAlmostEqual(positions[name], x)
+        # custom gap between clusters
+        _, positions = ShannonIndex(self.count_df)._grouped_box_positions(["X"], ["F", "M"], {"layout": {"boxgap": 0.5}})
+        self.assertAlmostEqual(positions["X - F"], -0.125)
+        self.assertAlmostEqual(positions["X - M"], 0.125)

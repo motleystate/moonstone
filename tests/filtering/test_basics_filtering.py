@@ -20,7 +20,7 @@ class TestNoCountsFiltering(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         test_df.columns.name = 'sample'
-        tested_filtering = NoCountsFiltering(test_df, axis=1)
+        tested_filtering = NoCountsFiltering(test_df, axis=0)
         expected_df = pd.DataFrame.from_dict(
             {
                 'specie_1': [3, 2, 1, 0],
@@ -39,7 +39,7 @@ class TestNoCountsFiltering(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         test_df.columns.name = 'sample'
-        tested_filtering = NoCountsFiltering(test_df, axis=1)
+        tested_filtering = NoCountsFiltering(test_df, axis=0)
         expected_df = pd.DataFrame.from_dict(
             {
                 'specie_1': [3.0, 2.0, 1.0, 0.0],
@@ -58,7 +58,7 @@ class TestNoCountsFiltering(TestCase):
             },
             orient='index', columns=['1', '2', '3', '4'])
         test_df.columns.name = 'sample'
-        tested_filtering = NoCountsFiltering(test_df, axis=0)
+        tested_filtering = NoCountsFiltering(test_df, axis=1)
         expected_df = pd.DataFrame.from_dict(
             {
                 'specie_1': [3, 1, 0],
@@ -68,6 +68,29 @@ class TestNoCountsFiltering(TestCase):
             orient='index', columns=['1', '3', '4'])
         expected_df.columns.name = 'sample'
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
+    def test_default_removes_empty_rows_and_columns(self):
+        test_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 0, 1, 0],
+                'specie_2': [25, 0, 3, 9],
+                'specie_3': [0, 0, 0, 0]
+            },
+            orient='index', columns=['1', '2', '3', '4'])
+        test_df.columns.name = 'sample'
+        tested_filtering = NoCountsFiltering(test_df)
+        expected_df = pd.DataFrame.from_dict(
+            {
+                'specie_1': [3, 1, 0],
+                'specie_2': [25, 3, 9]
+            },
+            orient='index', columns=['1', '3', '4'])
+        expected_df.columns.name = 'sample'
+        pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
+    def test_invalid_axis(self):
+        with self.assertRaises(ValueError):
+            NoCountsFiltering(pd.DataFrame({'1': [1]}), axis=2)
 
 
 class TestNamesFiltering(TestCase):
@@ -362,3 +385,10 @@ class TestNumberOfDifferentValuesFiltering(TestCase):
         expected_df.columns.name = 'metadata'
         tested_filtering = NumberOfDifferentValuesFiltering(self.test_df, min=2, max=2, na=False, axis=1)
         pd.testing.assert_frame_equal(tested_filtering.filtered_df, expected_df)
+
+    def test_input_not_modified(self):
+        test_df = self.test_df.copy()
+        for axis, df in [(1, test_df), (0, test_df.transpose())]:
+            original = df.copy()
+            NumberOfDifferentValuesFiltering(df, min=2, axis=axis).filtered_df
+            pd.testing.assert_frame_equal(df, original)

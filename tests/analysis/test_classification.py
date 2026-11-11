@@ -178,6 +178,19 @@ class TestClassification(TestCase):
         self.assertEqual(len(y), 39)
         self.assertNotIn('s0', x.index)
 
+    def test_numeric_sample_ids_match_text_ids(self):
+        # e.g. sample IDs read as integers from one file and as text from the other
+        self.counts.index = range(40)
+        self.metadata.index = [str(i) for i in range(40)]
+        x, y, _ = self.make().prepare_data()
+        self.assertEqual(len(y), 40)
+        self.assertEqual(list(x.index), list(y.index))
+
+    def test_one_group_rejected(self):
+        self.metadata['group'] = 'A'
+        with self.assertRaisesRegex(ValueError, 'needs at least 2 groups'):
+            self.make().prepare_data()
+
     def test_rfecv_plot_labels_balanced_accuracy(self):
         with mock.patch.object(Axes, 'set_ylabel', autospec=True, side_effect=Axes.set_ylabel) as set_ylabel:
             self.make(rfe_step=2).run(feature_selection=True)

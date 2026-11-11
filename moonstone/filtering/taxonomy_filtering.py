@@ -1,8 +1,11 @@
+import logging
 from typing import List
 
 import pandas as pd
 
 from moonstone.filtering.base import CountsFiltering
+
+logger = logging.getLogger(__name__)
 
 
 class TaxonomyNamesFiltering(CountsFiltering):
@@ -43,7 +46,8 @@ class TaxonomyMeanFiltering(CountsFiltering):
     Filtering a Taxonomy multiindexed dataframe on sample mean at a chosen level.
 
     This means you select a mean value for all samples and it will discard all selected
-    taxonomy below this mean.
+    taxonomy below this mean. Taxa whose mean equals the mean value are kept.
+    Rows with no name at the chosen level are summed together as one unnamed group, not dropped.
     """
 
     def __init__(
@@ -51,7 +55,7 @@ class TaxonomyMeanFiltering(CountsFiltering):
         level: str = 'species'
     ):
         """
-        :param mean_value: mean among all samples to be kept
+        :param mean_value: minimum mean among all samples for a taxon to be kept
         :param level: level of the MultiIndex to filter on
         """
         super().__init__(dataframe)
@@ -65,7 +69,12 @@ class TaxonomyMeanFiltering(CountsFiltering):
             raise ValueError(error_message)
 
     def filter(self) -> pd.DataFrame:
-        level_df = self.df.groupby(self.level).sum()
-        selected_names = level_df[level_df.mean(axis=1) > self.mean_value].index
+        # Rows with no name at this level are kept together as one blank-named group, not dropped.
+        n_unnamed = int(self.df.index.get_level_values(self.level).isna().sum())
+        if n_unnamed:
+            logger.warning("%i row(s) have no %s name; they are filtered together as one unnamed group.",
+                           n_unnamed, self.level)
+        level_df = self.df.groupby(level=self.level, dropna=False).sum()
+        selected_names = level_df[level_df.mean(axis=1) >= self.mean_value].index
         corresponding_rows = self.df.index.get_level_values(self.level).isin(selected_names)
         return self.df.loc[corresponding_rows]

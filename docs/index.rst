@@ -19,6 +19,9 @@ Welcome to Moonstone's documentation!
     user_guide/installation
     user_guide/getting_started_with_moonstone
     user_guide/classification
+    user_guide/permanova
+    user_guide/correlation
+    user_guide/category_flows
     user_guide/available_classes
 
 
@@ -36,8 +39,10 @@ Welcome to Moonstone's documentation!
     api_docs/parsers
     api_docs/filtering
     api_docs/normalization
+    api_docs/transformers
     api_docs/plot
     api_docs/analysis
+    api_docs/validation
 
 
 .. toctree::

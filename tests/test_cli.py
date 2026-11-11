@@ -102,3 +102,354 @@ class TestCommandLineSmoke(TestCase):
                 self.assertNotIn('Traceback', result.stderr)
                 self.assertIn(f'{flag} has been removed. Use: {replacement}', result.stderr)
                 self.assertEqual(result.returncode, 1)
+
+    def test_removed_pca_and_kmeans_flags(self):
+        counts, metadata, outdir = self.write_inputs()
+        for args in [('-p',), ('--pca_plot',), ('-k', '3'), ('--k_means', '3')]:
+            with self.subTest(flag=args[0]):
+                result = self.run_moonstone(counts, metadata, outdir, *args)
+                self.assertNotIn('Traceback', result.stderr)
+                self.assertIn(f'{args[0]} has been removed.', result.stderr)
+                self.assertEqual(result.returncode, 1)
+                self.assertFalse(os.path.exists(os.path.join(outdir, 'metaData_withKClusters.csv')))
+
+    def test_help_does_not_list_removed_flags(self):
+        result = self.run_moonstone('--help')
+        self.assertNotIn('--pca_plot', result.stdout)
+        self.assertNotIn('--k_means', result.stdout)
+
+    def test_filtering_writes_filtered_table(self):
+        counts, metadata, outdir = self.write_inputs()
+        table = pd.read_csv(counts, index_col=0)
+        table.loc['taxon0'] = 1   # mean of 1 read per sample, below the threshold
+        table.to_csv(counts)
+        result = self.run_moonstone(counts, metadata, outdir, '-f', '5')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        filtered = pd.read_csv(os.path.join(outdir, 'filteredCountFile.csv'), index_col=0)
+        self.assertEqual(filtered.shape, (40, 11))
+        self.assertNotIn('taxon0', filtered.columns)
+        self.assertTrue(os.path.isfile(os.path.join(outdir, 'filtered_variables.csv')))
+
+    def test_sample_without_metadata_warns_and_continues(self):
+        counts, metadata, outdir = self.write_inputs()
+        pd.read_csv(metadata, index_col=0).iloc[:-1].to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group', '--folds', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('1 sample(s) of the count table have no metadata and are left out: s39', result.stdout)
+        self.assertIn('39 samples in both the count and metadata files', result.stdout)
+        self.assertIn('39 samples: A 20', result.stdout)
+
+    def test_extra_metadata_samples_are_ignored(self):
+        # Used to exit with "sample numbers don't match" although every counted sample had metadata.
+        counts, metadata, outdir = self.write_inputs()
+        extra = pd.DataFrame({'group': ['A'] * 3}, index=pd.Index(['x1', 'x2', 'x3'], name='sample'))
+        pd.concat([pd.read_csv(metadata, index_col=0), extra]).to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group', '--folds', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('3 sample(s) of the metadata are not in the count table and are ignored: x1, x2, x3',
+                      result.stdout)
+        self.assertIn('40 samples in both the count and metadata files', result.stdout)
+
+    def test_same_number_of_samples_with_different_ids_warns(self):
+        # Used to print "Nice! 40 samples" and silently train on the 30 matching samples.
+        counts, metadata, outdir = self.write_inputs()
+        df = pd.read_csv(metadata, index_col=0)
+        df.index = [s.upper() if i >= 30 else s for i, s in enumerate(df.index)]
+        df.rename_axis('sample').to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group', '--folds', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('10 sample(s) of the count table have no metadata and are left out', result.stdout)
+        self.assertIn("differ only by case or spaces (not matched): 's30' / 'S30'", result.stdout)
+        self.assertIn('30 samples in both the count and metadata files', result.stdout)
+
+    def test_no_common_sample_exits_1(self):
+        counts, metadata, outdir = self.write_inputs()
+        df = pd.read_csv(metadata, index_col=0)
+        df.index = [f'p{i}' for i in range(len(df))]
+        df.rename_axis('sample').to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertIn('No sample ID is found in both the count table and the metadata', result.stderr)
+        self.assertEqual(result.returncode, 1)
+
+    def test_duplicated_metadata_sample_exits_1(self):
+        counts, metadata, outdir = self.write_inputs()
+        df = pd.read_csv(metadata, index_col=0)
+        pd.concat([df, df.iloc[[0]]]).to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertIn('Sample IDs used more than once in the metadata: s0', result.stderr)
+        self.assertEqual(result.returncode, 1)
+
+    def test_numeric_sample_ids_keep_leading_zeros(self):
+        counts, metadata, outdir = self.write_inputs()
+        ids = [f'{i:03d}' for i in range(40)]
+        counts_df = pd.read_csv(counts, index_col=0)
+        counts_df.columns = ids
+        counts_df.to_csv(counts)
+        df = pd.read_csv(metadata, index_col=0)
+        df.index = pd.Index(ids, name='sample')
+        df.sample(frac=1, random_state=0).to_csv(metadata)
+        result = self.run_moonstone(counts, metadata, outdir, '-c', 'group', '--folds', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('not in the same order in the two files; they are matched by ID', result.stdout)
+        self.assertIn('40 samples in both the count and metadata files', result.stdout)
+
+    def test_existing_output_directory_asks_before_overwriting(self):
+        counts, metadata, outdir = self.write_inputs()
+        os.mkdir(outdir)
+        for answer, returncode in [('n\n', 1), ('y\n', 0)]:
+            with self.subTest(answer=answer):
+                result = subprocess.run(
+                    [sys.executable, '-c', 'from moonstone.main import run; run()', counts, metadata, outdir],
+                    capture_output=True, text=True, timeout=120, input=answer,
+                )
+                self.assertIn('already exists! Continue anyway', result.stdout)
+                self.assertNotIn('Traceback', result.stderr)
+                self.assertEqual(result.returncode, returncode)
+        self.assertIn('Not overwriting...aborting.', subprocess.run(
+            [sys.executable, '-c', 'from moonstone.main import run; run()', counts, metadata, outdir],
+            capture_output=True, text=True, timeout=120, input='n\n').stderr)
+
+
+class TestCommandLinePermanova(TestCase):
+
+    def run_moonstone(self, *args):
+        return subprocess.run(
+            [sys.executable, '-c', 'from moonstone.main import run; run()', *args],
+            capture_output=True, text=True, timeout=300,
+        )
+
+    def write_inputs(self):
+        from tests.analysis.test_permanova import make_taxonomy_counts
+        tmpdir = tempfile.mkdtemp()
+        counts_df, metadata = make_taxonomy_counts()
+        counts_df.reset_index().to_csv(os.path.join(tmpdir, 'counts.tsv'), sep='\t', index=False)
+        metadata.index.name = 'sample'
+        metadata.to_csv(os.path.join(tmpdir, 'metadata.csv'))
+        return os.path.join(tmpdir, 'counts.tsv'), os.path.join(tmpdir, 'metadata.csv'), os.path.join(tmpdir, 'out')
+
+    def test_permanova_default_species(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', '--permutations', '199')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('species / group', result.stdout)
+        table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
+        self.assertEqual(list(table['variable']), ['group', 'random'])
+        self.assertEqual(set(table['level']), {'species'})
+        self.assertIn('p_value_se', table.columns)
+
+    def test_permanova_threads_same_results(self):
+        counts, metadata, outdir = self.write_inputs()
+        tables = []
+        for threads in ['1', '2']:
+            out = outdir + threads
+            result = self.run_moonstone(counts, metadata, out, '--permanova', '--permutations', '199',
+                                        '--threads', threads)
+            self.assertEqual(result.returncode, 0)
+            tables.append(pd.read_csv(os.path.join(out, 'permanova.csv')))
+        pd.testing.assert_frame_equal(tables[0], tables[1])
+
+    def test_permanova_rejects_negative_threads(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', '--permutations', '9',
+                                    '--threads', '-3')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn('Traceback', result.stderr)
+
+    def test_permanova_all_levels_one_variable(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', 'group', '--taxa_level', 'all',
+                                    '--permutations', '99')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('Warning (genus)', result.stdout)
+        table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
+        self.assertEqual(table.shape[0], 7)
+        self.assertTrue(table.loc[table['level'] != 'species', 'warnings'].str.contains('species level only').all())
+        self.assertEqual(table.loc[table['level'] == 'kingdom', 'skipped'].iloc[0],
+                         'fewer than 2 taxa, composition cannot be compared')
+
+    def test_permanova_no_read_threshold(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', 'group', '--no_read_threshold',
+                                    '--permutations', '9')
+        self.assertEqual(result.returncode, 0)
+        table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
+        self.assertEqual(table.loc[0, 'taxa_kept'], table.loc[0, 'taxa_total'])
+
+    def test_permanova_blank_metadata_is_missing(self):
+        counts, metadata, outdir = self.write_inputs()
+        lines = open(metadata).read().splitlines()
+        lines[1] = lines[1].replace(',A,', ',,', 1)     # s0: blank group
+        lines[2] = lines[2].replace(',A,', ',NA,', 1)   # s1: NA group
+        open(metadata, 'w').write('\n'.join(lines) + '\n')
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', 'group', '--permutations', '9')
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('group: 2 sample(s) with a missing value left out', result.stdout)
+        table = pd.read_csv(os.path.join(outdir, 'permanova.csv'))
+        self.assertEqual(table.loc[0, 'n_missing'], 2)
+        self.assertEqual(table.loc[0, 'n_samples'], 28)
+        self.assertEqual(table.loc[0, 'n_groups'], 2)
+
+    def test_permanova_mostly_missing_variable_flagged(self):
+        counts, metadata, outdir = self.write_inputs()
+        lines = open(metadata).read().splitlines()
+        lines = [line if i == 0 or i > 16 else line.rsplit(',', 1)[0] + ',' for i, line in enumerate(lines)]
+        open(metadata, 'w').write('\n'.join(lines) + '\n')     # 'random' blank for 16 of 30 samples
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', 'random', '--permutations', '9')
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('random: 16 sample(s) with a missing value left out - mostly missing', result.stdout)
+
+    def test_permanova_rejects_other_analyses(self):
+        counts, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(counts, metadata, outdir, '--permanova', '-f', '5')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('cannot be combined with -f/--filtering', result.stderr)
+
+
+class TestCommandLineCompositional(TestCase):
+
+    def run_moonstone(self, *args):
+        return subprocess.run(
+            [sys.executable, '-c', 'from moonstone.main import run; run()', *args],
+            capture_output=True, text=True, timeout=300,
+        )
+
+    def write_inputs(self):
+        """Species table with taxonomy (sp0 higher with bv), a gene table, and metadata with two visits per patient."""
+        tmpdir = tempfile.mkdtemp()
+        rng = np.random.default_rng(0)
+        n, d = 60, 8
+        samples = [f'S{i:02d}' for i in range(n)]
+        metadata = pd.DataFrame({
+            'Type': ['inclusion'] * 30 + ['delivery'] * 30,
+            'patient': [f'p{i % 30}' for i in range(n)],
+            'disease': rng.choice(['healthy', 'bv'], n),
+            'age': rng.normal(30, 5, n).round(1),
+        }, index=pd.Index(samples, name='sample'))
+        log_abundance = rng.normal(3, 1, (d, n))
+        log_abundance[0] += 2 * (metadata['disease'] == 'bv').to_numpy()
+        proportions = np.exp(log_abundance) / np.exp(log_abundance).sum(axis=0)
+        counts = np.stack([rng.multinomial(20000, proportions[:, j]) for j in range(n)]).T
+        taxonomy = pd.DataFrame({'kingdom': 'Bacteria', 'genus': [f'G{i // 2}' for i in range(d)],
+                                 'species': [f'G{i // 2} sp{i}' for i in range(d)]})
+        pd.concat([taxonomy, pd.DataFrame(counts, columns=samples)], axis=1).to_csv(
+            os.path.join(tmpdir, 'species.tsv'), sep='\t', index=False)
+        genes = pd.DataFrame(rng.poisson(30, (4, n)), index=pd.Index([f'gene{i}' for i in range(4)], name='gene'),
+                             columns=samples)
+        genes.to_csv(os.path.join(tmpdir, 'genes.csv'))
+        metadata.to_csv(os.path.join(tmpdir, 'metadata.csv'))
+        return [os.path.join(tmpdir, name) for name in ('species.tsv', 'genes.csv', 'metadata.csv', 'out')]
+
+    def test_correlation_and_association_with_selection(self):
+        species, _, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(species, metadata, outdir, '--correlation', '--associate', 'disease',
+                                    '--covariates', 'age', '--reference', 'disease=healthy', '--select',
+                                    'Type=inclusion', '--group_column', 'patient', '--permutations', '199')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('Selected Type = inclusion (30 of 60 samples)', result.stdout)
+        edges = pd.read_csv(os.path.join(outdir, 'correlation_edges.csv'))
+        self.assertEqual(len(edges), 8 * 7 // 2)
+        self.assertEqual(set(edges['n_samples']), {30})
+        self.assertTrue(os.path.exists(os.path.join(outdir, 'correlation_gephi_edges.csv')))
+        matrix = pd.read_csv(os.path.join(outdir, 'correlation_matrix.csv'), index_col=0)
+        self.assertEqual(matrix.shape, (8, 8))
+        association = pd.read_csv(os.path.join(outdir, 'association.csv'))
+        top = association.sort_values('p_value').iloc[0]
+        self.assertEqual((top['feature'], top['level'], top['reference']), ('G0 sp0', 'bv', 'healthy'))
+        self.assertLess(top['q_value'], 0.05)
+        methods = open(os.path.join(outdir, 'methods.txt')).read()
+        for text in ['Type = inclusion', 'checked on patient', '199 permutations', 'CLR ~ disease + age',
+                     'disease = healthy', 'summed to species level', 'Benjamini-Hochberg']:
+            self.assertIn(text, methods)
+
+    def test_repeated_subjects_stop_the_run(self):
+        species, _, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(species, metadata, outdir, '--associate', 'disease', '--group_column', 'patient')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('more than one sample', result.stderr)
+
+    def test_two_tables_and_ancombc(self):
+        species, genes, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(species, metadata, outdir, '--correlation', '--second_countfile', genes,
+                                    '--taxa_level', 'genus', '--correlation_method', 'pearson', '--permutations',
+                                    '100', '--associate', 'disease', '--ancombc', '--top', '3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        edges = pd.read_csv(os.path.join(outdir, 'correlation_edges.csv'))
+        self.assertEqual(len(edges), 3 * 3)
+        self.assertTrue(edges['feature_b'].str.startswith('gene').all())
+        association = pd.read_csv(os.path.join(outdir, 'association.csv'))
+        self.assertIn('ancombc_q_value', association.columns)
+        self.assertTrue(os.path.exists(os.path.join(outdir, 'ancombc.csv')))
+        self.assertIn('also significant with ANCOM-BC', result.stdout)
+        methods = open(os.path.join(outdir, 'methods.txt')).read()
+        self.assertIn('across the two tables', methods)
+        self.assertIn('the 3 with the highest mean relative abundance', methods)
+
+    def test_selection_value_not_found(self):
+        species, _, metadata, outdir = self.write_inputs()
+        result = self.run_moonstone(species, metadata, outdir, '--associate', 'disease', '--select', 'Type=visit3')
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("no sample has Type = 'visit3'", result.stderr)
+
+    def test_flag_combinations(self):
+        species, genes, metadata, outdir = self.write_inputs()
+        for flags, message in [
+            (['--correlation', '-f', '5'], 'cannot be combined with -f/--filtering'),
+            (['--correlation', '--permanova'], 'cannot be combined with --correlation'),
+            (['--associate', 'disease', '--second_countfile', genes], '--second_countfile is only used with'),
+            (['--correlation', '--covariates', 'age'], '--covariates is only used with --associate'),
+            (['--select', 'Type=inclusion'], '--select is only used with'),
+            (['--correlation_method', 'sparcc'], '--correlation_method is only used with --correlation'),
+            (['--correlation', '--alpha', '2'], '--alpha must be between 0 and 1'),
+        ]:
+            with self.subTest(flags=flags):
+                result = self.run_moonstone(species, metadata, outdir, *flags)
+                self.assertNotIn('Traceback', result.stderr)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(message, result.stderr)
+
+
+class TestUserGuideExamples(TestCase):
+    """The example files and commands of docs/user_guide/correlation.rst run, and give the results it quotes."""
+
+    folder = os.path.join(os.path.dirname(__file__), '..', 'docs', 'user_guide', 'examples')
+
+    def run_example(self, *flags):
+        outdir = os.path.join(tempfile.mkdtemp(), 'results')
+        result = subprocess.run(
+            [sys.executable, '-c', 'from moonstone.main import run; run()', 'species_counts.tsv', 'metadata.csv',
+             outdir, *flags], capture_output=True, text=True, timeout=300, cwd=self.folder,
+        )
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return outdir
+
+    def test_species_against_genes(self):
+        outdir = self.run_example('--correlation', '--second_countfile', 'resistance_genes.csv', '--select',
+                                  'Type=inclusion')
+        edges = pd.read_csv(os.path.join(outdir, 'correlation_edges.csv')).set_index(['feature_a', 'feature_b'])
+        self.assertAlmostEqual(edges.loc[('Gardnerella vaginalis', 'tetM'), 'r'], 0.81, places=2)
+
+    def test_association_with_ancombc(self):
+        outdir = self.run_example('--associate', 'disease', '--covariates', 'age', 'antibiotics', '--reference',
+                                  'disease=healthy', '--ancombc', '--select', 'Type=inclusion', '--group_column',
+                                  'patient')
+        results = pd.read_csv(os.path.join(outdir, 'association.csv')).set_index('feature')
+        self.assertAlmostEqual(results.loc['Lactobacillus crispatus', 'coef'], -3.3, places=1)
+        self.assertLess(results.loc['Lactobacillus crispatus', 'q_value'], 0.001)
+        for feature, ancombc_q in [('Escherichia coli', 0.47), ('Lactobacillus iners', 0.81)]:
+            self.assertLess(results.loc[feature, 'q_value'], 0.05)
+            self.assertAlmostEqual(results.loc[feature, 'ancombc_q_value'], ancombc_q, places=2)
