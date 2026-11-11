@@ -7,8 +7,18 @@ from moonstone.normalization.base import BaseNormalization
 
 class RPKMNormalization(BaseNormalization):
     """
-    Normalize feature counts using the RPKM method
-    info : https://doi.org/10.1038/nmeth.1226
+    Normalize feature counts using Reads Per Kilobase per Million
+    mapped reads (RPKM).
+
+    Feature lengths must be provided in base pairs (bp)
+    Sequencing depth is estimated from the sum of
+    counts per sample unless custom depths are provided ().
+
+    Note:
+        Filtering features before automatic normalization may underestimate
+        sequencing depth and bias RPKM values 
+
+    Reference: https://doi.org/10.1038/nmeth.1226
     """
 
     def __init__(

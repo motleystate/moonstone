@@ -148,11 +148,12 @@ List
    :nosignatures:
 
     counts.geometric_mean.GeometricMeanNormalization
+    counts.rpkm.RPKMNormalization
     counts.total_counts.TotalCountsNormalization
     counts.random_selection.RandomSelection
     counts.random_selection.TaxonomyRandomSelection
     processed.scaling_normalization
-
+    
 .. _av_plot:
 
 Plot
