@@ -75,9 +75,9 @@ class TestRPKMNormalization(TestCase):
         )
 
     def test_invalid_feature_lengths(self):
-        # Test missing, zero, or negative feature lengths
+       # Test missing, non-numeric, infinite, zero, and negative feature lengths
 
-        invalid_lengths = [None, 0, -100, "invalid"]
+        invalid_lengths = [None, 0, -100, "invalid", float("inf")]
 
         for value in invalid_lengths:
             with self.subTest(value=value):
@@ -104,3 +104,42 @@ class TestRPKMNormalization(TestCase):
 
         with self.assertRaises(ValueError):
             tested_normalization.normalized_df
+
+    def test_invalid_counts(self):
+        # Test missing, non-numeric, infinite, and negative counts
+
+        invalid_counts = [None, "invalid", float("inf"), -10]
+
+        for value in invalid_counts:
+            with self.subTest(value=value):
+                counts = self.raw_df.astype(object).copy()
+                counts.loc["Gene_1", "Sample_1"] = value
+
+                tested_normalization = RPKMNormalization(
+                    counts,
+                    feature_lengths=self.feature_lengths,
+                )
+
+                with self.assertRaises(ValueError):
+                    tested_normalization.normalized_df
+
+    def test_invalid_sequencing_depth(self):
+        # Test missing, non-numeric, infinite, zero, and negative depths
+
+        invalid_depths = [None, "invalid", float("inf"), 0, -100]
+
+        for value in invalid_depths:
+            with self.subTest(value=value):
+                sequencing_depth = pd.Series(
+                    [value, 2000],
+                    index=self.column_names,
+                )
+
+                tested_normalization = RPKMNormalization(
+                    self.raw_df,
+                    feature_lengths=self.feature_lengths,
+                    sequencing_depth=sequencing_depth,
+                )
+
+                with self.assertRaises(ValueError):
+                    tested_normalization.normalized_df
