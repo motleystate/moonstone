@@ -23,9 +23,16 @@ import logging
 
 import numpy as np
 import pandas as pd
+from joblib import Parallel, delayed
 from statsmodels.stats.multitest import multipletests
+from threadpoolctl import threadpool_limits
 
-from moonstone.analysis.diversity.beta import DEFAULT_PERMUTATIONS, BrayCurtis, too_few_permutations_warning
+from moonstone.analysis.association import (
+    _as_list, _categorical_columns, _complete_cases, _is_categorical, _numeric_column
+)
+from moonstone.analysis.diversity.beta import (
+    DEFAULT_PERMUTATIONS, BrayCurtis, permutation_p_value_se, resolve_n_jobs, run_permdisp, too_few_permutations_warning
+)
 from moonstone.filtering.read_threshold_analysis import combined_score_threshold, compute_taxa_metrics
 
 logger = logging.getLogger(__name__)
@@ -42,6 +49,13 @@ RESULT_COLUMNS = [
     'permutations', 'skipped',
     'taxa_total', 'taxa_kept', 'reads_pct_kept', 'warnings',
 ]
+# Columns of a multivariable run: one row per level and model term, with the degrees of freedom and term type added.
+MODEL_RESULT_COLUMNS = RESULT_COLUMNS[:2] + ['term_type', 'df'] + RESULT_COLUMNS[2:]
+NOT_APPLICABLE = 'not applicable'
+PERMDISP_COLUMNS = ['permdisp_F', 'permdisp_p_value', 'permdisp_p_value_se', 'permdisp_p_value_corrected']
+PERMUTATION_CHUNK = 100
+# adonis2's tolerance when comparing a permuted pseudo-F with the observed one
+F_TOLERANCE = np.sqrt(np.finfo(float).eps)
 
 
 def read_taxonomy_counts(path: str) -> pd.DataFrame:
@@ -139,10 +153,153 @@ def _drop_empty_samples(level_df: pd.DataFrame) -> tuple:
     return level_df, warnings
 
 
+def _contributions(gower: np.ndarray, basis: np.ndarray, perms: np.ndarray, parallel: bool = False) -> np.ndarray:
+    """q'Gq for each column q of basis, with the rows of basis shuffled by each row of perms (perms x columns)."""
+    out = np.empty((len(perms), basis.shape[1]))
+    with threadpool_limits(1 if parallel else None):  # one test per core: libraries' own threads would compete
+        for i, perm in enumerate(perms):
+            q = basis[perm]
+            out[i] = np.einsum('ij,ij->j', q, gower @ q)
+    return out
+
+
+def _permutation_chunks(rng, blocks: list, n: int, permutations: int):
+    """Shuffles of range(n) that only move a sample within its block, PERMUTATION_CHUNK at a time."""
+    for start in range(0, permutations, PERMUTATION_CHUNK):
+        perms = np.tile(np.arange(n), (min(PERMUTATION_CHUNK, permutations - start), 1))
+        for perm in perms:
+            for block in blocks:
+                perm[block] = rng.permutation(block)
+        yield perms
+
+
+def permanova_model(
+    distmat, metadata_df: pd.DataFrame, terms: list, categorical: list = None, strata: str = None,
+    by: str = 'margin', permutations: int = DEFAULT_PERMUTATIONS, seed: int = 0, dispersion: bool = True,
+    dispersion_test: str = 'median', n_jobs: int = 1,
+) -> pd.DataFrame:
+    """
+    Multivariable PERMANOVA: a distance-based linear model, as ``vegan::adonis2`` with the terms added in the order
+    given. The data (not the residuals) are shuffled, as in ``adonis2``.
+
+    Args:
+        distmat: scikit-bio DistanceMatrix between samples.
+        metadata_df: metadata indexed by sample. A sample with a missing value in a term or in strata is left out
+          (never filled in) and counted in ``n_missing``.
+        terms: metadata columns of the model. Text, boolean and ``categorical`` columns are groups; other columns
+          are numbers (one slope). No interactions.
+        categorical: numeric columns to treat as groups (for example 1/2/3 codes).
+        strata: metadata column of blocks (for example sequencing batch): samples are only shuffled within their
+          block.
+        by: 'margin' tests each term after all the others, 'terms' tests them one after the other in the order
+          given, each after the terms before it.
+        permutations, seed: as in ``BetaDiversity.permanova``. The p-values do not depend on ``n_jobs`` or on the
+          order of the samples.
+        dispersion, dispersion_test: also run PERMDISP (Permutational Analysis of Multivariate Dispersions) on each
+          categorical term, on the same samples. It tests one term at a time and does not adjust the spread for
+          the other terms (neither does ``vegan``). Numeric terms get NaN.
+        n_jobs: processes sharing the permutations and the PERMDISP runs (0 or -1: every core).
+
+    Returns:
+        One row per term: term_type, df, n_samples, n_missing, n_groups (categorical terms), pseudo_F, R2, p_value,
+        p_value_se, the PERMDISP fields and permutations.
+    """
+    if by not in ('terms', 'margin'):
+        raise ValueError(f"by must be 'terms' or 'margin', not {by!r}.")
+    terms, categorical = _as_list(terms), _as_list(categorical)
+    if not terms:
+        raise ValueError("Name at least one variable to test.")
+    model_columns = terms + _as_list(strata)
+    if len(set(model_columns)) != len(model_columns):
+        raise ValueError("A variable is listed twice (in the variables, the covariates or the strata).")
+    unknown = [c for c in model_columns + categorical if c not in metadata_df.columns]
+    if unknown:
+        raise ValueError(f"Not metadata columns: {unknown}.")
+    if [c for c in categorical if c not in terms]:
+        raise ValueError("categorical names columns that are not in the model.")
+
+    ids = [str(i) for i in distmat.ids]
+    meta = _complete_cases(metadata_df.apply(lambda c: c.mask(c.astype(str).str.strip().eq(''))), ids, model_columns)
+    meta = meta.sort_index()  # a fixed order, so the same seed gives the same p-values whatever the input order
+    n = len(meta)
+    n_missing = len(ids) - n
+    position = {name: i for i, name in enumerate(ids)}
+    keep = [position[s] for s in meta.index]
+    squared = -0.5 * distmat.data[np.ix_(keep, keep)] ** 2
+    gower = squared - squared.mean(0) - squared.mean(1)[:, None] + squared.mean()  # Gower-centred matrix
+    total = np.trace(gower)
+
+    kinds, blocks = [], []
+    for term in terms:
+        is_group = _is_categorical(meta[term], term in categorical)
+        kinds.append('categorical' if is_group else 'numeric')
+        columns = ([v for v, _ in _categorical_columns(term, meta[term], {})[0].values()] if is_group
+                   else [_numeric_column(term, meta[term], {}, True)])
+        blocks.append(np.column_stack(columns))
+    df = np.array([b.shape[1] for b in blocks])
+    df_residual = n - 1 - df.sum()
+    if df_residual < 1:
+        raise ValueError(f"{n} samples are too few for a model with {df.sum()} parameters.")
+
+    def orthonormal(*parts):
+        """Orthonormal basis of the columns (after the intercept, which Gower centring makes irrelevant)."""
+        q, r = np.linalg.qr(np.column_stack([np.ones(n), *parts]))
+        return q[:, 1:], np.abs(np.diag(r)).min()
+
+    sequential, smallest = orthonormal(*blocks)
+    if smallest < 1e-8:
+        raise ValueError("The terms are collinear (one is a combination of the others): drop one.")
+    bases = [sequential]
+    if by == 'margin':  # a term's margin test is its sequential test when it comes last
+        bases += [orthonormal(*blocks[:t], *blocks[t + 1:], blocks[t])[0][:, -df[t]:] for t in range(len(terms))]
+    basis = np.hstack(bases)
+    starts = np.cumsum(df) - df
+    width = sequential.shape[1]
+
+    def statistics(contributions):
+        residual = total - contributions[:, :width].sum(1)
+        used = contributions[:, width:] if by == 'margin' else contributions[:, :width]
+        sum_squares = np.add.reduceat(used, starts, axis=1)
+        return sum_squares, sum_squares / df / (residual / df_residual)[:, None]
+
+    observed_ss, observed_f = (a[0] for a in statistics(_contributions(gower, basis, np.arange(n)[None])))
+    blocks_of_samples = list(pd.Series(np.arange(n)).groupby(
+        meta[strata].to_numpy() if strata else np.zeros(n)).indices.values())
+    if max(len(b) for b in blocks_of_samples) < 2:
+        raise ValueError(f"Every {strata} block has a single sample: no permutation is possible.")
+    n_jobs = resolve_n_jobs(n_jobs)
+    chunks = _permutation_chunks(np.random.default_rng(seed), blocks_of_samples, n, permutations)
+    if n_jobs == 1:
+        parts = [_contributions(gower, basis, perms) for perms in chunks]
+    else:
+        parts = Parallel(n_jobs=n_jobs)(delayed(_contributions)(gower, basis, perms, True) for perms in chunks)
+    permuted_f = statistics(np.vstack(parts))[1]
+    p_values = (1 + (permuted_f >= observed_f - F_TOLERANCE).sum(0)) / (permutations + 1)
+
+    permdisp = {term: (np.nan, np.nan) for term in terms}
+    if dispersion:
+        groups = [t for t, kind in zip(terms, kinds) if kind == 'categorical']
+        reduced = distmat.filter(list(meta.index))
+        args = [(reduced, meta[[t]].astype(str), t, dispersion_test, permutations, seed) for t in groups]
+        runs = [run_permdisp(*a) for a in args] if n_jobs == 1 else Parallel(n_jobs=n_jobs)(
+            delayed(run_permdisp)(*a) for a in args)
+        permdisp.update(zip(groups, runs))
+    return pd.DataFrame({
+        'term_type': kinds, 'df': df, 'n_samples': n, 'n_missing': n_missing,
+        'n_groups': [meta[t].nunique() if k == 'categorical' else np.nan for t, k in zip(terms, kinds)],
+        'pseudo_F': observed_f, 'R2': observed_ss / total, 'p_value': p_values,
+        'p_value_se': [permutation_p_value_se(p, permutations) for p in p_values],
+        'permdisp_F': [permdisp[t][0] for t in terms], 'permdisp_p_value': [permdisp[t][1] for t in terms],
+        'permdisp_p_value_se': [permutation_p_value_se(permdisp[t][1], permutations) for t in terms],
+        'permutations': permutations,
+    }, index=pd.Index(terms, name='variable'))
+
+
 def run_permanova(
     counts_df: pd.DataFrame, metadata_df: pd.DataFrame, columns: list = None, taxa_level: str = 'species',
     read_threshold: bool = True, correction_method: str = 'fdr_bh', max_groups: int = 15,
     permutations: int = DEFAULT_PERMUTATIONS, seed: int = 0, min_group_size: int = 2, n_jobs: int = 1,
+    covariates: list = None, strata: str = None, categorical: list = None, by: str = 'margin',
 ) -> pd.DataFrame:
     """
     PERMANOVA with a PERMDISP dispersion check on Bray-Curtis distances, for one or all taxonomic levels.
@@ -151,17 +308,26 @@ def run_permanova(
         counts_df: normalized counts, one row per taxon and one column per sample, indexed by the taxonomy levels
           (as returned by :func:`read_taxonomy_counts`).
         metadata_df: metadata indexed by sample. Samples are matched by ID; unmatched samples are left out.
-        columns: metadata columns to test. Default: all.
+        columns: metadata columns to test. Default: all (with covariates or strata, name them).
         taxa_level: a level of the taxonomy index ('species' by default), or 'all' for every level present.
         read_threshold: keep only the taxa above the read-threshold knee at each level before testing.
         correction_method: 'fdr_bh' (default), 'bonferroni', or None. Applied once over every test of the run.
         max_groups, permutations, seed, min_group_size, n_jobs: see ``BetaDiversity.permanova_screen``.
           The seed makes a run repeatable; it does not make the p-values more accurate (more permutations do).
+        covariates, strata, categorical, by: with covariates or strata, ``columns`` and ``covariates`` become the terms
+          of one model fitted with :func:`permanova_model` (every term is tested and reported, by default each one
+          after all the others), with permutations restricted within ``strata``. ``max_groups`` and
+          ``min_group_size`` then do not apply.
 
     Returns:
-        One row per level and variable, with the columns of ``RESULT_COLUMNS``. ``warnings`` lists anything the
+        One row per level and variable (or model term), with the columns of ``RESULT_COLUMNS`` (``MODEL_RESULT_COLUMNS``
+        for a model). PERMDISP is ``'not applicable'`` for numeric terms. ``warnings`` lists anything the
         reader should know about that level (separated by '; ').
     """
+    model = bool(covariates or strata)
+    terms = list(columns or []) + _as_list(covariates)
+    if model and not columns:
+        raise ValueError("Name the variable(s) to test when using covariates or strata.")
     available = [lvl for lvl in TAXA_LEVELS if lvl in counts_df.index.names]
     if taxa_level == 'all':
         levels = available
@@ -195,7 +361,11 @@ def run_permanova(
         if level_df.shape[0] < 2:
             # With one taxon, Bray-Curtis only compares total reads, not community composition.
             screen = pd.DataFrame({'skipped': 'fewer than 2 taxa, composition cannot be compared'},
-                                  index=pd.Index(columns or list(metadata_df.columns)))
+                                  index=pd.Index(terms if model else columns or list(metadata_df.columns)))
+        elif model:
+            screen = permanova_model(
+                BrayCurtis(level_df).beta_diversity, metadata_df, terms, categorical, strata, by, permutations, seed,
+                n_jobs=n_jobs)
         else:
             screen = BrayCurtis(level_df).permanova_screen(
                 metadata_df, columns=columns, correction_method=None, max_groups=max_groups,
@@ -220,4 +390,8 @@ def run_permanova(
         if correction_method is not None and not tested.empty:
             corrected[tested.index] = multipletests(tested, method=correction_method)[1]
         results[f'{pval_col}_corrected'] = corrected
-    return results.reindex(columns=RESULT_COLUMNS)
+    if model and 'term_type' in results:
+        numeric = results['term_type'] == 'numeric'
+        results[PERMDISP_COLUMNS] = results[PERMDISP_COLUMNS].astype(object)
+        results.loc[numeric, PERMDISP_COLUMNS] = NOT_APPLICABLE
+    return results.reindex(columns=MODEL_RESULT_COLUMNS if model else RESULT_COLUMNS)
