@@ -54,6 +54,15 @@ def too_few_permutations_warning(n_tests: int, permutations: int, alpha: float =
             f"real effect can reach is {min(best, 1):.3g}, not below {alpha}. Use at least {needed} permutations")
 
 
+def run_permdisp(distmat: DistanceMatrix, grouping_df: pd.DataFrame, column: str, test: str, permutations: int,
+                 seed: int) -> tuple:
+    """PERMDISP F and p-value for one grouping column. All Principal Coordinates axes with a positive eigenvalue are
+    used (scikit-bio defaults to 10), as in R's vegan::betadisper, which also keeps the negative ones."""
+    disp = permdisp(distmat, grouping_df, column=column, test=test, permutations=permutations,
+                    dimensions=distmat.shape[0], seed=seed, warn_neg_eigval=False)
+    return float(disp['test statistic']), float(disp['p-value'])
+
+
 def resolve_n_jobs(n_jobs) -> int:
     """Number of worker processes: n_jobs as given, or every available core for 0, -1 or None."""
     if n_jobs in (None, 0, -1):
@@ -503,12 +512,7 @@ class BetaDiversity(DiversityBase, ABC):
 
         permdisp_f = permdisp_p = np.nan
         if dispersion:
-            disp = permdisp(
-                distmat, grouping_df, column=group_col, test=dispersion_test, permutations=permutations,
-                dimensions=distmat.shape[0], seed=seed, warn_neg_eigval=False,
-            )
-            permdisp_f = float(disp['test statistic'])
-            permdisp_p = float(disp['p-value'])
+            permdisp_f, permdisp_p = run_permdisp(distmat, grouping_df, group_col, dispersion_test, permutations, seed)
 
         return pd.Series(
             {

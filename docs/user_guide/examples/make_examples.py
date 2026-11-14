@@ -1,9 +1,10 @@
 """
-Write the synthetic example files used in the user guide (docs/user_guide/correlation.rst).
+Write the synthetic example files used in the user guide (docs/user_guide/correlation.rst and permanova.rst).
 
 All values are simulated: 30 patients sampled at inclusion and at delivery. Gardnerella vaginalis, Fannyhessea
 vaginae and Prevotella bivia are higher, and Lactobacillus crispatus lower, in patients with bacterial vaginosis (bv);
-the resistance gene tetM follows Gardnerella vaginalis. Run from this folder: python make_examples.py
+the resistance gene tetM follows Gardnerella vaginalis; batch (a sequencing run, same for both samples of a
+patient) is unrelated to everything else. Run from this folder: python make_examples.py
 """
 import numpy as np
 import pandas as pd
@@ -58,6 +59,8 @@ def main(n_patients=30, seed=2026):
         values[rng.random(n) < 0.25] = 0
         genes.loc[gene] = values
     genes.to_csv('resistance_genes.csv')
+    # drawn last, from its own generator, so the other files do not change (docs/user_guide/permanova.rst)
+    metadata['batch'] = np.random.default_rng(seed + 1).choice(['run1', 'run2', 'run3'], n_patients)[patient]
     metadata.to_csv('metadata.csv', index=False)
 
 

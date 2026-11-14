@@ -410,7 +410,8 @@ class TestCommandLineCompositional(TestCase):
             (['--correlation', '-f', '5'], 'cannot be combined with -f/--filtering'),
             (['--correlation', '--permanova'], 'cannot be combined with --correlation'),
             (['--associate', 'disease', '--second_countfile', genes], '--second_countfile is only used with'),
-            (['--correlation', '--covariates', 'age'], '--covariates is only used with --associate'),
+            (['--correlation', '--covariates', 'age'], '--covariates is only used with --associate or --permanova'),
+            (['--strata', 'batch'], '--strata is only used with --permanova'),
             (['--select', 'Type=inclusion'], '--select is only used with'),
             (['--correlation_method', 'sparcc'], '--correlation_method is only used with --correlation'),
             (['--correlation', '--alpha', '2'], '--alpha must be between 0 and 1'),
@@ -423,7 +424,7 @@ class TestCommandLineCompositional(TestCase):
 
 
 class TestUserGuideExamples(TestCase):
-    """The example files and commands of docs/user_guide/correlation.rst run, and give the results it quotes."""
+    """The example files and commands of the correlation and PERMANOVA user guide pages run and give the numbers quoted."""
 
     folder = os.path.join(os.path.dirname(__file__), '..', 'docs', 'user_guide', 'examples')
 
@@ -453,3 +454,25 @@ class TestUserGuideExamples(TestCase):
         for feature, ancombc_q in [('Escherichia coli', 0.47), ('Lactobacillus iners', 0.81)]:
             self.assertLess(results.loc[feature, 'q_value'], 0.05)
             self.assertAlmostEqual(results.loc[feature, 'ancombc_q_value'], ancombc_q, places=2)
+
+    def test_permanova_screen_and_model(self):
+        common = ('--select', 'Type=inclusion', '--group_column', 'patient')
+        screen = pd.read_csv(os.path.join(
+            self.run_example('--permanova', 'disease', 'antibiotics', *common), 'permanova.csv')).set_index('variable')
+        self.assertAlmostEqual(screen.loc['disease', 'R2'], 0.581, places=3)
+        self.assertAlmostEqual(screen.loc['disease', 'pseudo_F'], 38.8, places=1)
+        self.assertAlmostEqual(screen.loc['disease', 'p_value_corrected'], 0.0002, places=4)
+        self.assertAlmostEqual(screen.loc['antibiotics', 'R2'], 0.054, places=3)
+        self.assertAlmostEqual(screen.loc['antibiotics', 'p_value_corrected'], 0.19, places=2)
+
+        model = pd.read_csv(os.path.join(self.run_example(
+            '--permanova', 'disease', '--covariates', 'age', 'antibiotics', '--strata', 'batch', *common),
+            'permanova.csv')).set_index('variable')
+        self.assertAlmostEqual(model.loc['disease', 'R2'], 0.520, places=3)
+        self.assertAlmostEqual(model.loc['disease', 'pseudo_F'], 37.0, places=1)
+        self.assertAlmostEqual(model.loc['disease', 'p_value_corrected'], 0.0003, places=4)
+        self.assertAlmostEqual(model.loc['age', 'R2'], 0.036, places=3)
+        self.assertAlmostEqual(model.loc['age', 'p_value'], 0.057, places=3)
+        self.assertAlmostEqual(model.loc['antibiotics', 'R2'], 0.018, places=3)
+        self.assertAlmostEqual(model.loc['antibiotics', 'p_value'], 0.29, places=2)
+        self.assertEqual(model.loc['age', 'permdisp_F'], 'not applicable')

@@ -3,12 +3,16 @@ import os
 import sys
 import logging
 
+import pandas as pd
+
 from moonstone.parsers import (handleCounts, handleMetadata)
 from moonstone.analysis import stats
 from moonstone.analysis.association import ancombc_check, feature_association
 from moonstone.analysis import compositional_pipeline as pipeline
 from moonstone.analysis.correlation import METHODS as CORRELATION_METHODS
-from moonstone.analysis.correlation import edges_to_matrix, feature_correlation, filter_edges, to_gephi
+from moonstone.analysis.correlation import (
+    check_one_sample_per_subject, edges_to_matrix, feature_correlation, filter_edges, to_gephi
+)
 from moonstone.analysis.classification import Classification, KERNELS, MODELS
 from moonstone.analysis.diversity.beta import DEFAULT_PERMUTATIONS, MISSING_WARNING_FRACTION
 from moonstone.analysis.permanova import TAXA_LEVELS, read_taxonomy_counts, run_permanova
@@ -69,7 +73,8 @@ def parse_arguments():
                              '(default: 0)')
     parser.add_argument('--group_column', metavar='column', type=str,
                         help='Metadata column naming the subject of each sample; keeps a subject in one fold. With '
-                             '--correlation or --associate, the run stops if a subject has more than one sample')
+                             '--correlation, --associate or --permanova, the run stops if a subject has more '
+                             'than one sample')
     parser.add_argument('--roc', action='store_true',
                         help='With --classify, plot Receiver Operating Characteristic curves')
     parser.add_argument('--feature_selection', action='store_true',
@@ -104,15 +109,20 @@ def parse_arguments():
                                help='Association of every feature with these metadata variables (one linear model '
                                     'per feature on CLR values). Place this flag after the file arguments')
     compositional.add_argument('--covariates', metavar='variable', nargs='+', default=[],
-                               help='With --associate, metadata variables to adjust for')
+                               help='With --associate, metadata variables to adjust for. With --permanova, further '
+                                    'terms of the model, which then tests every term after all the others')
     compositional.add_argument('--categorical', metavar='variable', nargs='+', default=[],
-                               help='With --associate, numeric variables to treat as groups (for example 1/2/3 codes)')
+                               help='With --associate or --permanova, numeric variables to treat as groups (for example '
+                                    '1/2/3 codes)')
     compositional.add_argument('--reference', metavar='VARIABLE=LEVEL', action='append', default=[],
                                help='With --associate, reference level of a categorical variable; repeatable')
     compositional.add_argument('--standardize', action='store_true',
                                help='With --associate, scale continuous variables to unit standard deviation')
     compositional.add_argument('--ancombc', action='store_true',
                                help='With --associate, also run ANCOM-BC on the same model as a sensitivity check')
+    parser.add_argument('--strata', metavar='column', type=str,
+                        help='With --permanova, metadata column of blocks (for example sequencing batch): samples '
+                             'are only shuffled within their block')
     compositional.add_argument('--select', metavar='COLUMN=VALUE', action='append', default=[],
                                help='Keep only the samples with this metadata value, for example Type=inclusion; '
                                     'repeatable, all must match')
@@ -160,10 +170,13 @@ def check_analysis_combinations(parser, args):
         parser.error("--alpha must be between 0 and 1.")
     needs = [('--second_countfile', args.second_countfile, '--correlation', args.correlation)]
     needs += [(flag, used, '--associate', args.associate is not None) for flag, used in [
-        ('--covariates', args.covariates), ('--categorical', args.categorical), ('--reference', args.reference),
-        ('--standardize', args.standardize), ('--ancombc', args.ancombc)]]
-    needs += [(flag, used, '--correlation or --associate', compositional) for flag, used in [
-        ('--select', args.select), ('--top', args.top is not None)]]
+        ('--reference', args.reference), ('--standardize', args.standardize), ('--ancombc', args.ancombc)]]
+    needs += [(flag, used, '--associate or --permanova', args.associate is not None or args.permanova is not None)
+              for flag, used in [('--covariates', args.covariates), ('--categorical', args.categorical)]]
+    needs += [('--strata', args.strata, '--permanova', args.permanova is not None),
+              ('--select', args.select, '--correlation, --associate or --permanova',
+               compositional or args.permanova is not None),
+              ('--top', args.top is not None, '--correlation or --associate', compositional)]
     for flag, used, required, present in needs:
         if used and not present:
             parser.error(f"{flag} is only used with {required}.")
@@ -284,10 +297,18 @@ def permanova(args, outdir, logger):
     metadata_df = handleMetadata.Inputs(args.metadata).openmeta(outdir)
     report_sample_matching(counts_df.columns, metadata_df.index)
     try:
+        metadata_df, selection_notes = pipeline.select_samples(
+            metadata_df, [pipeline.parse_selection(text) for text in args.select])
+        for note in selection_notes:
+            print(f'Selected {note}')
+        if args.group_column:
+            check_one_sample_per_subject([s for s in counts_df.columns if s in metadata_df.index], metadata_df,
+                                         args.group_column)
         results = run_permanova(
             counts_df, metadata_df, columns=args.permanova or None, taxa_level=args.taxa_level,
-            read_threshold=not args.no_read_threshold, permutations=args.permutations or DEFAULT_PERMUTATIONS, seed=args.seed,
-            n_jobs=args.threads,
+            read_threshold=not args.no_read_threshold, permutations=args.permutations or DEFAULT_PERMUTATIONS,
+            seed=args.seed, n_jobs=args.threads, covariates=args.covariates, strata=args.strata,
+            categorical=args.categorical,
         )
     except ValueError as error:
         logger.error(str(error))
@@ -306,7 +327,8 @@ def permanova(args, outdir, logger):
     print(f'\n{significant.shape[0]} of {results["p_value"].notna().sum()} tests significant after '
           f'false discovery rate correction (p < 0.05).')
     for row in significant.itertuples(index=False):
-        dispersion = ' (groups also differ in spread)' if row.permdisp_p_value_corrected < 0.05 else ''
+        spread = pd.to_numeric(row.permdisp_p_value_corrected, errors='coerce')  # 'not applicable' -> NaN
+        dispersion = ' (groups also differ in spread)' if spread < 0.05 else ''
         print(f'  {row.level} / {row.variable}: R2 = {row.R2:.3f}, corrected p = {row.p_value_corrected:.3g}'
               f'{dispersion}')
     print(f'Results written to {output_file}')
