@@ -19,6 +19,12 @@ Counts
     :special-members: __init__
     :inherited-members:
 
+.. automodule:: moonstone.normalization.counts.rpkm
+    :members:
+    :undoc-members:
+    :special-members: __init__
+    :inherited-members:
+    
 .. automodule:: moonstone.normalization.counts.total_counts
     :members:
     :undoc-members:

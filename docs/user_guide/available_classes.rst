@@ -148,10 +148,27 @@ List
    :nosignatures:
 
     counts.geometric_mean.GeometricMeanNormalization
+    counts.rpkm.RPKMNormalization
     counts.total_counts.TotalCountsNormalization
     counts.random_selection.RandomSelection
     counts.random_selection.TaxonomyRandomSelection
     processed.scaling_normalization
+
+
+RPKM normalization
+""""""""""""""""""
+
+Requires a count DataFrame (features × samples) and feature lengths
+in bp (Series). Sequencing depth is automatic or provided per sample.
+
+.. code-block:: python
+
+    from moonstone.normalization.counts import RPKMNormalization
+
+    rpkm = RPKMNormalization(counts, feature_lengths).normalized_df
+
+    # Optional custom sequencing depth
+    rpkm = RPKMNormalization(counts, feature_lengths, sequencing_depth=depths).normalized_df
 
 .. _av_plot:
 
