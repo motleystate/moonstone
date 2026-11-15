@@ -31,3 +31,6 @@ notebooks/
 
 # local data files (not tracked)
 data/
+.claude/settings.local.json
+moonstone_runs/
+docs/superpowers/

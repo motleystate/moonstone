@@ -227,6 +227,7 @@ def combined_score_threshold(taxa_metrics, save_plots=False, output_dir="."):
 
 
 def plot_combined_score(taxa_metrics, keep, sorted_score, knee_idx, score_slope, average_rate, _stats, output_dir):
+    """Save the three plots of the combined-score threshold (knee, derivative, taxa kept) in output_dir."""
     total_taxa = len(sorted_score)
     # Position k on the x axis is the number of lowest-scoring species removed
     x = np.arange(1, total_taxa + 1)
@@ -350,8 +351,8 @@ def analyze_normalized_reads(input_file, save_plots=False, save_filtered=False, 
     return _stats, filtered_taxa
 
 
-def main(argv=None):
-    """Command-line entry point."""
+def build_parser():
+    """Parser of the command-line entry point."""
     parser = argparse.ArgumentParser(
         description="Determine filtering threshold based on species prevalence and read abundance.")
     parser.add_argument("input_file", help="Path to normalized read counts CSV file (species x samples)")
@@ -359,7 +360,12 @@ def main(argv=None):
     parser.add_argument("--save-filtered", action="store_true", help="Save filtered taxa to CSV file (default: no)")
     parser.add_argument("--output-dir", default=".",
                         help="Directory for saved plots and CSV (default: current directory)")
-    args = parser.parse_args(argv)
+    return parser
+
+
+def main(argv=None):
+    """Command-line entry point."""
+    args = build_parser().parse_args(argv)
 
     stats, filtered_taxa = analyze_normalized_reads(args.input_file,
                                                     save_plots=args.save_plots,

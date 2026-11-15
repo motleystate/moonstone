@@ -7,6 +7,21 @@ Changelogs
 Summary of developments of moonstone library.
 
 
+Unreleased
+==========
+
+* New graphical interface, ``moonstone-ui`` (optional: ``pip install "moonstone[ui]"``). Every tool has a page with
+  a form built from the options of the command line, checks of the input files before a run, example files, a
+  tutorial and its documentation; the page shows and runs the equivalent ``moonstone`` command, each run in a new
+  directory. Also: tutorials run live on the example files for the classes of the Python API, a page to check and
+  repair input files, the list of previous runs, and a searchable reference of the Python API. See
+  :ref:`interface`.
+* The example files are now installed with the package (``moonstone.examples``; they were in
+  ``docs/user_guide/examples``), with two new ones: ``taxa_counts.csv`` (read-threshold format) and
+  ``kraken2_counts.tsv`` (Sunbeam/Kraken2 format).
+* ``moonstone.main.build_parser()`` and ``moonstone.filtering.read_threshold_analysis.build_parser()`` return the
+  command-line parsers; ``moonstone.main.parse_arguments`` accepts a list of arguments.
+
 v1.5
 ====
 

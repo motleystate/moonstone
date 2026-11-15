@@ -1,5 +1,6 @@
 """
-Write the synthetic example files used in the user guide (docs/user_guide/correlation.rst and permanova.rst).
+Write the synthetic example files used in the user guide (docs/user_guide/correlation.rst and permanova.rst)
+and by the interface (moonstone-ui).
 
 All values are simulated: 30 patients sampled at inclusion and at delivery. Gardnerella vaginalis, Fannyhessea
 vaginae and Prevotella bivia are higher, and Lactobacillus crispatus lower, in patients with bacterial vaginosis (bv);
@@ -9,6 +10,12 @@ patient) is unrelated to everything else. Run from this folder: python make_exam
 import numpy as np
 import pandas as pd
 
+# NCBI Taxonomy identifiers of the example species, for the read-threshold table (taxa_counts.csv)
+NCBI_IDS = {
+    'Lactobacillus crispatus': 47770, 'Lactobacillus iners': 147802, 'Gardnerella vaginalis': 2702,
+    'Fannyhessea vaginae': 82135, 'Prevotella bivia': 28125, 'Sneathia amnii': 187101,
+    'Streptococcus agalactiae': 1311, 'Escherichia coli': 562,
+}
 TAXONOMY = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
 # taxonomy, mean log abundance, shift with bv
 TAXA = [
@@ -51,6 +58,18 @@ def main(n_patients=30, seed=2026):
     species = pd.concat([pd.DataFrame([taxonomy for taxonomy, _, _ in TAXA], columns=TAXONOMY),
                          pd.DataFrame(counts, columns=samples)], axis=1)
     species.to_csv('species_counts.tsv', sep='\t', index=False)
+    # same counts, comma-separated and with NCBI identifiers: the format of moonstone.filtering.read_threshold_analysis
+    with_ids = species.copy()
+    with_ids.insert(len(TAXONOMY), 'NCBI_taxonomy_ID', species['species'].map(NCBI_IDS))
+    with_ids.to_csv('taxa_counts.csv', index=False)
+    # same counts as a Kraken2 table merged by Sunbeam: the format of moonstone.parsers.SunbeamKraken2Parser
+    lineage = species[TAXONOMY].apply(lambda row: '; '.join(
+        f'{prefix}__{name.split()[-1]}' for prefix, name in zip('kpcofgs', row)), axis=1)
+    kraken2 = pd.concat([with_ids[['NCBI_taxonomy_ID']].rename(columns={'NCBI_taxonomy_ID': '#OTU ID'}),
+                         species[samples], lineage.rename('Consensus Lineage')], axis=1)
+    with open('kraken2_counts.tsv', 'w') as handle:
+        handle.write('# Constructed from biom file\n')
+        kraken2.to_csv(handle, sep='\t', index=False)
 
     genes = pd.DataFrame(index=pd.Index(['tetM', 'ermB', 'lnuA', 'blaTEM'], name='gene'), columns=samples, dtype=float)
     genes.loc['tetM'] = np.round(counts[2] / counts.sum(axis=0) * 200 * rng.lognormal(0, 0.3, n), 1)

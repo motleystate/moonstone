@@ -114,6 +114,23 @@ Receiver Operating Characteristic (ROC) curve, measured on samples the model did
 
 --------
 
+## Graphical interface
+
+`moonstone-ui` opens Moonstone in your browser: one page per tool, with a form built from the command-line options,
+checks of your files before a run, example files, a tutorial and the documentation. Each page shows the `moonstone`
+command it runs, so anything done in the interface can be repeated in a terminal or on a cluster.
+
+```bash
+pip install "moonstone[ui]"   # adds Streamlit
+moonstone-ui                  # start it from the directory where results should go
+```
+
+The Tutorials page has worked examples for every tool and for the Python classes, run live on the example files
+installed with Moonstone. Start there after a long break. More in the
+[documentation](https://moonstone.readthedocs.io/en/latest/user_guide/interface.html).
+
+--------
+
 ## Development guide
 
 To work on a new feature, related or not to an issue, we open a new branch from the development (currently `master`) branch to work on it.

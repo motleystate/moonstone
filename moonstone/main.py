@@ -43,7 +43,7 @@ class RemovedFlag(argparse.Action):
         parser.error(f'{option_string} has been removed. Use: {self.replacement.format(variable=values)}')
 
 
-def parse_arguments():
+def build_parser():
     """
     Parser for commandline arguments:
     * Countfile and Metadata are required
@@ -142,8 +142,14 @@ def parse_arguments():
         parser.add_argument(*flags, action=RemovedFlag, replacement=replacement, metavar='variable')
     parser.add_argument('-p', '--pca_plot', action=RemovedFlag, nargs=0)
     parser.add_argument('-k', '--k_means', action=RemovedFlag, metavar='nb_clusters')
+    return parser
+
+
+def parse_arguments(argv=None):
+    """Parse and check the command line (sys.argv when argv is None)."""
+    parser = build_parser()
     try:
-        args = parser.parse_args()
+        args = parser.parse_args(argv)
         check_analysis_combinations(parser, args)
         return args
     except SystemExit as exit_error:

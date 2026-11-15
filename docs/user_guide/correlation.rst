@@ -34,7 +34,7 @@ this page in a few seconds.
 Input files
 -----------
 
-Species count table (:download:`species_counts.tsv <examples/species_counts.tsv>`)
+Species count table (:download:`species_counts.tsv <../../moonstone/examples/species_counts.tsv>`)
     One row per taxon, one column per sample. Tab- or comma-separated: Moonstone picks the separator from the
     header line.
 
@@ -54,7 +54,7 @@ Species count table (:download:`species_counts.tsv <examples/species_counts.tsv>
       separator. Write 0 for a taxon not found; a blank cell stops the run. Moonstone never fills in values.
     - Rows without a name at the chosen level are pooled as ``unclassified <level>``, with a warning.
 
-Feature table without taxonomy (:download:`resistance_genes.csv <examples/resistance_genes.csv>`)
+Feature table without taxonomy (:download:`resistance_genes.csv <../../moonstone/examples/resistance_genes.csv>`)
     For genes, pathways or any other features. The **first column holds the feature names** (its header can be
     anything, here ``gene``); every other column is a sample, with the same rules for IDs and values. Feature names
     must be unique. Units do not need to match the species table (here, reads per kilobase per million): each table
@@ -66,7 +66,7 @@ Feature table without taxonomy (:download:`resistance_genes.csv <examples/resist
         tetM, 127.2, 43.7, 19.3, 4.0, ...
         ermB, 13.7, 0.0, 41.5, 11.3, ...
 
-Metadata (:download:`metadata.csv <examples/metadata.csv>`)
+Metadata (:download:`metadata.csv <../../moonstone/examples/metadata.csv>`)
     One row per sample, comma-separated. **The first column holds the sample IDs** (its header can be anything,
     here ``sample``); the other columns are the variables.
 
@@ -121,7 +121,7 @@ the geometric mean of its sample, so when *L. crispatus* drops sharply the other
 ANCOM-BC, which corrects for this bias, does not report them (``ancombc_q_value`` of 0.47 and 0.81 in
 ``association.csv``). Associations found by both methods are the robust ones.
 
-The example files are made by ``docs/user_guide/examples/make_examples.py``.
+The example files are made by ``moonstone/examples/make_examples.py``.
 
 What happens, in this order
 ---------------------------

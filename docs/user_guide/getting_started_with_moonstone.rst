@@ -2,7 +2,8 @@
 Getting started with moonstone
 ******************************
 
-Moonstone can be used in two different ways:
+Moonstone can be used in three different ways: from the command line, in Python, and through a graphical
+interface that builds and runs the command line for you (see :ref:`interface`).
 
 By command-line
 ===============

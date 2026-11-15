@@ -1,4 +1,6 @@
+import contextlib
 import importlib
+import io
 import os
 import subprocess
 import sys
@@ -426,7 +428,7 @@ class TestCommandLineCompositional(TestCase):
 class TestUserGuideExamples(TestCase):
     """The example files and commands of the correlation and PERMANOVA user guide pages run and give the numbers quoted."""
 
-    folder = os.path.join(os.path.dirname(__file__), '..', 'docs', 'user_guide', 'examples')
+    folder = os.path.join(os.path.dirname(__file__), '..', 'moonstone', 'examples')
 
     def run_example(self, *flags):
         outdir = os.path.join(tempfile.mkdtemp(), 'results')
@@ -476,3 +478,23 @@ class TestUserGuideExamples(TestCase):
         self.assertAlmostEqual(model.loc['antibiotics', 'R2'], 0.018, places=3)
         self.assertAlmostEqual(model.loc['antibiotics', 'p_value'], 0.29, places=2)
         self.assertEqual(model.loc['age', 'permdisp_F'], 'not applicable')
+
+
+class TestParser(TestCase):
+    """The parser is reusable: the interface reads its options and checks commands with it."""
+
+    def test_build_parser_exposes_the_options(self):
+        from moonstone.main import build_parser
+        dests = {action.dest for action in build_parser()._actions}
+        self.assertLessEqual({'classify', 'permanova', 'correlation', 'associate', 'select'}, dests)
+
+    def test_parse_arguments_takes_a_list(self):
+        from moonstone.main import parse_arguments
+        args = parse_arguments(['c.tsv', 'm.csv', 'out', '--permanova', 'disease'])
+        self.assertEqual((args.permanova, args.outdir), (['disease'], 'out'))
+
+    def test_parse_arguments_still_checks_combinations(self):
+        from moonstone.main import parse_arguments
+        with self.assertRaises(SystemExit) as stop, contextlib.redirect_stderr(io.StringIO()):
+            parse_arguments(['c.tsv', 'm.csv', '--standardize'])
+        self.assertEqual(stop.exception.code, 1)

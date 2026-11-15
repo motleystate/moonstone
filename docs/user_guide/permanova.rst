@@ -81,7 +81,7 @@ Levels with a single taxon
 Example files
 =============
 
-Synthetic example files are in ``docs/user_guide/examples/`` (written by ``make_examples.py``, all values simulated,
+Synthetic example files are in ``moonstone/examples/`` (written by ``make_examples.py``, all values simulated,
 never real patients):
 
 * ``species_counts.tsv``: tab-separated, one row per species, the seven taxonomy columns first (``kingdom`` ...

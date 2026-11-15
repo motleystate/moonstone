@@ -49,6 +49,13 @@ Check the installation with:
 
     moonstone --help
 
+To also install the graphical interface (see :ref:`interface`):
+
+.. code-block:: bash
+
+    pip install "moonstone[ui]"
+    moonstone-ui
+
 Manually
 --------
 

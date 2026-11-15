@@ -27,5 +27,7 @@ setup(
     ],
     python_requires='>=3.13,<3.14',
     packages=find_packages(exclude=["tests", "tests.*"]),
-    entry_points={'console_scripts': ['moonstone=moonstone.main:run']},
+    package_data={'moonstone': ['examples/*.tsv', 'examples/*.csv']},
+    extras_require={'ui': ['streamlit[pdf]>=1.64']},
+    entry_points={'console_scripts': ['moonstone=moonstone.main:run', 'moonstone-ui=moonstone.ui.launch:main']},
 )

@@ -10,3 +10,4 @@ mypy
 odfpy
 openpyxl
 xlrd
+streamlit[pdf]>=1.64

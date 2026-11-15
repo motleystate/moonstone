@@ -22,7 +22,7 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel
         pip install pytest pytest-cov "coverage>=7.10"
         # Editable install, so the command-line tests' subprocesses run the code under ./moonstone that is measured.
-        pip install -e .
+        pip install -e ".[ui]"
         pip install odfpy     # optional dependencies
         pip install openpyxl  # idem
         pip install xlrd      # idem

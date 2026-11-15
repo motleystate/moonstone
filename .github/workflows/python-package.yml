@@ -24,7 +24,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip setuptools wheel
         pip install flake8 pytest
-        pip install .
+        pip install ".[ui]"
         pip install odfpy     # optional dependencies
         pip install openpyxl  # idem
         pip install xlrd      # idem

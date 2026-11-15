@@ -169,3 +169,8 @@ class TestAnalyzeNormalizedReads(TestCase):
             main([self.input_file, '--save-filtered', '--output-dir', self.output_dir])
         self.assertIn('Species removed: 7 out of 10', stdout.getvalue())
         self.assertTrue(os.path.exists(os.path.join(self.output_dir, 'filtered_taxa.csv')))
+
+    def test_build_parser(self):
+        from moonstone.filtering.read_threshold_analysis import build_parser
+        args = build_parser().parse_args(['counts.csv', '--save-plots'])
+        self.assertEqual((args.input_file, args.save_plots, args.output_dir), ('counts.csv', True, '.'))
