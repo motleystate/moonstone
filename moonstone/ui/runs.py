@@ -11,7 +11,7 @@ from moonstone import __version__
 from moonstone.ui.catalog import Tool
 from moonstone.ui.forms import preview
 
-BOOKKEEPING = ('command.txt', 'run.log', 'exit_code.txt')
+BOOKKEEPING = ('command.txt', 'run.log', 'exit_code.txt', 'head_job_id.txt')
 
 
 @dataclass(frozen=True)
@@ -68,6 +68,12 @@ def list_runs(root: str) -> list:
     return runs
 
 
-def result_files(run_dir: Path) -> list:
-    """The files a run wrote, without the interface's own bookkeeping files."""
-    return sorted(path for path in Path(run_dir).iterdir() if path.is_file() and path.name not in BOOKKEEPING)
+def result_files(run_dir: Path, patterns=()) -> list:
+    """
+    The files a run wrote, without the interface's own bookkeeping files: those at the top of the run directory,
+    and those below it that match one of ``patterns`` (relative paths, e.g. 'output/mapping/*.tsv').
+    """
+    run_dir = Path(run_dir)
+    found = {path for path in run_dir.iterdir() if path.is_file() and path.name not in BOOKKEEPING}
+    found.update(path for pattern in patterns for path in run_dir.glob(pattern) if path.is_file())
+    return sorted(found)

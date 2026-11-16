@@ -1,0 +1,241 @@
+# Moonstone reads workflow: adapter trimming (Trimmomatic), host-read removal and taxonomic classification
+# (Kraken2 + Bracken) of paired- or single-end shotgun reads.
+# From Moonbeam (https://github.com/motleystate/moonbeam2, commit 7a0f069). Run it with --configfile;
+# every setting is listed in config_all_options.yaml.
+import json
+import os
+import re
+import sys
+from snakemake.exceptions import WorkflowError
+
+
+# ------------------------------------------------------------------ checks, then settings
+# Fail early with a clear message on bad settings or input: the same checks as `moonstone-reads run`.
+from moonstone.reads.config import EXTRACT_READS, adapter_dir, validate    # EXTRACT_READS: KrakenTools (GPL-3.0), an installed program
+
+_errors = [finding.message for finding in validate(config)]
+if _errors:
+    raise WorkflowError("\n".join(_errors))
+
+# Only raw_read_dir, krakenDB_dir and (with host mapping) krakenDB_host are required;
+# everything else has a default.
+_input = config.get("input_data") or {}
+_perform = config.get("to_perform") or {}
+_trim = config.get("trimmomatic") or {}
+_bracken = config.get("bracken") or {}
+_report = config.get("report") or {}
+
+DO_TRIM = _perform.get("trimmomatic", True)
+DO_HOST = _perform.get("host_mapping", True)
+DO_BRACKEN = _perform.get("bracken", True)
+
+raw_read_dir = _input["raw_read_dir"]
+krakenDB_dir = config["krakenDB_dir"]
+krakenDB_host = config["krakenDB_host"] if DO_HOST else None
+
+PAIRED = _input.get("paired", True)
+EXT = _input.get("ext", "fastq.gz")
+KEEP_TRIMMED = config.get("keep_trimmed_reads", False)          # allows mapping with another database without trimming again
+KEEP_KRAKEN = config.get("keep_kraken_output", False)           # the per-read Kraken2 files (large)
+HOST_TAXIDS = config.get("host_taxid", [9606, 10090])           # a number or a list (default human + mouse)
+HOST_TAXIDS = [int(t) for t in (HOST_TAXIDS if isinstance(HOST_TAXIDS, list) else [HOST_TAXIDS])]
+READ_LEN = _bracken.get("read_len", 150)
+BRACKEN_THRESHOLD = _bracken.get("threshold", 5)
+bracken_kmers = os.path.join(krakenDB_dir, "database%smers.kmer_distrib" % READ_LEN)
+
+ADAPTER_DIR = adapter_dir(config)        # trimmomatic.adapter_dir, else the adapters of the conda trimmomatic package
+ADAPTER_SET = _trim.get("adapter_set", "TruSeq3-PE.fa:2:30:10" if PAIRED else "TruSeq3-SE.fa:2:30:10")
+
+SCRIPTS = os.path.join(workflow.basedir, "scripts")
+
+# Output layout
+out_dir = config.get("output_dir", "output")
+trimmed_dir = out_dir + "/trimmed_seq"
+discarded_dir = trimmed_dir + "/discarded"
+noHost_dir = trimmed_dir + "/noHost_seq"
+mapping_dir = out_dir + "/mapping"
+kraken_host_dir = mapping_dir + "/kraken2_host"
+kraken_final_dir = mapping_dir + "/kraken2_final"
+bracken_dir = mapping_dir + "/bracken_results"
+bracken_corrections_dir = bracken_dir + "/correctionLogs"
+report_file = out_dir + "/pipeline_report.md"
+
+
+# ------------------------------------------------------------------ samples
+if PAIRED:
+    SAMPLES, READS = glob_wildcards(raw_read_dir + "/{sample}_{read}." + EXT)
+    READS = sorted(set("_" + r for r in READS))
+else:
+    SAMPLES, = glob_wildcards(raw_read_dir + "/{sample}." + EXT)
+    READS = [""]
+SAMPLES = sorted(set(SAMPLES))
+PAIRED_FLAG = "--paired" if PAIRED else ""
+
+wildcard_constraints:
+    sample = "|".join(re.escape(s) for s in SAMPLES) or "(?!)"
+
+
+# ------------------------------------------------------------------ helpers
+def _maybe_temp(path, keep):
+    """A large intermediate: deleted once no rule needs it, unless its keep setting is True."""
+    return path if keep else temp(path)
+
+def _per_read(pattern):
+    """One path per mate: {read} becomes _1/_2 (paired) or nothing (single-end); {sample} stays a wildcard."""
+    return [pattern.replace("{read}", r) for r in READS]
+
+def _db_mem_mb(db_dir, margin_mb=4000):
+    """Slurm memory for Kraken2: size of the database index files + a margin for reads and buffers."""
+    files = [os.path.join(db_dir, f) for f in ("hash.k2d", "taxo.k2d", "opts.k2d")] if db_dir else []
+    return sum(os.path.getsize(f) for f in files if os.path.exists(f)) // (1024 * 1024) + margin_mb
+
+
+# ------------------------------------------------------------------ file chain
+raw_reads = _per_read(raw_read_dir + "/{sample}{read}." + EXT)
+trimmed_reads = _per_read(trimmed_dir + "/{sample}{read}.trimmed.fastq.gz")
+host_input = trimmed_reads if DO_TRIM else raw_reads
+noHost_reads = _per_read(noHost_dir + "/{sample}{read}" + (".trimmed" if DO_TRIM else "") + ".noHost.fastq")
+classify_input = noHost_reads if DO_HOST else host_input
+
+TOOLS = ["kraken"] + (["bracken"] if DO_BRACKEN else [])
+TABLES = expand(mapping_dir + "/all_samples.{tool}.tsv", tool=TOOLS)
+
+
+# ------------------------------------------------------------------ rules
+rule all:
+    input:
+        report_file
+
+if DO_TRIM:
+    _trimmed = [_maybe_temp(p, KEEP_TRIMMED) for p in trimmed_reads]
+    # Trimmomatic PE writes, per mate, the reads still paired and those whose mate was dropped ("discarded")
+    if PAIRED:
+        _discarded = [temp(p) for p in _per_read(discarded_dir + "/{sample}{read}.discarded.fastq.gz")]
+        _trimmomatic_output = [p for pair in zip(_trimmed, _discarded) for p in pair]
+    else:
+        _trimmomatic_output = _trimmed
+
+    rule trimmomatic:
+        threads: 4
+        input:
+            raw_reads
+        output:
+            _trimmomatic_output
+        params:
+            mode = "PE" if PAIRED else "SE",
+            clip = "ILLUMINACLIP:" + os.path.join(ADAPTER_DIR, ADAPTER_SET)
+        shell:
+            "trimmomatic {params.mode} -threads {threads} {input} {output} {params.clip}"
+
+if DO_HOST:
+    rule kraken2_map4host:
+        threads: 4
+        resources:
+            mem_mb = _db_mem_mb(krakenDB_host)
+        input:
+            db = os.path.join(krakenDB_host, "hash.k2d"),
+            reads = host_input
+        output:
+            report = kraken_host_dir + "/{sample}.taxa.report",
+            kraken = _maybe_temp(kraken_host_dir + "/{sample}.mapping.kraken", KEEP_KRAKEN)
+        params:
+            db = krakenDB_host,
+            paired = PAIRED_FLAG
+        shell:
+            "kraken2 --db {params.db} --threads {threads} --memory-mapping {params.paired} --use-names "
+            "--report {output.report} --output {output.kraken} {input.reads}"
+
+    rule purge_host:
+        input:
+            kraken = kraken_host_dir + "/{sample}.mapping.kraken",
+            reads = host_input
+        output:
+            [temp(p) for p in noHost_reads]
+        params:
+            taxids = " ".join(map(str, HOST_TAXIDS))
+        shell:
+            EXTRACT_READS + " -k {input.kraken} -t {params.taxids} --exclude --fastq-output "
+            + ("-s1 {input.reads[0]} -o {output[0]} -s2 {input.reads[1]} -o2 {output[1]}" if PAIRED else "-s1 {input.reads[0]} -o {output[0]}")
+
+rule kraken2_map:
+    threads: 4
+    resources:
+        mem_mb = _db_mem_mb(krakenDB_dir)
+    input:
+        db = os.path.join(krakenDB_dir, "hash.k2d"),
+        reads = classify_input
+    output:
+        report = kraken_final_dir + "/{sample}.taxa.report",
+        kraken = _maybe_temp(kraken_final_dir + "/{sample}.mapping.kraken", KEEP_KRAKEN)
+    params:
+        db = krakenDB_dir,
+        paired = PAIRED_FLAG
+    shell:
+        "kraken2 --db {params.db} --threads {threads} --memory-mapping {params.paired} --use-names "
+        "--report {output.report} --output {output.kraken} {input.reads}"
+
+rule merge_kraken_reports:
+    input:
+        expand(kraken_final_dir + "/{sample}.taxa.report", sample=SAMPLES)
+    output:
+        mapping_dir + "/all_samples.kraken.biom"
+    shell:
+        "kraken-biom {input} --max D --min S -o {output}"
+
+if DO_BRACKEN:
+    rule bracken:
+        input:
+            kmers = bracken_kmers,
+            report = kraken_final_dir + "/{sample}.taxa.report"
+        output:
+            report = bracken_dir + "/{sample}.brackenCorrected_taxa.report",
+            corrections = bracken_corrections_dir + "/{sample}.corrections.bracken"
+        params:
+            db = krakenDB_dir,
+            read_len = READ_LEN,
+            threshold = BRACKEN_THRESHOLD
+        shell:
+            "bracken -d {params.db} -i {input.report} -o {output.corrections} -w {output.report} "
+            "-r {params.read_len} -t {params.threshold}"
+
+    rule merge_bracken_reports:
+        input:
+            expand(bracken_dir + "/{sample}.brackenCorrected_taxa.report", sample=SAMPLES)
+        output:
+            mapping_dir + "/all_samples.bracken.biom"
+        shell:
+            "kraken-biom {input} --max D --min S -o {output}"
+
+rule biom_to_tsv:
+    input:
+        mapping_dir + "/all_samples.{tool}.biom"
+    output:
+        mapping_dir + "/all_samples.{tool}.tsv"
+    shell:
+        "biom convert -i {input} -o {output} --process-obs-metadata=taxonomy --header-key=taxonomy --to-tsv"
+
+rule run_completed:
+    input:
+        TABLES,
+        expand(kraken_final_dir + "/{sample}.taxa.report", sample=SAMPLES),
+        expand(kraken_host_dir + "/{sample}.taxa.report", sample=SAMPLES) if DO_HOST else [],
+        expand(bracken_dir + "/{sample}.brackenCorrected_taxa.report", sample=SAMPLES) if DO_BRACKEN else []
+    output:
+        report_file
+    params:
+        samples = " ".join(SAMPLES),
+        host_dir = kraken_host_dir if DO_HOST else "",
+        bracken_dir = bracken_dir if DO_BRACKEN else "",
+        tables = " ".join(TABLES),
+        settings = json.dumps({"paired": PAIRED,
+                               "to_perform": {"trimmomatic": DO_TRIM, "host_mapping": DO_HOST, "bracken": DO_BRACKEN},
+                               "krakenDB_dir": krakenDB_dir, "krakenDB_host": krakenDB_host, "host_taxid": HOST_TAXIDS,
+                               "bracken": {"read_len": READ_LEN, "threshold": BRACKEN_THRESHOLD},
+                               "keep_trimmed_reads": KEEP_TRIMMED, "keep_kraken_output": KEEP_KRAKEN}),
+        min_reads = _report.get("min_reads", 100000),
+        min_pct = _report.get("min_classified_pct", 20)
+    shell:
+        # sys.executable: the Python that runs Snakemake, where Moonstone is installed
+        sys.executable + " " + os.path.join(SCRIPTS, "make_report.py") + " --samples {params.samples} --final-dir " + kraken_final_dir + " "
+        "--host-dir '{params.host_dir}' --bracken-dir '{params.bracken_dir}' --tables {params.tables} --settings {params.settings:q} "
+        "--min-reads {params.min_reads} --min-classified-pct {params.min_pct} --out {output}"

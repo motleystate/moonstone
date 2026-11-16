@@ -7,14 +7,16 @@ Options, defaults and help texts are not written here; they are read from each t
 import argparse
 import importlib
 import inspect
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable, Optional
 
 from moonstone import examples, main
 from moonstone.analysis import compositional_pipeline
 from moonstone.analysis.permanova import read_taxonomy_counts
 from moonstone.filtering import read_threshold_analysis
+from moonstone.normalization import table as normalization_table
 from moonstone.parsers import handleCounts
+from moonstone.reads import config as reads_config, run as reads_run, samples as reads_samples, table as reads_table
 
 GUIDE = 'https://moonstone.readthedocs.io/en/latest/user_guide/'
 
@@ -61,14 +63,82 @@ class Tool:
     example: dict                 # {'countfile': name, 'metadata': name or None, 'values': {dest: value}}
     docs: tuple                   # dotted names whose docstrings are shown
     guide_url: str
-    outputs: dict                 # file name pattern -> what the file holds
+    outputs: dict                 # file name pattern (relative to the run directory) -> what the file holds
+    input_kind: str = 'table'     # 'table', or 'reads_dir': a folder of read files
+    input_label: str = 'Count table'
+    choice_labels: dict = field(default_factory=dict)    # {option: {choice: text shown in the menu}}
+    requires: tuple = ()          # ((Python module, how to install it), ...): needed to run the tool
 
 
 def _feature_samples(path):
     return list(compositional_pipeline.read_feature_table(path)[0].columns)
 
 
+READS_RULES = (
+    'A folder of sequencing reads (FASTQ, gzipped or not); its sub-folders are searched.',
+    'Paired-end files end with _1/_2, _R1/_R2 or _R1_001/_R2_001 before the extension; single-end files have no '
+    'such ending. Paired and single-end reads cannot be mixed in one run.',
+    'The sample name is the file name without that ending; it may contain letters, digits, ".", "_" and "-".',
+    'Also needed: a Kraken2 database with its Bracken k-mer file, and, to remove host reads, a Kraken2 database '
+    'of the host genomes.',
+)
+
 TOOLS = {tool.key: tool for tool in [
+    Tool(
+        key='reads', title='Reads to counts', group='From reads', icon=':material/genetics:',
+        question='Which taxa are in my sequencing reads, and how many reads of each?',
+        module='moonstone.reads.run', build_parser=reads_run.build_parser,
+        parse=lambda argv: reads_run.build_parser().parse_args(argv),
+        fixed=(),
+        options=('db', 'host_db', 'remove_host', 'match', 'single_end', 'keep_trimmed_reads', 'keep_kraken_output',
+                 'slurm'),
+        advanced=('no_trimming', 'no_bracken', 'read_len', 'bracken_threshold', 'min_reads', 'min_classified_pct',
+                  'cores', 'dry_run'),
+        # always sent: the database, so the command shown is complete; and --remove-host, which given with no
+        # name switches host removal off
+        required=('db', 'remove_host'),
+        needs_metadata=False, outdir_flag=None, count_sep=None,
+        read_samples=lambda path: [sample.name for sample in reads_samples.discover(path)[0]],
+        input_rules=READS_RULES, example={},      # no example: reads and databases are too large to ship
+        docs=('moonstone.reads.run.check_inputs', 'moonstone.reads.samples.discover', 'moonstone.reads.config.build',
+              'moonstone.reads.launch.submit', 'moonstone.reads.launch.status'),
+        guide_url=GUIDE + 'reads.html',
+        outputs={
+            'output/pipeline_report.md': 'The run report: versions, settings, reads per sample, % host, % classified, '
+                                         'warnings.',
+            'output/mapping/all_samples.bracken.tsv': 'Bracken-corrected raw counts of all samples: the result of '
+                                                      'the run.',
+            'output/mapping/all_samples.kraken.tsv': 'Kraken2 counts of all samples, before the Bracken correction.',
+        },      # samples.tsv (the read files of each sample) and config.yaml (the settings) are listed below them
+        input_kind='reads_dir', input_label='Reads folder',
+        choice_labels={'remove_host': {name: f'{name.capitalize()} ({taxid})'
+                                       for name, taxid in reads_config.HOSTS.items()}},
+        requires=(('snakemake', 'pip install "moonstone[reads]", and Kraken2, Bracken, Trimmomatic and KrakenTools '
+                                '(see environment-hpc.yml)'),),
+    ),
+    Tool(
+        key='reads_table', title='Counts to Moonstone table', group='From reads', icon=':material/table_convert:',
+        question="How do I get the counts of a reads run in the layout Moonstone's analyses read?",
+        module='moonstone.reads.table', build_parser=reads_table.build_parser,
+        parse=lambda argv: reads_table.build_parser().parse_args(argv),
+        fixed=(), options=(), advanced=(), required=(),
+        needs_metadata=False, outdir_flag=None, count_sep='\t',
+        read_samples=lambda path: [column for column in reads_table.read_moonbeam_table(path).columns
+                                   if column != reads_table.ID_COLUMN],
+        input_rules=(
+            'The table of a reads run: output/mapping/all_samples.bracken.tsv (or all_samples.kraken.tsv).',
+            'Tab-separated, one row per taxon; a first comment line, then a header starting with #OTU ID; the last '
+            'column, taxonomy, holds the lineage.',
+            'The counts are written unchanged; only the layout and the sample names change.',
+        ),
+        example={'countfile': 'moonbeam_bracken.tsv', 'metadata': None, 'values': {}},
+        docs=('moonstone.reads.table.to_moonstone_table', 'moonstone.reads.table.read_moonbeam_table'),
+        guide_url=GUIDE + 'reads.html',
+        outputs={'counts_raw.csv': 'The raw counts in Moonstone layout: taxonomy columns, NCBI_taxonomy_ID, one '
+                                   'column per sample.',
+                 'counts_raw.csv.methods.txt': 'What was done, to quote in your methods.'},
+        input_label='Table of a reads run',
+    ),
     Tool(
         key='read_threshold', title='Read threshold', group='Prepare', icon=':material/filter_alt:',
         question='Which taxa are prevalent and abundant enough to keep?',
@@ -95,6 +165,28 @@ TOOLS = {tool.key: tool for tool in [
             'combined_score_derivative.png': 'The rate-of-change criterion that locates the knee.',
             'combined_score_retained.png': 'Prevalence against abundance, with the taxa kept and removed.',
         },
+    ),
+    Tool(
+        key='normalize', title='Normalize', group='Prepare', icon=':material/balance:',
+        question='How do I make the counts of samples sequenced to different depths comparable?',
+        module='moonstone.normalization.table', build_parser=normalization_table.build_parser,
+        parse=lambda argv: normalization_table.build_parser().parse_args(argv),
+        fixed=(), options=('method',), advanced=(), required=('method',),
+        needs_metadata=False, outdir_flag=None, count_sep=None,
+        read_samples=lambda path: [str(column) for column in normalization_table.read_counts(path).columns],
+        input_rules=(
+            'Any Moonstone count table, tab- or comma-separated: one row per feature, one column per sample.',
+            'The rows are identified by the taxonomy columns (kingdom ... species) and NCBI_taxonomy_ID when '
+            'present, otherwise by the first column.',
+            'Sample columns must be numeric with no blank cell, and no sample may be empty.',
+        ),
+        example={'countfile': 'taxa_counts.csv', 'metadata': None, 'values': {'method': 'geometric_mean'}},
+        docs=('moonstone.normalization.table.normalize', 'moonstone.normalization.table.normalize_table',
+              'moonstone.normalization.counts.geometric_mean.GeometricMeanNormalization'),
+        guide_url=GUIDE + 'reads.html',
+        outputs={'counts_*.csv': 'The normalized table, with the same identifying columns as the input.',
+                 'counts_*.csv.methods.txt': 'What was done, with the parameters actually used, and what the table '
+                                             'suits.'},
     ),
     Tool(
         key='classify', title='Classification', group='Analyse', icon=':material/category:',

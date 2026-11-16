@@ -47,8 +47,11 @@ dependencies = [
 [project.optional-dependencies]
 # the browser interface (moonstone-ui); the PDF viewer shows the classification plots
 ui = ["streamlit[pdf]>=1.64"]
+# the reads workflow (moonstone-reads); Kraken2, Bracken, Trimmomatic and KrakenTools come from environment-hpc.yml
+reads = ["snakemake==9.27.1", "snakemake-executor-plugin-slurm", "biom-format", "kraken-biom==1.0.1"]
 
 [project.scripts]
 moonstone = "moonstone.main:run"
 moonstone-ui = "moonstone.ui.launch:main"
+moonstone-reads = "moonstone.reads.cli:main"
 

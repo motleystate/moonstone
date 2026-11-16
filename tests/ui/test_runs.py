@@ -18,6 +18,8 @@ class TestRuns(TestCase):
 
     def test_each_example_runs(self):
         for tool in TOOLS.values():
+            if not tool.example:
+                continue
             with self.subTest(tool=tool.key):
                 run_dir = new_run_dir(self.tmp, tool.key)
                 meta = examples.path('metadata.csv') if tool.needs_metadata else None
@@ -27,6 +29,7 @@ class TestRuns(TestCase):
                 self.assertEqual((run_dir / 'exit_code.txt').read_text().strip(), '0', ''.join(lines))
                 for pattern in tool.outputs:
                     self.assertTrue(list(run_dir.glob(pattern)), pattern)
+                    self.assertTrue(any(path.match(pattern) for path in result_files(run_dir, tool.outputs)), pattern)
                 self.assertEqual(list_runs(self.tmp)[0].exit_code, 0)
 
     def test_two_runs_in_the_same_second_get_two_directories(self):

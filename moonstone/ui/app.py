@@ -22,13 +22,15 @@ pages['tutorials'] = st.Page(views.render_tutorials, title='Tutorials', icon=':m
 pages['runs'] = st.Page(views.render_runs, title='Previous runs', icon=':material/history:', url_path='runs')
 pages['check'] = st.Page(views.render_check, title='Check my files', icon=':material/fact_check:', url_path='check')
 pages['api'] = st.Page(views.render_api, title='Python API', icon=':material/menu_book:', url_path='api')
+views.PAGES.update(pages)
 sections = {
     'Start': [home, pages['tutorials'], pages['runs']],
+    'From reads': [pages[tool.key] for tool in TOOLS.values() if tool.group == 'From reads'],
     'Prepare': [pages['check']] + [pages[tool.key] for tool in TOOLS.values() if tool.group == 'Prepare'],
     'Analyse': [pages[tool.key] for tool in TOOLS.values() if tool.group == 'Analyse'],
     'Reference': [pages['api']],
 }
-page = st.navigation(sections)
+page = st.navigation(sections, expanded=True)      # every page stays visible in the sidebar
 with st.sidebar:
     views.runs_root()
     st.text_input('Run directory', key='runs_root',

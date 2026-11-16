@@ -11,3 +11,7 @@ odfpy
 openpyxl
 xlrd
 streamlit[pdf]>=1.64
+snakemake==9.27.1
+snakemake-executor-plugin-slurm
+biom-format
+kraken-biom==1.0.1

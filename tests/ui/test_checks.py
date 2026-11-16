@@ -1,4 +1,5 @@
 import os
+from unittest import mock
 import tempfile
 import time
 from unittest import TestCase
@@ -27,6 +28,8 @@ class TestChecks(TestCase):
 
     def test_examples_have_no_error(self):
         for tool in TOOLS.values():
+            if not tool.example:
+                continue
             meta = METADATA if tool.needs_metadata else None
             findings = check_inputs(tool, examples.path(tool.example['countfile']), meta)
             self.assertFalse(has_errors(findings), (tool.key, findings))
@@ -88,3 +91,45 @@ class TestChecks(TestCase):
         findings = check_inputs(TOOLS['permanova'], path, meta)
         self.assertLess(time.time() - start, 60)
         self.assertFalse(has_errors(findings), findings)
+
+
+class TestReadsFolderChecks(TestCase):
+
+    def setUp(self):
+        from tests.reads.helpers import fake_bin, make_inputs
+        self.tmp = tempfile.mkdtemp()
+        self.inputs = make_inputs(self.tmp)
+        self.reads = self.inputs['input_data']['raw_read_dir']
+        self.values = {'db': self.inputs['krakenDB_dir'], 'host_db': self.inputs['krakenDB_host'],
+                       'remove_host': ['human', 'mouse']}
+        patcher = mock.patch.dict(os.environ, {'PATH': fake_bin(os.path.join(self.tmp, 'bin')),
+                                               'MOONSTONE_SITE': os.path.join(self.tmp, 'site.yaml')})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        with open(os.path.join(self.tmp, 'site.yaml'), 'w') as handle:
+            handle.write(f"adapter_dir: {os.path.join(self.tmp, 'adapters')}\n")
+
+    def test_good_reads_folder(self):
+        self.assertEqual(check_inputs(TOOLS['reads'], self.reads, values=self.values), [])
+        self.assertEqual(summary(TOOLS['reads'], self.reads, values=self.values), '2 samples, paired-end: S1, S2')
+
+    def test_reads_directory_findings(self):
+        open(os.path.join(self.reads, 'S3_1.fastq.gz'), 'w').close()
+        findings = check_inputs(TOOLS['reads'], self.reads, values=self.values)
+        self.assertEqual([f.code for f in findings], ['mate_missing'])
+        self.assertIn('S3', findings[0].message)
+
+    def test_database_findings(self):
+        findings = check_inputs(TOOLS['reads'], self.reads, values=dict(self.values, db=self.tmp))
+        self.assertTrue(any('not a Kraken2 database' in f.message for f in findings))
+        findings = check_inputs(TOOLS['reads'], self.reads, values=dict(self.values, db=None))
+        self.assertTrue(any('database' in f.message for f in findings))
+
+    def test_no_host_removal_needs_no_host_database(self):
+        values = dict(self.values, host_db=None, remove_host=[])
+        self.assertEqual(check_inputs(TOOLS['reads'], self.reads, values=values), [])
+
+    def test_single_end_summary(self):
+        from tests.reads.helpers import make_inputs
+        reads = make_inputs(os.path.join(self.tmp, 'se'), paired=False)['input_data']['raw_read_dir']
+        self.assertEqual(summary(TOOLS['reads'], reads, values={'single_end': True}), '2 samples, single-end: S1, S2')

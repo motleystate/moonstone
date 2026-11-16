@@ -1,0 +1,17 @@
+# One environment for a cluster: Moonstone with its interface, and the tools of the reads workflow.
+#   mamba env create -f environment-hpc.yml
+name: moonstone-hpc
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - python=3.13
+  - kraken2=2.17.2
+  - bracken=3.1
+  - trimmomatic=0.41
+  - krakentools          # extract_kraken_reads.py (host-read removal); GPL-3.0, used as an installed program
+  - biopython
+  - pip
+  - pip:
+    - moonstone[ui,reads]

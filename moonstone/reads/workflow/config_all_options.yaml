@@ -1,0 +1,41 @@
+# Every setting of the reads workflow, with its default. Only raw_read_dir, krakenDB_dir and (with host
+# mapping) krakenDB_host are required. `moonstone-reads run` writes this file for you.
+
+input_data:
+  raw_read_dir: /path/to/reads_dir   # {sample}_1/_2.<ext> (paired) or {sample}.<ext> (single-end)
+  paired: True
+  ext: "fastq.gz"
+
+to_perform:
+  trimmomatic: True
+  host_mapping: True
+  bracken: True
+
+# Kraken2 database of the host(s), and the one used to classify the remaining reads
+krakenDB_host: /path/to/kraken2/hosts
+krakenDB_dir: /path/to/kraken2/database
+
+# taxid(s) of the host(s) whose reads are removed: a number or a list (9606 = human, 10090 = mouse).
+# Only reads classified exactly as one of these taxids are removed.
+host_taxid: [9606, 10090]
+
+# Large intermediates are deleted once no step needs them. Set to True to keep:
+keep_trimmed_reads: False     # the trimmed reads: allows mapping with another database without trimming again
+keep_kraken_output: False     # the per-read Kraken2 files (large). The per-sample reports are always kept.
+
+output_dir: "output"
+
+trimmomatic:
+  # adapter_dir defaults to the adapters of the conda trimmomatic package; uncomment to override
+  #adapter_dir: /path/to/adapters
+  # adapter_set defaults to TruSeq3-PE.fa:2:30:10 (paired) or TruSeq3-SE.fa:2:30:10 (single-end)
+  #adapter_set: TruSeq3-PE.fa:2:30:10
+
+bracken:
+  read_len: 150       # must match a database<N>mers.kmer_distrib file in krakenDB_dir
+  threshold: 5
+
+# Thresholds for warnings in the run report (placeholders: adjust to your data)
+report:
+  min_reads: 100000          # warn if fewer reads reach the final classification
+  min_classified_pct: 20     # warn if less than this % of reads are classified

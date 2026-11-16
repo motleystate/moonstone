@@ -5,6 +5,7 @@ import tempfile
 from typing import Optional
 
 from moonstone.parsers import handleMetadata
+from moonstone.reads import run as reads_run
 from moonstone.ui.catalog import Tool
 from moonstone.validation import Finding, check_file_format, has_errors, match_samples
 
@@ -36,14 +37,17 @@ def _check_table(path: str, sep: Optional[str], read_samples) -> tuple:
 
 
 def check_inputs(tool: Tool, countfile: str, metadata: Optional[str] = None,
-                 second_countfile: Optional[str] = None) -> list:
+                 second_countfile: Optional[str] = None, values: Optional[dict] = None) -> list:
     """
     Everything that would stop or distort a run of ``tool`` on these files: missing file, file format
     (:func:`moonstone.validation.check_file_format`), table not readable by this tool, and sample IDs that do
     not match the metadata (:func:`moonstone.validation.match_samples`).
 
+    :param values: the values of the tool's options; used when the input is a folder of reads.
     :return: list of :class:`moonstone.validation.Finding`; a run should not start while one is an error.
     """
+    if tool.input_kind == 'reads_dir':       # a folder of reads: the checks of `moonstone-reads run`, with its options
+        return reads_run.check_inputs(countfile, values or {})[1]
     findings, tables = [], []
     for path in [countfile] + ([second_countfile] if second_countfile else []):
         found, samples = _check_table(path, tool.count_sep, tool.read_samples)
@@ -69,9 +73,16 @@ def metadata_columns(path: str) -> dict:
     return {str(column): sorted(metadata[column].dropna().astype(str).unique()) for column in metadata.columns}
 
 
-def summary(tool: Tool, countfile: str) -> str:
-    """A one-line description of a count table, e.g. '60 samples'; '' if the tool cannot read it."""
+def summary(tool: Tool, countfile: str, values: Optional[dict] = None) -> str:
+    """A one-line description of the input, e.g. '60 samples'; '' if the tool cannot read it."""
     try:
+        if tool.input_kind == 'reads_dir':
+            values = values or {}
+            single = bool(values.get('single_end'))
+            found = reads_run.samples.discover(countfile, paired=not single, match=values.get('match') or None)[0]
+            names = [sample.name for sample in found]
+            listed = ', '.join(names[:5]) + (' ...' if len(names) > 5 else '')
+            return f"{len(names)} samples, {'single' if single else 'paired'}-end: {listed}" if names else ''
         return f'{len(tool.read_samples(countfile))} samples'
     except Exception:
         return ''

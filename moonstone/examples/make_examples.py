@@ -70,6 +70,15 @@ def main(n_patients=30, seed=2026):
     with open('kraken2_counts.tsv', 'w') as handle:
         handle.write('# Constructed from biom file\n')
         kraken2.to_csv(handle, sep='\t', index=False)
+    # the same table as the reads workflow (Moonbeam) writes it: Bracken-corrected counts as decimals, sample columns
+    # named after the report files, lineage column headed "taxonomy". Input of moonstone.reads.table
+    moonbeam = kraken2.rename(columns={sample: sample + '.brackenCorrected_taxa' for sample in samples}
+                              | {'Consensus Lineage': 'taxonomy'}).astype({'#OTU ID': int})
+    moonbeam[[sample + '.brackenCorrected_taxa' for sample in samples]] = moonbeam[
+        [sample + '.brackenCorrected_taxa' for sample in samples]].astype(float)
+    with open('moonbeam_bracken.tsv', 'w') as handle:
+        handle.write('# Constructed from biom file\n')
+        moonbeam.to_csv(handle, sep='\t', index=False)
 
     genes = pd.DataFrame(index=pd.Index(['tetM', 'ermB', 'lnuA', 'blaTEM'], name='gene'), columns=samples, dtype=float)
     genes.loc['tetM'] = np.round(counts[2] / counts.sum(axis=0) * 200 * rng.lognormal(0, 0.3, n), 1)

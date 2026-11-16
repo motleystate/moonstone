@@ -309,6 +309,196 @@ kraken2.drop(columns='NCBI_taxonomy_ID')
                  '- `YAMLBasedMetadataParser`: a metadata parser whose cleaning operations are written in a YAML '
                  'file.\n\nTheir arguments are on the *Python API* page.'),
         )),
+    # -------------------------------------------------------------------------------------------------- From reads
+    Tutorial(
+        'reads_pipeline', 'From sequencing reads to counts', 'From reads',
+        'What the reads pipeline does, how it finds your files, its settings, and how to run and follow it.',
+        (
+            Step('**What it does.** The pipeline takes a folder of sequencing reads and gives the number of reads '
+                 'of each taxon in each sample:\n\n'
+                 '| Step | Tool | What happens |\n|---|---|---|\n'
+                 '| 1 | Trimmomatic | Sequencing adapters are clipped from the reads. |\n'
+                 '| 2 | Kraken2, host database | Reads are classified against the host genomes. |\n'
+                 '| 3 | KrakenTools | Reads classified as a chosen host are removed. |\n'
+                 '| 4 | Kraken2, your database | The remaining reads are classified. |\n'
+                 '| 5 | Bracken | Read counts are re-estimated at species level. |\n'
+                 '| 6 | kraken-biom | One table for all samples, and a run report. |\n\n'
+                 'It is the Moonbeam pipeline, moved into Moonstone; for the same reads, databases and settings it '
+                 'gives the same files. It needs Kraken2, Bracken, Trimmomatic and KrakenTools, and is meant to '
+                 'run on a cluster.'),
+            Step('**Finding the reads.** Give one folder; its sub-folders are searched. Paired files are recognised '
+                 'by the endings `_1`/`_2`, `_R1`/`_R2` or `_R1_001`/`_R2_001`, and the sample name is what comes '
+                 'before. Your files are not renamed or moved: the run folder gets links to them. Here on empty '
+                 'files with three naming styles:',
+                 '''\
+import os
+import tempfile
+
+import pandas as pd
+from moonstone.reads.samples import discover
+
+folder = tempfile.mkdtemp()
+for name in ['run1/A_1.fastq.gz', 'run1/A_2.fastq.gz', 'run2/B_R1.fastq.gz', 'run2/B_R2.fastq.gz',
+             'run2/C_R1_001.fastq.gz', 'run2/C_R2_001.fastq.gz']:
+    os.makedirs(os.path.dirname(os.path.join(folder, name)), exist_ok=True)
+    open(os.path.join(folder, name), 'w').close()
+
+samples, findings = discover(folder)
+pd.DataFrame([(s.name, os.path.relpath(s.read1, folder), os.path.relpath(s.read2, folder)) for s in samples],
+             columns=['sample', 'read 1', 'read 2'])
+'''),
+            Step('**Problems are reported before anything runs.** A mate without its pair, a sample found twice, '
+                 'or paired and single-end files together stop the run at once, by name. The interface shows the '
+                 'same messages as you fill in the form.',
+                 '''\
+open(os.path.join(folder, 'run2', 'D_1.fastq.gz'), 'w').close()      # the second file of D is missing
+[finding.message for finding in discover(folder)[1]]
+'''),
+            Step('**The settings of a run** are written to `config.yaml` in the run folder: the record of what '
+                 'was done.\n\n'
+                 '- **Hosts to remove** are chosen from a menu (`HOSTS`). Only reads classified *exactly* as a '
+                 'chosen host are removed. A read that matches human and mouse equally well is classified above '
+                 'both, and is kept. Choose no host to skip host removal.\n'
+                 '- **Large intermediate files are deleted** once no step needs them. Two switches keep them: the '
+                 'trimmed reads (keeping them allows mapping with another database without trimming again) and '
+                 'the per-read Kraken2 files. The per-sample reports are always kept.\n'
+                 '- **Bracken** needs the k-mer file of the read length in the database folder '
+                 '(`database150mers.kmer_distrib` for 150).',
+                 '''\
+import yaml
+from moonstone.reads import config
+
+print('hosts:', config.HOSTS)
+settings = config.build('/run/reads', '/run/output', True, 'fastq.gz',
+                        {'db': '/databases/kraken2/my_database', 'host_db': '/databases/kraken2/hosts',
+                         'remove_host': ['human'], 'keep_trimmed_reads': True})
+print(yaml.safe_dump(settings, sort_keys=False))
+'''),
+            Step('**Running it.** In the interface: *Reads to counts*, give the folder and the databases, tick '
+                 '*Submit to Slurm*, and Run. The page shows the state of the run and its progress; you can close '
+                 'it and come back, under *Previous runs*. From a terminal:\n\n'
+                 '```bash\nmoonstone-reads run READS_FOLDER RUN_FOLDER --db DATABASE --host-db HOST_DATABASE --slurm\n'
+                 'moonstone-reads status RUN_FOLDER\nmoonstone-reads cancel RUN_FOLDER\n```\n\n'
+                 'With `--slurm`, one small job runs the workflow and submits one job per step; without it, the '
+                 'steps run where you are, on `--cores` cores. `--dry-run` writes the run folder and lists the '
+                 'steps without running them.\n\n'
+                 '**What you get**, in the run folder:\n\n'
+                 '- `output/pipeline_report.md`: reads per sample, % host, % classified, and warnings for samples '
+                 'with few reads or few classified reads. Read it first.\n'
+                 '- `output/mapping/all_samples.bracken.tsv`: the Bracken-corrected raw counts of all samples.\n'
+                 '- `samples.tsv` and `config.yaml`: the files and settings used.'),
+            Step('**Next.** The counts are raw. To use them in Moonstone: *Counts to Moonstone table* changes the '
+                 'layout without changing a count, then *Normalize* is a separate, optional step. Each has its '
+                 'tutorial.'),
+        ), tool='reads'),
+    Tutorial(
+        'reads_table', 'From the pipeline table to a Moonstone table', 'From reads',
+        'moonstone.reads.table: the same counts, in the layout the analyses read.',
+        (
+            Step("**The pipeline's table** has one lineage per row in its last column, and names each sample "
+                 "column after a report file. This is the example, in exactly that format (first and last columns):",
+                 '''\
+import pandas as pd
+from moonstone import examples
+
+source = examples.path('moonbeam_bracken.tsv')
+pd.read_csv(source, sep='\\t', skiprows=1).iloc[:, [0, 1, 2, -1]]
+'''),
+            Step('`read_moonbeam_table` reads it: the lineage becomes the taxonomy index (genus and species joined, '
+                 'as everywhere in Moonstone), the NCBI identifier becomes a column, and the sample names lose '
+                 'their `.brackenCorrected_taxa` ending, so they match your metadata.',
+                 '''\
+from moonstone.reads.table import read_moonbeam_table
+
+read_moonbeam_table(source).iloc[:, :4]
+'''),
+            Step('`to_moonstone_table` writes that as a file, with a methods note beside it. **No count is '
+                 "changed**: these are the raw, Bracken-corrected counts. The pipeline's own table is left in "
+                 'place. From a terminal: `moonstone-reads table all_samples.bracken.tsv counts_raw.csv`.',
+                 '''\
+import os
+import tempfile
+from moonstone.reads.table import to_moonstone_table
+
+output = os.path.join(tempfile.mkdtemp(), 'counts_raw.csv')
+print(to_moonstone_table(source, output))
+with open(output + '.methods.txt') as handle:
+    print(handle.read())
+pd.read_csv(output).iloc[:, :10]
+'''),
+            Step('**The result is a Moonstone input.** The readers of PERMANOVA, of correlation and association, '
+                 'and of read threshold all accept it, and its samples match the metadata.',
+                 '''\
+from moonstone.analysis.compositional_pipeline import read_feature_table
+from moonstone.analysis.permanova import read_taxonomy_counts
+from moonstone.filtering.read_threshold_analysis import load_species_table
+from moonstone.validation import match_samples
+
+metadata = pd.read_csv(examples.path('metadata.csv'), index_col=0, dtype={0: str})
+counts = read_taxonomy_counts(output)
+print('PERMANOVA reader:', counts.shape, '| correlation reader:', read_feature_table(output)[0].shape,
+      '| read-threshold reader:', load_species_table(output).shape)
+print(len(match_samples(counts.columns, metadata.index).matched), 'samples matched with the metadata')
+'''),
+        ), tool='reads_table'),
+    Tutorial(
+        'normalize_table', 'Normalizing a count table', 'From reads',
+        'moonstone.normalization.table: geometric mean or relative abundance, as a step of its own.',
+        (
+            Step('Normalization is **separate** from how the counts were obtained: it takes any Moonstone count '
+                 'table, so you can keep the raw counts and change your mind about the method. Two methods are '
+                 'offered, and one must be chosen: there is no default.\n\nThe raw example table, and the reads '
+                 'of each sample:',
+                 '''\
+from moonstone import examples
+from moonstone.normalization.table import normalize, read_counts
+
+counts = read_counts(examples.path('taxa_counts.csv'))
+counts.sum().describe().rename('reads per sample').to_frame()
+'''),
+            Step('**Geometric mean** (median of ratios, as in DESeq2): each sample is divided by one scaling '
+                 'factor. Values stay on a count scale, so the result suits every Moonstone analysis.',
+                 '''\
+import pandas as pd
+
+geometric = normalize(counts, 'geometric_mean')
+pd.DataFrame({'reads before': counts.sum(), 'after': geometric.sum().round()}).head()
+'''),
+            Step('**Relative abundance**: each count as a percentage of its sample, so every sample sums to 100. '
+                 'It suits plots, correlation (except SparCC) and association. It does **not** suit PERMANOVA or '
+                 'read threshold, which expect counts.',
+                 '''\
+relative = normalize(counts, 'relative_abundance')
+pd.DataFrame({'reads before': counts.sum(), 'after': relative.sum()}).head()
+'''),
+            Step('**File to file**, as the interface and the command do. The identifying columns are written back '
+                 'unchanged. The methods note states the parameters *actually used*: on sparse data the geometric '
+                 'mean lowers by itself the share of samples in which a feature must be present to enter the '
+                 'scaling factors, and the note gives the value it ended with. From a terminal: '
+                 '`python -m moonstone.normalization.table counts_raw.csv counts_geomean.csv --method '
+                 'geometric_mean`.',
+                 '''\
+import os
+import tempfile
+from moonstone.normalization.table import normalize_table
+
+output = os.path.join(tempfile.mkdtemp(), 'counts_geometric_mean.csv')
+print(normalize_table(examples.path('taxa_counts.csv'), output, 'geometric_mean'))
+with open(output + '.methods.txt') as handle:
+    print(handle.read())
+'''),
+            Step('**Into an analysis.** The normalized table is read like any other; here PERMANOVA on the '
+                 'inclusion samples (999 permutations keep the tutorial fast).',
+                 '''\
+from moonstone.analysis.permanova import read_taxonomy_counts, run_permanova
+from moonstone.parsers import MetadataParser
+
+metadata = MetadataParser(examples.path('metadata.csv'), sep=',', index_col='sample').dataframe
+inclusion = metadata[metadata['Type'] == 'inclusion']
+results = run_permanova(read_taxonomy_counts(output), inclusion, columns=['disease'], permutations=999)
+results[['level', 'variable', 'n_samples', 'R2', 'p_value_corrected']]
+'''),
+        ), tool='normalize'),
     # ------------------------------------------------------------------------------------------ Prepare the table
     Tutorial(
         'filtering', 'Filtering taxa, genes and samples', 'Prepare the table',
@@ -418,7 +608,8 @@ kept
         'TotalCountsNormalization, GeometricMeanNormalization and random selection (rarefaction).',
         (
             Step('Samples are not sequenced to the same depth, so raw counts are not comparable between samples. '
-                 'Every normalization works the same way: `Normalization(table).normalized_df`.\n\nThe depth of '
+                 'Every normalization works the same way: `Normalization(table).normalized_df`. To normalize a '
+                 'table file in one step, see *Normalizing a count table*.\n\nThe depth of '
                  'the example samples:',
                  SETUP + "counts.sum().describe().rename('reads per sample').to_frame()"),
             Step('`TotalCountsNormalization` scales each sample by its total, so that all samples end with the '

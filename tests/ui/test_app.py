@@ -63,6 +63,8 @@ class TestApp(TestCase):
 
     def test_every_example_makes_a_valid_form(self):
         for key in TOOLS:
+            if not TOOLS[key].example:
+                continue
             with self.subTest(tool=key):
                 at = self.page(key)
                 at.button(key=f'{key}.example').click().run()
@@ -270,3 +272,197 @@ class TestTutorialPages(TestCase):
         self.assertFalse(at.exception)
         self.assertTrue(any('analyze_normalized_reads' in code.value for code in at.code))
         self.assertEqual(len(at.get('image')), 2)
+
+
+def reads_without_snakemake():
+    import sys
+    from moonstone.ui import catalog, views
+    saved = sys.modules.get('snakemake')
+    sys.modules['snakemake'] = None
+    try:
+        views.render_tool(catalog.TOOLS['reads'])
+    finally:
+        if saved is None:
+            sys.modules.pop('snakemake', None)
+        else:
+            sys.modules['snakemake'] = saved
+
+
+class TestReadsPages(TestCase):
+
+    def setUp(self):
+        from unittest import mock
+        from tests.reads.helpers import fake_bin, fake_slurm, make_inputs
+        self.tmp = tempfile.mkdtemp()
+        self.runs = os.path.join(self.tmp, 'runs')
+        self.inputs = make_inputs(self.tmp)
+        self.reads = self.inputs['input_data']['raw_read_dir']
+        self.state = os.path.join(self.tmp, 'slurm')
+        fake_slurm(os.path.join(self.tmp, 'bin'), self.state)
+        with open(os.path.join(self.tmp, 'site.yaml'), 'w') as handle:
+            handle.write(f"adapter_dir: {os.path.join(self.tmp, 'adapters')}\n")
+        patcher = mock.patch.dict(os.environ, {'PATH': fake_bin(os.path.join(self.tmp, 'bin')),
+                                               'FAKE_SLURM_DIR': self.state,
+                                               'MOONSTONE_SITE': os.path.join(self.tmp, 'site.yaml')})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def page(self, key):
+        return AppTest.from_function(tool_page, args=(key, self.runs), default_timeout=TIMEOUT).run()
+
+    def filled_reads_page(self):
+        at = self.page('reads')
+        at.text_input(key='reads.countfile').set_value(self.reads)
+        at.text_input(key='reads.db').set_value(self.inputs['krakenDB_dir'])
+        at.text_input(key='reads.host_db').set_value(self.inputs['krakenDB_host']).run()
+        return at
+
+    def submitted_run(self, squeue='RUNNING\n', log='Building DAG\n12 of 40 steps (30%) done\n'):
+        run_dir = os.path.join(self.runs, '20260101-000000-reads')
+        os.makedirs(os.path.join(run_dir, '.snakemake', 'log'))
+        for name, text in [('command.txt', 'python -m moonstone.reads.run ...\n'), ('exit_code.txt', '0\n'),
+                           ('run.log', 'Submitted to Slurm as job 123.\n'), ('head_job_id.txt', '123\n'),
+                           ('.snakemake/log/2026-01-01T000000.snakemake.log', log)]:
+            with open(os.path.join(run_dir, name), 'w') as handle:
+                handle.write(text)
+        with open(os.path.join(self.state, 'squeue'), 'w') as handle:
+            handle.write(squeue)
+        return run_dir
+
+    def text(self, at):
+        return '\n'.join(element.value for element in list(at.markdown) + list(at.caption))
+
+    def test_reads_page_renders_empty_without_an_example_button(self):
+        at = self.page('reads')
+        self.assertFalse(at.exception)
+        self.assertTrue(at.button(key='reads.run').disabled)
+        self.assertNotIn('reads.example', [button.key for button in at.button])
+
+    def test_reads_page_with_valid_inputs(self):
+        at = self.filled_reads_page()
+        self.assertFalse(at.exception)
+        self.assertFalse(at.error)
+        self.assertFalse(at.button(key='reads.run').disabled)
+        self.assertTrue(at.code[0].value.startswith('python -m moonstone.reads.run ' + self.reads))
+        self.assertIn('--remove-host human mouse', at.code[0].value)
+        self.assertIn('2 samples, paired-end: S1, S2', self.text(at))
+
+    def test_reads_findings_block_the_run(self):
+        open(os.path.join(self.reads, 'S3_1.fastq.gz'), 'w').close()
+        at = self.filled_reads_page()
+        self.assertTrue(any('S3' in error.value for error in at.error))
+        self.assertTrue(at.button(key='reads.run').disabled)
+
+    def test_host_menu_shows_names_and_taxids(self):
+        at = self.filled_reads_page()
+        menu = at.multiselect(key='reads.remove_host')
+        self.assertEqual(menu.options, ['Human (9606)', 'Mouse (10090)'])
+        self.assertEqual(menu.value, ['human', 'mouse'])
+        at.text_input(key='reads.host_db').set_value('')
+        menu.set_value([]).run()
+        self.assertFalse(at.error)                                   # no host removal: no host database needed
+        self.assertRegex(at.code[0].value, r'--remove-host($| --)')    # the flag is sent with no name
+
+    def test_keep_switch_help_comes_from_the_parser(self):
+        at = self.page('reads')
+        self.assertIn('without trimming again', at.checkbox(key='reads.keep_trimmed_reads').help)
+        self.assertIn('per-sample reports are always kept', at.checkbox(key='reads.keep_kraken_output').help)
+
+    def test_slurm_submission_from_the_page(self):
+        at = self.filled_reads_page()
+        at.checkbox(key='reads.slurm').check().run()
+        with open(os.path.join(self.state, 'squeue'), 'w') as handle:
+            handle.write('PENDING\n')
+        at.button(key='reads.run').click().run()
+        self.assertFalse(at.exception)
+        self.assertFalse(at.error)
+        run_dir = os.path.join(self.runs, os.listdir(self.runs)[0])
+        with open(os.path.join(run_dir, 'head_job_id.txt')) as handle:
+            self.assertEqual(handle.read().strip(), '123')
+        self.assertIn('pending', self.text(at))
+        self.assertIn('Slurm job 123', self.text(at))
+
+    def test_submitted_run_shows_status_after_restart(self):
+        run_dir = self.submitted_run()
+        at = AppTest.from_function(results_page, args=(run_dir,), default_timeout=TIMEOUT).run()
+        self.assertFalse(at.exception)
+        self.assertIn('running', self.text(at))
+        self.assertIn('12 of 40 steps', self.text(at))
+
+    def test_cancel_asks_for_confirmation(self):
+        run_dir = self.submitted_run()
+        at = AppTest.from_function(results_page, args=(run_dir,), default_timeout=TIMEOUT).run()
+        confirm = at.button(key='cancel.20260101-000000-reads')
+        self.assertIn('Yes, cancel', confirm.label)
+        self.assertFalse(os.path.exists(os.path.join(self.state, 'cancelled.txt')))
+        confirm.click().run()
+        self.assertFalse(at.exception)
+        with open(os.path.join(self.state, 'cancelled.txt')) as handle:
+            self.assertEqual(handle.read(), '123')
+
+    def test_a_finished_run_has_no_cancel_button(self):
+        run_dir = self.submitted_run(squeue='')
+        os.makedirs(os.path.join(run_dir, 'output', 'mapping'))
+        with open(os.path.join(run_dir, 'output', 'pipeline_report.md'), 'w') as handle:
+            handle.write('# Moonstone reads pipeline report\n\n| Sample | Reads |\n|---|---|\n| S1 | 1000 |\n')
+        with open(os.path.join(run_dir, 'output', 'mapping', 'all_samples.bracken.tsv'), 'w') as handle:
+            handle.write('# Constructed from biom file\n#OTU ID\tS1.brackenCorrected_taxa\ttaxonomy\n'
+                         '562\t600.0\tk__Bacteria\n')
+        at = AppTest.from_function(results_page, args=(run_dir,), default_timeout=TIMEOUT).run()
+        self.assertFalse(at.exception)
+        self.assertIn('finished', self.text(at))
+        self.assertNotIn('cancel.20260101-000000-reads', [button.key for button in at.button])
+        self.assertIn('Moonstone reads pipeline report', self.text(at))                # the report is rendered
+        self.assertEqual(list(at.dataframe[0].value.columns), ['#OTU ID', 'S1.brackenCorrected_taxa', 'taxonomy'])
+        at.button(key='next.20260101-000000-reads').click().run()                       # "Make a Moonstone table"
+        self.assertEqual(at.session_state['reads_table.countfile'],
+                         os.path.join(run_dir, 'output', 'mapping', 'all_samples.bracken.tsv'))
+
+    def test_table_tool_runs_and_offers_normalization(self):
+        at = self.page('reads_table')
+        at.button(key='reads_table.example').click().run()
+        at.button(key='reads_table.run').click().run()
+        self.assertFalse(at.exception)
+        self.assertFalse(at.error)
+        run_dir = os.path.join(self.runs, os.listdir(self.runs)[0])
+        output = os.path.join(run_dir, 'counts_raw.csv')
+        self.assertTrue(os.path.exists(output))
+        at.button(key=f'next.{os.path.basename(run_dir)}').click().run()
+        self.assertEqual(at.session_state['normalize.countfile'], output)
+
+    def test_normalize_tool_needs_a_method(self):
+        at = self.page('normalize')
+        at.text_input(key='normalize.countfile').set_value(examples.path('taxa_counts.csv')).run()
+        self.assertTrue(at.button(key='normalize.run').disabled)
+        self.assertIn('--method is required.', [error.value for error in at.error])
+        at.selectbox(key='normalize.method').set_value('relative_abundance').run()
+        self.assertFalse(at.error)
+        at.button(key='normalize.run').click().run()
+        self.assertFalse(at.exception)
+        run_dir = os.path.join(self.runs, os.listdir(self.runs)[0])
+        self.assertTrue(os.path.exists(os.path.join(run_dir, 'counts_relative_abundance.csv')))
+        self.assertIn('not for PERMANOVA', '\n'.join(code.value for code in at.code))
+
+    def test_wide_table_preview_is_capped(self):
+        run_dir = os.path.join(self.runs, '20260101-000000-reads_table')
+        os.makedirs(run_dir)
+        pd.DataFrame([[1] * 2000], columns=[f'S{i}' for i in range(2000)]).to_csv(
+            os.path.join(run_dir, 'counts_raw.csv'), index=False)
+        with open(os.path.join(run_dir, 'command.txt'), 'w') as handle:
+            handle.write('moonstone-reads table ...\n')
+        at = AppTest.from_function(results_page, args=(run_dir,), default_timeout=TIMEOUT).run()
+        self.assertFalse(at.exception)
+        self.assertEqual(at.dataframe[0].value.shape[1], 50)
+        self.assertTrue(any('2,000' in caption.value for caption in at.caption))
+
+    def test_reads_page_without_the_reads_extra(self):
+        at = AppTest.from_function(reads_without_snakemake, default_timeout=TIMEOUT).run()
+        self.assertFalse(at.exception)
+        self.assertTrue(any('moonstone[reads]' in warning.value for warning in at.warning))
+        self.assertTrue(at.button(key='reads.run').disabled)
+
+    def test_previous_runs_show_the_slurm_state(self):
+        self.submitted_run()
+        at = AppTest.from_function(runs_page, args=(self.runs,), default_timeout=TIMEOUT).run()
+        self.assertFalse(at.exception)
+        self.assertEqual(list(at.dataframe[0].value['Status']), ['running'])

@@ -24,8 +24,28 @@ class TestCatalog(TestCase):
                   if action.option_strings and action.help != argparse.SUPPRESS}
         self.assertEqual(public - shown - {'help', 'skip_prompt', 'correlation'}, set())
 
+    def test_every_option_of_the_other_commands_is_on_a_form(self):
+        for key in ('reads', 'reads_table', 'normalize', 'read_threshold'):
+            tool = TOOLS[key]
+            public = {action.dest for action in tool.build_parser()._actions
+                      if action.option_strings and action.help != argparse.SUPPRESS} - {'help'}
+            fixed = {action.dest for action in tool.build_parser()._actions
+                     if set(action.option_strings) & set(tool.fixed)}
+            placed = set(tool.options) | set(tool.advanced) | set(tool.required) | fixed
+            if tool.outdir_flag:
+                placed.add(tool.outdir_flag.lstrip('-').replace('-', '_'))
+            self.assertEqual(public - placed, set(), key)
+
+    def test_groups_and_order(self):
+        self.assertEqual(list(dict.fromkeys(tool.group for tool in TOOLS.values())), ['From reads', 'Prepare', 'Analyse'])
+        self.assertEqual([tool.key for tool in TOOLS.values() if tool.group == 'From reads'], ['reads', 'reads_table'])
+        self.assertEqual(TOOLS['reads'].input_kind, 'reads_dir')
+        self.assertEqual(TOOLS['reads'].choice_labels['remove_host'], {'human': 'Human (9606)', 'mouse': 'Mouse (10090)'})
+
     def test_examples_exist(self):
         for tool in TOOLS.values():
+            if not tool.example:
+                continue
             with self.subTest(tool=tool.key):
                 self.assertIn(tool.example['countfile'], examples.NAMES)
                 self.assertGreater(len(tool.read_samples(examples.path(tool.example['countfile']))), 0)

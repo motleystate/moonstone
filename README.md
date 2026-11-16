@@ -4,6 +4,8 @@
 [![Documentation Status](https://readthedocs.org/projects/moonstone/badge/?version=latest)](https://moonstone.readthedocs.io/en/latest)
 [![codecov](https://codecov.io/gh/motleystate/moonstone/branch/master/graph/badge.svg)](https://codecov.io/gh/motleystate/moonstone)
 
+**M**etagenomics **O**bservation, **O**rganization, **N**ormalization, **S**tatistics, **T**esting, **O**rdination, **N**etworks and **E**xploration.
+
 Moonstone aims to provide a way of performing analysis of metagenomics counts from raw data to statistical analysis and visualization of the results.
 
 Thus, in moonstone you will find:

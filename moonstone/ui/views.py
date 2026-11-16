@@ -2,16 +2,20 @@
 import argparse
 import dataclasses
 import fnmatch
+import importlib.util
 import inspect
+import json
 import os
 import pprint
 from datetime import datetime
 from pathlib import Path
+import subprocess
 
 import pandas as pd
 import streamlit as st
 
 from moonstone import examples
+from moonstone.reads import launch as reads_launch
 from moonstone.ui import checks, forms, runs
 from moonstone.ui.catalog import METADATA_RULES, TOOLS, Tool, api_objects, resolve
 from moonstone.ui.tutorials import TUTORIALS, Tutorial, run_tutorial
@@ -30,7 +34,19 @@ LABELS = {
     'second_countfile': 'Second count table', 'min_prevalence': 'Minimum prevalence', 'top': 'Keep the top N features',
     'correction': 'Multiple-testing correction', 'alpha': 'Significance threshold', 'associate': 'Variables to test',
     'reference': 'Reference levels', 'standardize': 'Standardize continuous variables', 'ancombc': 'Also run ANCOM-BC',
+    'db': 'Kraken2 database', 'host_db': 'Host Kraken2 database', 'remove_host': 'Hosts to remove (none: keep all reads)',
+    'single_end': 'Single-end reads', 'match': 'Only the files matching', 'keep_trimmed_reads': 'Keep the trimmed reads',
+    'keep_kraken_output': 'Keep the per-read Kraken2 files', 'slurm': 'Submit to Slurm', 'no_trimming': 'Skip trimming',
+    'no_bracken': 'Skip Bracken', 'read_len': 'Read length (Bracken)', 'bracken_threshold': 'Bracken threshold',
+    'min_reads': 'Warn below this number of reads', 'min_classified_pct': 'Warn below this % classified',
+    'cores': 'Cores (without Slurm)', 'dry_run': 'Only list the steps', 'method': 'Method',
 }
+# Filled by the app with its pages, so that a result can be sent to the page of the next step.
+PAGES = {}
+# After a run of the tool (key): the output (relative to the run directory) that the next tool takes, and its button.
+NEXT_STEP = {'reads': ('reads_table', 'output/mapping/all_samples.bracken.tsv', 'Make a Moonstone table'),
+             'reads_table': ('normalize', 'counts_raw.csv', 'Normalize')}
+TABLE_COLUMNS = 50
 PREVIEW_ROWS = 20
 TABLE_ROWS = 1000
 MAX_LEVELS = 20    # a column with more distinct values is not offered as COLUMN=VALUE choices
@@ -59,9 +75,12 @@ def _stamp(path):
 
 
 # The three functions below read the input files: cached on the file's modification time and size.
-@st.cache_data(max_entries=64, show_spinner='Checking the files...')
-def _findings(tool_key, countfile, metadata, second_countfile, stamps):
-    return checks.check_inputs(TOOLS[tool_key], countfile, metadata, second_countfile)
+# ``options``: the form values as JSON, for the tools whose checks depend on them (a folder of reads). The results
+# expire after two minutes, because a folder can change without its own modification time changing.
+@st.cache_data(max_entries=64, ttl=120, show_spinner='Checking the files...')
+def _findings(tool_key, countfile, metadata, second_countfile, stamps, options=''):
+    return checks.check_inputs(TOOLS[tool_key], countfile, metadata, second_countfile,
+                               json.loads(options) if options else None)
 
 
 @st.cache_data(max_entries=64, show_spinner=False)
@@ -69,9 +88,9 @@ def _columns(path, stamp):
     return checks.metadata_columns(path)
 
 
-@st.cache_data(max_entries=64, show_spinner=False)
-def _summary(tool_key, path, stamp):
-    return checks.summary(TOOLS[tool_key], path)
+@st.cache_data(max_entries=64, ttl=120, show_spinner=False)
+def _summary(tool_key, path, stamp, options=''):
+    return checks.summary(TOOLS[tool_key], path, json.loads(options) if options else None)
 
 
 def show_findings(findings: list):
@@ -100,7 +119,7 @@ def render_home(pages: dict):
     """One card per tool, by group. ``pages`` maps a card key to its st.Page."""
     st.title('Moonstone')
     st.markdown(
-        'Analysis of metagenomics counts, from a count table and a metadata file to statistics and plots. '
+        'Analysis of metagenomics counts, from sequencing reads or a count table to statistics and plots. '
         'Every page builds a `moonstone` command, checks your files before it runs, and keeps each run in its '
         'own directory with the command that produced it.')
     starts = [('tutorials', ':material/school: Tutorials', 'Worked examples for every tool and for the Python '
@@ -109,9 +128,11 @@ def render_home(pages: dict):
                'Every run keeps the command that produced it.')]
     check = ('check', ':material/fact_check: Check my files', 'Is my file in the format Moonstone expects? '
              'Repair files saved by Excel in a French locale.', 'Needs: any count table or metadata file.')
-    cards = {'Start': starts, 'Prepare': [check], 'Analyse': []}
+    cards = {'Start': starts, 'From reads': [], 'Prepare': [check], 'Analyse': []}
     for tool in TOOLS.values():
         needs = 'a count table and a metadata file' if tool.needs_metadata else 'a count table'
+        if tool.input_kind == 'reads_dir':
+            needs = 'sequencing reads and Kraken2 databases'
         cards[tool.group].append((tool.key, f'{tool.icon} {tool.title}', tool.question,
                                   f'Needs: {needs}. {tool.input_rules[0]}'))
     for group, group_cards in cards.items():
@@ -152,7 +173,9 @@ def _widget(tool: Tool, action, columns: dict):
         options = list(action.choices)
         st.session_state.setdefault(key, list(action.default or []) if multi else action.default)
         _keep_valid(key, options, multi)
-        return (st.multiselect if multi else st.selectbox)(label, options, key=key, help=help_text)
+        shown = tool.choice_labels.get(action.dest, {})
+        return (st.multiselect if multi else st.selectbox)(label, options, key=key, help=help_text,
+                                                           format_func=lambda choice: shown.get(choice, choice))
     metavar = action.metavar or ''
     if metavar in ('variable', 'column') or '=' in metavar:
         if not columns:    # no readable metadata: free text, several values separated by spaces
@@ -173,6 +196,8 @@ def _widget(tool: Tool, action, columns: dict):
                                    help=help_text, placeholder='Default')
         st.session_state.setdefault(key, action.default)
         return st.number_input(label, step=1 if action.type is int else 0.01, key=key, help=help_text)
+    if action.default:      # for example a database path from the site file
+        st.session_state.setdefault(key, action.default)
     return st.text_input(label, key=key, help=help_text) or None
 
 
@@ -191,31 +216,39 @@ def _path_input(tool: Tool, name: str, label: str, help_text: str):
 
 def _run_view(tool: Tool):
     key = tool.key
-    st.button('Use the example files', key=f'{key}.example', on_click=_load_example, args=(tool,),
-              icon=':material/science:', help='Fill this form with example files and options that work.')
-    countfile = _path_input(tool, 'countfile', 'Count table', ' '.join(tool.input_rules))
-    if countfile and _summary(key, countfile, _stamp(countfile)):
-        st.caption(_summary(key, countfile, _stamp(countfile)))
+    missing = [how for module, how in tool.requires if importlib.util.find_spec(module) is None]
+    for how in missing:
+        st.warning(f'This tool cannot run here: it needs {how}.', icon=':material/warning:')
+    if tool.example:
+        st.button('Use the example files', key=f'{key}.example', on_click=_load_example, args=(tool,),
+                  icon=':material/science:', help='Fill this form with example files and options that work.')
+    countfile = _path_input(tool, 'countfile', tool.input_label, ' '.join(tool.input_rules))
+    summary = st.empty()
     metadata = _path_input(tool, 'metadata', 'Metadata', ' '.join(METADATA_RULES)) if tool.needs_metadata else None
     columns = _columns(metadata, _stamp(metadata)) if metadata else {}
 
     shown, advanced = forms.form_actions(tool)
     values = {}
-    for actions, container in [(shown, st.container(border=True)), (advanced, st.expander('More options'))]:
-        if actions:
-            grid = container.columns(2)
+    for actions, container in [(shown, lambda: st.container(border=True)), (advanced, lambda: st.expander('More options'))]:
+        if actions:       # a tool without options gets no empty box
+            grid = container().columns(2)
             for position, action in enumerate(actions):
                 with grid[position % 2]:
                     values[action.dest] = _widget(tool, action, columns)
 
-    ready = bool(countfile) and (bool(metadata) or not tool.needs_metadata)
+    # a folder of reads is checked with the options of the form (databases, hosts, pairing)
+    options = json.dumps(values, sort_keys=True, default=str) if tool.input_kind == 'reads_dir' else ''
+    if countfile and _summary(key, countfile, _stamp(countfile), options):
+        summary.caption(_summary(key, countfile, _stamp(countfile), options))
+    ready = bool(countfile) and (bool(metadata) or not tool.needs_metadata) and not missing
     second = values.get('second_countfile')
     findings = []
-    if ready:
+    if countfile and (metadata or not tool.needs_metadata):
         stamps = (_stamp(countfile), _stamp(metadata), _stamp(second))
-        findings = list(_findings(key, countfile, metadata, second, stamps))
+        findings = list(_findings(key, countfile, metadata, second, stamps, options))
     planned = Path(runs_root()) / f'{datetime.now():%Y%m%d-%H%M%S}-{key}'
-    argv = forms.to_argv(tool, countfile or 'COUNT_TABLE', metadata or 'METADATA', str(planned), values)
+    argv = forms.to_argv(tool, countfile or tool.input_label.upper().replace(' ', '_'), metadata or 'METADATA',
+                         str(planned), values)
     command_error = forms.check_command(tool, argv)
     if command_error:
         findings.append(Finding('error', 'command', command_error))
@@ -235,7 +268,9 @@ def _run_view(tool: Tool):
                 lines.append(line)
                 output.code(''.join(lines[-25:]), language=None)
             failed = (run_dir / 'exit_code.txt').read_text().strip() != '0'
-            status.update(label=f'{tool.title} failed' if failed else f'{tool.title} finished',
+            submitted = (run_dir / reads_launch.JOB_ID_FILE).exists()
+            done = 'submitted to Slurm' if submitted else 'finished'
+            status.update(label=f'{tool.title} failed' if failed else f'{tool.title} {done}',
                           state='error' if failed else 'complete', expanded=False)
         st.session_state[f'{key}.last_run'] = str(run_dir)
     if st.session_state.get(f'{key}.last_run'):
@@ -252,10 +287,11 @@ def _preview_table(name: str):
 
 
 def _inputs_view(tool: Tool):
-    st.subheader('Count table')
+    st.subheader(tool.input_label)
     st.markdown('\n'.join(f'- {rule}' for rule in tool.input_rules))
-    st.caption(f'Example: `{tool.example["countfile"]}` (simulated values, first {PREVIEW_ROWS} rows)')
-    _preview_table(tool.example['countfile'])
+    if tool.example:
+        st.caption(f'Example: `{tool.example["countfile"]}` (simulated values, first {PREVIEW_ROWS} rows)')
+        _preview_table(tool.example['countfile'])
     if tool.needs_metadata:
         st.subheader('Metadata')
         st.markdown('\n'.join(f'- {rule}' for rule in METADATA_RULES))
@@ -316,15 +352,29 @@ def render_tool(tool: Tool):
 # ---------------------------------------------------------------------------------------------------------------------
 # Results of a run
 # ---------------------------------------------------------------------------------------------------------------------
+def _show_table(path: Path, separator: str):
+    """A preview of a table: at most TABLE_ROWS rows and TABLE_COLUMNS columns are read and sent to the browser."""
+    with open(path, 'rb') as handle:
+        first = handle.readline()
+        lines_after_first = sum(1 for _ in handle)
+    skip = 1 if first.startswith(b'# ') else 0       # the tables of the reads workflow start with a comment line
+    n_columns = len(pd.read_csv(path, sep=separator, skiprows=skip, nrows=0).columns)
+    table = pd.read_csv(path, sep=separator, skiprows=skip, nrows=TABLE_ROWS,
+                        usecols=range(min(n_columns, TABLE_COLUMNS)))
+    st.dataframe(table, hide_index=True)
+    n_rows, shown = lines_after_first - skip, []
+    if n_rows > TABLE_ROWS:
+        shown.append(f'first {TABLE_ROWS:,} of {n_rows:,} rows')
+    if n_columns > TABLE_COLUMNS:
+        shown.append(f'first {TABLE_COLUMNS} of {n_columns:,} columns')
+    if shown:
+        st.caption(f'Shown: {" and ".join(shown)}; download the file for all of it.')
+
+
 def _show_file(path: Path):
     suffix = path.suffix.lower()
     if suffix in ('.csv', '.tsv'):
-        table = pd.read_csv(path, sep='\t' if suffix == '.tsv' else ',', nrows=TABLE_ROWS)
-        with open(path, 'rb') as handle:
-            total = sum(1 for _ in handle) - 1
-        st.dataframe(table, hide_index=True)
-        if total > TABLE_ROWS:
-            st.caption(f'First {TABLE_ROWS:,} of {total:,} rows; download the file for all of them.')
+        _show_table(path, '\t' if suffix == '.tsv' else ',')
     elif suffix in ('.png', '.jpg', '.jpeg', '.svg'):
         st.image(str(path))
     elif suffix == '.pdf':
@@ -332,12 +382,61 @@ def _show_file(path: Path):
             st.pdf(str(path), height=600, key=f'pdf.{path}')
         except Exception:    # the PDF viewer is an optional Streamlit component
             st.caption('No PDF viewer installed (pip install "streamlit[pdf]"); download the file to see it.')
-    elif suffix in ('.txt', '.log'):
-        st.code(path.read_text(errors='replace'), language=None, wrap_lines=True)
+    elif suffix == '.md':
+        st.markdown(path.read_text(errors='replace'))
+    elif suffix in ('.txt', '.log', '.yaml', '.yml'):
+        st.code(path.read_text(errors='replace'), language='yaml' if suffix in ('.yaml', '.yml') else None,
+                wrap_lines=True)
     else:
         st.caption('No preview for this type of file.')
     st.download_button(f'Download {path.name}', path.read_bytes(), file_name=path.name, key=f'download.{path}',
                        icon=':material/download:', on_click='ignore')
+
+
+def _slurm_status(run_dir: Path) -> str:
+    """The state of a run submitted to Slurm, refreshed while it is pending or running. Returns the state."""
+    active = reads_launch.status(str(run_dir)).state in ('pending', 'running')
+
+    def block():
+        status = reads_launch.status(str(run_dir))      # read from the run directory and Slurm: survives a restart
+        if active and status.state not in ('pending', 'running'):
+            st.rerun()                                  # the run just ended: show its results
+        steps = f' · {status.done} of {status.total} steps done' if status.total else ''
+        st.markdown(f'**Status: {status.state}** (Slurm job {status.job_id}){steps}')
+        if status.total:
+            st.progress(status.done / status.total)
+        if status.state in ('pending', 'running'):
+            st.caption('Checked again every 30 seconds. The run continues if you close this page or the interface.')
+            with st.popover('Cancel the run', icon=':material/cancel:'):
+                st.write(f'Cancel Slurm job {status.job_id} and the jobs it started?')
+                if st.button('Yes, cancel the run', key=f'cancel.{run_dir.name}'):
+                    try:
+                        reads_launch.cancel(str(run_dir))
+                        st.success('Cancellation requested.', icon=':material/check_circle:')
+                    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+                        st.error(f'The run could not be cancelled: {error}', icon=':material/error:')
+        elif status.state != 'finished' and status.log_tail:
+            with st.expander('End of the Snakemake log', expanded=status.state == 'failed'):
+                st.code(status.log_tail, language=None, wrap_lines=True)
+
+    st.fragment(block, run_every=30 if active else None)()
+    return reads_launch.status(str(run_dir)).state
+
+
+def _next_step(tool: Tool, run_dir: Path):
+    """Offer to send the result of a run to the tool that takes it next."""
+    if tool is None or tool.key not in NEXT_STEP:
+        return
+    target, relative, label = NEXT_STEP[tool.key]
+    result = run_dir / relative
+    if not result.exists():
+        return
+    if st.button(label, key=f'next.{run_dir.name}', icon=':material/arrow_forward:',
+                 help=f'Open "{TOOLS[target].title}" with this result filled in.'):
+        st.session_state[f'{target}.countfile'] = str(result)
+        if target in PAGES:
+            st.switch_page(PAGES[target])
+        st.info(f'`{result}` is filled in on the page "{TOOLS[target].title}".', icon=':material/info:')
 
 
 def render_results(run_dir: Path):
@@ -348,19 +447,29 @@ def render_results(run_dir: Path):
     st.subheader('Results')
     st.caption(f'Run directory: `{run_dir}`')
     log = log_file.read_text(errors='replace') if log_file.exists() else ''
-    if exit_file.exists() and exit_file.read_text().strip() != '0':
+    failed = exit_file.exists() and exit_file.read_text().strip() != '0'
+    if failed:
         st.error('The run failed. The end of its log:\n\n```\n' + '\n'.join(log.splitlines()[-8:]) + '\n```',
                  icon=':material/error:')
     elif command_file.exists() and log_file.exists() and not exit_file.exists():
         st.warning('This run did not finish.', icon=':material/warning:')
+    if not failed and (run_dir / reads_launch.JOB_ID_FILE).exists():
+        _slurm_status(run_dir)
     outputs = tool.outputs if tool else {}
-    files = runs.result_files(run_dir)
+    files = runs.result_files(run_dir, outputs)
     described = {path: text for path in files for pattern, text in outputs.items()
-                 if fnmatch.fnmatch(path.name, pattern)}
-    for path in files:
-        if path in described:
-            with st.expander(f'**{path.name}**: {described[path]}', expanded=True):
-                _show_file(path)
+                 if fnmatch.fnmatch(path.relative_to(run_dir).as_posix(), pattern)}
+    for pattern in outputs:        # in the order of the catalog: the main result first
+        for path in files:
+            if path in described and fnmatch.fnmatch(path.relative_to(run_dir).as_posix(), pattern):
+                with st.expander(f'**{path.relative_to(run_dir)}**: {described[path]}', expanded=True):
+                    _show_file(path)
+    _next_step(tool, run_dir)
+    if tool is not None and tool.key in ('reads_table', 'normalize'):
+        for path in files:
+            if path in described and path.suffix == '.csv':
+                st.caption('Path of the table, to paste in an analysis page:')
+                st.code(str(path), language=None)
     for path in files:
         if path not in described:
             with st.expander(path.name):
@@ -473,9 +582,15 @@ def render_runs():
                 icon=':material/info:')
         return
     status = {None: 'did not finish', 0: 'finished'}
+
+    def state(run):       # a run submitted to Slurm: its state there; otherwise how its command ended
+        if run.exit_code == 0 and (run.path / reads_launch.JOB_ID_FILE).exists():
+            return reads_launch.status(str(run.path)).state
+        return status.get(run.exit_code, 'failed')
+
     st.dataframe(pd.DataFrame([{
         'Run': run.path.name, 'Tool': TOOLS[run.tool_key].title if run.tool_key in TOOLS else run.tool_key,
-        'Status': status.get(run.exit_code, 'failed'), 'Command': run.command} for run in listed]), hide_index=True)
+        'Status': state(run), 'Command': run.command} for run in listed]), hide_index=True)
     picked = st.selectbox('Open a run', [run.path.name for run in listed], key='runs.pick')
     render_results(Path(runs_root()) / picked)
 

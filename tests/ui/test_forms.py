@@ -13,8 +13,27 @@ class TestForms(TestCase):
 
     def test_example_commands_are_valid(self):
         for tool in TOOLS.values():
-            argv = to_argv(tool, 'counts.tsv', 'meta.csv', 'out', tool.example['values'])
-            self.assertIsNone(check_command(tool, argv), tool.key)
+            if tool.example:
+                argv = to_argv(tool, 'counts.tsv', 'meta.csv', 'out', tool.example['values'])
+                self.assertIsNone(check_command(tool, argv), tool.key)
+
+    def test_reads_command(self):
+        tool = TOOLS['reads']
+        argv = to_argv(tool, '/reads', None, '/run', {'db': '/db', 'remove_host': ['human', 'mouse'], 'slurm': True,
+                                                      'keep_trimmed_reads': True, 'cores': 4, 'read_len': 150})
+        self.assertEqual(argv, ['/reads', '/run', '--db', '/db', '--remove-host', 'human', 'mouse',
+                                '--keep-trimmed-reads', '--slurm'])
+        self.assertIsNone(check_command(tool, argv))
+        cleared = to_argv(tool, '/reads', None, '/run', {'db': '/db', 'remove_host': []})
+        self.assertEqual(cleared, ['/reads', '/run', '--db', '/db', '--remove-host'])     # no name: no host removal
+        self.assertIsNone(check_command(tool, cleared))
+        self.assertTrue(preview(tool, argv).startswith('python -m moonstone.reads.run /reads /run'))
+        self.assertEqual(check_command(tool, to_argv(tool, '/reads', None, '/run', {})), '--db is required.')
+
+    def test_normalize_needs_a_method(self):
+        tool = TOOLS['normalize']
+        self.assertEqual(check_command(tool, to_argv(tool, 'c.csv', None, 'out', {})), '--method is required.')
+        self.assertIsNone(check_command(tool, to_argv(tool, 'c.csv', None, 'out', {'method': 'geometric_mean'})))
 
     def test_permanova_command(self):
         argv = to_argv(TOOLS['permanova'], 'c.tsv', 'm.csv', 'out',

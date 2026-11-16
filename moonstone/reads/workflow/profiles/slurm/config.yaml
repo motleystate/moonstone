@@ -1,0 +1,35 @@
+# Snakemake 9 profile for a Slurm cluster (needs snakemake-executor-plugin-slurm).
+# Generic: no partition, account or qos. For your cluster, copy this folder, add for example
+#   slurm_partition: <partition>     under default-resources
+# and give the copy as "profile" in the Moonstone site file (see the documentation).
+executor: slurm
+jobs: 100
+latency-wait: 120
+keep-going: true
+printshellcmds: true
+
+default-resources:
+  mem_mb: 4000
+  runtime: 1440       # minutes (1 day)
+
+set-resources:
+  trimmomatic:
+    runtime: 120      # fast step
+  # kraken2_map4host / kraken2_map: memory is set from the database size in the Snakefile
+  # (index files + 4 GB). To override, add e.g.  kraken2_map: {mem_mb: 64000}
+  purge_host:
+    mem_mb: 16000
+  merge_kraken_reports:
+    mem_mb: 1000
+    runtime: 60
+  bracken:
+    mem_mb: 12000
+  merge_bracken_reports:
+    mem_mb: 2000
+    runtime: 60
+  biom_to_tsv:
+    mem_mb: 2000
+    runtime: 60
+  run_completed:
+    mem_mb: 2000
+    runtime: 60
