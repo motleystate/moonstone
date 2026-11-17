@@ -56,6 +56,13 @@ To also install the graphical interface (see :ref:`interface`):
     pip install "moonstone[ui]"
     moonstone-ui
 
+The pipeline from sequencing reads to counts needs Kraken2, Bracken, Trimmomatic and KrakenTools as well. The file
+``environment-hpc.yml`` of the repository creates one environment with everything (see :ref:`reads`):
+
+.. code-block:: bash
+
+    mamba env create -f environment-hpc.yml
+
 Manually
 --------
 

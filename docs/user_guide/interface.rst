@@ -30,6 +30,8 @@ Start it from the directory where the results should go:
 It runs on your machine only (address ``127.0.0.1``) and follows the light or dark setting of your system. Extra
 arguments are passed to ``streamlit run``, for example ``moonstone-ui --server.port 8502``.
 
+On a cluster, start it with ``moonstone-ui --remote`` and reach it through an SSH tunnel: see :ref:`remote`.
+
 The pages
 =========
 
@@ -47,6 +49,10 @@ Check my files
     and, if you name the tool, that this tool can read it and that its samples match the metadata. A file saved
     by Excel in a French locale can be repaired: the repair is written to a **new file**, with the list of every
     value that changed. Your file is never modified.
+
+Reads to counts, Counts to Moonstone table, Normalize
+    From sequencing reads to a table the analyses read (:ref:`reads`). *Reads to counts* submits the pipeline to
+    Slurm and shows its state and progress; a finished run offers the next step as a button.
 
 Read threshold, Classification, PERMANOVA, Correlation, Association
     One page per tool, with four tabs:

@@ -10,6 +10,17 @@ Summary of developments of moonstone library.
 Unreleased
 ==========
 
+* New ``moonstone.reads``: the Moonbeam pipeline (adapter trimming, host-read removal, Kraken2, Bracken) moved into
+  Moonstone, with the same results on the same inputs. ``moonstone-reads run`` finds and pairs the read files,
+  checks the inputs, and runs the workflow or submits it to Slurm; ``status`` and ``cancel`` follow it. Hosts to
+  remove are chosen from a menu (human, mouse); trimmed reads and per-read Kraken2 files are deleted by default, each
+  with a switch to keep them. ``moonstone-reads table`` writes the Bracken raw counts in Moonstone's table layout.
+  See :ref:`reads`.
+* New ``moonstone.normalization.table``: normalize any Moonstone count table, file to file or as a function, by
+  geometric mean or relative abundance, with a note of the parameters actually used.
+* ``moonstone-ui --remote`` serves the interface on a private Unix socket for use on a cluster through an SSH tunnel,
+  with no network port open (:ref:`remote`). The interface gains three tools: Reads to counts, Counts to Moonstone
+  table and Normalize.
 * New graphical interface, ``moonstone-ui`` (optional: ``pip install "moonstone[ui]"``). Every tool has a page with
   a form built from the options of the command line, checks of the input files before a run, example files, a
   tutorial and its documentation; the page shows and runs the equivalent ``moonstone`` command, each run in a new

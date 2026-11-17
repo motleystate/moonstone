@@ -131,6 +131,34 @@ The Tutorials page has worked examples for every tool and for the Python classes
 installed with Moonstone. Start there after a long break. More in the
 [documentation](https://moonstone.readthedocs.io/en/latest/user_guide/interface.html).
 
+On a cluster, `moonstone-ui --remote` serves the interface on a private socket, with no network port open, and you
+reach it from your own computer through an SSH tunnel
+([documentation](https://moonstone.readthedocs.io/en/latest/user_guide/remote.html)).
+
+--------
+
+## From sequencing reads to counts
+
+`moonstone-reads` runs the [Moonbeam](https://github.com/motleystate/moonbeam2) pipeline from inside Moonstone:
+adapter trimming, host-read removal, Kraken2 classification and Bracken, with the same results as Moonbeam on the
+same inputs. It needs Kraken2, Bracken, Trimmomatic and KrakenTools; `environment-hpc.yml` creates an environment
+with everything.
+
+```bash
+# 1. reads to Bracken-corrected raw counts, submitted to Slurm
+moonstone-reads run READS_FOLDER RUN_FOLDER --db DATABASE --host-db HOST_DATABASE --slurm
+moonstone-reads status RUN_FOLDER
+
+# 2. the same counts, in the table layout the analyses read
+moonstone-reads table RUN_FOLDER/output/mapping/all_samples.bracken.tsv counts_raw.csv
+
+# 3. normalization, a separate step on any Moonstone count table
+python -m moonstone.normalization.table counts_raw.csv counts_geomean.csv --method geometric_mean
+```
+
+The same three steps are tools of the interface. More in the
+[documentation](https://moonstone.readthedocs.io/en/latest/user_guide/reads.html).
+
 --------
 
 ## Development guide
